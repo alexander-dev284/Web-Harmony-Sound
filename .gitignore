@@ -1,0 +1,7 @@
+# .gitignore
+.vs/
+*.tmp
+~$*
+*.user
+*.suo
+*.vsidx
