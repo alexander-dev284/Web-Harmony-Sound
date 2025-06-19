@@ -1,0 +1,12 @@
+C:\Users\ALEXANDER\Desktop\HarmonySound-App\HarmonySound.Models\bin\Debug\net8.0\HarmonySound.Models.deps.json
+C:\Users\ALEXANDER\Desktop\HarmonySound-App\HarmonySound.Models\bin\Debug\net8.0\HarmonySound.Models.dll
+C:\Users\ALEXANDER\Desktop\HarmonySound-App\HarmonySound.Models\bin\Debug\net8.0\HarmonySound.Models.pdb
+C:\Users\ALEXANDER\Desktop\HarmonySound-App\HarmonySound.Models\obj\Debug\net8.0\HarmonySound.Models.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\ALEXANDER\Desktop\HarmonySound-App\HarmonySound.Models\obj\Debug\net8.0\HarmonySound.Models.AssemblyInfoInputs.cache
+C:\Users\ALEXANDER\Desktop\HarmonySound-App\HarmonySound.Models\obj\Debug\net8.0\HarmonySound.Models.AssemblyInfo.cs
+C:\Users\ALEXANDER\Desktop\HarmonySound-App\HarmonySound.Models\obj\Debug\net8.0\HarmonySound.Models.csproj.CoreCompileInputs.cache
+C:\Users\ALEXANDER\Desktop\HarmonySound-App\HarmonySound.Models\obj\Debug\net8.0\HarmonySound.Models.sourcelink.json
+C:\Users\ALEXANDER\Desktop\HarmonySound-App\HarmonySound.Models\obj\Debug\net8.0\HarmonySound.Models.dll
+C:\Users\ALEXANDER\Desktop\HarmonySound-App\HarmonySound.Models\obj\Debug\net8.0\refint\HarmonySound.Models.dll
+C:\Users\ALEXANDER\Desktop\HarmonySound-App\HarmonySound.Models\obj\Debug\net8.0\HarmonySound.Models.pdb
+C:\Users\ALEXANDER\Desktop\HarmonySound-App\HarmonySound.Models\obj\Debug\net8.0\ref\HarmonySound.Models.dll
