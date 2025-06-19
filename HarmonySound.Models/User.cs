@@ -12,10 +12,10 @@ namespace HarmonySound.Models
         [Required] public string State { get; set; }
 
 
-        public List<UserRole> UserRoles { get; set; }
-        public List<UserPlan> UserPlans { get; set; }
-        public List<Content> Content { get; set; }  // Si es un Artista
-        public List<Report> Reports { get; set; }
-        public List<SubscriptionHistory> SubscriptionHistory { get; set; }
+        public List<UserRole>? UserRoles { get; set; }
+        public List<UserPlan>? UserPlans { get; set; }
+        public List<Content>? Content { get; set; }  // Si es un Artista
+        public List<Report>? Reports { get; set; }
+        public List<SubscriptionHistory>? SubscriptionHistory { get; set; }
     }
 }

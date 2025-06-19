@@ -20,9 +20,9 @@ namespace HarmonySound.Models
         public DateTime UploadDate { get; set; }
 
         public int ArtistId { get; set; }
-        public User Artist { get; set; }
+        public User? Artist { get; set; }
 
         // Relación con Álbumes
-        public List<ContentAlbum> ContentAlbumes { get; set; }
+        public List<ContentAlbum>? ContentAlbumes { get; set; }
     }
 }

@@ -14,11 +14,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\ALEXANDER\\Desktop\\HarmonySound-App\\HarmonySound.Models\\HarmonySound.Models\\HarmonySound.Models.csproj",
+      "projectUniqueName": "C:\\Users\\ALEXANDER\\Desktop\\HarmonySound-App\\HarmonySound.Models\\HarmonySound.Models.csproj",
       "projectName": "HarmonySound.Models",
-      "projectPath": "C:\\Users\\ALEXANDER\\Desktop\\HarmonySound-App\\HarmonySound.Models\\HarmonySound.Models\\HarmonySound.Models.csproj",
+      "projectPath": "C:\\Users\\ALEXANDER\\Desktop\\HarmonySound-App\\HarmonySound.Models\\HarmonySound.Models.csproj",
       "packagesPath": "C:\\Users\\ALEXANDER\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\ALEXANDER\\Desktop\\HarmonySound-App\\HarmonySound.Models\\HarmonySound.Models\\obj\\",
+      "outputPath": "C:\\Users\\ALEXANDER\\Desktop\\HarmonySound-App\\HarmonySound.Models\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

@@ -12,8 +12,8 @@ namespace HarmonySound.Models
         public DateTime CreationDate { get; set; }
 
         public int ArtistId { get; set; }
-        public User Artist { get; set; }
+        public User? Artist { get; set; }
 
-        public List<ContentAlbum> ContentAlbums { get; set; }
+        public List<ContentAlbum>? ContentAlbums { get; set; }
     }
 }
