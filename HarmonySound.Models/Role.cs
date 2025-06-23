@@ -8,7 +8,7 @@ namespace HarmonySound.Models
         public int Id { get; set; }
 
         [Required]
-        [MaxLength(50)]
+        [MaxLength(20)]
         public string RoleName { get; set; }
     }
 }

@@ -7,9 +7,9 @@ namespace HarmonySound.Models
         [Key] public int Id { get; set; }
 
         [Required]
-        [MaxLength(255)]
+        [MaxLength(20)]
         public string Title { get; set; }
-        public DateTime CreationDate { get; set; }
+        public DateTimeOffset CreationDate { get; set; }
 
         public int ArtistId { get; set; }
         public User? Artist { get; set; }

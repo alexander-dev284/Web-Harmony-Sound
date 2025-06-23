@@ -7,17 +7,17 @@ namespace HarmonySound.Models
         [Key] public int Id { get; set; }
 
         [Required]
-        [MaxLength(255)]
+        [MaxLength(20)]
         public string Title { get; set; }
 
-        [Required]
         public string Type { get; set; }  // Ejemplo: "Canción", "Podcast"
 
+        [Required]
         public string UrlMedia { get; set; }  // Ruta o URL del archivo
 
         public TimeSpan Duration { get; set; }
 
-        public DateTime UploadDate { get; set; }
+        public DateTimeOffset UploadDate { get; set; }
 
         public int ArtistId { get; set; }
         public User? Artist { get; set; }

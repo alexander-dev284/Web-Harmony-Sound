@@ -11,27 +11,27 @@ namespace HarmonySound.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class SubscriptionHistoriesController : ControllerBase
+    public class SubscriptionsHistoriesController : ControllerBase
     {
         private readonly HarmonySoundDbContext _context;
 
-        public SubscriptionHistoriesController(HarmonySoundDbContext context)
+        public SubscriptionsHistoriesController(HarmonySoundDbContext context)
         {
             _context = context;
         }
 
-        // GET: api/SubscriptionHistories
+        // GET: api/SubscriptionsHistories
         [HttpGet]
         public async Task<ActionResult<IEnumerable<SubscriptionHistory>>> GetSubscriptionHistory()
         {
-            return await _context.SubscriptionHistory.ToListAsync();
+            return await _context.SubscriptionsHistories.ToListAsync();
         }
 
-        // GET: api/SubscriptionHistories/5
+        // GET: api/SubscriptionsHistories/5
         [HttpGet("{id}")]
         public async Task<ActionResult<SubscriptionHistory>> GetSubscriptionHistory(int id)
         {
-            var subscriptionHistory = await _context.SubscriptionHistory.FindAsync(id);
+            var subscriptionHistory = await _context.SubscriptionsHistories.FindAsync(id);
 
             if (subscriptionHistory == null)
             {
@@ -41,7 +41,7 @@ namespace HarmonySound.API.Controllers
             return subscriptionHistory;
         }
 
-        // PUT: api/SubscriptionHistories/5
+        // PUT: api/SubscriptionsHistories/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutSubscriptionHistory(int id, SubscriptionHistory subscriptionHistory)
@@ -72,28 +72,28 @@ namespace HarmonySound.API.Controllers
             return NoContent();
         }
 
-        // POST: api/SubscriptionHistories
+        // POST: api/SubscriptionsHistories
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<SubscriptionHistory>> PostSubscriptionHistory(SubscriptionHistory subscriptionHistory)
         {
-            _context.SubscriptionHistory.Add(subscriptionHistory);
+            _context.SubscriptionsHistories.Add(subscriptionHistory);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetSubscriptionHistory", new { id = subscriptionHistory.Id }, subscriptionHistory);
         }
 
-        // DELETE: api/SubscriptionHistories/5
+        // DELETE: api/SubscriptionsHistories/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteSubscriptionHistory(int id)
         {
-            var subscriptionHistory = await _context.SubscriptionHistory.FindAsync(id);
+            var subscriptionHistory = await _context.SubscriptionsHistories.FindAsync(id);
             if (subscriptionHistory == null)
             {
                 return NotFound();
             }
 
-            _context.SubscriptionHistory.Remove(subscriptionHistory);
+            _context.SubscriptionsHistories.Remove(subscriptionHistory);
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -101,7 +101,7 @@ namespace HarmonySound.API.Controllers
 
         private bool SubscriptionHistoryExists(int id)
         {
-            return _context.SubscriptionHistory.Any(e => e.Id == id);
+            return _context.SubscriptionsHistories.Any(e => e.Id == id);
         }
     }
 }

@@ -11,23 +11,23 @@ namespace HarmonySound.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UserPlansController : ControllerBase
+    public class UsersPlansController : ControllerBase
     {
         private readonly HarmonySoundDbContext _context;
 
-        public UserPlansController(HarmonySoundDbContext context)
+        public UsersPlansController(HarmonySoundDbContext context)
         {
             _context = context;
         }
 
-        // GET: api/UserPlans
+        // GET: api/UsersPlans
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserPlan>>> GetUserPlan()
         {
             return await _context.UserPlan.ToListAsync();
         }
 
-        // GET: api/UserPlans/5
+        // GET: api/UsersPlans/5
         [HttpGet("{id}")]
         public async Task<ActionResult<UserPlan>> GetUserPlan(int id)
         {
@@ -41,7 +41,7 @@ namespace HarmonySound.API.Controllers
             return userPlan;
         }
 
-        // PUT: api/UserPlans/5
+        // PUT: api/UsersPlans/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutUserPlan(int id, UserPlan userPlan)
@@ -72,7 +72,7 @@ namespace HarmonySound.API.Controllers
             return NoContent();
         }
 
-        // POST: api/UserPlans
+        // POST: api/UsersPlans
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<UserPlan>> PostUserPlan(UserPlan userPlan)
@@ -83,7 +83,7 @@ namespace HarmonySound.API.Controllers
             return CreatedAtAction("GetUserPlan", new { id = userPlan.Id }, userPlan);
         }
 
-        // DELETE: api/UserPlans/5
+        // DELETE: api/UsersPlans/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUserPlan(int id)
         {

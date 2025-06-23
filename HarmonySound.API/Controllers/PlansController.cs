@@ -24,14 +24,14 @@ namespace HarmonySound.API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Plan>>> GetPlan()
         {
-            return await _context.Plan.ToListAsync();
+            return await _context.Plans.ToListAsync();
         }
 
         // GET: api/Plans/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Plan>> GetPlan(int id)
         {
-            var plan = await _context.Plan.FindAsync(id);
+            var plan = await _context.Plans.FindAsync(id);
 
             if (plan == null)
             {
@@ -77,7 +77,7 @@ namespace HarmonySound.API.Controllers
         [HttpPost]
         public async Task<ActionResult<Plan>> PostPlan(Plan plan)
         {
-            _context.Plan.Add(plan);
+            _context.Plans.Add(plan);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetPlan", new { id = plan.Id }, plan);
@@ -87,13 +87,13 @@ namespace HarmonySound.API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePlan(int id)
         {
-            var plan = await _context.Plan.FindAsync(id);
+            var plan = await _context.Plans.FindAsync(id);
             if (plan == null)
             {
                 return NotFound();
             }
 
-            _context.Plan.Remove(plan);
+            _context.Plans.Remove(plan);
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -101,7 +101,7 @@ namespace HarmonySound.API.Controllers
 
         private bool PlanExists(int id)
         {
-            return _context.Plan.Any(e => e.Id == id);
+            return _context.Plans.Any(e => e.Id == id);
         }
     }
 }

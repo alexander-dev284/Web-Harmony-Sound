@@ -24,14 +24,14 @@ namespace HarmonySound.API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserRole>>> GetUserRole()
         {
-            return await _context.UserRole.ToListAsync();
+            return await _context.UsersRoles.ToListAsync();
         }
 
         // GET: api/UserRoles/5
         [HttpGet("{id}")]
         public async Task<ActionResult<UserRole>> GetUserRole(int id)
         {
-            var userRole = await _context.UserRole.FindAsync(id);
+            var userRole = await _context.UsersRoles.FindAsync(id);
 
             if (userRole == null)
             {
@@ -77,7 +77,7 @@ namespace HarmonySound.API.Controllers
         [HttpPost]
         public async Task<ActionResult<UserRole>> PostUserRole(UserRole userRole)
         {
-            _context.UserRole.Add(userRole);
+            _context.UsersRoles.Add(userRole);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetUserRole", new { id = userRole.Id }, userRole);
@@ -87,13 +87,13 @@ namespace HarmonySound.API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUserRole(int id)
         {
-            var userRole = await _context.UserRole.FindAsync(id);
+            var userRole = await _context.UsersRoles.FindAsync(id);
             if (userRole == null)
             {
                 return NotFound();
             }
 
-            _context.UserRole.Remove(userRole);
+            _context.UsersRoles.Remove(userRole);
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -101,7 +101,7 @@ namespace HarmonySound.API.Controllers
 
         private bool UserRoleExists(int id)
         {
-            return _context.UserRole.Any(e => e.Id == id);
+            return _context.UsersRoles.Any(e => e.Id == id);
         }
     }
 }

@@ -12,7 +12,7 @@ namespace HarmonySound.Models
         public int PlanId { get; set; }
         public Plan Plan { get; set; }
 
-        public DateTime TransactionDate { get; set; }
+        public DateTimeOffset TransactionDate { get; set; }
 
         public decimal Amount { get; set; }
 
@@ -22,6 +22,6 @@ namespace HarmonySound.Models
 
         public string PayReference { get; set; }
 
-        public DateTime? ExpirationDate { get; set; }
+        public DateTimeOffset? ExpirationDate { get; set; }
     }
 }

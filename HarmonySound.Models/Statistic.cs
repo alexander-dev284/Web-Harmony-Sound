@@ -16,6 +16,6 @@ namespace HarmonySound.Models
 
         public int Comments { get; set; }
 
-        public DateTime ReportDate { get; set; }
+        public DateTimeOffset ReportDate { get; set; }
     }
 }

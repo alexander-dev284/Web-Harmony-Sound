@@ -24,14 +24,14 @@ namespace HarmonySound.API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Album>>> GetAlbum()
         {
-            return await _context.Album.ToListAsync();
+            return await _context.Albums.ToListAsync();
         }
 
         // GET: api/Albums/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Album>> GetAlbum(int id)
         {
-            var album = await _context.Album.FindAsync(id);
+            var album = await _context.Albums.FindAsync(id);
 
             if (album == null)
             {
@@ -77,7 +77,7 @@ namespace HarmonySound.API.Controllers
         [HttpPost]
         public async Task<ActionResult<Album>> PostAlbum(Album album)
         {
-            _context.Album.Add(album);
+            _context.Albums.Add(album);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetAlbum", new { id = album.Id }, album);
@@ -87,13 +87,13 @@ namespace HarmonySound.API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAlbum(int id)
         {
-            var album = await _context.Album.FindAsync(id);
+            var album = await _context.Albums.FindAsync(id);
             if (album == null)
             {
                 return NotFound();
             }
 
-            _context.Album.Remove(album);
+            _context.Albums.Remove(album);
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -101,7 +101,7 @@ namespace HarmonySound.API.Controllers
 
         private bool AlbumExists(int id)
         {
-            return _context.Album.Any(e => e.Id == id);
+            return _context.Albums.Any(e => e.Id == id);
         }
     }
 }

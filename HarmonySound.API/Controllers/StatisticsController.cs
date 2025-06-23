@@ -24,14 +24,14 @@ namespace HarmonySound.API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Statistic>>> GetStatistic()
         {
-            return await _context.Statistic.ToListAsync();
+            return await _context.Statistics.ToListAsync();
         }
 
         // GET: api/Statistics/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Statistic>> GetStatistic(int id)
         {
-            var statistic = await _context.Statistic.FindAsync(id);
+            var statistic = await _context.Statistics.FindAsync(id);
 
             if (statistic == null)
             {
@@ -77,7 +77,7 @@ namespace HarmonySound.API.Controllers
         [HttpPost]
         public async Task<ActionResult<Statistic>> PostStatistic(Statistic statistic)
         {
-            _context.Statistic.Add(statistic);
+            _context.Statistics.Add(statistic);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetStatistic", new { id = statistic.Id }, statistic);
@@ -87,13 +87,13 @@ namespace HarmonySound.API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteStatistic(int id)
         {
-            var statistic = await _context.Statistic.FindAsync(id);
+            var statistic = await _context.Statistics.FindAsync(id);
             if (statistic == null)
             {
                 return NotFound();
             }
 
-            _context.Statistic.Remove(statistic);
+            _context.Statistics.Remove(statistic);
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -101,7 +101,7 @@ namespace HarmonySound.API.Controllers
 
         private bool StatisticExists(int id)
         {
-            return _context.Statistic.Any(e => e.Id == id);
+            return _context.Statistics.Any(e => e.Id == id);
         }
     }
 }

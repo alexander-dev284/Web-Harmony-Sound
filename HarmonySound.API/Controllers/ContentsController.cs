@@ -24,14 +24,14 @@ namespace HarmonySound.API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Content>>> GetContent()
         {
-            return await _context.Content.ToListAsync();
+            return await _context.Contents.ToListAsync();
         }
 
         // GET: api/Contents/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Content>> GetContent(int id)
         {
-            var content = await _context.Content.FindAsync(id);
+            var content = await _context.Contents.FindAsync(id);
 
             if (content == null)
             {
@@ -77,7 +77,7 @@ namespace HarmonySound.API.Controllers
         [HttpPost]
         public async Task<ActionResult<Content>> PostContent(Content content)
         {
-            _context.Content.Add(content);
+            _context.Contents.Add(content);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetContent", new { id = content.Id }, content);
@@ -87,13 +87,13 @@ namespace HarmonySound.API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteContent(int id)
         {
-            var content = await _context.Content.FindAsync(id);
+            var content = await _context.Contents.FindAsync(id);
             if (content == null)
             {
                 return NotFound();
             }
 
-            _context.Content.Remove(content);
+            _context.Contents.Remove(content);
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -101,7 +101,7 @@ namespace HarmonySound.API.Controllers
 
         private bool ContentExists(int id)
         {
-            return _context.Content.Any(e => e.Id == id);
+            return _context.Contents.Any(e => e.Id == id);
         }
     }
 }

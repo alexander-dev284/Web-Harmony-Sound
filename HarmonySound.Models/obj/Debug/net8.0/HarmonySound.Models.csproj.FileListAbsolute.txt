@@ -10,3 +10,15 @@ C:\Users\ALEXANDER\Desktop\HarmonySound-App\HarmonySound.Models\obj\Debug\net8.0
 C:\Users\ALEXANDER\Desktop\HarmonySound-App\HarmonySound.Models\obj\Debug\net8.0\refint\HarmonySound.Models.dll
 C:\Users\ALEXANDER\Desktop\HarmonySound-App\HarmonySound.Models\obj\Debug\net8.0\HarmonySound.Models.pdb
 C:\Users\ALEXANDER\Desktop\HarmonySound-App\HarmonySound.Models\obj\Debug\net8.0\ref\HarmonySound.Models.dll
+C:\Universidad\Tercer Semestre\Web-Harmony-Sound\HarmonySound.Models\bin\Debug\net8.0\HarmonySound.Models.deps.json
+C:\Universidad\Tercer Semestre\Web-Harmony-Sound\HarmonySound.Models\bin\Debug\net8.0\HarmonySound.Models.dll
+C:\Universidad\Tercer Semestre\Web-Harmony-Sound\HarmonySound.Models\bin\Debug\net8.0\HarmonySound.Models.pdb
+C:\Universidad\Tercer Semestre\Web-Harmony-Sound\HarmonySound.Models\obj\Debug\net8.0\HarmonySound.Models.GeneratedMSBuildEditorConfig.editorconfig
+C:\Universidad\Tercer Semestre\Web-Harmony-Sound\HarmonySound.Models\obj\Debug\net8.0\HarmonySound.Models.AssemblyInfoInputs.cache
+C:\Universidad\Tercer Semestre\Web-Harmony-Sound\HarmonySound.Models\obj\Debug\net8.0\HarmonySound.Models.AssemblyInfo.cs
+C:\Universidad\Tercer Semestre\Web-Harmony-Sound\HarmonySound.Models\obj\Debug\net8.0\HarmonySound.Models.csproj.CoreCompileInputs.cache
+C:\Universidad\Tercer Semestre\Web-Harmony-Sound\HarmonySound.Models\obj\Debug\net8.0\HarmonySound.Models.sourcelink.json
+C:\Universidad\Tercer Semestre\Web-Harmony-Sound\HarmonySound.Models\obj\Debug\net8.0\HarmonySound.Models.dll
+C:\Universidad\Tercer Semestre\Web-Harmony-Sound\HarmonySound.Models\obj\Debug\net8.0\refint\HarmonySound.Models.dll
+C:\Universidad\Tercer Semestre\Web-Harmony-Sound\HarmonySound.Models\obj\Debug\net8.0\HarmonySound.Models.pdb
+C:\Universidad\Tercer Semestre\Web-Harmony-Sound\HarmonySound.Models\obj\Debug\net8.0\ref\HarmonySound.Models.dll

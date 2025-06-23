@@ -24,14 +24,14 @@ namespace HarmonySound.API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Report>>> GetReport()
         {
-            return await _context.Report.ToListAsync();
+            return await _context.Reports.ToListAsync();
         }
 
         // GET: api/Reports/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Report>> GetReport(int id)
         {
-            var report = await _context.Report.FindAsync(id);
+            var report = await _context.Reports.FindAsync(id);
 
             if (report == null)
             {
@@ -77,7 +77,7 @@ namespace HarmonySound.API.Controllers
         [HttpPost]
         public async Task<ActionResult<Report>> PostReport(Report report)
         {
-            _context.Report.Add(report);
+            _context.Reports.Add(report);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetReport", new { id = report.Id }, report);
@@ -87,13 +87,13 @@ namespace HarmonySound.API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteReport(int id)
         {
-            var report = await _context.Report.FindAsync(id);
+            var report = await _context.Reports.FindAsync(id);
             if (report == null)
             {
                 return NotFound();
             }
 
-            _context.Report.Remove(report);
+            _context.Reports.Remove(report);
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -101,7 +101,7 @@ namespace HarmonySound.API.Controllers
 
         private bool ReportExists(int id)
         {
-            return _context.Report.Any(e => e.Id == id);
+            return _context.Reports.Any(e => e.Id == id);
         }
     }
 }

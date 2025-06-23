@@ -12,25 +12,25 @@ using HarmonySound.Models;
         {
         }
 
-        public DbSet<HarmonySound.Models.Album> Album { get; set; } = default!;
+        public DbSet<HarmonySound.Models.Album> Albums { get; set; } = default!;
 
-public DbSet<HarmonySound.Models.Content> Content { get; set; } = default!;
+        public DbSet<HarmonySound.Models.Content> Contents { get; set; } = default!;
 
-public DbSet<HarmonySound.Models.ContentAlbum> ContentAlbum { get; set; } = default!;
+        public DbSet<HarmonySound.Models.ContentAlbum> ContentsAlbums { get; set; } = default!;
 
-public DbSet<HarmonySound.Models.Plan> Plan { get; set; } = default!;
+        public DbSet<HarmonySound.Models.Plan> Plans { get; set; } = default!;
 
-public DbSet<HarmonySound.Models.Report> Report { get; set; } = default!;
+        public DbSet<HarmonySound.Models.Report> Reports { get; set; } = default!;
 
-public DbSet<HarmonySound.Models.Role> Role { get; set; } = default!;
+        public DbSet<HarmonySound.Models.Role> Roles { get; set; } = default!;
 
-public DbSet<HarmonySound.Models.Statistic> Statistic { get; set; } = default!;
+        public DbSet<HarmonySound.Models.Statistic> Statistics { get; set; } = default!;
 
-public DbSet<HarmonySound.Models.SubscriptionHistory> SubscriptionHistory { get; set; } = default!;
+        public DbSet<HarmonySound.Models.SubscriptionHistory> SubscriptionsHistories { get; set; } = default!;
 
-public DbSet<HarmonySound.Models.User> User { get; set; } = default!;
+        public DbSet<HarmonySound.Models.User> Users { get; set; } = default!;
 
-public DbSet<HarmonySound.Models.UserPlan> UserPlan { get; set; } = default!;
+        public DbSet<HarmonySound.Models.UserPlan> UsersPlans { get; set; } = default!;
 
-public DbSet<HarmonySound.Models.UserRole> UserRole { get; set; } = default!;
-    }
+        public DbSet<HarmonySound.Models.UserRole> UsersRoles { get; set; } = default!;
+            }

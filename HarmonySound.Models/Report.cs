@@ -13,7 +13,7 @@ namespace HarmonySound.Models
 
         public string ReportType { get; set; }
 
-        public DateTime ReportDate { get; set; }
+        public DateTimeOffset ReportDate { get; set; }
 
         public string State { get; set; }  // Ejemplo: "Pendiente", "Resuelto"
     }
