@@ -5,3 +5,9 @@
 *.user
 *.suo
 *.vsidx
+bin/
+obj/
+*.user
+*.suo
+*.cache
+*.log
