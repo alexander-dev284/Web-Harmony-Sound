@@ -7,6 +7,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HarmonySound.Models", "Harm
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HarmonySound.API", "HarmonySound.API\HarmonySound.API.csproj", "{4600AF5A-5BD1-439D-B4BC-CC6458BF7C9F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HarmonySound.API.Consumer", "HarmonySound.API.Consumer\HarmonySound.API.Consumer.csproj", "{817E5B78-0F21-FB8E-ADFA-FF846FF39853}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HarmonySound.MVC", "HarmonySound.MVC\HarmonySound.MVC.csproj", "{A3116F19-4E34-98B3-337A-D32D36D27330}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +25,14 @@ Global
 		{4600AF5A-5BD1-439D-B4BC-CC6458BF7C9F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4600AF5A-5BD1-439D-B4BC-CC6458BF7C9F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4600AF5A-5BD1-439D-B4BC-CC6458BF7C9F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{817E5B78-0F21-FB8E-ADFA-FF846FF39853}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{817E5B78-0F21-FB8E-ADFA-FF846FF39853}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{817E5B78-0F21-FB8E-ADFA-FF846FF39853}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{817E5B78-0F21-FB8E-ADFA-FF846FF39853}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A3116F19-4E34-98B3-337A-D32D36D27330}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A3116F19-4E34-98B3-337A-D32D36D27330}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A3116F19-4E34-98B3-337A-D32D36D27330}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A3116F19-4E34-98B3-337A-D32D36D27330}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
