@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
+using System.Collections.Generic;
 
 namespace HarmonySound.Models
 {
@@ -8,5 +9,7 @@ namespace HarmonySound.Models
         [Required]
         [MaxLength(20)]
         public string RoleName { get; set; }
+
+        public virtual ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
     }
 }

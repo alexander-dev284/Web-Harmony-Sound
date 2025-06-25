@@ -109,6 +109,38 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "HarmonySound.API.Controllers.AuthController",
+    "Method": "Login",
+    "RelativePath": "api/Auth/login",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "model",
+        "Type": "HarmonySound.API.DTOs.LoginModel",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "HarmonySound.API.Controllers.AuthController",
+    "Method": "Register",
+    "RelativePath": "api/Auth/register",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "model",
+        "Type": "HarmonySound.API.DTOs.RegisterModel",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "HarmonySound.API.Controllers.ContentAlbumsController",
     "Method": "GetContentAlbum",
     "RelativePath": "api/ContentAlbums",
@@ -546,7 +578,7 @@
   },
   {
     "ContainingType": "HarmonySound.API.Controllers.RolesController",
-    "Method": "GetRole",
+    "Method": "GetRoles",
     "RelativePath": "api/Roles",
     "HttpMethod": "GET",
     "IsController": true,
@@ -554,7 +586,7 @@
     "Parameters": [],
     "ReturnTypes": [
       {
-        "Type": "System.Collections.Generic.IEnumerable\u00601[[HarmonySound.Models.Role, HarmonySound.Models, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "Type": "System.Collections.Generic.IEnumerable\u00601[[System.Object, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
         "MediaTypes": [
           "text/plain",
           "application/json",
@@ -578,17 +610,7 @@
         "IsRequired": true
       }
     ],
-    "ReturnTypes": [
-      {
-        "Type": "HarmonySound.Models.Role",
-        "MediaTypes": [
-          "text/plain",
-          "application/json",
-          "text/json"
-        ],
-        "StatusCode": 200
-      }
-    ]
+    "ReturnTypes": []
   },
   {
     "ContainingType": "HarmonySound.API.Controllers.RolesController",
@@ -604,17 +626,7 @@
         "IsRequired": true
       }
     ],
-    "ReturnTypes": [
-      {
-        "Type": "HarmonySound.Models.Role",
-        "MediaTypes": [
-          "text/plain",
-          "application/json",
-          "text/json"
-        ],
-        "StatusCode": 200
-      }
-    ]
+    "ReturnTypes": []
   },
   {
     "ContainingType": "HarmonySound.API.Controllers.RolesController",
@@ -630,7 +642,7 @@
         "IsRequired": true
       },
       {
-        "Name": "role",
+        "Name": "updatedRole",
         "Type": "HarmonySound.Models.Role",
         "IsRequired": true
       }
@@ -763,9 +775,9 @@
     "ReturnTypes": []
   },
   {
-    "ContainingType": "HarmonySound.API.Controllers.SubscriptionHistoriesController",
+    "ContainingType": "HarmonySound.API.Controllers.SubscriptionsHistoriesController",
     "Method": "GetSubscriptionHistory",
-    "RelativePath": "api/SubscriptionHistories",
+    "RelativePath": "api/SubscriptionsHistories",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
@@ -783,9 +795,9 @@
     ]
   },
   {
-    "ContainingType": "HarmonySound.API.Controllers.SubscriptionHistoriesController",
+    "ContainingType": "HarmonySound.API.Controllers.SubscriptionsHistoriesController",
     "Method": "PostSubscriptionHistory",
-    "RelativePath": "api/SubscriptionHistories",
+    "RelativePath": "api/SubscriptionsHistories",
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
@@ -809,9 +821,9 @@
     ]
   },
   {
-    "ContainingType": "HarmonySound.API.Controllers.SubscriptionHistoriesController",
+    "ContainingType": "HarmonySound.API.Controllers.SubscriptionsHistoriesController",
     "Method": "GetSubscriptionHistory",
-    "RelativePath": "api/SubscriptionHistories/{id}",
+    "RelativePath": "api/SubscriptionsHistories/{id}",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
@@ -835,9 +847,9 @@
     ]
   },
   {
-    "ContainingType": "HarmonySound.API.Controllers.SubscriptionHistoriesController",
+    "ContainingType": "HarmonySound.API.Controllers.SubscriptionsHistoriesController",
     "Method": "PutSubscriptionHistory",
-    "RelativePath": "api/SubscriptionHistories/{id}",
+    "RelativePath": "api/SubscriptionsHistories/{id}",
     "HttpMethod": "PUT",
     "IsController": true,
     "Order": 0,
@@ -856,118 +868,9 @@
     "ReturnTypes": []
   },
   {
-    "ContainingType": "HarmonySound.API.Controllers.SubscriptionHistoriesController",
+    "ContainingType": "HarmonySound.API.Controllers.SubscriptionsHistoriesController",
     "Method": "DeleteSubscriptionHistory",
-    "RelativePath": "api/SubscriptionHistories/{id}",
-    "HttpMethod": "DELETE",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "id",
-        "Type": "System.Int32",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "HarmonySound.API.Controllers.UserPlansController",
-    "Method": "GetUserPlan",
-    "RelativePath": "api/UserPlans",
-    "HttpMethod": "GET",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [],
-    "ReturnTypes": [
-      {
-        "Type": "System.Collections.Generic.IEnumerable\u00601[[HarmonySound.Models.UserPlan, HarmonySound.Models, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
-        "MediaTypes": [
-          "text/plain",
-          "application/json",
-          "text/json"
-        ],
-        "StatusCode": 200
-      }
-    ]
-  },
-  {
-    "ContainingType": "HarmonySound.API.Controllers.UserPlansController",
-    "Method": "PostUserPlan",
-    "RelativePath": "api/UserPlans",
-    "HttpMethod": "POST",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "userPlan",
-        "Type": "HarmonySound.Models.UserPlan",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": [
-      {
-        "Type": "HarmonySound.Models.UserPlan",
-        "MediaTypes": [
-          "text/plain",
-          "application/json",
-          "text/json"
-        ],
-        "StatusCode": 200
-      }
-    ]
-  },
-  {
-    "ContainingType": "HarmonySound.API.Controllers.UserPlansController",
-    "Method": "GetUserPlan",
-    "RelativePath": "api/UserPlans/{id}",
-    "HttpMethod": "GET",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "id",
-        "Type": "System.Int32",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": [
-      {
-        "Type": "HarmonySound.Models.UserPlan",
-        "MediaTypes": [
-          "text/plain",
-          "application/json",
-          "text/json"
-        ],
-        "StatusCode": 200
-      }
-    ]
-  },
-  {
-    "ContainingType": "HarmonySound.API.Controllers.UserPlansController",
-    "Method": "PutUserPlan",
-    "RelativePath": "api/UserPlans/{id}",
-    "HttpMethod": "PUT",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "id",
-        "Type": "System.Int32",
-        "IsRequired": true
-      },
-      {
-        "Name": "userPlan",
-        "Type": "HarmonySound.Models.UserPlan",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "HarmonySound.API.Controllers.UserPlansController",
-    "Method": "DeleteUserPlan",
-    "RelativePath": "api/UserPlans/{id}",
+    "RelativePath": "api/SubscriptionsHistories/{id}",
     "HttpMethod": "DELETE",
     "IsController": true,
     "Order": 0,
@@ -982,7 +885,7 @@
   },
   {
     "ContainingType": "HarmonySound.API.Controllers.UserRolesController",
-    "Method": "GetUserRole",
+    "Method": "GetUserRoles",
     "RelativePath": "api/UserRoles",
     "HttpMethod": "GET",
     "IsController": true,
@@ -1002,15 +905,52 @@
   },
   {
     "ContainingType": "HarmonySound.API.Controllers.UserRolesController",
-    "Method": "PostUserRole",
-    "RelativePath": "api/UserRoles",
+    "Method": "AssignRole",
+    "RelativePath": "api/UserRoles/assign",
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "userRole",
-        "Type": "HarmonySound.Models.UserRole",
+        "Name": "model",
+        "Type": "HarmonySound.API.Controllers.AssignRoleModel",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "HarmonySound.API.Controllers.UserRolesController",
+    "Method": "RemoveRole",
+    "RelativePath": "api/UserRoles/remove",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "model",
+        "Type": "HarmonySound.API.Controllers.AssignRoleModel",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "HarmonySound.API.Controllers.UserRolesController",
+    "Method": "GetUserRole",
+    "RelativePath": "api/UserRoles/user/{userId}/role/{roleId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "roleId",
+        "Type": "System.Int32",
         "IsRequired": true
       }
     ],
@@ -1028,8 +968,49 @@
   },
   {
     "ContainingType": "HarmonySound.API.Controllers.UserRolesController",
-    "Method": "GetUserRole",
-    "RelativePath": "api/UserRoles/{id}",
+    "Method": "DeleteUserRole",
+    "RelativePath": "api/UserRoles/user/{userId}/role/{roleId}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "roleId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "HarmonySound.API.Controllers.UsersController",
+    "Method": "GetUsers",
+    "RelativePath": "api/Users",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.IEnumerable\u00601[[System.Object, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HarmonySound.API.Controllers.UsersController",
+    "Method": "GetUser",
+    "RelativePath": "api/Users/{id}",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
@@ -1040,43 +1021,12 @@
         "IsRequired": true
       }
     ],
-    "ReturnTypes": [
-      {
-        "Type": "HarmonySound.Models.UserRole",
-        "MediaTypes": [
-          "text/plain",
-          "application/json",
-          "text/json"
-        ],
-        "StatusCode": 200
-      }
-    ]
-  },
-  {
-    "ContainingType": "HarmonySound.API.Controllers.UserRolesController",
-    "Method": "PutUserRole",
-    "RelativePath": "api/UserRoles/{id}",
-    "HttpMethod": "PUT",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "id",
-        "Type": "System.Int32",
-        "IsRequired": true
-      },
-      {
-        "Name": "userRole",
-        "Type": "HarmonySound.Models.UserRole",
-        "IsRequired": true
-      }
-    ],
     "ReturnTypes": []
   },
   {
-    "ContainingType": "HarmonySound.API.Controllers.UserRolesController",
-    "Method": "DeleteUserRole",
-    "RelativePath": "api/UserRoles/{id}",
+    "ContainingType": "HarmonySound.API.Controllers.UsersController",
+    "Method": "DeleteUser",
+    "RelativePath": "api/Users/{id}",
     "HttpMethod": "DELETE",
     "IsController": true,
     "Order": 0,
@@ -1090,16 +1040,16 @@
     "ReturnTypes": []
   },
   {
-    "ContainingType": "HarmonySound.API.Controllers.UsersController",
-    "Method": "GetUser",
-    "RelativePath": "api/Users",
+    "ContainingType": "HarmonySound.API.Controllers.UsersPlansController",
+    "Method": "GetUsersPlans",
+    "RelativePath": "api/UsersPlans",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
     "Parameters": [],
     "ReturnTypes": [
       {
-        "Type": "System.Collections.Generic.IEnumerable\u00601[[HarmonySound.Models.User, HarmonySound.Models, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "Type": "System.Collections.Generic.IEnumerable\u00601[[HarmonySound.Models.UserPlan, HarmonySound.Models, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
         "MediaTypes": [
           "text/plain",
           "application/json",
@@ -1110,22 +1060,22 @@
     ]
   },
   {
-    "ContainingType": "HarmonySound.API.Controllers.UsersController",
-    "Method": "PostUser",
-    "RelativePath": "api/Users",
+    "ContainingType": "HarmonySound.API.Controllers.UsersPlansController",
+    "Method": "PostUserPlan",
+    "RelativePath": "api/UsersPlans",
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "user",
-        "Type": "HarmonySound.Models.User",
+        "Name": "userPlan",
+        "Type": "HarmonySound.Models.UserPlan",
         "IsRequired": true
       }
     ],
     "ReturnTypes": [
       {
-        "Type": "HarmonySound.Models.User",
+        "Type": "HarmonySound.Models.UserPlan",
         "MediaTypes": [
           "text/plain",
           "application/json",
@@ -1136,9 +1086,9 @@
     ]
   },
   {
-    "ContainingType": "HarmonySound.API.Controllers.UsersController",
-    "Method": "GetUser",
-    "RelativePath": "api/Users/{id}",
+    "ContainingType": "HarmonySound.API.Controllers.UsersPlansController",
+    "Method": "GetUserPlan",
+    "RelativePath": "api/UsersPlans/{id}",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
@@ -1151,7 +1101,7 @@
     ],
     "ReturnTypes": [
       {
-        "Type": "HarmonySound.Models.User",
+        "Type": "HarmonySound.Models.UserPlan",
         "MediaTypes": [
           "text/plain",
           "application/json",
@@ -1162,9 +1112,9 @@
     ]
   },
   {
-    "ContainingType": "HarmonySound.API.Controllers.UsersController",
-    "Method": "PutUser",
-    "RelativePath": "api/Users/{id}",
+    "ContainingType": "HarmonySound.API.Controllers.UsersPlansController",
+    "Method": "PutUserPlan",
+    "RelativePath": "api/UsersPlans/{id}",
     "HttpMethod": "PUT",
     "IsController": true,
     "Order": 0,
@@ -1175,17 +1125,17 @@
         "IsRequired": true
       },
       {
-        "Name": "user",
-        "Type": "HarmonySound.Models.User",
+        "Name": "userPlan",
+        "Type": "HarmonySound.Models.UserPlan",
         "IsRequired": true
       }
     ],
     "ReturnTypes": []
   },
   {
-    "ContainingType": "HarmonySound.API.Controllers.UsersController",
-    "Method": "DeleteUser",
-    "RelativePath": "api/Users/{id}",
+    "ContainingType": "HarmonySound.API.Controllers.UsersPlansController",
+    "Method": "DeleteUserPlan",
+    "RelativePath": "api/UsersPlans/{id}",
     "HttpMethod": "DELETE",
     "IsController": true,
     "Order": 0,

@@ -6,4 +6,13 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Microsoft.aspnetcore.Mvc.NewtonsoftJson" Version="8.0.15" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\HarmonySound.API.Consumer\HarmonySound.API.Consumer.csproj" />
+    <ProjectReference Include="..\HarmonySound.Models\HarmonySound.Models.csproj" />
+  </ItemGroup>
+
 </Project>

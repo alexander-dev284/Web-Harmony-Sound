@@ -11,10 +11,11 @@ namespace HarmonySound.Models
         [Required][EmailAddress] public override string Email { get; set; }
         [Required] public DateTimeOffset RegisterDate { get; set; }
         public string State { get; set; }
-        public List<UserRole>? UserRoles { get; set; }
-        public List<UserPlan>? UserPlans { get; set; }
-        public List<Content>? Content { get; set; }
-        public List<Report>? Reports { get; set; }
-        public List<SubscriptionHistory>? SubscriptionHistory { get; set; }
+
+        public virtual ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
+        public virtual ICollection<UserPlan> UserPlans { get; set; } = new List<UserPlan>();
+        public virtual ICollection<Content> Content { get; set; } = new List<Content>();
+        public virtual ICollection<Report> Reports { get; set; } = new List<Report>();
+        public virtual ICollection<SubscriptionHistory> SubscriptionHistory { get; set; } = new List<SubscriptionHistory>();
     }
 }

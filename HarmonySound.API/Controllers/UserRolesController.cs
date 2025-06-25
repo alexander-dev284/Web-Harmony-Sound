@@ -29,7 +29,7 @@ namespace HarmonySound.API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserRole>>> GetUserRoles()
         {
-            return await _context.UsersRoles
+            return await _context.UserRoles
                 .Include(ur => ur.User)
                 .Include(ur => ur.Role)
                 .ToListAsync();
@@ -39,7 +39,7 @@ namespace HarmonySound.API.Controllers
         [HttpGet("user/{userId}/role/{roleId}")]
         public async Task<ActionResult<UserRole>> GetUserRole(int userId, int roleId)
         {
-            var userRole = await _context.UsersRoles
+            var userRole = await _context.UserRoles
                 .Include(ur => ur.User)
                 .Include(ur => ur.Role)
                 .FirstOrDefaultAsync(ur => ur.UserId == userId && ur.RoleId == roleId);
@@ -90,7 +90,7 @@ namespace HarmonySound.API.Controllers
         [HttpDelete("user/{userId}/role/{roleId}")]
         public async Task<IActionResult> DeleteUserRole(int userId, int roleId)
         {
-            var userRole = await _context.UsersRoles
+            var userRole = await _context.UserRoles
                 .FirstOrDefaultAsync(ur => ur.UserId == userId && ur.RoleId == roleId);
 
             if (userRole == null)
@@ -98,7 +98,7 @@ namespace HarmonySound.API.Controllers
                 return NotFound();
             }
 
-            _context.UsersRoles.Remove(userRole);
+            _context.UserRoles.Remove(userRole);
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -107,7 +107,7 @@ namespace HarmonySound.API.Controllers
         // Helper: Verifica si existe la relación usuario-rol
         private bool UserRoleExists(int userId, int roleId)
         {
-            return _context.UsersRoles.Any(e => e.UserId == userId && e.RoleId == roleId);
+            return _context.UserRoles.Any(e => e.UserId == userId && e.RoleId == roleId);
         }
     }
 
