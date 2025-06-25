@@ -24,14 +24,14 @@ namespace HarmonySound.API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserPlan>>> GetUserPlan()
         {
-            return await _context.UserPlan.ToListAsync();
+            return await _context.UsersPlans.ToListAsync();
         }
 
         // GET: api/UsersPlans/5
         [HttpGet("{id}")]
         public async Task<ActionResult<UserPlan>> GetUserPlan(int id)
         {
-            var userPlan = await _context.UserPlan.FindAsync(id);
+            var userPlan = await _context.UsersPlans.FindAsync(id);
 
             if (userPlan == null)
             {
@@ -77,7 +77,7 @@ namespace HarmonySound.API.Controllers
         [HttpPost]
         public async Task<ActionResult<UserPlan>> PostUserPlan(UserPlan userPlan)
         {
-            _context.UserPlan.Add(userPlan);
+            _context.UsersPlans.Add(userPlan);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetUserPlan", new { id = userPlan.Id }, userPlan);
@@ -87,13 +87,13 @@ namespace HarmonySound.API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUserPlan(int id)
         {
-            var userPlan = await _context.UserPlan.FindAsync(id);
+            var userPlan = await _context.UsersPlans.FindAsync(id);
             if (userPlan == null)
             {
                 return NotFound();
             }
 
-            _context.UserPlan.Remove(userPlan);
+            _context.UsersPlans.Remove(userPlan);
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -101,7 +101,7 @@ namespace HarmonySound.API.Controllers
 
         private bool UserPlanExists(int id)
         {
-            return _context.UserPlan.Any(e => e.Id == id);
+            return _context.UsersPlans.Any(e => e.Id == id);
         }
     }
 }
