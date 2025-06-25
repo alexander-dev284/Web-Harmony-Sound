@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 using HarmonySound.Models;
 
 namespace HarmonySound.API.Controllers
@@ -13,95 +11,87 @@ namespace HarmonySound.API.Controllers
     [ApiController]
     public class RolesController : ControllerBase
     {
-        private readonly HarmonySoundDbContext _context;
+        private readonly RoleManager<Role> _roleManager;
 
-        public RolesController(HarmonySoundDbContext context)
+        public RolesController(RoleManager<Role> roleManager)
         {
-            _context = context;
+            _roleManager = roleManager;
         }
 
         // GET: api/Roles
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Role>>> GetRole()
+        public ActionResult<IEnumerable<object>> GetRoles()
         {
-            return await _context.Roles.ToListAsync();
+            var roles = _roleManager.Roles.Select(r => new {
+                r.Id,
+                r.Name,
+                r.RoleName
+            }).ToList();
+
+            return Ok(roles);
         }
 
         // GET: api/Roles/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Role>> GetRole(int id)
+        public async Task<ActionResult<object>> GetRole(int id)
         {
-            var role = await _context.Roles.FindAsync(id);
-
+            var role = await _roleManager.FindByIdAsync(id.ToString());
             if (role == null)
-            {
                 return NotFound();
-            }
 
-            return role;
-        }
-
-        // PUT: api/Roles/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutRole(int id, Role role)
-        {
-            if (id != role.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(role).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!RoleExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            return Ok(new {
+                role.Id,
+                role.Name,
+                role.RoleName
+            });
         }
 
         // POST: api/Roles
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Role>> PostRole(Role role)
+        public async Task<ActionResult<object>> PostRole([FromBody] Role role)
         {
-            _context.Roles.Add(role);
-            await _context.SaveChangesAsync();
+            var result = await _roleManager.CreateAsync(role);
+            if (!result.Succeeded)
+                return BadRequest(result.Errors);
 
-            return CreatedAtAction("GetRole", new { id = role.Id }, role);
+            return CreatedAtAction(nameof(GetRole), new { id = role.Id }, new {
+                role.Id,
+                role.Name,
+                role.RoleName
+            });
+        }
+
+        // PUT: api/Roles/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutRole(int id, [FromBody] Role updatedRole)
+        {
+            var role = await _roleManager.FindByIdAsync(id.ToString());
+            if (role == null)
+                return NotFound();
+
+            role.Name = updatedRole.Name;
+            role.RoleName = updatedRole.RoleName;
+
+            var result = await _roleManager.UpdateAsync(role);
+            if (!result.Succeeded)
+                return BadRequest(result.Errors);
+
+            return NoContent();
         }
 
         // DELETE: api/Roles/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteRole(int id)
         {
-            var role = await _context.Roles.FindAsync(id);
+            var role = await _roleManager.FindByIdAsync(id.ToString());
             if (role == null)
-            {
                 return NotFound();
-            }
 
-            _context.Roles.Remove(role);
-            await _context.SaveChangesAsync();
+            var result = await _roleManager.DeleteAsync(role);
+            if (!result.Succeeded)
+                return BadRequest(result.Errors);
 
             return NoContent();
-        }
-
-        private bool RoleExists(int id)
-        {
-            return _context.Roles.Any(e => e.Id == id);
         }
     }
 }

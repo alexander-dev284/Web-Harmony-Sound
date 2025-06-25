@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 using HarmonySound.Models;
 
 namespace HarmonySound.API.Controllers
@@ -14,80 +15,84 @@ namespace HarmonySound.API.Controllers
     public class UserRolesController : ControllerBase
     {
         private readonly HarmonySoundDbContext _context;
+        private readonly UserManager<User> _userManager;
+        private readonly RoleManager<Role> _roleManager;
 
-        public UserRolesController(HarmonySoundDbContext context)
+        public UserRolesController(HarmonySoundDbContext context, UserManager<User> userManager, RoleManager<Role> roleManager)
         {
             _context = context;
+            _userManager = userManager;
+            _roleManager = roleManager;
         }
 
         // GET: api/UserRoles
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<UserRole>>> GetUserRole()
+        public async Task<ActionResult<IEnumerable<UserRole>>> GetUserRoles()
         {
-            return await _context.UsersRoles.ToListAsync();
+            return await _context.UsersRoles
+                .Include(ur => ur.User)
+                .Include(ur => ur.Role)
+                .ToListAsync();
         }
 
-        // GET: api/UserRoles/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<UserRole>> GetUserRole(int id)
+        // GET: api/UserRoles/user/5/role/3
+        [HttpGet("user/{userId}/role/{roleId}")]
+        public async Task<ActionResult<UserRole>> GetUserRole(int userId, int roleId)
         {
-            var userRole = await _context.UsersRoles.FindAsync(id);
+            var userRole = await _context.UsersRoles
+                .Include(ur => ur.User)
+                .Include(ur => ur.Role)
+                .FirstOrDefaultAsync(ur => ur.UserId == userId && ur.RoleId == roleId);
 
             if (userRole == null)
-            {
                 return NotFound();
-            }
 
             return userRole;
         }
 
-        // PUT: api/UserRoles/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutUserRole(int id, UserRole userRole)
+        // POST: api/UserRoles/assign
+        [HttpPost("assign")]
+        public async Task<IActionResult> AssignRole([FromBody] AssignRoleModel model)
         {
-            if (id != userRole.Id)
-            {
-                return BadRequest();
-            }
+            var user = await _userManager.FindByIdAsync(model.UserId.ToString());
+            if (user == null)
+                return NotFound(new { Message = "Usuario no encontrado" });
 
-            _context.Entry(userRole).State = EntityState.Modified;
+            if (!await _roleManager.RoleExistsAsync(model.RoleName))
+                return NotFound(new { Message = "Rol no encontrado" });
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!UserRoleExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            var result = await _userManager.AddToRoleAsync(user, model.RoleName);
+            if (!result.Succeeded)
+                return BadRequest(result.Errors);
 
-            return NoContent();
+            return Ok(new { Message = "Rol asignado correctamente" });
         }
 
-        // POST: api/UserRoles
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<UserRole>> PostUserRole(UserRole userRole)
+        // POST: api/UserRoles/remove
+        [HttpPost("remove")]
+        public async Task<IActionResult> RemoveRole([FromBody] AssignRoleModel model)
         {
-            _context.UsersRoles.Add(userRole);
-            await _context.SaveChangesAsync();
+            var user = await _userManager.FindByIdAsync(model.UserId.ToString());
+            if (user == null)
+                return NotFound(new { Message = "Usuario no encontrado" });
 
-            return CreatedAtAction("GetUserRole", new { id = userRole.Id }, userRole);
+            if (!await _roleManager.RoleExistsAsync(model.RoleName))
+                return NotFound(new { Message = "Rol no encontrado" });
+
+            var result = await _userManager.RemoveFromRoleAsync(user, model.RoleName);
+            if (!result.Succeeded)
+                return BadRequest(result.Errors);
+
+            return Ok(new { Message = "Rol removido correctamente" });
         }
 
-        // DELETE: api/UserRoles/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUserRole(int id)
+        // DELETE: api/UserRoles/user/5/role/3
+        [HttpDelete("user/{userId}/role/{roleId}")]
+        public async Task<IActionResult> DeleteUserRole(int userId, int roleId)
         {
-            var userRole = await _context.UsersRoles.FindAsync(id);
+            var userRole = await _context.UsersRoles
+                .FirstOrDefaultAsync(ur => ur.UserId == userId && ur.RoleId == roleId);
+
             if (userRole == null)
             {
                 return NotFound();
@@ -99,9 +104,16 @@ namespace HarmonySound.API.Controllers
             return NoContent();
         }
 
-        private bool UserRoleExists(int id)
+        // Helper: Verifica si existe la relación usuario-rol
+        private bool UserRoleExists(int userId, int roleId)
         {
-            return _context.UsersRoles.Any(e => e.Id == id);
+            return _context.UsersRoles.Any(e => e.UserId == userId && e.RoleId == roleId);
         }
+    }
+
+    public class AssignRoleModel
+    {
+        public int UserId { get; set; }
+        public string RoleName { get; set; }
     }
 }

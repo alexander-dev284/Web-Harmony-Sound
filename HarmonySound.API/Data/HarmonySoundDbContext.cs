@@ -4,33 +4,24 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using HarmonySound.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
-    public class HarmonySoundDbContext : DbContext
+public class HarmonySoundDbContext : IdentityDbContext<User, Role, int>
+{
+    public HarmonySoundDbContext(DbContextOptions<HarmonySoundDbContext> options)
+        : base(options)
     {
-        public HarmonySoundDbContext (DbContextOptions<HarmonySoundDbContext> options)
-            : base(options)
-        {
-        }
+    }
 
-        public DbSet<HarmonySound.Models.Album> Albums { get; set; } = default!;
-
-        public DbSet<HarmonySound.Models.Content> Contents { get; set; } = default!;
-
-        public DbSet<HarmonySound.Models.ContentAlbum> ContentsAlbums { get; set; } = default!;
-
-        public DbSet<HarmonySound.Models.Plan> Plans { get; set; } = default!;
-
-        public DbSet<HarmonySound.Models.Report> Reports { get; set; } = default!;
-
-        public DbSet<HarmonySound.Models.Role> Roles { get; set; } = default!;
-
-        public DbSet<HarmonySound.Models.Statistic> Statistics { get; set; } = default!;
-
-        public DbSet<HarmonySound.Models.SubscriptionHistory> SubscriptionsHistories { get; set; } = default!;
-
-        public DbSet<HarmonySound.Models.User> Users { get; set; } = default!;
-
-        public DbSet<HarmonySound.Models.UserPlan> UsersPlans { get; set; } = default!;
-
-        public DbSet<HarmonySound.Models.UserRole> UsersRoles { get; set; } = default!;
-            }
+    public DbSet<Album> Albums { get; set; } = default!;
+    public DbSet<Content> Contents { get; set; } = default!;
+    public DbSet<ContentAlbum> ContentsAlbums { get; set; } = default!;
+    public DbSet<Plan> Plans { get; set; } = default!;
+    public DbSet<Report> Reports { get; set; } = default!;
+    public DbSet<Role> Roles { get; set; } = default!;
+    public DbSet<Statistic> Statistics { get; set; } = default!;
+    public DbSet<SubscriptionHistory> SubscriptionsHistories { get; set; } = default!;
+    public DbSet<UserPlan> UsersPlans { get; set; } = default!;
+    public DbSet<UserRole> UsersRoles { get; set; } = default!;
+}

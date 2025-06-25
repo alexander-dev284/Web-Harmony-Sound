@@ -22,16 +22,22 @@ namespace HarmonySound.API.Controllers
 
         // GET: api/UsersPlans
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<UserPlan>>> GetUserPlan()
+        public async Task<ActionResult<IEnumerable<UserPlan>>> GetUsersPlans()
         {
-            return await _context.UsersPlans.ToListAsync();
+            return await _context.UsersPlans
+                .Include(up => up.User)
+                .Include(up => up.Plan)
+                .ToListAsync();
         }
 
         // GET: api/UsersPlans/5
         [HttpGet("{id}")]
         public async Task<ActionResult<UserPlan>> GetUserPlan(int id)
         {
-            var userPlan = await _context.UsersPlans.FindAsync(id);
+            var userPlan = await _context.UsersPlans
+                .Include(up => up.User)
+                .Include(up => up.Plan)
+                .FirstOrDefaultAsync(up => up.Id == id);
 
             if (userPlan == null)
             {
@@ -42,7 +48,6 @@ namespace HarmonySound.API.Controllers
         }
 
         // PUT: api/UsersPlans/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutUserPlan(int id, UserPlan userPlan)
         {
@@ -73,14 +78,13 @@ namespace HarmonySound.API.Controllers
         }
 
         // POST: api/UsersPlans
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<UserPlan>> PostUserPlan(UserPlan userPlan)
         {
             _context.UsersPlans.Add(userPlan);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetUserPlan", new { id = userPlan.Id }, userPlan);
+            return CreatedAtAction(nameof(GetUserPlan), new { id = userPlan.Id }, userPlan);
         }
 
         // DELETE: api/UsersPlans/5

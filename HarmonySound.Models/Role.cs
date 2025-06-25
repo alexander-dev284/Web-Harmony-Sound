@@ -1,12 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations;
 
 namespace HarmonySound.Models
 {
-    public class Role
+    public class Role : IdentityRole<int>
     {
-        [Key]
-        public int Id { get; set; }
-
         [Required]
         [MaxLength(20)]
         public string RoleName { get; set; }
