@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using System.Security.Claims;
 
 namespace HarmonySound.MVC.Controllers
 {
@@ -37,6 +38,23 @@ namespace HarmonySound.MVC.Controllers
 
                     // Guarda el token en una cookie o sesión
                     HttpContext.Session.SetString("Token", result.Token);
+
+                    // AUTENTICAR USUARIO CON COOKIE
+                    var claims = new List<Claim>
+                    {
+                        new Claim(ClaimTypes.Name, model.Email)
+                        // Puedes agregar más claims si lo necesitas
+                    };
+                    var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                    var authProperties = new AuthenticationProperties
+                    {
+                        IsPersistent = true
+                    };
+
+                    await HttpContext.SignInAsync(
+                        CookieAuthenticationDefaults.AuthenticationScheme,
+                        new ClaimsPrincipal(claimsIdentity),
+                        authProperties);
 
                     return RedirectToAction("Index", "Home");
                 }

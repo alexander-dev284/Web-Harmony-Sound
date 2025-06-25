@@ -27,9 +27,12 @@
                         </li>
                     </ul>
                     <div class="ms-auto">
-                        <a href="/Account/Logout" class="btn btn-link" style="color: #dc3545; font-weight: bold; text-decoration: underline;">
-                            Cerrar Sesión
-                        </a>
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <a href="/Account/Logout" class="btn btn-link" style="color: #dc3545; font-weight: bold; text-decoration: underline;">
+                                Cerrar Sesión
+                            </a>
+                        }
                     </div>
                 </div>
             </div>
@@ -43,7 +46,7 @@
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2025 - HarmonySound.MVC - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; 2025 - HarmonySound.MVC - 
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
