@@ -35,3 +35,4 @@ C:\Users\GIGABYTE\Desktop\Web-Harmony-Sound\HarmonySound.Models\obj\Debug\net8.0
 C:\Users\GIGABYTE\Desktop\Web-Harmony-Sound\HarmonySound.Models\obj\Debug\net8.0\refint\HarmonySound.Models.dll
 C:\Users\GIGABYTE\Desktop\Web-Harmony-Sound\HarmonySound.Models\obj\Debug\net8.0\HarmonySound.Models.pdb
 C:\Users\GIGABYTE\Desktop\Web-Harmony-Sound\HarmonySound.Models\obj\Debug\net8.0\ref\HarmonySound.Models.dll
+C:\Universidad\Tercer Semestre\Web-Harmony-Sound\HarmonySound.Models\obj\Debug\net8.0\HarmonySound.Models.csproj.AssemblyReference.cache

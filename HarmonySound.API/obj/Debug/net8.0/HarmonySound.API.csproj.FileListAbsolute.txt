@@ -816,3 +816,9 @@ C:\Users\GIGABYTE\Desktop\Web-Harmony-Sound\HarmonySound.API\obj\Debug\net8.0\re
 C:\Users\GIGABYTE\Desktop\Web-Harmony-Sound\HarmonySound.API\obj\Debug\net8.0\HarmonySound.API.pdb
 C:\Users\GIGABYTE\Desktop\Web-Harmony-Sound\HarmonySound.API\obj\Debug\net8.0\HarmonySound.API.genruntimeconfig.cache
 C:\Users\GIGABYTE\Desktop\Web-Harmony-Sound\HarmonySound.API\obj\Debug\net8.0\ref\HarmonySound.API.dll
+C:\Universidad\Tercer Semestre\Web-Harmony-Sound\HarmonySound.API\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+C:\Universidad\Tercer Semestre\Web-Harmony-Sound\HarmonySound.API\bin\Debug\net8.0\Microsoft.AspNetCore.Cryptography.Internal.dll
+C:\Universidad\Tercer Semestre\Web-Harmony-Sound\HarmonySound.API\bin\Debug\net8.0\Microsoft.AspNetCore.Cryptography.KeyDerivation.dll
+C:\Universidad\Tercer Semestre\Web-Harmony-Sound\HarmonySound.API\bin\Debug\net8.0\Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll
+C:\Universidad\Tercer Semestre\Web-Harmony-Sound\HarmonySound.API\bin\Debug\net8.0\Microsoft.Extensions.Identity.Core.dll
+C:\Universidad\Tercer Semestre\Web-Harmony-Sound\HarmonySound.API\bin\Debug\net8.0\Microsoft.Extensions.Identity.Stores.dll

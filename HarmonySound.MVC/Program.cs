@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
+
 namespace HarmonySound.MVC
 {
     public class Program
@@ -12,6 +14,14 @@ namespace HarmonySound.MVC
                 options.Cookie.HttpOnly = true;  // Hace que la cookie no sea accesible por JavaScript
                 options.Cookie.IsEssential = true;  // Hace la cookie esencial para el funcionamiento
             });
+
+            // Configuración de autenticación por cookies
+            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(options =>
+                {
+                    options.LoginPath = "/Account/Login";
+                    options.LogoutPath = "/Account/Logout";
+                });
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
@@ -31,6 +41,9 @@ namespace HarmonySound.MVC
 
             app.UseRouting();
             app.UseSession();
+
+            // Agrega estos middlewares en este orden
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllerRoute(
