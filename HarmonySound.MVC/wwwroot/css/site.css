@@ -20,3 +20,175 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: #121212; /* mismo que var(--background-dark) */
+    color: #fff;
+    overflow-x: hidden; /* evita scroll horizontal por si acaso */
+}
+
+
+.login-card label {
+    color: #fff;
+    font-weight: 500;
+}
+
+.login-card input {
+    border-radius: 8px;
+    border: none;
+    margin-bottom: 10px;
+    padding: 0.7rem 1rem;
+    width: 100%;
+    background: #232323;
+    color: #fff;
+    font-size: 1rem;
+}
+
+.login-card input:focus {
+    outline: 2px solid #1db954;
+    background: #191414;
+}
+
+.login-card button {
+    background: #1db954;
+    color: #191414;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    width: 100%;
+    padding: 0.7rem 0;
+    margin-top: 10px;
+    transition: background 0.2s;
+}
+
+.login-card button:hover {
+        background: #17a74a;
+}
+
+.login-card a {
+    color: #1db954;
+    text-decoration: underline;
+}
+
+.login-card a:hover {
+        color: #fff;
+}
+
+.auth-container {
+    min-height: 100vh;
+    background-color: var(--background-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.auth-card {
+    background: #1e1e1e;
+    color: #fff;
+    border-radius: 20px;
+    box-shadow: 0 6px 30px rgba(0, 0, 0, 0.4);
+    padding: 2.5rem 2rem;
+    width: 100%;
+    max-width: 420px;
+}
+
+    .auth-card h2 {
+        color: var(--spotify-green);
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+
+    .auth-card input,
+    .auth-card select {
+        background-color: var(--input-bg);
+        border: none;
+        border-radius: 10px;
+        color: #fff;
+        width: 100%;
+        padding: 0.8rem 1rem;
+        margin-bottom: 1rem;
+        font-size: 1rem;
+    }
+
+        .auth-card input::placeholder {
+            color: #bbbbbb;
+        }
+
+        .auth-card input:focus,
+        .auth-card select:focus {
+            outline: 2px solid var(--spotify-green);
+            background-color: var(--input-focus-bg);
+        }
+
+    .auth-card label {
+        font-weight: 500;
+        color: #ddd;
+        margin-bottom: 0.3rem;
+        display: block;
+    }
+
+    .auth-card button {
+        background-color: var(--spotify-green);
+        color: #121212;
+        border: none;
+        border-radius: 10px;
+        width: 100%;
+        padding: 0.9rem 1rem;
+        font-weight: bold;
+        transition: background 0.3s ease;
+    }
+
+        .auth-card button:hover {
+            background-color: var(--spotify-green-hover);
+        }
+
+    .auth-card a {
+        color: var(--spotify-green);
+        text-decoration: none;
+    }
+
+        .auth-card a:hover {
+            color: #fff;
+            text-decoration: underline;
+        }
+
+.text-danger,
+.text-warning {
+    font-size: 0.875rem;
+    margin-top: -0.3rem;
+    display: block;
+    color: #ff6666;
+    font-weight: 500;
+    padding-left: 0.2rem;
+
+}
+
+:root {
+    --spotify-green: #178a43; /* Más oscuro que #1db954 */
+    --spotify-green-hover: #14733a;
+    --background-dark: #121212;
+    --input-bg: #232323;
+    --input-focus-bg: #1a1a1a;
+}
+
+.auth-card select {
+    background-color: var(--input-bg); /* oscuro */
+    color: #fff; /* texto blanco */
+    border: none;
+    border-radius: 10px;
+    width: 100%;
+    padding: 0.8rem 1rem;
+    font-size: 1rem;
+    appearance: none; /* para eliminar el estilo nativo */
+}
+
+.auth-card select option {
+ background-color: #232323; /* fondo de las opciones */
+    color: #fff; /* texto blanco */
+ }
+
+
