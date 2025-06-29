@@ -7,7 +7,19 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Views\Admin\**" />
+    <Compile Remove="Views\Client\**" />
+    <Content Remove="Views\Admin\**" />
+    <Content Remove="Views\Client\**" />
+    <EmbeddedResource Remove="Views\Admin\**" />
+    <EmbeddedResource Remove="Views\Client\**" />
+    <None Remove="Views\Admin\**" />
+    <None Remove="Views\Client\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.aspnetcore.Mvc.NewtonsoftJson" Version="8.0.15" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.7" />
   </ItemGroup>
 
   <ItemGroup>
@@ -16,8 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Views\Client\" />
-    <Folder Include="Views\Admin\" />
+    <Folder Include="Views\UserRoles\" />
   </ItemGroup>
 
 </Project>

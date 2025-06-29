@@ -1,4 +1,7 @@
+using HarmonySound.API.Consumer;
+using HarmonySound.Models;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace HarmonySound.MVC
 {
@@ -6,6 +9,20 @@ namespace HarmonySound.MVC
     {
         public static void Main(string[] args)
         {
+            Crud<Album>.EndPoint = "https://localhost:7120/api/Albums";
+            Crud<ContentAlbum>.EndPoint = "https://localhost:7120/api/ContentAlbums";
+            Crud<Content>.EndPoint = "https://localhost:7120/api/Contents";
+            Crud<Plan>.EndPoint = "https://localhost:7120/api/Plans";
+            Crud<Report>.EndPoint = "https://localhost:7120/api/Reports";
+            Crud<Role>.EndPoint = "https://localhost:7120/api/Roles";
+            Crud<Statistic>.EndPoint = "https://localhost:7120/api/Statistics";
+            Crud<SubscriptionHistory>.EndPoint = "https://localhost:7120/api/SubscriptionsHistories";
+            Crud<UserRole>.EndPoint = "https://localhost:7120/api/UserRoles";
+            Crud<User>.EndPoint = "https://localhost:7120/api/Users";
+            Crud<UserPlan>.EndPoint = "https://localhost:7120/api/UsersPlans";
+
+
+
             var builder = WebApplication.CreateBuilder(args);
             builder.Services.AddDistributedMemoryCache();  // Usar en memoria como almacenamiento para las sesiones
             builder.Services.AddSession(options =>
