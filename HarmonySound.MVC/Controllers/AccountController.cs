@@ -8,6 +8,8 @@ using System.Linq;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Security.Claims;
+using HarmonySound.API.Consumer;
+using HarmonySound.Models;
 
 namespace HarmonySound.MVC.Controllers
 {
@@ -22,47 +24,50 @@ namespace HarmonySound.MVC.Controllers
         // POST: /Account/Login
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Login(LoginViewModel model)
+        public async Task<IActionResult> Login(LoginViewModel model)
         {
             if (!ModelState.IsValid)
                 return View(model);
 
-            using (var client = new HttpClient())
+            var apiModel = new
             {
-                var response = await client.PostAsJsonAsync("https://localhost:7120/api/Auth/login", model);
+                Email = model.Email,
+                Password = model.Password
+            };
 
-                if (response.IsSuccessStatusCode)
+            var json = JsonConvert.SerializeObject(apiModel);
+
+            try
+            {
+                using (var client = new HttpClient())
                 {
-                    var result = JsonConvert.DeserializeObject<LoginResult>(
-                        await response.Content.ReadAsStringAsync());
+                    var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+                    var response = await client.PostAsync("https://localhost:7120/api/Auth/Login", content);
 
-                    // Guarda el token en una cookie o sesión
-                    HttpContext.Session.SetString("Token", result.Token);
-
-                    // AUTENTICAR USUARIO CON COOKIE
-                    var claims = new List<Claim>
+                    if (!response.IsSuccessStatusCode)
                     {
-                        new Claim(ClaimTypes.Name, model.Email)
-                        // Puedes agregar más claims si lo necesitas
-                    };
-                    var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                    var authProperties = new AuthenticationProperties
-                    {
-                        IsPersistent = true
-                    };
+                        ModelState.AddModelError("", "Usuario o contraseña incorrectos.");
+                        return View(model);
+                    }
 
-                    await HttpContext.SignInAsync(
-                        CookieAuthenticationDefaults.AuthenticationScheme,
-                        new ClaimsPrincipal(claimsIdentity),
-                        authProperties);
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    System.Diagnostics.Debug.WriteLine("JSON recibido: " + responseContent);
 
-                    return RedirectToAction("Index", "Home");
+                    var loginResult = JsonConvert.DeserializeObject<LoginResult>(responseContent);
+                    var role = GetRoleFromJwt(loginResult.Token);
+
+                    if (role == "cliente")
+                        return Redirect("/Clients/Index"); // para clientes
+                    else if (role == "artista")
+                        return Redirect("/Artists/Index"); // para artistas
+                    else
+                        return RedirectToAction("Index", "Home");
                 }
-                else
-                {
-                    ModelState.AddModelError("", "Usuario o contraseña incorrectos");
-                    return View(model);
-                }
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "Error de red o de servidor: " + ex.Message);
+                return View(model);
             }
         }
 
@@ -158,6 +163,31 @@ namespace HarmonySound.MVC.Controllers
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Login", "Account");
+        }
+
+        private string GetRoleFromJwt(string token)
+        {
+            var parts = token.Split('.');
+            if (parts.Length != 3)
+                return null;
+
+            var payload = parts[1];
+            var jsonBytes = Convert.FromBase64String(PadBase64(payload));
+            var json = System.Text.Encoding.UTF8.GetString(jsonBytes);
+
+            var payloadData = Newtonsoft.Json.Linq.JObject.Parse(json);
+            // El claim de rol puede variar, revisa el nombre exacto en tu JWT
+            return payloadData["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"]?.ToString();
+        }
+
+        private string PadBase64(string base64)
+        {
+            switch (base64.Length % 4)
+            {
+                case 2: base64 += "=="; break;
+                case 3: base64 += "="; break;
+            }
+            return base64.Replace('-', '+').Replace('_', '/');
         }
     }
 

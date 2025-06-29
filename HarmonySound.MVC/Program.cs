@@ -43,6 +43,7 @@ namespace HarmonySound.MVC
             // Add services to the container.
             builder.Services.AddControllersWithViews();
             builder.Services.AddSession();
+            builder.Services.AddRazorPages();
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -66,6 +67,8 @@ namespace HarmonySound.MVC
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Account}/{action=Login}/{id?}");
+
+            app.MapRazorPages();
 
             app.Run();
         }

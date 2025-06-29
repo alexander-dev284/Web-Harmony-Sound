@@ -28,6 +28,14 @@ build_property._RazorSourceGeneratorDebug =
 build_property.EffectiveAnalysisLevelStyle = 8.0
 build_property.EnableCodeStyleSeverity = 
 
+[C:/Universidad/Tercer Semestre/Web-Harmony-Sound/HarmonySound.MVC/Pages/Artists/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQXJ0aXN0c1xJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Universidad/Tercer Semestre/Web-Harmony-Sound/HarmonySound.MVC/Pages/Clients/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQ2xpZW50c1xJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Universidad/Tercer Semestre/Web-Harmony-Sound/HarmonySound.MVC/Views/Account/Login.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFxMb2dpbi5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
@@ -58,14 +66,6 @@ build_metadata.AdditionalFiles.CssScope =
 
 [C:/Universidad/Tercer Semestre/Web-Harmony-Sound/HarmonySound.MVC/Views/Albums/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWxidW1zXEluZGV4LmNzaHRtbA==
-build_metadata.AdditionalFiles.CssScope = 
-
-[C:/Universidad/Tercer Semestre/Web-Harmony-Sound/HarmonySound.MVC/Views/Artists/Index.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXJ0aXN0c1xJbmRleC5jc2h0bWw=
-build_metadata.AdditionalFiles.CssScope = 
-
-[C:/Universidad/Tercer Semestre/Web-Harmony-Sound/HarmonySound.MVC/Views/Clients/Index.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2xpZW50c1xJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Universidad/Tercer Semestre/Web-Harmony-Sound/HarmonySound.MVC/Views/ContentAlbums/Create.cshtml]
