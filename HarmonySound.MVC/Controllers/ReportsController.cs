@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using HarmonySound.API.Consumer;
+using HarmonySound.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HarmonySound.MVC.Controllers
@@ -8,13 +10,15 @@ namespace HarmonySound.MVC.Controllers
         // GET: ReportsController
         public ActionResult Index()
         {
-            return View();
+            var data = Crud<Report>.GetAll();
+            return View(data);
         }
 
         // GET: ReportsController/Details/5
         public ActionResult Details(int id)
         {
-            return View();
+            var data = Crud<Report>.GetById(id);
+            return View(data);
         }
 
         // GET: ReportsController/Create
@@ -26,57 +30,62 @@ namespace HarmonySound.MVC.Controllers
         // POST: ReportsController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public ActionResult Create(Report data)
         {
             try
             {
+                Crud<Report>.Create(data);
                 return RedirectToAction(nameof(Index));
             }
             catch
             {
-                return View();
+                return View(data);
             }
         }
 
         // GET: ReportsController/Edit/5
         public ActionResult Edit(int id)
         {
-            return View();
+            var data = Crud<Report>.GetById(id);
+            return View(data);
         }
 
         // POST: ReportsController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public ActionResult Edit(int id, Report data)
         {
             try
             {
+                Crud<Report>.Update(id, data);
                 return RedirectToAction(nameof(Index));
             }
             catch
             {
-                return View();
+                return View(data);
             }
         }
 
         // GET: ReportsController/Delete/5
         public ActionResult Delete(int id)
         {
-            return View();
+            var data = Crud<Report>.GetById(id);
+            return View(data);
         }
 
         // POST: ReportsController/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public ActionResult Delete(int id, Report data)
         {
             try
             {
+                Crud<Report>.Delete(id);
                 return RedirectToAction(nameof(Index));
             }
             catch
             {
-                return View();
+                return View(data);
             }
         }
     }
