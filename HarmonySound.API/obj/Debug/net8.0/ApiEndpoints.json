@@ -359,6 +359,37 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "HarmonySound.API.Controllers.ContentsController",
+    "Method": "UploadAudio",
+    "RelativePath": "api/Contents/upload",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "File",
+        "Type": "Microsoft.AspNetCore.Http.IFormFile",
+        "IsRequired": false
+      },
+      {
+        "Name": "Title",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "Type",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "ArtistId",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "HarmonySound.API.Controllers.PlansController",
     "Method": "GetPlan",
     "RelativePath": "api/Plans",
@@ -1038,6 +1069,46 @@
       }
     ],
     "ReturnTypes": []
+  },
+  {
+    "ContainingType": "HarmonySound.API.Controllers.UsersController",
+    "Method": "GetArtists",
+    "RelativePath": "api/Users/Artists",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.IEnumerable\u00601[[System.Object, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HarmonySound.API.Controllers.UsersController",
+    "Method": "GetClients",
+    "RelativePath": "api/Users/Clients",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.IEnumerable\u00601[[System.Object, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
   },
   {
     "ContainingType": "HarmonySound.API.Controllers.UsersPlansController",

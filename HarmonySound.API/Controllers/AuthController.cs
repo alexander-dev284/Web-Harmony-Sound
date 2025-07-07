@@ -78,7 +78,8 @@ namespace HarmonySound.API.Controllers
             var roleClaims = roles.Select(role => new Claim(ClaimTypes.Role, role)).ToList();
             var claims = new List<Claim>
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
+                // CAMBIO: ahora el sub es el ID numérico
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             }.Concat(roleClaims);
 

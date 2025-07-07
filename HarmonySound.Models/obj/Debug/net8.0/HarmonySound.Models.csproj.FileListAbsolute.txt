@@ -22,6 +22,7 @@ C:\Universidad\Tercer Semestre\Web-Harmony-Sound\HarmonySound.Models\obj\Debug\n
 C:\Universidad\Tercer Semestre\Web-Harmony-Sound\HarmonySound.Models\obj\Debug\net8.0\refint\HarmonySound.Models.dll
 C:\Universidad\Tercer Semestre\Web-Harmony-Sound\HarmonySound.Models\obj\Debug\net8.0\HarmonySound.Models.pdb
 C:\Universidad\Tercer Semestre\Web-Harmony-Sound\HarmonySound.Models\obj\Debug\net8.0\ref\HarmonySound.Models.dll
+C:\Universidad\Tercer Semestre\Web-Harmony-Sound\HarmonySound.Models\obj\Debug\net8.0\HarmonySound.Models.csproj.AssemblyReference.cache
 C:\Users\GIGABYTE\Desktop\Web-Harmony-Sound\HarmonySound.Models\bin\Debug\net8.0\HarmonySound.Models.deps.json
 C:\Users\GIGABYTE\Desktop\Web-Harmony-Sound\HarmonySound.Models\bin\Debug\net8.0\HarmonySound.Models.dll
 C:\Users\GIGABYTE\Desktop\Web-Harmony-Sound\HarmonySound.Models\bin\Debug\net8.0\HarmonySound.Models.pdb
@@ -35,4 +36,3 @@ C:\Users\GIGABYTE\Desktop\Web-Harmony-Sound\HarmonySound.Models\obj\Debug\net8.0
 C:\Users\GIGABYTE\Desktop\Web-Harmony-Sound\HarmonySound.Models\obj\Debug\net8.0\refint\HarmonySound.Models.dll
 C:\Users\GIGABYTE\Desktop\Web-Harmony-Sound\HarmonySound.Models\obj\Debug\net8.0\HarmonySound.Models.pdb
 C:\Users\GIGABYTE\Desktop\Web-Harmony-Sound\HarmonySound.Models\obj\Debug\net8.0\ref\HarmonySound.Models.dll
-C:\Universidad\Tercer Semestre\Web-Harmony-Sound\HarmonySound.Models\obj\Debug\net8.0\HarmonySound.Models.csproj.AssemblyReference.cache

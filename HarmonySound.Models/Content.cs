@@ -24,5 +24,5 @@ namespace HarmonySound.Models
 
         // Relación con Álbumes
         public List<ContentAlbum>? ContentAlbumes { get; set; }
-    }
+    } 
 }

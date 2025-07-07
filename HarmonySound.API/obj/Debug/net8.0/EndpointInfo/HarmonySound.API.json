@@ -622,6 +622,57 @@
         }
       }
     },
+    "/api/Contents/upload": {
+      "post": {
+        "tags": [
+          "Contents"
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "File": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "Title": {
+                    "type": "string"
+                  },
+                  "Type": {
+                    "type": "string"
+                  },
+                  "ArtistId": {
+                    "type": "integer",
+                    "format": "int32"
+                  }
+                }
+              },
+              "encoding": {
+                "File": {
+                  "style": "form"
+                },
+                "Title": {
+                  "style": "form"
+                },
+                "Type": {
+                  "style": "form"
+                },
+                "ArtistId": {
+                  "style": "form"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/Plans": {
       "get": {
         "tags": [
@@ -1758,6 +1809,70 @@
         "responses": {
           "200": {
             "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Users/Artists": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": { }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Users/Clients": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": { }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { }
+                }
+              }
+            }
           }
         }
       }

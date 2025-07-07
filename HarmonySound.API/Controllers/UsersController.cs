@@ -54,6 +54,40 @@ namespace HarmonySound.API.Controllers
             });
         }
 
+        // GET: api/Users/Artists
+        [HttpGet("Artists")]
+        public async Task<ActionResult<IEnumerable<object>>> GetArtists()
+        {
+            var artists = await _userManager.GetUsersInRoleAsync("Artist");
+            var result = artists.Select(u => new {
+                u.Id,
+                u.UserName,
+                u.Email,
+                u.Name,
+                u.State,
+                u.RegisterDate
+            }).ToList();
+
+            return Ok(result);
+        }
+
+        // GET: api/Users/Clients
+        [HttpGet("Clients")]
+        public async Task<ActionResult<IEnumerable<object>>> GetClients()
+        {
+            var clients = await _userManager.GetUsersInRoleAsync("Client");
+            var result = clients.Select(u => new {
+                u.Id,
+                u.UserName,
+                u.Email,
+                u.Name,
+                u.State,
+                u.RegisterDate
+            }).ToList();
+
+            return Ok(result);
+        }
+
         // DELETE: api/Users/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)

@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace HarmonySound.API.Migrations
 {
     /// <inheritdoc />
-    public partial class v02 : Migration
+    public partial class contents : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

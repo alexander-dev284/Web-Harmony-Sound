@@ -46,20 +46,48 @@ namespace HarmonySound.MVC.Controllers
 
                     if (!response.IsSuccessStatusCode)
                     {
-                        ModelState.AddModelError("", "Usuario o contraseña incorrectos.");
+                        var errorContent = await response.Content.ReadAsStringAsync();
+                        ModelState.AddModelError("", "Error: " + errorContent);
                         return View(model);
                     }
 
                     var responseContent = await response.Content.ReadAsStringAsync();
-                    System.Diagnostics.Debug.WriteLine("JSON recibido: " + responseContent);
-
                     var loginResult = JsonConvert.DeserializeObject<LoginResult>(responseContent);
-                    var role = GetRoleFromJwt(loginResult.Token);
 
-                    if (role == "cliente")
-                        return Redirect("/Clients/Index"); // para clientes
-                    else if (role == "artista")
-                        return Redirect("/Artists/Index"); // para artistas
+                    // Agrega este log temporal
+                    Console.WriteLine("TOKEN JWT: " + loginResult.Token);
+
+                    // Decodificar el JWT y extraer los claims
+                    var handler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+                    var jwt = handler.ReadJwtToken(loginResult.Token);
+                    var claimsList = jwt.Claims.ToList();
+
+                    // Asegurarse de que haya un NameIdentifier
+                    if (!claimsList.Any(c => c.Type == ClaimTypes.NameIdentifier))
+                    {
+                        var sub = claimsList.FirstOrDefault(c => c.Type == "sub")?.Value;
+                        if (sub != null)
+                            claimsList.Add(new Claim(ClaimTypes.NameIdentifier, sub));
+                        else
+                            claimsList.Add(new Claim(ClaimTypes.NameIdentifier, model.Email)); // fallback
+                    }
+
+                    var claimsIdentity = new ClaimsIdentity(claimsList, CookieAuthenticationDefaults.AuthenticationScheme);
+                    var authProperties = new AuthenticationProperties { IsPersistent = true };
+
+                    await HttpContext.SignInAsync(
+                        CookieAuthenticationDefaults.AuthenticationScheme,
+                        new ClaimsPrincipal(claimsIdentity),
+                        authProperties
+                    );
+
+                    var role = claimsList.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+
+                    // Redirigir según el rol
+                    if (role != null && role.Equals("Client", StringComparison.OrdinalIgnoreCase))
+                        return RedirectToAction("Index", "Clients");
+                    else if (role != null && role.Equals("Artist", StringComparison.OrdinalIgnoreCase))
+                        return RedirectToAction("Index", "Artists");
                     else
                         return RedirectToAction("Index", "Home");
                 }
@@ -176,8 +204,11 @@ namespace HarmonySound.MVC.Controllers
             var json = System.Text.Encoding.UTF8.GetString(jsonBytes);
 
             var payloadData = Newtonsoft.Json.Linq.JObject.Parse(json);
-            // El claim de rol puede variar, revisa el nombre exacto en tu JWT
-            return payloadData["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"]?.ToString();
+
+            // Busca varios posibles nombres de claim
+            return (payloadData["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] ??
+                    payloadData["role"] ??
+                    payloadData["roles"])?.ToString();
         }
 
         private string PadBase64(string base64)

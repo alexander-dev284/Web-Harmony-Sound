@@ -1,7 +1,9 @@
 using HarmonySound.API.Consumer;
 using HarmonySound.Models;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 
 namespace HarmonySound.MVC
 {
@@ -9,6 +11,7 @@ namespace HarmonySound.MVC
     {
         public static void Main(string[] args)
         {
+            // Configuración de los endpoints de la API
             Crud<Album>.EndPoint = "https://localhost:7120/api/Albums";
             Crud<ContentAlbum>.EndPoint = "https://localhost:7120/api/ContentAlbums";
             Crud<Content>.EndPoint = "https://localhost:7120/api/Contents";
@@ -21,55 +24,95 @@ namespace HarmonySound.MVC
             Crud<User>.EndPoint = "https://localhost:7120/api/Users";
             Crud<UserPlan>.EndPoint = "https://localhost:7120/api/UsersPlans";
 
-
+            // Configuración de Serilog para registrar en la consola y en un archivo
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.Console() // Imprime en la consola
+                .WriteTo.File("logs/myapp.txt", rollingInterval: RollingInterval.Day) // Guarda los logs en un archivo
+                .CreateLogger();
 
             var builder = WebApplication.CreateBuilder(args);
-            builder.Services.AddDistributedMemoryCache();  // Usar en memoria como almacenamiento para las sesiones
-            builder.Services.AddSession(options =>
+
+            // Configuración de los límites de tamaño de solicitud
+            builder.Services.Configure<IISServerOptions>(options =>
             {
-                options.IdleTimeout = TimeSpan.FromMinutes(30); // Tiempo de espera para la sesión
-                options.Cookie.HttpOnly = true;  // Hace que la cookie no sea accesible por JavaScript
-                options.Cookie.IsEssential = true;  // Hace la cookie esencial para el funcionamiento
+                options.MaxRequestBodySize = 104857600; // 100 MB
             });
+
+            builder.Services.Configure<KestrelServerOptions>(options =>
+            {
+                options.Limits.MaxRequestBodySize = 104857600; // 100 MB
+            });
+
+            // Configuración de logging (se usa Serilog)
+            builder.Logging.ClearProviders();  // Limpiar proveedores de logs predeterminados
+            builder.Logging.AddSerilog();  // Usar Serilog para los logs
 
             // Configuración de autenticación por cookies
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
                 {
-                    options.LoginPath = "/Account/Login";
-                    options.LogoutPath = "/Account/Logout";
+                    options.LoginPath = "/Account/Login"; // Ruta para login
+                    options.LogoutPath = "/Account/Logout"; // Ruta para logout
                 });
 
-            // Add services to the container.
+            // Configuración de sesiones en memoria (sin DbContext en MVC)
+            builder.Services.AddDistributedMemoryCache();
+            builder.Services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(30); // Tiempo máximo de inactividad
+                options.Cookie.HttpOnly = true; // Hace que la cookie no sea accesible por JS
+                options.Cookie.IsEssential = true; // Hace la cookie esencial
+            });
+
+            // Agregar controladores y vistas
             builder.Services.AddControllersWithViews();
-            builder.Services.AddSession();
-            builder.Services.AddRazorPages();
+            builder.Services.AddSession();  // Asegura que la sesión esté disponible
+
+            // Inyectar HttpClient para hacer solicitudes a la API
+            builder.Services.AddHttpClient(); // Esto permite usar HttpClient en tus controladores
+
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
+            // Configuración de la tubería HTTP
             if (!app.Environment.IsDevelopment())
             {
-                app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                app.UseHsts();
+                app.UseExceptionHandler("/Home/Error"); // Página de error para producción
+                app.UseHsts();  // HSTS para seguridad adicional en producción
             }
 
-            app.UseHttpsRedirection();
-            app.UseStaticFiles();
+            app.UseHttpsRedirection();  // Redirección a HTTPS
+            app.UseStaticFiles();  // Permite archivos estáticos
 
-            app.UseRouting();
-            app.UseSession();
+            app.UseRouting();  // Usar el enrutamiento
+            app.UseSession();  // Usar sesiones
 
-            // Agrega estos middlewares en este orden
+            // Autenticación y autorización
             app.UseAuthentication();
             app.UseAuthorization();
 
+            // Configurar la ruta de los controladores
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Account}/{action=Login}/{id?}");
+                pattern: "{controller=Account}/{action=Login}/{id?}"); // Ruta por defecto para Login
 
-            app.MapRazorPages();
+            // Global exception handling middleware
+            app.UseExceptionHandler(errorApp =>
+            {
+                errorApp.Run(async context =>
+                {
+                    var exceptionHandlerPathFeature = context.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerPathFeature>();
+                    if (exceptionHandlerPathFeature?.Error != null)
+                    {
+                        // Registra los errores no manejados en el archivo de logs
+                        Log.Error(exceptionHandlerPathFeature.Error, "Unhandled exception occurred.");
+                    }
 
+                    context.Response.StatusCode = 500;
+                    await context.Response.WriteAsync("An error occurred.");
+                });
+            });
+
+            // Ejecutar la aplicación
             app.Run();
         }
     }
