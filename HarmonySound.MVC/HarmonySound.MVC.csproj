@@ -9,12 +9,16 @@
   <ItemGroup>
     <Compile Remove="Views\Admin\**" />
     <Compile Remove="Views\Client\**" />
+    <Compile Remove="wwwroot\media\**" />
     <Content Remove="Views\Admin\**" />
     <Content Remove="Views\Client\**" />
+    <Content Remove="wwwroot\media\**" />
     <EmbeddedResource Remove="Views\Admin\**" />
     <EmbeddedResource Remove="Views\Client\**" />
+    <EmbeddedResource Remove="wwwroot\media\**" />
     <None Remove="Views\Admin\**" />
     <None Remove="Views\Client\**" />
+    <None Remove="wwwroot\media\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -32,7 +36,6 @@
 
   <ItemGroup>
     <Folder Include="Views\UserRoles\" />
-    <Folder Include="wwwroot\media\" />
   </ItemGroup>
 
 </Project>

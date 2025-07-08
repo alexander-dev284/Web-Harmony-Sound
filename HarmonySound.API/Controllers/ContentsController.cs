@@ -74,43 +74,62 @@ namespace HarmonySound.API.Controllers
         {
             try
             {
+                _logger.LogInformation("Iniciando subida de archivo...");
+
                 if (model.File == null || model.File.Length == 0)
                 {
-                    _logger.LogWarning("Se intentó subir un archivo vacío o nulo.");
+                    _logger.LogWarning("Archivo vacío o nulo.");
                     return BadRequest("Archivo no válido.");
+                }
+
+                if (string.IsNullOrWhiteSpace(model.Title) || string.IsNullOrWhiteSpace(model.Type))
+                {
+                    _logger.LogWarning("Título o tipo vacío.");
+                    return BadRequest("El título y el tipo son obligatorios.");
+                }
+
+                const long maxFileSize = 20 * 1024 * 1024; // 20 MB
+                if (model.File.Length > maxFileSize)
+                {
+                    _logger.LogWarning("Archivo demasiado grande.");
+                    return BadRequest("El archivo es demasiado grande.");
                 }
 
                 var extension = Path.GetExtension(model.File.FileName).ToLower();
                 if (extension != ".mp3" && extension != ".wav")
                 {
-                    _logger.LogWarning("Se intentó subir un archivo con una extensión no permitida: {Extension}", extension);
+                    _logger.LogWarning("Extensión no permitida: {Extension}", extension);
                     return BadRequest("Solo se permiten archivos .mp3 o .wav");
                 }
 
+                _logger.LogInformation("Ruta webroot: {WebRootPath}", _env.WebRootPath);
+
                 var folderPath = Path.Combine(_env.WebRootPath, "media");
                 if (!Directory.Exists(folderPath))
+                {
+                    _logger.LogInformation("Creando carpeta: {FolderPath}", folderPath);
                     Directory.CreateDirectory(folderPath);
+                }
 
                 var uniqueFileName = $"{Guid.NewGuid()}{extension}";
                 var filePath = Path.Combine(folderPath, uniqueFileName);
 
-                // Guarda el archivo
+                _logger.LogInformation("Guardando archivo en: {FilePath}", filePath);
+
                 using (var stream = new FileStream(filePath, FileMode.Create))
                 {
                     await model.File.CopyToAsync(stream);
                 }
 
-                // Genera la URL del archivo subido
                 var fileUrl = $"{Request.Scheme}://{Request.Host}/media/{uniqueFileName}";
 
-                // Crear una entrada de contenido
                 var content = new Content
                 {
                     Title = model.Title,
                     Type = model.Type,
                     UrlMedia = fileUrl,
                     UploadDate = DateTimeOffset.UtcNow,
-                    Duration = TimeSpan.Zero, // O extraer la duración real del archivo
+                    Duration = TimeSpan.Zero,
                     ArtistId = model.ArtistId
                 };
 

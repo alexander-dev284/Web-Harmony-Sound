@@ -11,8 +11,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace HarmonySound.API.Migrations
 {
     [DbContext(typeof(HarmonySoundDbContext))]
-    [Migration("20250630232940_contents")]
-    partial class contents
+    [Migration("20250708000104_HarmonySound")]
+    partial class HarmonySound
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

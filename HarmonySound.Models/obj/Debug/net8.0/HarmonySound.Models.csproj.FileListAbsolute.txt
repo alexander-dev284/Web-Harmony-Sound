@@ -36,3 +36,16 @@ C:\Users\GIGABYTE\Desktop\Web-Harmony-Sound\HarmonySound.Models\obj\Debug\net8.0
 C:\Users\GIGABYTE\Desktop\Web-Harmony-Sound\HarmonySound.Models\obj\Debug\net8.0\refint\HarmonySound.Models.dll
 C:\Users\GIGABYTE\Desktop\Web-Harmony-Sound\HarmonySound.Models\obj\Debug\net8.0\HarmonySound.Models.pdb
 C:\Users\GIGABYTE\Desktop\Web-Harmony-Sound\HarmonySound.Models\obj\Debug\net8.0\ref\HarmonySound.Models.dll
+C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.Models\bin\Debug\net8.0\HarmonySound.Models.deps.json
+C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.Models\bin\Debug\net8.0\HarmonySound.Models.dll
+C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.Models\bin\Debug\net8.0\HarmonySound.Models.pdb
+C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.Models\obj\Debug\net8.0\HarmonySound.Models.csproj.AssemblyReference.cache
+C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.Models\obj\Debug\net8.0\HarmonySound.Models.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.Models\obj\Debug\net8.0\HarmonySound.Models.AssemblyInfoInputs.cache
+C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.Models\obj\Debug\net8.0\HarmonySound.Models.AssemblyInfo.cs
+C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.Models\obj\Debug\net8.0\HarmonySound.Models.csproj.CoreCompileInputs.cache
+C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.Models\obj\Debug\net8.0\HarmonySound.Models.sourcelink.json
+C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.Models\obj\Debug\net8.0\HarmonySound.Models.dll
+C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.Models\obj\Debug\net8.0\refint\HarmonySound.Models.dll
+C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.Models\obj\Debug\net8.0\HarmonySound.Models.pdb
+C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.Models\obj\Debug\net8.0\ref\HarmonySound.Models.dll

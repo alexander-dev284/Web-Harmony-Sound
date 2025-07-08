@@ -34,10 +34,26 @@ namespace HarmonySound.MVC.Controllers
                     return RedirectToAction("Index"); // Redirige a la vista Index en caso de error
                 }
 
+                // Log de información sobre el archivo
+                System.Diagnostics.Debug.WriteLine($"Nombre: {file.FileName}, Tamaño: {file.Length}");
+
+                if (string.IsNullOrWhiteSpace(form["Title"]) || string.IsNullOrWhiteSpace(form["Type"]) || string.IsNullOrWhiteSpace(form["ArtistId"]))
+                {
+                    TempData["Error"] = "Todos los campos son obligatorios.";
+                    return RedirectToAction("Index");
+                }
+
                 using var content = new MultipartFormDataContent();
                 content.Add(new StringContent(form["Title"]), "Title"); // Título del contenido
                 content.Add(new StringContent(form["Type"]), "Type");   // Tipo del contenido
                 content.Add(new StringContent(form["ArtistId"]), "ArtistId"); // ID del artista
+
+                // Validar tamaño máximo antes de abrir el stream
+                if (file.Length > 50 * 1024 * 1024)
+                {
+                    TempData["Error"] = "El archivo es demasiado grande.";
+                    return RedirectToAction("Index");
+                }
 
                 // Agregar el archivo al contenido
                 content.Add(new StreamContent(file.OpenReadStream()), "File", file.FileName);
@@ -51,12 +67,14 @@ namespace HarmonySound.MVC.Controllers
                 }
                 else
                 {
-                    TempData["Error"] = "Error al subir el archivo.";
+                    var errorMsg = await response.Content.ReadAsStringAsync();
+                    TempData["Error"] = $"Error al subir el archivo: {errorMsg}";
                 }
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "Excepción: " + ex.Message;
+                TempData["Error"] = "Excepción: " + ex.ToString();
+                System.Diagnostics.Debug.WriteLine("Excepción: " + ex.ToString());
             }
 
             return RedirectToAction("Index"); // Redirige al Index después de intentar subir el archivo
