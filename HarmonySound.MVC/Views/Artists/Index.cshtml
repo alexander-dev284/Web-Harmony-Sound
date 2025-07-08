@@ -48,8 +48,17 @@
 <div class="container">
     <h2 class="text-center">Subir nuevo contenido</h2>
 
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
     <!-- Formulario para subir contenido -->
-    @using (Html.BeginForm("Create", "Contents", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    @using (Html.BeginForm("UploadAudio", "Artists", FormMethod.Post, new { enctype = "multipart/form-data" }))
     {
         @Html.AntiForgeryToken()
 
@@ -60,7 +69,8 @@
 
         <div class="form-group">
             <label for="File">Archivo de audio</label>
-            <input type="file" name="File" class="form-control" accept=".mp3,.wav" required />
+            <input type="file" name="File" class="form-control" accept=".mp3,.wav,.ogg,.flac,.aac,.m4a,audio/*" required />
+            <small class="form-text text-muted">Formatos permitidos: mp3, wav, ogg, flac, aac, m4a. Tamaño máximo: 200 MB.</small>
         </div>
 
         <div class="form-group">

@@ -811,23 +811,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\GIGABYTE\\.nuget\\packages\\": {},
+    "C:\\Users\\Victus\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\GIGABYTE\\Desktop\\Web-Harmony-Sound\\HarmonySound.Models\\HarmonySound.Models.csproj",
+      "projectUniqueName": "C:\\Users\\Victus\\Desktop\\Web-Harmony-Sound\\HarmonySound.Models\\HarmonySound.Models.csproj",
       "projectName": "HarmonySound.Models",
-      "projectPath": "C:\\Users\\GIGABYTE\\Desktop\\Web-Harmony-Sound\\HarmonySound.Models\\HarmonySound.Models.csproj",
-      "packagesPath": "C:\\Users\\GIGABYTE\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\GIGABYTE\\Desktop\\Web-Harmony-Sound\\HarmonySound.Models\\obj\\",
+      "projectPath": "C:\\Users\\Victus\\Desktop\\Web-Harmony-Sound\\HarmonySound.Models\\HarmonySound.Models.csproj",
+      "packagesPath": "C:\\Users\\Victus\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Victus\\Desktop\\Web-Harmony-Sound\\HarmonySound.Models\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\GIGABYTE\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\Victus\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -836,7 +836,6 @@
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-        "C:\\Program Files\\dotnet\\library-packs": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {

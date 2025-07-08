@@ -42,7 +42,7 @@ namespace HarmonySound.API
 
             builder.Services.Configure<FormOptions>(options =>
             {
-                options.MultipartBodyLengthLimit = 50 * 1024 * 1024; // 50 MB
+                options.MultipartBodyLengthLimit = 200 * 1024 * 1024; // 200 MB
             });
 
             builder.Services.AddControllers();

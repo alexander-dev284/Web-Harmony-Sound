@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
 
 namespace HarmonySound.API.Controllers
 {
@@ -14,12 +16,16 @@ namespace HarmonySound.API.Controllers
         private readonly HarmonySoundDbContext _context;
         private readonly IWebHostEnvironment _env;
         private readonly ILogger<ContentsController> _logger;
+        private readonly string _blobConnectionString;
+        private readonly string _blobContainerName;
 
-        public ContentsController(HarmonySoundDbContext context, IWebHostEnvironment env, ILogger<ContentsController> logger)
+        public ContentsController(HarmonySoundDbContext context, IWebHostEnvironment env, ILogger<ContentsController> logger, IConfiguration configuration)
         {
             _context = context;
             _env = env;
             _logger = logger;
+            _blobConnectionString = configuration["AzureBlobStorage:ConnectionString"];
+            _blobContainerName = configuration["AzureBlobStorage:ContainerName"];
         }
 
         // GET: api/Contents
@@ -74,54 +80,40 @@ namespace HarmonySound.API.Controllers
         {
             try
             {
-                _logger.LogInformation("Iniciando subida de archivo...");
-
                 if (model.File == null || model.File.Length == 0)
-                {
-                    _logger.LogWarning("Archivo vacío o nulo.");
                     return BadRequest("Archivo no válido.");
-                }
 
                 if (string.IsNullOrWhiteSpace(model.Title) || string.IsNullOrWhiteSpace(model.Type))
-                {
-                    _logger.LogWarning("Título o tipo vacío.");
                     return BadRequest("El título y el tipo son obligatorios.");
-                }
 
-                const long maxFileSize = 20 * 1024 * 1024; // 20 MB
+                const long maxFileSize = 200 * 1024 * 1024; // 200 MB
                 if (model.File.Length > maxFileSize)
-                {
-                    _logger.LogWarning("Archivo demasiado grande.");
                     return BadRequest("El archivo es demasiado grande.");
-                }
 
                 var extension = Path.GetExtension(model.File.FileName).ToLower();
-                if (extension != ".mp3" && extension != ".wav")
-                {
-                    _logger.LogWarning("Extensión no permitida: {Extension}", extension);
-                    return BadRequest("Solo se permiten archivos .mp3 o .wav");
-                }
+                var allowedExtensions = new[] { ".mp3", ".wav", ".ogg", ".flac", ".aac", ".m4a" };
+                if (!allowedExtensions.Contains(extension))
+                    return BadRequest("Solo se permiten archivos de audio: .mp3, .wav, .ogg, .flac, .aac, .m4a");
 
-                _logger.LogInformation("Ruta webroot: {WebRootPath}", _env.WebRootPath);
+                // Forzar el tipo MIME correcto para .wav
+                string contentType = model.File.ContentType;
+                if (extension == ".wav")
+                    contentType = "audio/wav";
 
-                var folderPath = Path.Combine(_env.WebRootPath, "media");
-                if (!Directory.Exists(folderPath))
-                {
-                    _logger.LogInformation("Creando carpeta: {FolderPath}", folderPath);
-                    Directory.CreateDirectory(folderPath);
-                }
+                // Subir a Azure Blob Storage
+                var blobServiceClient = new BlobServiceClient(_blobConnectionString);
+                var containerClient = blobServiceClient.GetBlobContainerClient(_blobContainerName);
+                await containerClient.CreateIfNotExistsAsync(PublicAccessType.Blob);
 
                 var uniqueFileName = $"{Guid.NewGuid()}{extension}";
-                var filePath = Path.Combine(folderPath, uniqueFileName);
+                var blobClient = containerClient.GetBlobClient(uniqueFileName);
 
-                _logger.LogInformation("Guardando archivo en: {FilePath}", filePath);
-
-                using (var stream = new FileStream(filePath, FileMode.Create))
+                using (var stream = model.File.OpenReadStream())
                 {
-                    await model.File.CopyToAsync(stream);
+                    await blobClient.UploadAsync(stream, new BlobHttpHeaders { ContentType = contentType });
                 }
 
-                var fileUrl = $"{Request.Scheme}://{Request.Host}/media/{uniqueFileName}";
+                var fileUrl = blobClient.Uri.ToString();
 
                 var content = new Content
                 {
@@ -136,13 +128,11 @@ namespace HarmonySound.API.Controllers
                 _context.Contents.Add(content);
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation("Archivo subido con éxito: {FileName}", uniqueFileName);
-
                 return Ok(new { content.Id, content.Title, content.UrlMedia });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al intentar subir el archivo.");
+                _logger.LogError(ex, "Error al intentar subir el archivo a Azure Blob Storage.");
                 return StatusCode(500, "Error interno del servidor.");
             }
         }
