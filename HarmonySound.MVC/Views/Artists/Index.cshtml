@@ -1,52 +1,105 @@
 ﻿@model IEnumerable<HarmonySound.Models.Content>
 
 @{
-    ViewData["Title"] = "Gestión de Contenido";
+    ViewData["Title"] = "Subir nuevo contenido";
 }
 
-<h2>Subir nuevo contenido</h2>
+<!-- Estilo para los contenedores -->
+<style>
+    body {
+        background-color: #121212; /* Fondo oscuro */
+        color: white; /* Texto claro */
+    }
 
-@using (Html.BeginForm("UploadAudio", "Artists", FormMethod.Post, new { enctype = "multipart/form-data" }))
-{
-    @Html.AntiForgeryToken()
-    <div class="form-group">
-        <label for="Title">Título</label>
-        <input type="text" name="Title" class="form-control" required />
-    </div>
-    <div class="form-group">
-        <label for="File">Archivo de audio</label>
-        <input type="file" name="File" class="form-control" accept=".mp3,.wav" required />
-    </div>
-    <div class="form-group">
-        <label for="Type">Tipo</label>
-        <input type="text" name="Type" class="form-control" placeholder="Ej: Canción, Podcast" />
-    </div>
-    <input type="hidden" name="ArtistId" value="@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value" />
-    <button type="submit" class="btn btn-primary">Subir</button>
-    @Html.ValidationSummary(true)
-}
+    .container {
+        margin-top: 50px;
+        background-color: #1c1c1c; /* Fondo más oscuro */
+        padding: 20px;
+        border-radius: 8px;
+    }
 
-<hr />
+    .btn-primary {
+        background-color: #28a745; /* Verde similar al login */
+        border: none;
+    }
 
-<h2>Mis contenidos</h2>
+    .form-control {
+        background-color: #333;
+        color: white;
+        border: 1px solid #444;
+    }
 
-@if (Model != null && Model.Any())
-{
-    foreach (var item in Model)
+        .form-control:focus {
+            border-color: #28a745;
+            box-shadow: 0 0 0 0.25rem rgba(40, 167, 69, 0.25);
+        }
+
+    .btn-primary:hover {
+        background-color: #218838;
+    }
+
+    .card {
+        background-color: #2c2c2c;
+        border-radius: 8px;
+        padding: 20px;
+    }
+</style>
+
+<div class="container">
+    <h2 class="text-center">Subir nuevo contenido</h2>
+
+    <!-- Formulario para subir contenido -->
+    @using (Html.BeginForm("Create", "Contents", FormMethod.Post, new { enctype = "multipart/form-data" }))
     {
-        <div class="audio-item" style="margin-bottom: 2em;">
-            <h4>@item.Title</h4>
-            <audio controls style="width: 100%;">
-                <source src="@item.UrlMedia" type="audio/mpeg" />
-                Tu navegador no soporta el elemento de audio.
-            </audio>
-            <div>
-                <small>Duración: @item.Duration</small>
-            </div>
+        @Html.AntiForgeryToken()
+
+        <div class="form-group">
+            <label for="Title">Título</label>
+            <input type="text" name="Title" class="form-control" placeholder="Escribe el título del contenido" required />
+        </div>
+
+        <div class="form-group">
+            <label for="File">Archivo de audio</label>
+            <input type="file" name="File" class="form-control" accept=".mp3,.wav" required />
+        </div>
+
+        <div class="form-group">
+            <label for="Type">Tipo</label>
+            <input type="text" name="Type" class="form-control" placeholder="Ej: Canción, Podcast" />
+        </div>
+
+        <input type="hidden" name="ArtistId" value="@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value" />
+
+        <div class="text-center">
+            <button type="submit" class="btn btn-primary">Subir</button>
         </div>
     }
-}
-else
-{
-    <p>No tienes contenido disponible.</p>
-}
+
+    <hr />
+
+    <h3 class="text-center">Mis contenidos</h3>
+    @if (Model != null && Model.Any())
+    {
+        <div class="row">
+            @foreach (var item in Model)
+            {
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5>@item.Title</h5>
+                            <audio controls style="width: 100%;">
+                                <source src="@item.UrlMedia" type="audio/mpeg" />
+                                Tu navegador no soporta el elemento de audio.
+                            </audio>
+                            <p>Duración: @item.Duration</p>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <p>No tienes contenido disponible.</p>
+    }
+</div>

@@ -1101,3 +1101,4 @@ C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.API\obj\Debug\net8.0\refi
 C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.API\obj\Debug\net8.0\HarmonySound.API.pdb
 C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.API\obj\Debug\net8.0\HarmonySound.API.genruntimeconfig.cache
 C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.API\obj\Debug\net8.0\ref\HarmonySound.API.dll
+C:\Users\GIGABYTE\Desktop\Web-Harmony-Sound\HarmonySound.API\bin\Debug\net8.0\HarmonySound.API.staticwebassets.runtime.json

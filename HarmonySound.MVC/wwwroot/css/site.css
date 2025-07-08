@@ -190,5 +190,28 @@ html, body {
  background-color: #232323; /* fondo de las opciones */
     color: #fff; /* texto blanco */
  }
+/* Ocultar la barra de navegación */
+.navbar {
+    display: none;
+}
+
+/* Mostrar solo el botón de cerrar sesión */
+.logout-btn {
+    display: block;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: red;
+    font-weight: bold;
+    font-size: 18px;
+    text-decoration: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+    .logout-btn:hover {
+        text-decoration: underline;
+    }
 
 
