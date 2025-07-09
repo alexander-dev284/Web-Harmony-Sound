@@ -135,6 +135,43 @@ namespace HarmonySound.API.Migrations
                     b.ToTable("Plans");
                 });
 
+            modelBuilder.Entity("HarmonySound.Models.Playlist", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Playlist");
+                });
+
+            modelBuilder.Entity("HarmonySound.Models.PlaylistContent", b =>
+                {
+                    b.Property<int>("PlaylistId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ContentId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("PlaylistId", "ContentId");
+
+                    b.HasIndex("ContentId");
+
+                    b.ToTable("PlaylistContents");
+                });
+
             modelBuilder.Entity("HarmonySound.Models.Report", b =>
                 {
                     b.Property<int>("Id")
@@ -531,6 +568,36 @@ namespace HarmonySound.API.Migrations
                     b.Navigation("Content");
                 });
 
+            modelBuilder.Entity("HarmonySound.Models.Playlist", b =>
+                {
+                    b.HasOne("HarmonySound.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("HarmonySound.Models.PlaylistContent", b =>
+                {
+                    b.HasOne("HarmonySound.Models.Content", "Content")
+                        .WithMany()
+                        .HasForeignKey("ContentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("HarmonySound.Models.Playlist", "Playlist")
+                        .WithMany("PlaylistContents")
+                        .HasForeignKey("PlaylistId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Content");
+
+                    b.Navigation("Playlist");
+                });
+
             modelBuilder.Entity("HarmonySound.Models.Report", b =>
                 {
                     b.HasOne("HarmonySound.Models.User", "User")
@@ -654,6 +721,11 @@ namespace HarmonySound.API.Migrations
             modelBuilder.Entity("HarmonySound.Models.Content", b =>
                 {
                     b.Navigation("ContentAlbumes");
+                });
+
+            modelBuilder.Entity("HarmonySound.Models.Playlist", b =>
+                {
+                    b.Navigation("PlaylistContents");
                 });
 
             modelBuilder.Entity("HarmonySound.Models.Role", b =>

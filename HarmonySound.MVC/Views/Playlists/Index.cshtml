@@ -1,0 +1,47 @@
+﻿@model IEnumerable<HarmonySound.Models.Content>
+@{
+    var playlists = ViewBag.Playlists as List<HarmonySound.Models.Playlist>;
+}
+
+<h2>Agregar canciones a tu playlist</h2>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Título</th>
+            <th>Tipo</th>
+            <th>Acción</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var song in Model)
+    {
+        <tr>
+            <td>@song.Title</td>
+            <td>@song.Type</td>
+            <td>
+                <form asp-action="AddToPlaylist" method="post" style="display:inline;">
+                    <input type="hidden" name="contentId" value="@song.Id" />
+                    <select name="playlistId" required>
+                        <option value="">Selecciona una playlist</option>
+                        @foreach (var playlist in playlists)
+                        {
+                            <option value="@playlist.Id">@playlist.Name</option>
+                        }
+                    </select>
+                    <button type="submit" class="btn btn-primary btn-sm">Agregar</button>
+                </form>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

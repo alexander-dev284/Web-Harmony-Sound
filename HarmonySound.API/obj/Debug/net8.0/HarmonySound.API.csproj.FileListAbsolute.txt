@@ -822,6 +822,7 @@ C:\Users\GIGABYTE\Desktop\Web-Harmony-Sound\HarmonySound.API\obj\Debug\net8.0\re
 C:\Users\GIGABYTE\Desktop\Web-Harmony-Sound\HarmonySound.API\obj\Debug\net8.0\HarmonySound.API.pdb
 C:\Users\GIGABYTE\Desktop\Web-Harmony-Sound\HarmonySound.API\obj\Debug\net8.0\HarmonySound.API.genruntimeconfig.cache
 C:\Users\GIGABYTE\Desktop\Web-Harmony-Sound\HarmonySound.API\obj\Debug\net8.0\ref\HarmonySound.API.dll
+C:\Users\GIGABYTE\Desktop\Web-Harmony-Sound\HarmonySound.API\bin\Debug\net8.0\HarmonySound.API.staticwebassets.runtime.json
 C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.API\bin\Debug\net8.0\appsettings.Development.json
 C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.API\bin\Debug\net8.0\appsettings.json
 C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.API\bin\Debug\net8.0\HarmonySound.API.staticwebassets.runtime.json
@@ -833,6 +834,8 @@ C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.API\bin\Debug\net8.0\Harm
 C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.API\bin\Debug\net8.0\HarmonySound.API.pdb
 C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.API\bin\Debug\net8.0\Azure.Core.dll
 C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.API\bin\Debug\net8.0\Azure.Identity.dll
+C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.API\bin\Debug\net8.0\Azure.Storage.Blobs.dll
+C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.API\bin\Debug\net8.0\Azure.Storage.Common.dll
 C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.API\bin\Debug\net8.0\Humanizer.dll
 C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.API\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
 C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.API\bin\Debug\net8.0\Microsoft.AspNetCore.Cryptography.Internal.dll
@@ -919,6 +922,7 @@ C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.API\bin\Debug\net8.0\Syst
 C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.API\bin\Debug\net8.0\System.Configuration.ConfigurationManager.dll
 C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.API\bin\Debug\net8.0\System.Drawing.Common.dll
 C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.API\bin\Debug\net8.0\System.IdentityModel.Tokens.Jwt.dll
+C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.API\bin\Debug\net8.0\System.IO.Hashing.dll
 C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.API\bin\Debug\net8.0\System.Memory.Data.dll
 C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.API\bin\Debug\net8.0\System.Reflection.MetadataLoadContext.dll
 C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.API\bin\Debug\net8.0\System.Runtime.Caching.dll
@@ -1101,7 +1105,3 @@ C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.API\obj\Debug\net8.0\refi
 C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.API\obj\Debug\net8.0\HarmonySound.API.pdb
 C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.API\obj\Debug\net8.0\HarmonySound.API.genruntimeconfig.cache
 C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.API\obj\Debug\net8.0\ref\HarmonySound.API.dll
-C:\Users\GIGABYTE\Desktop\Web-Harmony-Sound\HarmonySound.API\bin\Debug\net8.0\HarmonySound.API.staticwebassets.runtime.json
-C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.API\bin\Debug\net8.0\Azure.Storage.Blobs.dll
-C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.API\bin\Debug\net8.0\Azure.Storage.Common.dll
-C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.API\bin\Debug\net8.0\System.IO.Hashing.dll

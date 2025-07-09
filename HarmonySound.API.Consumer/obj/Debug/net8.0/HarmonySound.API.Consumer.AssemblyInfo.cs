@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("HarmonySound.API.Consumer")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7441df7d85ae1110b43df4ccabf1add13d8f7239")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f03dd5a30869724d1205d2d914e1ba4d610b85a7")]
 [assembly: System.Reflection.AssemblyProductAttribute("HarmonySound.API.Consumer")]
 [assembly: System.Reflection.AssemblyTitleAttribute("HarmonySound.API.Consumer")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
