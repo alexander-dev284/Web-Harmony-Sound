@@ -64,8 +64,16 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXJ0aXN0c1xFcnJvcjQwMS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/Victus/Desktop/Web-Harmony-Sound/HarmonySound.MVC/Views/Artists/Home.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXJ0aXN0c1xIb21lLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/Victus/Desktop/Web-Harmony-Sound/HarmonySound.MVC/Views/Artists/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXJ0aXN0c1xJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Victus/Desktop/Web-Harmony-Sound/HarmonySound.MVC/Views/Clients/Home.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2xpZW50c1xIb21lLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/Victus/Desktop/Web-Harmony-Sound/HarmonySound.MVC/Views/Clients/Index.cshtml]

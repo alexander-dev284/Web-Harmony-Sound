@@ -11,5 +11,10 @@ namespace HarmonySound.MVC.Controllers
             var contenidos = Crud<Content>.GetAll();
             return View(contenidos);
         }
+
+        public IActionResult Home()
+        {
+            return View();
+        }
     }
 }

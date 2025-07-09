@@ -19,6 +19,12 @@ namespace HarmonySound.MVC.Controllers
             _httpClient = httpClient;
         }
 
+        public IActionResult Home()
+        {
+            return View();
+        }
+
+
         // Este método se invoca cuando el formulario de la vista "UploadAudio" se envía.
         [HttpPost]
         [ValidateAntiForgeryToken]
