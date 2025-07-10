@@ -193,6 +193,11 @@ namespace HarmonySound.MVC.Controllers
             return RedirectToAction("Login", "Account");
         }
 
+        public IActionResult AccessDenied()
+        {
+            return View();
+        }
+
         private string GetRoleFromJwt(string token)
         {
             var parts = token.Split('.');

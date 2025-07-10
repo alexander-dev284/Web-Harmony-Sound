@@ -1,8 +1,10 @@
 ﻿using HarmonySound.API.Consumer;
 using HarmonySound.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 namespace HarmonySound.MVC.Controllers
 {
+    [Authorize(Roles = "client")]
     public class ClientsController : Controller
     {
         public async Task<IActionResult> Index()

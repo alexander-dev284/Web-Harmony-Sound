@@ -9,7 +9,7 @@ using System.Net.Http.Headers;
 
 namespace HarmonySound.MVC.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "artist")]
     public class ArtistsController : Controller
     {
         private readonly HttpClient _httpClient;

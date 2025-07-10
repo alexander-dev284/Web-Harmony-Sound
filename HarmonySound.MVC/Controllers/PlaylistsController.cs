@@ -26,6 +26,12 @@ namespace HarmonySound.MVC.Controllers
             var playlistsResponse = await _httpClient.GetAsync("https://localhost:7120/api/Playlists");
             var playlistsJson = await playlistsResponse.Content.ReadAsStringAsync();
             var playlists = JsonSerializer.Deserialize<List<PlaylistDto>>(playlistsJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            var songsResponse = await _httpClient.GetAsync("https://localhost:7120/api/Contents");
+            var songsJson = await songsResponse.Content.ReadAsStringAsync();
+            var songs = JsonSerializer.Deserialize<List<Content>>(songsJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            ViewBag.Songs = songs;
+
             return View(playlists);
         }
 
