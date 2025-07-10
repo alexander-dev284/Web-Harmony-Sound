@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using HarmonySound.Models;
+using HarmonySound.API.DTOs;
 
 namespace HarmonySound.API.Controllers
 {
@@ -22,9 +23,28 @@ namespace HarmonySound.API.Controllers
 
         // GET: api/Playlists
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Playlist>>> GetPlaylist()
+        public async Task<ActionResult<IEnumerable<PlaylistDto>>> GetPlaylist()
         {
-            return await _context.Playlist.ToListAsync();
+            var playlists = await _context.Playlist
+                .Include(p => p.PlaylistContents)
+                    .ThenInclude(pc => pc.Content)
+                .ToListAsync();
+
+            var result = playlists.Select(p => new PlaylistDto
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Songs = p.PlaylistContents?
+                    .Where(pc => pc.Content != null)
+                    .Select(pc => new PlaylistSongDto
+                    {
+                        ContentId = pc.Content.Id,
+                        Title = pc.Content.Title,
+                        UrlMedia = pc.Content.UrlMedia
+                    }).ToList() ?? new List<PlaylistSongDto>()
+            }).ToList();
+
+            return Ok(result);
         }
 
         // GET: api/Playlists/5
@@ -105,14 +125,6 @@ namespace HarmonySound.API.Controllers
                 .ToListAsync();
         }
 
-        // Crear playlist
-        [HttpPost]
-        public async Task<ActionResult<Playlist>> CreatePlaylist(Playlist playlist)
-        {
-            _context.Playlist.Add(playlist);
-            await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetUserPlaylists), new { userId = playlist.UserId }, playlist);
-        }
 
         // Agregar canción a playlist
         [HttpPost("{playlistId}/add")]
@@ -126,6 +138,24 @@ namespace HarmonySound.API.Controllers
             _context.PlaylistContents.Add(pc);
             await _context.SaveChangesAsync();
             return Ok();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] PlaylistCreateDto dto)
+        {
+            if (dto == null || string.IsNullOrWhiteSpace(dto.Name) || dto.UserId == 0)
+                return BadRequest("Datos de playlist inválidos.");
+
+            var playlist = new Playlist
+            {
+                Name = dto.Name,
+                UserId = dto.UserId
+            };
+
+            _context.Playlist.Add(playlist);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetUserPlaylists), new { userId = playlist.UserId }, playlist);
         }
     }
 }

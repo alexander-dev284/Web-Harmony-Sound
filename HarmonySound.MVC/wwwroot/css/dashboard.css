@@ -178,5 +178,8 @@
         margin-top: 0.5rem;
     }
 
+.card-title.playlist-title {
+    color: #000 !important;
+}
 
 

@@ -1056,7 +1056,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/Playlist"
+                    "$ref": "#/components/schemas/PlaylistDto"
                   }
                 }
               },
@@ -1064,7 +1064,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/Playlist"
+                    "$ref": "#/components/schemas/PlaylistDto"
                   }
                 }
               },
@@ -1072,7 +1072,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/Playlist"
+                    "$ref": "#/components/schemas/PlaylistDto"
                   }
                 }
               }
@@ -1088,41 +1088,24 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Playlist"
+                "$ref": "#/components/schemas/PlaylistCreateDto"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/Playlist"
+                "$ref": "#/components/schemas/PlaylistCreateDto"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/Playlist"
+                "$ref": "#/components/schemas/PlaylistCreateDto"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/Playlist"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Playlist"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Playlist"
-                }
-              }
-            }
+            "description": "OK"
           }
         }
       }
@@ -2784,6 +2767,59 @@
           },
           "content": {
             "$ref": "#/components/schemas/Content"
+          }
+        },
+        "additionalProperties": false
+      },
+      "PlaylistCreateDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "userId": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "PlaylistDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "songs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlaylistSongDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PlaylistSongDto": {
+        "type": "object",
+        "properties": {
+          "contentId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "urlMedia": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
