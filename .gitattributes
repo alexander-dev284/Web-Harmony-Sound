@@ -1,0 +1,33 @@
+# Configuración de finales de línea
+# Automáticamente convertirá los finales de línea a LF en el repositorio y a CRLF en Windows
+* text=auto
+
+# Forzar finales de línea LF para archivos de script (como archivos .sh)
+*.sh text eol=lf
+
+# Tratar archivos de configuración como texto
+*.json text
+*.xml text
+*.yaml text
+
+# Ignorar la fusión de archivos de configuración específicos, siempre usar la versión de la rama actual
+HarmonySound.MVC/obj/Debug/net8.0/* merge=ours
+
+# Tratar imágenes y archivos de audio como binarios (no fusionarlos)
+*.png binary
+*.jpg binary
+*.mp3 binary
+*.wav binary
+
+# Archivos de base de datos y archivos grandes (LFS)
+*.db filter=lfs diff=lfs merge=lfs
+*.tar filter=lfs diff=lfs merge=lfs
+
+# Excluir archivos que no deben estar en el repositorio
+*.log export-ignore
+*.tmp export-ignore
+*.bak export-ignore
+
+# Ignorar los archivos de caché que se generan automáticamente
+HarmonySound.MVC/obj/Debug/net8.0/*.cache export-ignore
+HarmonySound.MVC/obj/Debug/net8.0/*.editorconfig export-ignore
