@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
-
+using HarmonySound.API.Data;
 namespace HarmonySound.API.Controllers
 {
     [Route("api/[controller]")]

@@ -1,12 +1,15 @@
 ﻿using HarmonySound.API.DTOs;
 using HarmonySound.Models;
+using HarmonySound.API.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.WebUtilities;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 namespace HarmonySound.API.Controllers
 {
@@ -18,27 +21,35 @@ namespace HarmonySound.API.Controllers
         private readonly SignInManager<User> _signInManager;
         private readonly RoleManager<Role> _roleManager;
         private readonly IConfiguration _configuration;
+        private readonly IEmailSender _emailSender;
+        private readonly IJwtService _jwtService;
+        private readonly I2FAService _twoFactorAuthService;
 
         public AuthController(
             UserManager<User> userManager,
             SignInManager<User> signInManager,
             RoleManager<Role> roleManager,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            IEmailSender emailSender,
+            IJwtService jwtService,
+            I2FAService twoFactorAuthService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
             _configuration = configuration;
+            _emailSender = emailSender;
+            _jwtService = jwtService;
+            _twoFactorAuthService = twoFactorAuthService;
         }
 
-        // Registro de usuario
+        // Registro de usuario con envío de email de confirmación
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterModel model)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            // Verifica que el rol exista
             if (!await _roleManager.RoleExistsAsync(model.Role))
                 return BadRequest(new { Message = "El rol especificado no existe." });
 
@@ -60,10 +71,34 @@ namespace HarmonySound.API.Controllers
             if (!roleResult.Succeeded)
                 return BadRequest(roleResult.Errors);
 
-            return Ok(new { Message = "Usuario registrado correctamente" });
+            // Genera el token de confirmación de email
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var tokenEncoded = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+            var confirmationLink = $"{_configuration["AppUrl"]}/api/Auth/confirm-email?userId={user.Id}&token={tokenEncoded}";
+
+            await _emailSender.SendEmailAsync(user.Email, "Confirma tu email", $"Confirma tu cuenta aquí: {confirmationLink}");
+
+            return Ok(new { Message = "Usuario registrado correctamente. Por favor verifica tu email." });
         }
 
-        // Login de usuario
+        // Confirmación de email
+        [HttpGet("confirm-email")]
+        public async Task<IActionResult> ConfirmEmail(int userId, string token)
+        {
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            if (user == null)
+                return BadRequest("Usuario no encontrado.");
+
+            var decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(token));
+            var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
+
+            if (result.Succeeded)
+                return Ok("Email confirmado correctamente.");
+            else
+                return BadRequest("Token inválido o expirado.");
+        }
+
+        // Login de usuario con JWT
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
@@ -74,30 +109,56 @@ namespace HarmonySound.API.Controllers
             if (user == null || !await _userManager.CheckPasswordAsync(user, model.Password))
                 return Unauthorized(new { Message = "Credenciales inválidas" });
 
-            var roles = await _userManager.GetRolesAsync(user);
-            var roleClaims = roles.Select(role => new Claim(ClaimTypes.Role, role)).ToList();
-            var claims = new List<Claim>
-            {
-                // CAMBIO: ahora el sub es el ID numérico
-                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-            }.Concat(roleClaims);
+            // Opcional: Verifica si el email está confirmado
+            if (!await _userManager.IsEmailConfirmedAsync(user))
+                return Unauthorized(new { Message = "Debes confirmar tu email antes de iniciar sesión." });
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var token = await _jwtService.GenerateTokenAsync(user);
 
-            var token = new JwtSecurityToken(
-                issuer: _configuration["JWT:Issuer"],
-                audience: _configuration["JWT:Audience"],
-                claims: claims,
-                expires: DateTime.UtcNow.AddHours(1),
-                signingCredentials: creds
-            );
+            return Ok(new { Token = token });
+        }
 
-            return Ok(new
-            {
-                Token = new JwtSecurityTokenHandler().WriteToken(token)
-            });
+        // Recuperación de contraseña: envío de código por email
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] LoginModel model)
+        {
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
+                return BadRequest("Usuario no encontrado o email no confirmado.");
+
+            // Genera código de recuperación y lo envía por email
+            var code = await _twoFactorAuthService.GenerateCodeAsync(user.Id);
+            await _twoFactorAuthService.SendCodeByEmailAsync(user.Email, code);
+
+            return Ok(new { Message = "Se ha enviado el código de recuperación a tu email." });
+        }
+
+        // Restablecimiento de contraseña usando el código enviado
+        public class ResetPasswordModel
+        {
+            public int UserId { get; set; }
+            public string Code { get; set; }
+            public string NewPassword { get; set; }
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordModel model)
+        {
+            var user = await _userManager.FindByIdAsync(model.UserId.ToString());
+            if (user == null)
+                return BadRequest("Usuario no encontrado.");
+
+            var isValid = await _twoFactorAuthService.ValidateCodeAsync(user.Id, model.Code);
+            if (!isValid)
+                return BadRequest("Código inválido o expirado.");
+
+            var resetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var result = await _userManager.ResetPasswordAsync(user, resetToken, model.NewPassword);
+
+            if (result.Succeeded)
+                return Ok("Contraseña restablecida correctamente.");
+            else
+                return BadRequest(result.Errors);
         }
     }
 }

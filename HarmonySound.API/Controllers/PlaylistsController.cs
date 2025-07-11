@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using HarmonySound.Models;
 using HarmonySound.API.DTOs;
-
+using HarmonySound.API.Data;
 namespace HarmonySound.API.Controllers
 {
     [Route("api/[controller]")]
