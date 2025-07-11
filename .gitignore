@@ -11,3 +11,7 @@ obj/
 *.suo
 *.cache
 *.log
+/HarmonySound.MVC/obj/
+/HarmonySound.MVC/obj/Debug/net8.0/HarmonySound.MVC.AssemblyInfo.cs
+/HarmonySound.MVC/obj/Debug/net8.0/HarmonySound.MVC.GeneratedMSBuildEditorConfig.editorconfig
+/HarmonySound.MVC/obj/Debug/net8.0/rpswa.dswa.cache.json
