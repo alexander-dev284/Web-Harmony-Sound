@@ -180,15 +180,34 @@ namespace HarmonySound.API.Controllers
                 var containerClient = blobServiceClient.GetBlobContainerClient(containerName);
                 await containerClient.CreateIfNotExistsAsync(PublicAccessType.Blob);
 
+                // 1. Obtener el usuario y la URL anterior
+                var user = await _userManager.FindByIdAsync(model.UserId.ToString());
+                if (user == null)
+                    return NotFound();
+
+                var previousImageUrl = user.ProfileImageUrl;
+
+                // 2. Eliminar la imagen anterior si existe y es de Azure (no la imagen por defecto)
+                if (!string.IsNullOrEmpty(previousImageUrl) && previousImageUrl.Contains(containerName))
+                {
+                    try
+                    {
+                        var previousBlobName = Path.GetFileName(new Uri(previousImageUrl).LocalPath);
+                        var previousBlobClient = containerClient.GetBlobClient(previousBlobName);
+                        await previousBlobClient.DeleteIfExistsAsync();
+                    }
+                    catch
+                    {
+                        // Si falla la eliminación, no interrumpe el flujo
+                    }
+                }
+
+                // 3. Subir la nueva imagen
                 var blobClient = containerClient.GetBlobClient(fileName);
                 using (var stream = model.File.OpenReadStream())
                 {
                     await blobClient.UploadAsync(stream, new BlobHttpHeaders { ContentType = model.File.ContentType });
                 }
-
-                var user = await _userManager.FindByIdAsync(model.UserId.ToString());
-                if (user == null)
-                    return NotFound();
 
                 user.ProfileImageUrl = blobClient.Uri.ToString();
                 await _userManager.UpdateAsync(user);
@@ -197,7 +216,6 @@ namespace HarmonySound.API.Controllers
             }
             catch (Exception ex)
             {
-                // Agrega un log aquí
                 Console.WriteLine("Error en UploadProfileImage: " + ex.ToString());
                 return StatusCode(500, "Error interno del servidor: " + ex.Message);
             }
