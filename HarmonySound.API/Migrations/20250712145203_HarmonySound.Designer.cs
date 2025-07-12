@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace HarmonySound.API.Migrations
 {
     [DbContext(typeof(HarmonySoundDbContext))]
-    [Migration("20250711040825_EmailVerification")]
-    partial class EmailVerification
+    [Migration("20250712145203_HarmonySound")]
+    partial class HarmonySound
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -328,6 +328,9 @@ namespace HarmonySound.API.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("integer");
 
+                    b.Property<string>("Biography")
+                        .HasColumnType("text");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("text");
@@ -366,6 +369,9 @@ namespace HarmonySound.API.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("boolean");
+
+                    b.Property<string>("ProfileImageUrl")
+                        .HasColumnType("text");
 
                     b.Property<DateTimeOffset>("RegisterDate")
                         .HasColumnType("timestamp with time zone");

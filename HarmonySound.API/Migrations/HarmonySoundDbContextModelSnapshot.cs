@@ -325,6 +325,9 @@ namespace HarmonySound.API.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("integer");
 
+                    b.Property<string>("Biography")
+                        .HasColumnType("text");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("text");
@@ -363,6 +366,9 @@ namespace HarmonySound.API.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("boolean");
+
+                    b.Property<string>("ProfileImageUrl")
+                        .HasColumnType("text");
 
                     b.Property<DateTimeOffset>("RegisterDate")
                         .HasColumnType("timestamp with time zone");

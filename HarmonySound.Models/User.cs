@@ -12,6 +12,10 @@ namespace HarmonySound.Models
         [Required] public DateTimeOffset RegisterDate { get; set; }
         public string State { get; set; }
 
+        // Profile fields
+        public string? Biography { get; set; }
+        public string? ProfileImageUrl { get; set; }
+
         public virtual ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
         public virtual ICollection<UserPlan> UserPlans { get; set; } = new List<UserPlan>();
         public virtual ICollection<Content> Content { get; set; } = new List<Content>();

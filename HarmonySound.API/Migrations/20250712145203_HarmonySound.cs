@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace HarmonySound.API.Migrations
 {
     /// <inheritdoc />
-    public partial class EmailVerification : Migration
+    public partial class HarmonySound : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -38,6 +38,8 @@ namespace HarmonySound.API.Migrations
                     Email = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
                     RegisterDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     State = table.Column<string>(type: "text", nullable: false),
+                    Biography = table.Column<string>(type: "text", nullable: true),
+                    ProfileImageUrl = table.Column<string>(type: "text", nullable: true),
                     UserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     NormalizedEmail = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),

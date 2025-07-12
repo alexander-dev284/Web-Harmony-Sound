@@ -1,0 +1,310 @@
+2025-07-11 12:57:00.199 -05:00 [INF] User profile is available. Using 'C:\Users\Victus\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2025-07-11 12:57:00.414 -05:00 [INF] Now listening on: https://localhost:7052
+2025-07-11 12:57:00.415 -05:00 [INF] Now listening on: http://localhost:5003
+2025-07-11 12:57:00.441 -05:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-07-11 12:57:00.442 -05:00 [INF] Hosting environment: Development
+2025-07-11 12:57:00.444 -05:00 [INF] Content root path: C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.MVC
+2025-07-11 12:57:01.559 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/ - null null
+2025-07-11 12:57:01.716 -05:00 [INF] Executing endpoint 'HarmonySound.MVC.Controllers.AccountController.Login (HarmonySound.MVC)'
+2025-07-11 12:57:01.757 -05:00 [INF] Route matched with {action = "Login", controller = "Account"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.ActionResult Login() on controller HarmonySound.MVC.Controllers.AccountController (HarmonySound.MVC).
+2025-07-11 12:57:01.773 -05:00 [INF] Executing ViewResult, running view Login.
+2025-07-11 12:57:02.006 -05:00 [INF] Executed ViewResult - view Login executed in 234.8427ms.
+2025-07-11 12:57:02.009 -05:00 [INF] Executed action HarmonySound.MVC.Controllers.AccountController.Login (HarmonySound.MVC) in 247.9372ms
+2025-07-11 12:57:02.012 -05:00 [INF] Executed endpoint 'HarmonySound.MVC.Controllers.AccountController.Login (HarmonySound.MVC)'
+2025-07-11 12:57:02.018 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/ - 200 null text/html; charset=utf-8 462.4716ms
+2025-07-11 12:57:02.217 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/lib/bootstrap/dist/css/bootstrap.min.css - null null
+2025-07-11 12:57:02.224 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/_framework/aspnetcore-browser-refresh.js - null null
+2025-07-11 12:57:02.227 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/css/site.css - null null
+2025-07-11 12:57:02.229 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/_vs/browserLink - null null
+2025-07-11 12:57:02.247 -05:00 [INF] The file /css/site.css was not modified
+2025-07-11 12:57:02.239 -05:00 [INF] The file /lib/bootstrap/dist/css/bootstrap.min.css was not modified
+2025-07-11 12:57:02.227 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/lib/bootstrap/dist/js/bootstrap.bundle.min.js - null null
+2025-07-11 12:57:02.268 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/css/site.css - 304 null text/css 41.4764ms
+2025-07-11 12:57:02.269 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/lib/bootstrap/dist/css/bootstrap.min.css - 304 null text/css 51.3869ms
+2025-07-11 12:57:02.276 -05:00 [INF] The file /lib/bootstrap/dist/js/bootstrap.bundle.min.js was not modified
+2025-07-11 12:57:02.267 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/_framework/aspnetcore-browser-refresh.js - 200 16517 application/javascript; charset=utf-8 42.865ms
+2025-07-11 12:57:02.292 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/lib/bootstrap/dist/js/bootstrap.bundle.min.js - 304 null text/javascript 65.4406ms
+2025-07-11 12:57:02.316 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/_vs/browserLink - 200 null text/javascript; charset=UTF-8 89.2389ms
+2025-07-11 12:57:38.971 -05:00 [INF] Request starting HTTP/2 POST https://localhost:7052/ - application/x-www-form-urlencoded 229
+2025-07-11 12:57:38.994 -05:00 [INF] Executing endpoint 'HarmonySound.MVC.Controllers.AccountController.Login (HarmonySound.MVC)'
+2025-07-11 12:57:39.017 -05:00 [INF] Route matched with {action = "Login", controller = "Account"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Login(HarmonySound.MVC.Models.LoginViewModel) on controller HarmonySound.MVC.Controllers.AccountController (HarmonySound.MVC).
+2025-07-11 12:57:41.597 -05:00 [INF] Executing ViewResult, running view Login.
+2025-07-11 12:57:41.608 -05:00 [INF] Executed ViewResult - view Login executed in 11.4513ms.
+2025-07-11 12:57:41.610 -05:00 [INF] Executed action HarmonySound.MVC.Controllers.AccountController.Login (HarmonySound.MVC) in 2590.9496ms
+2025-07-11 12:57:41.613 -05:00 [INF] Executed endpoint 'HarmonySound.MVC.Controllers.AccountController.Login (HarmonySound.MVC)'
+2025-07-11 12:57:41.618 -05:00 [INF] Request finished HTTP/2 POST https://localhost:7052/ - 200 null text/html; charset=utf-8 2647.7657ms
+2025-07-11 12:57:41.636 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/_framework/aspnetcore-browser-refresh.js - null null
+2025-07-11 12:57:41.636 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/_vs/browserLink - null null
+2025-07-11 12:57:41.644 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/_framework/aspnetcore-browser-refresh.js - 200 16517 application/javascript; charset=utf-8 8.9651ms
+2025-07-11 12:57:41.682 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/_vs/browserLink - 200 null text/javascript; charset=UTF-8 47.2378ms
+2025-07-11 12:57:50.382 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/Account/Register - null null
+2025-07-11 12:57:50.390 -05:00 [INF] Executing endpoint 'HarmonySound.MVC.Controllers.AccountController.Register (HarmonySound.MVC)'
+2025-07-11 12:57:50.394 -05:00 [INF] Route matched with {action = "Register", controller = "Account"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult] Register() on controller HarmonySound.MVC.Controllers.AccountController (HarmonySound.MVC).
+2025-07-11 12:57:50.491 -05:00 [INF] Executing ViewResult, running view Register.
+2025-07-11 12:57:50.596 -05:00 [INF] Executed ViewResult - view Register executed in 105.7095ms.
+2025-07-11 12:57:50.599 -05:00 [INF] Executed action HarmonySound.MVC.Controllers.AccountController.Register (HarmonySound.MVC) in 202.7397ms
+2025-07-11 12:57:50.600 -05:00 [INF] Executed endpoint 'HarmonySound.MVC.Controllers.AccountController.Register (HarmonySound.MVC)'
+2025-07-11 12:57:50.602 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/Account/Register - 200 null text/html; charset=utf-8 220.0649ms
+2025-07-11 12:57:50.612 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/_vs/browserLink - null null
+2025-07-11 12:57:50.613 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/_framework/aspnetcore-browser-refresh.js - null null
+2025-07-11 12:57:50.622 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/_framework/aspnetcore-browser-refresh.js - 200 16517 application/javascript; charset=utf-8 9.0535ms
+2025-07-11 12:57:50.637 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/_vs/browserLink - 200 null text/javascript; charset=UTF-8 25.1506ms
+2025-07-11 12:58:17.321 -05:00 [INF] Request starting HTTP/2 POST https://localhost:7052/Account/Register - application/x-www-form-urlencoded 297
+2025-07-11 12:58:17.341 -05:00 [INF] Executing endpoint 'HarmonySound.MVC.Controllers.AccountController.Register (HarmonySound.MVC)'
+2025-07-11 12:58:17.350 -05:00 [INF] Route matched with {action = "Register", controller = "Account"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult] Register(HarmonySound.MVC.Models.RegisterViewModel) on controller HarmonySound.MVC.Controllers.AccountController (HarmonySound.MVC).
+2025-07-11 12:58:17.468 -05:00 [INF] Executing ViewResult, running view Register.
+2025-07-11 12:58:17.490 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/_vs/browserLink - null null
+2025-07-11 12:58:17.490 -05:00 [INF] Executed ViewResult - view Register executed in 23.2409ms.
+2025-07-11 12:58:17.496 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/_framework/aspnetcore-browser-refresh.js - null null
+2025-07-11 12:58:17.509 -05:00 [INF] Executed action HarmonySound.MVC.Controllers.AccountController.Register (HarmonySound.MVC) in 156.4541ms
+2025-07-11 12:58:17.511 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/_framework/aspnetcore-browser-refresh.js - 200 16517 application/javascript; charset=utf-8 15.6944ms
+2025-07-11 12:58:17.513 -05:00 [INF] Executed endpoint 'HarmonySound.MVC.Controllers.AccountController.Register (HarmonySound.MVC)'
+2025-07-11 12:58:17.524 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/_vs/browserLink - 200 null text/javascript; charset=UTF-8 34.257ms
+2025-07-11 12:58:17.525 -05:00 [INF] Request finished HTTP/2 POST https://localhost:7052/Account/Register - 200 null text/html; charset=utf-8 205.2174ms
+2025-07-11 12:59:09.998 -05:00 [INF] Request starting HTTP/2 POST https://localhost:7052/Account/Register - application/x-www-form-urlencoded 303
+2025-07-11 12:59:10.076 -05:00 [INF] Executing endpoint 'HarmonySound.MVC.Controllers.AccountController.Register (HarmonySound.MVC)'
+2025-07-11 12:59:10.077 -05:00 [INF] Route matched with {action = "Register", controller = "Account"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult] Register(HarmonySound.MVC.Models.RegisterViewModel) on controller HarmonySound.MVC.Controllers.AccountController (HarmonySound.MVC).
+2025-07-11 12:59:12.952 -05:00 [INF] Executing RedirectResult, redirecting to /.
+2025-07-11 12:59:12.954 -05:00 [INF] Executed action HarmonySound.MVC.Controllers.AccountController.Register (HarmonySound.MVC) in 2874.7304ms
+2025-07-11 12:59:12.955 -05:00 [INF] Executed endpoint 'HarmonySound.MVC.Controllers.AccountController.Register (HarmonySound.MVC)'
+2025-07-11 12:59:12.957 -05:00 [INF] Request finished HTTP/2 POST https://localhost:7052/Account/Register - 302 0 null 2961.1853ms
+2025-07-11 12:59:12.961 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/ - null null
+2025-07-11 12:59:12.966 -05:00 [INF] Executing endpoint 'HarmonySound.MVC.Controllers.AccountController.Login (HarmonySound.MVC)'
+2025-07-11 12:59:12.967 -05:00 [INF] Route matched with {action = "Login", controller = "Account"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.ActionResult Login() on controller HarmonySound.MVC.Controllers.AccountController (HarmonySound.MVC).
+2025-07-11 12:59:12.970 -05:00 [INF] Executing ViewResult, running view Login.
+2025-07-11 12:59:12.974 -05:00 [INF] Executed ViewResult - view Login executed in 3.195ms.
+2025-07-11 12:59:12.975 -05:00 [INF] Executed action HarmonySound.MVC.Controllers.AccountController.Login (HarmonySound.MVC) in 5.1941ms
+2025-07-11 12:59:12.978 -05:00 [INF] Executed endpoint 'HarmonySound.MVC.Controllers.AccountController.Login (HarmonySound.MVC)'
+2025-07-11 12:59:12.980 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/ - 200 null text/html; charset=utf-8 19.0194ms
+2025-07-11 12:59:13.019 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/_framework/aspnetcore-browser-refresh.js - null null
+2025-07-11 12:59:13.019 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/_vs/browserLink - null null
+2025-07-11 12:59:13.024 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/_framework/aspnetcore-browser-refresh.js - 200 16517 application/javascript; charset=utf-8 5.7213ms
+2025-07-11 12:59:13.040 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/_vs/browserLink - 200 null text/javascript; charset=UTF-8 21.5185ms
+2025-07-11 12:59:56.170 -05:00 [INF] Request starting HTTP/2 POST https://localhost:7052/ - application/x-www-form-urlencoded 242
+2025-07-11 12:59:56.184 -05:00 [INF] Executing endpoint 'HarmonySound.MVC.Controllers.AccountController.Login (HarmonySound.MVC)'
+2025-07-11 12:59:56.191 -05:00 [INF] Route matched with {action = "Login", controller = "Account"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Login(HarmonySound.MVC.Models.LoginViewModel) on controller HarmonySound.MVC.Controllers.AccountController (HarmonySound.MVC).
+2025-07-11 12:59:56.299 -05:00 [INF] Executing ViewResult, running view Login.
+2025-07-11 12:59:56.302 -05:00 [INF] Executed ViewResult - view Login executed in 2.9636ms.
+2025-07-11 12:59:56.304 -05:00 [INF] Executed action HarmonySound.MVC.Controllers.AccountController.Login (HarmonySound.MVC) in 111.2307ms
+2025-07-11 12:59:56.306 -05:00 [INF] Executed endpoint 'HarmonySound.MVC.Controllers.AccountController.Login (HarmonySound.MVC)'
+2025-07-11 12:59:56.307 -05:00 [INF] Request finished HTTP/2 POST https://localhost:7052/ - 200 null text/html; charset=utf-8 139.2858ms
+2025-07-11 12:59:56.318 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/_vs/browserLink - null null
+2025-07-11 12:59:56.318 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/_framework/aspnetcore-browser-refresh.js - null null
+2025-07-11 12:59:56.333 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/_framework/aspnetcore-browser-refresh.js - 200 16517 application/javascript; charset=utf-8 14.038ms
+2025-07-11 12:59:56.360 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/_vs/browserLink - 200 null text/javascript; charset=UTF-8 41.8925ms
+2025-07-11 13:00:33.760 -05:00 [INF] Request starting HTTP/2 POST https://localhost:7052/ - application/x-www-form-urlencoded 242
+2025-07-11 13:00:33.765 -05:00 [INF] Executing endpoint 'HarmonySound.MVC.Controllers.AccountController.Login (HarmonySound.MVC)'
+2025-07-11 13:00:33.767 -05:00 [INF] Route matched with {action = "Login", controller = "Account"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Login(HarmonySound.MVC.Models.LoginViewModel) on controller HarmonySound.MVC.Controllers.AccountController (HarmonySound.MVC).
+2025-07-11 13:00:33.886 -05:00 [INF] Executing ViewResult, running view Login.
+2025-07-11 13:00:33.889 -05:00 [INF] Executed ViewResult - view Login executed in 3.0781ms.
+2025-07-11 13:00:33.890 -05:00 [INF] Executed action HarmonySound.MVC.Controllers.AccountController.Login (HarmonySound.MVC) in 120.55ms
+2025-07-11 13:00:33.892 -05:00 [INF] Executed endpoint 'HarmonySound.MVC.Controllers.AccountController.Login (HarmonySound.MVC)'
+2025-07-11 13:00:33.894 -05:00 [INF] Request finished HTTP/2 POST https://localhost:7052/ - 200 null text/html; charset=utf-8 134.7293ms
+2025-07-11 13:00:33.911 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/_framework/aspnetcore-browser-refresh.js - null null
+2025-07-11 13:00:33.911 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/_vs/browserLink - null null
+2025-07-11 13:00:33.916 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/_framework/aspnetcore-browser-refresh.js - 200 16517 application/javascript; charset=utf-8 5.6551ms
+2025-07-11 13:00:33.939 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/_vs/browserLink - 200 null text/javascript; charset=UTF-8 29.0163ms
+2025-07-11 13:00:33.958 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/favicon.ico - null null
+2025-07-11 13:00:33.962 -05:00 [INF] The file /favicon.ico was not modified
+2025-07-11 13:00:33.963 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/favicon.ico - 304 null image/x-icon 5.3098ms
+2025-07-11 13:00:38.748 -05:00 [INF] Request starting HTTP/2 POST https://localhost:7052/ - application/x-www-form-urlencoded 242
+2025-07-11 13:00:38.754 -05:00 [INF] Executing endpoint 'HarmonySound.MVC.Controllers.AccountController.Login (HarmonySound.MVC)'
+2025-07-11 13:00:38.755 -05:00 [INF] Route matched with {action = "Login", controller = "Account"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Login(HarmonySound.MVC.Models.LoginViewModel) on controller HarmonySound.MVC.Controllers.AccountController (HarmonySound.MVC).
+2025-07-11 13:00:38.853 -05:00 [INF] Executing ViewResult, running view Login.
+2025-07-11 13:00:38.857 -05:00 [INF] Executed ViewResult - view Login executed in 3.4743ms.
+2025-07-11 13:00:38.858 -05:00 [INF] Executed action HarmonySound.MVC.Controllers.AccountController.Login (HarmonySound.MVC) in 101.4411ms
+2025-07-11 13:00:38.860 -05:00 [INF] Executed endpoint 'HarmonySound.MVC.Controllers.AccountController.Login (HarmonySound.MVC)'
+2025-07-11 13:00:38.862 -05:00 [INF] Request finished HTTP/2 POST https://localhost:7052/ - 200 null text/html; charset=utf-8 114.3526ms
+2025-07-11 13:00:38.874 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/_vs/browserLink - null null
+2025-07-11 13:00:38.874 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/_framework/aspnetcore-browser-refresh.js - null null
+2025-07-11 13:00:38.885 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/_framework/aspnetcore-browser-refresh.js - 200 16517 application/javascript; charset=utf-8 11.1051ms
+2025-07-11 13:00:38.901 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/_vs/browserLink - 200 null text/javascript; charset=UTF-8 27.4479ms
+2025-07-11 13:00:41.925 -05:00 [INF] Request starting HTTP/2 POST https://localhost:7052/ - application/x-www-form-urlencoded 233
+2025-07-11 13:00:41.930 -05:00 [INF] Executing endpoint 'HarmonySound.MVC.Controllers.AccountController.Login (HarmonySound.MVC)'
+2025-07-11 13:00:41.931 -05:00 [INF] Route matched with {action = "Login", controller = "Account"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Login(HarmonySound.MVC.Models.LoginViewModel) on controller HarmonySound.MVC.Controllers.AccountController (HarmonySound.MVC).
+2025-07-11 13:00:42.044 -05:00 [INF] Executing ViewResult, running view Login.
+2025-07-11 13:00:42.048 -05:00 [INF] Executed ViewResult - view Login executed in 3.3574ms.
+2025-07-11 13:00:42.050 -05:00 [INF] Executed action HarmonySound.MVC.Controllers.AccountController.Login (HarmonySound.MVC) in 116.4834ms
+2025-07-11 13:00:42.052 -05:00 [INF] Executed endpoint 'HarmonySound.MVC.Controllers.AccountController.Login (HarmonySound.MVC)'
+2025-07-11 13:00:42.054 -05:00 [INF] Request finished HTTP/2 POST https://localhost:7052/ - 200 null text/html; charset=utf-8 128.4649ms
+2025-07-11 13:00:42.067 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/_vs/browserLink - null null
+2025-07-11 13:00:42.067 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/_framework/aspnetcore-browser-refresh.js - null null
+2025-07-11 13:00:42.076 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/_framework/aspnetcore-browser-refresh.js - 200 16517 application/javascript; charset=utf-8 8.355ms
+2025-07-11 13:00:42.082 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/_vs/browserLink - 200 null text/javascript; charset=UTF-8 15.1667ms
+2025-07-11 13:00:46.477 -05:00 [INF] Request starting HTTP/2 POST https://localhost:7052/ - application/x-www-form-urlencoded 242
+2025-07-11 13:00:46.482 -05:00 [INF] Executing endpoint 'HarmonySound.MVC.Controllers.AccountController.Login (HarmonySound.MVC)'
+2025-07-11 13:00:46.484 -05:00 [INF] Route matched with {action = "Login", controller = "Account"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Login(HarmonySound.MVC.Models.LoginViewModel) on controller HarmonySound.MVC.Controllers.AccountController (HarmonySound.MVC).
+2025-07-11 13:00:46.580 -05:00 [INF] Executing ViewResult, running view Login.
+2025-07-11 13:00:46.584 -05:00 [INF] Executed ViewResult - view Login executed in 3.6128ms.
+2025-07-11 13:00:46.585 -05:00 [INF] Executed action HarmonySound.MVC.Controllers.AccountController.Login (HarmonySound.MVC) in 99.5025ms
+2025-07-11 13:00:46.587 -05:00 [INF] Executed endpoint 'HarmonySound.MVC.Controllers.AccountController.Login (HarmonySound.MVC)'
+2025-07-11 13:00:46.588 -05:00 [INF] Request finished HTTP/2 POST https://localhost:7052/ - 200 null text/html; charset=utf-8 111.4221ms
+2025-07-11 13:00:46.597 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/_vs/browserLink - null null
+2025-07-11 13:00:46.600 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/_framework/aspnetcore-browser-refresh.js - null null
+2025-07-11 13:00:46.609 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/_framework/aspnetcore-browser-refresh.js - 200 16517 application/javascript; charset=utf-8 8.1258ms
+2025-07-11 13:00:46.614 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/_vs/browserLink - 200 null text/javascript; charset=UTF-8 16.2172ms
+2025-07-11 13:04:16.390 -05:00 [INF] Request starting HTTP/2 POST https://localhost:7052/ - application/x-www-form-urlencoded 242
+2025-07-11 13:04:16.407 -05:00 [INF] Executing endpoint 'HarmonySound.MVC.Controllers.AccountController.Login (HarmonySound.MVC)'
+2025-07-11 13:04:16.408 -05:00 [INF] Route matched with {action = "Login", controller = "Account"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Login(HarmonySound.MVC.Models.LoginViewModel) on controller HarmonySound.MVC.Controllers.AccountController (HarmonySound.MVC).
+2025-07-11 13:04:16.577 -05:00 [INF] Executing ViewResult, running view Login.
+2025-07-11 13:04:16.580 -05:00 [INF] Executed ViewResult - view Login executed in 3.3449ms.
+2025-07-11 13:04:16.588 -05:00 [INF] Executed action HarmonySound.MVC.Controllers.AccountController.Login (HarmonySound.MVC) in 177.5188ms
+2025-07-11 13:04:16.589 -05:00 [INF] Executed endpoint 'HarmonySound.MVC.Controllers.AccountController.Login (HarmonySound.MVC)'
+2025-07-11 13:04:16.591 -05:00 [INF] Request finished HTTP/2 POST https://localhost:7052/ - 200 null text/html; charset=utf-8 205.4261ms
+2025-07-11 13:04:16.600 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/_vs/browserLink - null null
+2025-07-11 13:04:16.600 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/_framework/aspnetcore-browser-refresh.js - null null
+2025-07-11 13:04:16.613 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/_framework/aspnetcore-browser-refresh.js - 200 16517 application/javascript; charset=utf-8 13.0575ms
+2025-07-11 13:04:16.635 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/_vs/browserLink - 200 null text/javascript; charset=UTF-8 35.225ms
+2025-07-11 13:05:01.887 -05:00 [INF] User profile is available. Using 'C:\Users\Victus\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2025-07-11 13:05:02.097 -05:00 [INF] Now listening on: https://localhost:7052
+2025-07-11 13:05:02.098 -05:00 [INF] Now listening on: http://localhost:5003
+2025-07-11 13:05:02.129 -05:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-07-11 13:05:02.131 -05:00 [INF] Hosting environment: Development
+2025-07-11 13:05:02.132 -05:00 [INF] Content root path: C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.MVC
+2025-07-11 13:05:02.485 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/ - null null
+2025-07-11 13:05:02.606 -05:00 [INF] Executing endpoint 'HarmonySound.MVC.Controllers.AccountController.Login (HarmonySound.MVC)'
+2025-07-11 13:05:02.633 -05:00 [INF] Route matched with {action = "Login", controller = "Account"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.ActionResult Login() on controller HarmonySound.MVC.Controllers.AccountController (HarmonySound.MVC).
+2025-07-11 13:05:02.644 -05:00 [INF] Executing ViewResult, running view Login.
+2025-07-11 13:05:02.798 -05:00 [INF] Executed ViewResult - view Login executed in 156.548ms.
+2025-07-11 13:05:02.802 -05:00 [INF] Executed action HarmonySound.MVC.Controllers.AccountController.Login (HarmonySound.MVC) in 166.5516ms
+2025-07-11 13:05:02.803 -05:00 [INF] Executed endpoint 'HarmonySound.MVC.Controllers.AccountController.Login (HarmonySound.MVC)'
+2025-07-11 13:05:02.809 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/ - 200 null text/html; charset=utf-8 328.4657ms
+2025-07-11 13:05:02.811 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/_vs/browserLink - null null
+2025-07-11 13:05:02.811 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/_framework/aspnetcore-browser-refresh.js - null null
+2025-07-11 13:05:02.845 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/_framework/aspnetcore-browser-refresh.js - 200 16517 application/javascript; charset=utf-8 33.7001ms
+2025-07-11 13:05:02.871 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/_vs/browserLink - 200 null text/javascript; charset=UTF-8 60.1025ms
+2025-07-11 13:09:34.451 -05:00 [INF] Request starting HTTP/2 POST https://localhost:7052/ - application/x-www-form-urlencoded 242
+2025-07-11 13:09:34.476 -05:00 [INF] Executing endpoint 'HarmonySound.MVC.Controllers.AccountController.Login (HarmonySound.MVC)'
+2025-07-11 13:09:34.491 -05:00 [INF] Route matched with {action = "Login", controller = "Account"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Login(HarmonySound.MVC.Models.LoginViewModel) on controller HarmonySound.MVC.Controllers.AccountController (HarmonySound.MVC).
+2025-07-11 13:09:37.271 -05:00 [INF] AuthenticationScheme: Cookies signed in.
+2025-07-11 13:09:37.278 -05:00 [INF] Executing RedirectResult, redirecting to /Clients/Home.
+2025-07-11 13:09:37.280 -05:00 [INF] Executed action HarmonySound.MVC.Controllers.AccountController.Login (HarmonySound.MVC) in 2786.1907ms
+2025-07-11 13:09:37.282 -05:00 [INF] Executed endpoint 'HarmonySound.MVC.Controllers.AccountController.Login (HarmonySound.MVC)'
+2025-07-11 13:09:37.285 -05:00 [INF] Request finished HTTP/2 POST https://localhost:7052/ - 302 0 null 2834.248ms
+2025-07-11 13:09:37.292 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/Clients/Home - null null
+2025-07-11 13:09:37.311 -05:00 [INF] Executing endpoint 'HarmonySound.MVC.Controllers.ClientsController.Home (HarmonySound.MVC)'
+2025-07-11 13:09:37.314 -05:00 [INF] Route matched with {action = "Home", controller = "Clients"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult Home() on controller HarmonySound.MVC.Controllers.ClientsController (HarmonySound.MVC).
+2025-07-11 13:09:37.318 -05:00 [INF] Executing ViewResult, running view Home.
+2025-07-11 13:09:37.500 -05:00 [INF] Executed ViewResult - view Home executed in 183.0779ms.
+2025-07-11 13:09:37.504 -05:00 [INF] Executed action HarmonySound.MVC.Controllers.ClientsController.Home (HarmonySound.MVC) in 187.4735ms
+2025-07-11 13:09:37.506 -05:00 [INF] Executed endpoint 'HarmonySound.MVC.Controllers.ClientsController.Home (HarmonySound.MVC)'
+2025-07-11 13:09:37.507 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/Clients/Home - 200 null text/html; charset=utf-8 215.9013ms
+2025-07-11 13:09:37.511 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/HarmonySound.MVC.styles.css?v=PORTQlHQ6gq7hk7uJJXnuN3Q703XY1RTmFdxPglHolw - null null
+2025-07-11 13:09:37.511 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/_vs/browserLink - null null
+2025-07-11 13:09:37.510 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/_framework/aspnetcore-browser-refresh.js - null null
+2025-07-11 13:09:37.518 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/lib/jquery/dist/jquery.min.js - null null
+2025-07-11 13:09:37.537 -05:00 [INF] The file /HarmonySound.MVC.styles.css was not modified
+2025-07-11 13:09:37.510 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/css/dashboard.css?v=31B7aecqkPUE7b_NGBz0AntY7bv2ZqsQHfzj0SHhoyw - null null
+2025-07-11 13:09:37.518 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/css/site.css?v=TpraPIDCJlS2VFCNSx1P08imDG437YEsWQFAqAl_C0o - null null
+2025-07-11 13:09:37.550 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/HarmonySound.MVC.styles.css?v=PORTQlHQ6gq7hk7uJJXnuN3Q703XY1RTmFdxPglHolw - 304 null text/css 39.1088ms
+2025-07-11 13:09:37.548 -05:00 [INF] The file /lib/jquery/dist/jquery.min.js was not modified
+2025-07-11 13:09:37.557 -05:00 [INF] The file /css/dashboard.css was not modified
+2025-07-11 13:09:37.566 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/lib/jquery/dist/jquery.min.js - 304 null text/javascript 48.0727ms
+2025-07-11 13:09:37.568 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/css/dashboard.css?v=31B7aecqkPUE7b_NGBz0AntY7bv2ZqsQHfzj0SHhoyw - 304 null text/css 57.603ms
+2025-07-11 13:09:37.559 -05:00 [INF] The file /css/site.css was not modified
+2025-07-11 13:09:37.525 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/js/site.js?v=hRQyftXiu1lLX2P9Ly9xa4gHJgLeR1uGN5qegUobtGo - null null
+2025-07-11 13:09:37.543 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/_framework/aspnetcore-browser-refresh.js - 200 16517 application/javascript; charset=utf-8 32.983ms
+2025-07-11 13:09:37.569 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/_vs/browserLink - 200 null text/javascript; charset=UTF-8 58.2862ms
+2025-07-11 13:09:37.576 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/css/site.css?v=TpraPIDCJlS2VFCNSx1P08imDG437YEsWQFAqAl_C0o - 304 null text/css 58.2913ms
+2025-07-11 13:09:37.582 -05:00 [INF] The file /js/site.js was not modified
+2025-07-11 13:09:37.592 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/js/site.js?v=hRQyftXiu1lLX2P9Ly9xa4gHJgLeR1uGN5qegUobtGo - 304 null text/javascript 68.3723ms
+2025-07-11 13:09:40.218 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/Plans/Index - null null
+2025-07-11 13:09:40.228 -05:00 [INF] Executing endpoint 'HarmonySound.MVC.Controllers.PlansController.Index (HarmonySound.MVC)'
+2025-07-11 13:09:40.233 -05:00 [INF] Route matched with {action = "Index", controller = "Plans"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Index() on controller HarmonySound.MVC.Controllers.PlansController (HarmonySound.MVC).
+2025-07-11 13:09:40.282 -05:00 [INF] Start processing HTTP request GET https://localhost:7120/api/Plans
+2025-07-11 13:09:40.287 -05:00 [INF] Sending HTTP request GET https://localhost:7120/api/Plans
+2025-07-11 13:09:40.447 -05:00 [INF] Received HTTP response headers after 156.4022ms - 200
+2025-07-11 13:09:40.450 -05:00 [INF] End processing HTTP request after 172.2397ms - 200
+2025-07-11 13:09:40.466 -05:00 [INF] Start processing HTTP request GET https://localhost:7120/api/UserPlans/user/3
+2025-07-11 13:09:40.467 -05:00 [INF] Sending HTTP request GET https://localhost:7120/api/UserPlans/user/3
+2025-07-11 13:09:40.474 -05:00 [INF] Received HTTP response headers after 5.1056ms - 404
+2025-07-11 13:09:40.476 -05:00 [INF] End processing HTTP request after 10.6122ms - 404
+2025-07-11 13:09:40.480 -05:00 [INF] Executing ViewResult, running view Index.
+2025-07-11 13:09:40.496 -05:00 [INF] Executed ViewResult - view Index executed in 16.9607ms.
+2025-07-11 13:09:40.498 -05:00 [INF] Executed action HarmonySound.MVC.Controllers.PlansController.Index (HarmonySound.MVC) in 262.4466ms
+2025-07-11 13:09:40.499 -05:00 [INF] Executed endpoint 'HarmonySound.MVC.Controllers.PlansController.Index (HarmonySound.MVC)'
+2025-07-11 13:09:40.500 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/Plans/Index - 200 null text/html; charset=utf-8 282.8174ms
+2025-07-11 13:09:40.566 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/_vs/browserLink - null null
+2025-07-11 13:09:40.567 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/_framework/aspnetcore-browser-refresh.js - null null
+2025-07-11 13:09:40.573 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/_framework/aspnetcore-browser-refresh.js - 200 16517 application/javascript; charset=utf-8 6.8049ms
+2025-07-11 13:09:40.582 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/_vs/browserLink - 200 null text/javascript; charset=UTF-8 16.5836ms
+2025-07-11 13:09:43.105 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/_framework/aspnetcore-browser-refresh.js - null null
+2025-07-11 13:09:43.110 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/_framework/aspnetcore-browser-refresh.js - 200 16517 application/javascript; charset=utf-8 5.4443ms
+2025-07-11 13:09:43.744 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/Playlists/Index - null null
+2025-07-11 13:09:43.750 -05:00 [INF] Executing endpoint 'HarmonySound.MVC.Controllers.PlaylistsController.Index (HarmonySound.MVC)'
+2025-07-11 13:09:43.756 -05:00 [INF] Route matched with {action = "Index", controller = "Playlists"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Index() on controller HarmonySound.MVC.Controllers.PlaylistsController (HarmonySound.MVC).
+2025-07-11 13:09:43.760 -05:00 [INF] Start processing HTTP request GET https://localhost:7120/api/Playlists
+2025-07-11 13:09:43.761 -05:00 [INF] Sending HTTP request GET https://localhost:7120/api/Playlists
+2025-07-11 13:09:43.940 -05:00 [INF] Received HTTP response headers after 177.5876ms - 200
+2025-07-11 13:09:43.942 -05:00 [INF] End processing HTTP request after 182.4706ms - 200
+2025-07-11 13:09:43.948 -05:00 [INF] Start processing HTTP request GET https://localhost:7120/api/Contents
+2025-07-11 13:09:43.950 -05:00 [INF] Sending HTTP request GET https://localhost:7120/api/Contents
+2025-07-11 13:09:44.015 -05:00 [INF] Received HTTP response headers after 64.4454ms - 200
+2025-07-11 13:09:44.017 -05:00 [INF] End processing HTTP request after 68.9151ms - 200
+2025-07-11 13:09:44.103 -05:00 [INF] Executing ViewResult, running view Index.
+2025-07-11 13:09:44.271 -05:00 [INF] Executed ViewResult - view Index executed in 169.1354ms.
+2025-07-11 13:09:44.273 -05:00 [INF] Executed action HarmonySound.MVC.Controllers.PlaylistsController.Index (HarmonySound.MVC) in 515.2907ms
+2025-07-11 13:09:44.274 -05:00 [INF] Executed endpoint 'HarmonySound.MVC.Controllers.PlaylistsController.Index (HarmonySound.MVC)'
+2025-07-11 13:09:44.276 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/Playlists/Index - 200 null text/html; charset=utf-8 532.7364ms
+2025-07-11 13:09:44.284 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/_vs/browserLink - null null
+2025-07-11 13:09:44.287 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/_framework/aspnetcore-browser-refresh.js - null null
+2025-07-11 13:09:44.293 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/_framework/aspnetcore-browser-refresh.js - 200 16517 application/javascript; charset=utf-8 6.3536ms
+2025-07-11 13:09:44.299 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/_vs/browserLink - 200 null text/javascript; charset=UTF-8 14.3834ms
+2025-07-11 13:09:46.618 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/_framework/aspnetcore-browser-refresh.js - null null
+2025-07-11 13:09:46.621 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/_framework/aspnetcore-browser-refresh.js - 200 16517 application/javascript; charset=utf-8 3.7041ms
+2025-07-11 13:09:47.283 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/Clients/Index - null null
+2025-07-11 13:09:47.290 -05:00 [INF] Executing endpoint 'HarmonySound.MVC.Controllers.ClientsController.Index (HarmonySound.MVC)'
+2025-07-11 13:09:47.295 -05:00 [INF] Route matched with {action = "Index", controller = "Clients"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Index() on controller HarmonySound.MVC.Controllers.ClientsController (HarmonySound.MVC).
+2025-07-11 13:09:47.345 -05:00 [INF] Executing ViewResult, running view Index.
+2025-07-11 13:09:47.352 -05:00 [INF] Executed ViewResult - view Index executed in 7.7245ms.
+2025-07-11 13:09:47.354 -05:00 [INF] Executed action HarmonySound.MVC.Controllers.ClientsController.Index (HarmonySound.MVC) in 56.8637ms
+2025-07-11 13:09:47.355 -05:00 [INF] Executed endpoint 'HarmonySound.MVC.Controllers.ClientsController.Index (HarmonySound.MVC)'
+2025-07-11 13:09:47.357 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/Clients/Index - 200 null text/html; charset=utf-8 74.1565ms
+2025-07-11 13:09:47.365 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/_vs/browserLink - null null
+2025-07-11 13:09:47.370 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/_framework/aspnetcore-browser-refresh.js - null null
+2025-07-11 13:09:47.379 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/_framework/aspnetcore-browser-refresh.js - 200 16517 application/javascript; charset=utf-8 9.1493ms
+2025-07-11 13:09:47.385 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/_vs/browserLink - 200 null text/javascript; charset=UTF-8 20.0751ms
+2025-07-11 13:09:49.748 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/_framework/aspnetcore-browser-refresh.js - null null
+2025-07-11 13:09:49.754 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/_framework/aspnetcore-browser-refresh.js - 200 16517 application/javascript; charset=utf-8 6.1981ms
+2025-07-11 13:10:45.247 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/Plans/Index - null null
+2025-07-11 13:10:45.264 -05:00 [INF] Executing endpoint 'HarmonySound.MVC.Controllers.PlansController.Index (HarmonySound.MVC)'
+2025-07-11 13:10:45.266 -05:00 [INF] Route matched with {action = "Index", controller = "Plans"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Index() on controller HarmonySound.MVC.Controllers.PlansController (HarmonySound.MVC).
+2025-07-11 13:10:45.269 -05:00 [INF] Start processing HTTP request GET https://localhost:7120/api/Plans
+2025-07-11 13:10:45.270 -05:00 [INF] Sending HTTP request GET https://localhost:7120/api/Plans
+2025-07-11 13:10:45.278 -05:00 [INF] Received HTTP response headers after 6.4926ms - 200
+2025-07-11 13:10:45.279 -05:00 [INF] End processing HTTP request after 10.4889ms - 200
+2025-07-11 13:10:45.281 -05:00 [INF] Start processing HTTP request GET https://localhost:7120/api/UserPlans/user/3
+2025-07-11 13:10:45.282 -05:00 [INF] Sending HTTP request GET https://localhost:7120/api/UserPlans/user/3
+2025-07-11 13:10:45.286 -05:00 [INF] Received HTTP response headers after 2.3117ms - 404
+2025-07-11 13:10:45.287 -05:00 [INF] End processing HTTP request after 6.1342ms - 404
+2025-07-11 13:10:45.289 -05:00 [INF] Executing ViewResult, running view Index.
+2025-07-11 13:10:45.295 -05:00 [INF] Executed ViewResult - view Index executed in 6.5021ms.
+2025-07-11 13:10:45.303 -05:00 [INF] Executed action HarmonySound.MVC.Controllers.PlansController.Index (HarmonySound.MVC) in 35.0273ms
+2025-07-11 13:10:45.305 -05:00 [INF] Executed endpoint 'HarmonySound.MVC.Controllers.PlansController.Index (HarmonySound.MVC)'
+2025-07-11 13:10:45.307 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/Plans/Index - 200 null text/html; charset=utf-8 59.8801ms
+2025-07-11 13:10:45.316 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/_vs/browserLink - null null
+2025-07-11 13:10:45.320 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/_framework/aspnetcore-browser-refresh.js - null null
+2025-07-11 13:10:45.326 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/_framework/aspnetcore-browser-refresh.js - 200 16517 application/javascript; charset=utf-8 6.1255ms
+2025-07-11 13:10:45.342 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/_vs/browserLink - 200 null text/javascript; charset=UTF-8 26.1652ms
+2025-07-11 13:10:47.447 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/_framework/aspnetcore-browser-refresh.js - null null
+2025-07-11 13:10:47.450 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/_framework/aspnetcore-browser-refresh.js - 200 16517 application/javascript; charset=utf-8 4.1896ms
+2025-07-11 13:10:50.170 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/Account/Logout - null null
+2025-07-11 13:10:50.175 -05:00 [INF] Executing endpoint 'HarmonySound.MVC.Controllers.AccountController.Logout (HarmonySound.MVC)'
+2025-07-11 13:10:50.180 -05:00 [INF] Route matched with {action = "Logout", controller = "Account"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Logout() on controller HarmonySound.MVC.Controllers.AccountController (HarmonySound.MVC).
+2025-07-11 13:10:50.184 -05:00 [INF] AuthenticationScheme: Cookies signed out.
+2025-07-11 13:10:50.186 -05:00 [INF] Executing RedirectResult, redirecting to /.
+2025-07-11 13:10:50.187 -05:00 [INF] Executed action HarmonySound.MVC.Controllers.AccountController.Logout (HarmonySound.MVC) in 5.2226ms
+2025-07-11 13:10:50.188 -05:00 [INF] Executed endpoint 'HarmonySound.MVC.Controllers.AccountController.Logout (HarmonySound.MVC)'
+2025-07-11 13:10:50.189 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/Account/Logout - 302 0 null 20.1956ms
+2025-07-11 13:10:50.193 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/ - null null
+2025-07-11 13:10:50.198 -05:00 [INF] Executing endpoint 'HarmonySound.MVC.Controllers.AccountController.Login (HarmonySound.MVC)'
+2025-07-11 13:10:50.199 -05:00 [INF] Route matched with {action = "Login", controller = "Account"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.ActionResult Login() on controller HarmonySound.MVC.Controllers.AccountController (HarmonySound.MVC).
+2025-07-11 13:10:50.201 -05:00 [INF] Executing ViewResult, running view Login.
+2025-07-11 13:10:50.204 -05:00 [INF] Executed ViewResult - view Login executed in 3.7197ms.
+2025-07-11 13:10:50.206 -05:00 [INF] Executed action HarmonySound.MVC.Controllers.AccountController.Login (HarmonySound.MVC) in 5.1965ms
+2025-07-11 13:10:50.207 -05:00 [INF] Executed endpoint 'HarmonySound.MVC.Controllers.AccountController.Login (HarmonySound.MVC)'
+2025-07-11 13:10:50.208 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/ - 200 null text/html; charset=utf-8 15.2577ms
+2025-07-11 13:10:50.223 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/_framework/aspnetcore-browser-refresh.js - null null
+2025-07-11 13:10:50.223 -05:00 [INF] Request starting HTTP/2 GET https://localhost:7052/_vs/browserLink - null null
+2025-07-11 13:10:50.227 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/_framework/aspnetcore-browser-refresh.js - 200 16517 application/javascript; charset=utf-8 4.568ms
+2025-07-11 13:10:50.244 -05:00 [INF] Request finished HTTP/2 GET https://localhost:7052/_vs/browserLink - 200 null text/javascript; charset=UTF-8 20.6465ms

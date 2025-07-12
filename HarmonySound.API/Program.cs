@@ -48,6 +48,11 @@ namespace HarmonySound.API
                 options.MultipartBodyLengthLimit = 200 * 1024 * 1024; // 200 MB
             });
 
+            builder.Services.Configure<IISServerOptions>(options =>
+            {
+                options.MaxRequestBodySize = 104857600; // 100 MB
+            });
+
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();

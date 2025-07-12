@@ -1419,6 +1419,74 @@
     ]
   },
   {
+    "ContainingType": "HarmonySound.API.Controllers.UsersController",
+    "Method": "GetProfile",
+    "RelativePath": "api/Users/profile/{id}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "HarmonySound.API.DTOs.UserProfileDto",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HarmonySound.API.Controllers.UsersController",
+    "Method": "UpdateProfile",
+    "RelativePath": "api/Users/profile/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "dto",
+        "Type": "HarmonySound.API.DTOs.UserProfileDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "HarmonySound.API.Controllers.UsersController",
+    "Method": "UploadProfileImage",
+    "RelativePath": "api/Users/upload-profile-image",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "UserId",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "File",
+        "Type": "Microsoft.AspNetCore.Http.IFormFile",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "HarmonySound.API.Controllers.UsersPlansController",
     "Method": "GetUsersPlans",
     "RelativePath": "api/UsersPlans",
