@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("HarmonySound.Models")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+28c53c5740acc0ea02cd91b8cd070bf3b54a69b8")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5de09acb145200f59c74e2ce0026d00e766236aa")]
 [assembly: System.Reflection.AssemblyProductAttribute("HarmonySound.Models")]
 [assembly: System.Reflection.AssemblyTitleAttribute("HarmonySound.Models")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

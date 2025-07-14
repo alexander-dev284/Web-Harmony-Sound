@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using HarmonySound.Models;
 using HarmonySound.API.Data;
+
 namespace HarmonySound.API.Controllers
 {
     [Route("api/[controller]")]
@@ -73,14 +74,12 @@ namespace HarmonySound.API.Controllers
         }
 
         // POST: api/ContentAlbums
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<ContentAlbum>> PostContentAlbum(ContentAlbum contentAlbum)
+        public async Task<ActionResult<ContentAlbum>> PostContentAlbum(ContentAlbum data)
         {
-            _context.ContentsAlbums.Add(contentAlbum);
+            _context.ContentsAlbums.Add(data);
             await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetContentAlbum", new { id = contentAlbum.Id }, contentAlbum);
+            return CreatedAtAction("GetContentAlbum", new { id = data.Id }, data);
         }
 
         // DELETE: api/ContentAlbums/5
@@ -88,14 +87,10 @@ namespace HarmonySound.API.Controllers
         public async Task<IActionResult> DeleteContentAlbum(int id)
         {
             var contentAlbum = await _context.ContentsAlbums.FindAsync(id);
-            if (contentAlbum == null)
-            {
-                return NotFound();
-            }
+            if (contentAlbum == null) return NotFound();
 
             _context.ContentsAlbums.Remove(contentAlbum);
             await _context.SaveChangesAsync();
-
             return NoContent();
         }
 

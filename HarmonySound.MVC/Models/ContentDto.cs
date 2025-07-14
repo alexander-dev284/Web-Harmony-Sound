@@ -7,9 +7,8 @@
         public string Type { get; set; } // "Canción", "Podcast"
         public TimeSpan Duration { get; set; }
         public DateTimeOffset UploadDate { get; set; }
-        public int ArtistId { get; set; } 
-
-        public string? ArtistName { get; set; } 
-        public string? AlbumTitle { get; set; }   
+        public int ArtistId { get; set; }
+        public string? ArtistName { get; set; }
+        public string? AlbumTitle { get; set; }
     }
 }

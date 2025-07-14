@@ -18,7 +18,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/Album"
+                    "$ref": "#/components/schemas/AlbumDto"
                   }
                 }
               },
@@ -26,7 +26,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/Album"
+                    "$ref": "#/components/schemas/AlbumDto"
                   }
                 }
               },
@@ -34,7 +34,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/Album"
+                    "$ref": "#/components/schemas/AlbumDto"
                   }
                 }
               }
@@ -50,17 +50,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Album"
+                "$ref": "#/components/schemas/CreateAlbumDto"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/Album"
+                "$ref": "#/components/schemas/CreateAlbumDto"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/Album"
+                "$ref": "#/components/schemas/CreateAlbumDto"
               }
             }
           }
@@ -82,6 +82,55 @@
               "text/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Album"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Albums/ByArtist/{artistId}": {
+      "get": {
+        "tags": [
+          "Albums"
+        ],
+        "parameters": [
+          {
+            "name": "artistId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Album"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Album"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Album"
+                  }
                 }
               }
             }
@@ -111,17 +160,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/Album"
+                  "$ref": "#/components/schemas/AlbumDto"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Album"
+                  "$ref": "#/components/schemas/AlbumDto"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Album"
+                  "$ref": "#/components/schemas/AlbumDto"
                 }
               }
             }
@@ -147,17 +196,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Album"
+                "$ref": "#/components/schemas/CreateAlbumDto"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/Album"
+                "$ref": "#/components/schemas/CreateAlbumDto"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/Album"
+                "$ref": "#/components/schemas/CreateAlbumDto"
               }
             }
           }
@@ -175,6 +224,137 @@
         "parameters": [
           {
             "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Albums/{id}/UpdateSongs": {
+      "post": {
+        "tags": [
+          "Albums"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            },
+            "text/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Albums/{id}/AddSong": {
+      "post": {
+        "tags": [
+          "Albums"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "integer",
+                "format": "int32"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "type": "integer",
+                "format": "int32"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "type": "integer",
+                "format": "int32"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Albums/{id}/RemoveSong/{songId}": {
+      "delete": {
+        "tags": [
+          "Albums"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "songId",
             "in": "path",
             "required": true,
             "schema": {
@@ -2758,6 +2938,35 @@
         },
         "additionalProperties": false
       },
+      "AlbumDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "creationDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "artistName": {
+            "type": "string",
+            "nullable": true
+          },
+          "contents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContentDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "AssignRoleModel": {
         "type": "object",
         "properties": {
@@ -2841,6 +3050,61 @@
           },
           "album": {
             "$ref": "#/components/schemas/Album"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ContentDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "duration": {
+            "type": "string",
+            "format": "date-span"
+          },
+          "uploadDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "artistId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "artistName": {
+            "type": "string",
+            "nullable": true
+          },
+          "albumTitle": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CreateAlbumDto": {
+        "required": [
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "title": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "artistId": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false

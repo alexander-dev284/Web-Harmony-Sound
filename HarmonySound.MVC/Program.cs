@@ -64,7 +64,13 @@ namespace HarmonySound.MVC
                 options.Cookie.IsEssential = true; // Hace la cookie esencial
             });
 
-            // Agregar controladores y vistas
+            // Agregar controladores y vistas con opciones JSON
+            builder.Services.AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+                    options.JsonSerializerOptions.MaxDepth = 64; // Opcional: aumenta la profundidad máxima si es necesario
+                });
             builder.Services.AddControllersWithViews();
             builder.Services.AddSession();  // Asegura que la sesión esté disponible
 

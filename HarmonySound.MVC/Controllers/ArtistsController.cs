@@ -18,7 +18,7 @@ namespace HarmonySound.MVC.Controllers
         public ArtistsController(HttpClient httpClient)
         {
             _httpClient = httpClient;
-            _httpClient.Timeout = TimeSpan.FromMinutes(10); // Aumenta el timeout
+            _httpClient.Timeout = TimeSpan.FromMinutes(10);
         }
 
         // Vista Home del artista
