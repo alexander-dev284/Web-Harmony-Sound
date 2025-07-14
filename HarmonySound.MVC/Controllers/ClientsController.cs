@@ -117,10 +117,12 @@ namespace HarmonySound.MVC.Controllers
             return RedirectToAction("Home");
         }
 
-        public async Task<IActionResult> Home()
+        public async Task<IActionResult> Home(string query)
         {
             int userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier).Value);
+            var model = new SearchResultsViewModel { Query = query };
 
+            // Obtén el perfil del usuario
             using (var client = new HttpClient())
             {
                 var response = await client.GetAsync($"https://localhost:7120/api/Users/profile/{userId}");
@@ -128,11 +130,34 @@ namespace HarmonySound.MVC.Controllers
                     return View("Error");
 
                 var json = await response.Content.ReadAsStringAsync();
-                var dto = System.Text.Json.JsonSerializer.Deserialize<ProfileEditViewModel>(json, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-                ViewBag.Success = TempData["Success"];
-                return View(dto);
+                model.Profile = System.Text.Json.JsonSerializer.Deserialize<ProfileEditViewModel>(json, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             }
+
+            // Si hay búsqueda, consulta artistas y contenidos
+            if (!string.IsNullOrWhiteSpace(query))
+            {
+                using (var client = new HttpClient())
+                {
+                    // Buscar artistas
+                    var artistsResponse = await client.GetAsync($"https://localhost:7120/api/Users/search?query={Uri.EscapeDataString(query)}");
+                    if (artistsResponse.IsSuccessStatusCode)
+                    {
+                        var artistsJson = await artistsResponse.Content.ReadAsStringAsync();
+                        model.Artists = System.Text.Json.JsonSerializer.Deserialize<List<User>>(artistsJson, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new();
+                    }
+
+                    // Buscar contenidos
+                    var contentsResponse = await client.GetAsync($"https://localhost:7120/api/Contents/search?query={Uri.EscapeDataString(query)}");
+                    if (contentsResponse.IsSuccessStatusCode)
+                    {
+                        var contentsJson = await contentsResponse.Content.ReadAsStringAsync();
+                        model.Contents = System.Text.Json.JsonSerializer.Deserialize<List<Content>>(contentsJson, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new();
+                    }
+                }
+            }
+
+            ViewBag.Success = TempData["Success"];
+            return View(model);
         }
     }
 }

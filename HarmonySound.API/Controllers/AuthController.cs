@@ -85,17 +85,36 @@ namespace HarmonySound.API.Controllers
         [HttpGet("confirm-email")]
         public async Task<IActionResult> ConfirmEmail(int userId, string token)
         {
-            var user = await _userManager.FindByIdAsync(userId.ToString());
-            if (user == null)
-                return BadRequest("Usuario no encontrado.");
+            try
+            {
+                if (string.IsNullOrWhiteSpace(token))
+                    return BadRequest("Token no proporcionado.");
 
-            var decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(token));
-            var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
+                var user = await _userManager.FindByIdAsync(userId.ToString());
+                if (user == null)
+                    return BadRequest("Usuario no encontrado.");
 
-            if (result.Succeeded)
-                return Ok("Email confirmado correctamente.");
-            else
-                return BadRequest("Token inválido o expirado.");
+                string decodedToken;
+                try
+                {
+                    decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(token));
+                }
+                catch
+                {
+                    return BadRequest("Token malformado.");
+                }
+
+                var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
+
+                if (result.Succeeded)
+                    return Ok("Email confirmado correctamente.");
+                else
+                    return BadRequest("Token inválido o expirado.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error interno: {ex.Message}");
+            }
         }
 
         // Login de usuario con JWT
@@ -159,6 +178,29 @@ namespace HarmonySound.API.Controllers
                 return Ok("Contraseña restablecida correctamente.");
             else
                 return BadRequest(result.Errors);
+        }
+
+        // Reenvío de correo de confirmación
+        [HttpPost("resend-confirmation")]
+        public async Task<IActionResult> ResendConfirmation([FromBody] LoginModel model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+                return BadRequest("Usuario no encontrado.");
+
+            if (await _userManager.IsEmailConfirmedAsync(user))
+                return BadRequest("El email ya está confirmado.");
+
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var tokenEncoded = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+            var confirmationLink = $"{_configuration["AppUrl"]}/api/Auth/confirm-email?userId={user.Id}&token={tokenEncoded}";
+
+            await _emailSender.SendEmailAsync(user.Email, "Confirma tu email", $"Confirma tu cuenta aquí: {confirmationLink}");
+
+            return Ok(new { Message = "Correo de confirmación reenviado. Revisa tu bandeja de entrada." });
         }
     }
 }

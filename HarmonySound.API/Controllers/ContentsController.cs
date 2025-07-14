@@ -150,6 +150,23 @@ namespace HarmonySound.API.Controllers
             return NoContent();
         }
 
+        // GET: api/Contents/search?query=...
+        [HttpGet("search")]
+        public async Task<IActionResult> Search(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+                return Ok(new List<Content>());
+
+            var results = await _context.Contents
+                .Where(c =>
+                    (!string.IsNullOrEmpty(c.Title) && c.Title.ToLower().Contains(query.ToLower())) ||
+                    (!string.IsNullOrEmpty(c.Type) && c.Type.ToLower().Contains(query.ToLower()))
+                )
+                .ToListAsync();
+
+            return Ok(results);
+        }
+
         private bool ContentExists(int id)
         {
             return _context.Contents.Any(e => e.Id == id);

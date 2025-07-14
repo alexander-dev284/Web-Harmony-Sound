@@ -220,5 +220,28 @@ namespace HarmonySound.API.Controllers
                 return StatusCode(500, "Error interno del servidor: " + ex.Message);
             }
         }
+
+        // GET: api/Users/search?query=...
+        [HttpGet("search")]
+        public async Task<IActionResult> Search(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+                return Ok(new List<object>());
+
+            var allArtists = await _userManager.GetUsersInRoleAsync("Artist");
+            var filtered = allArtists
+                .Where(u =>
+                    (!string.IsNullOrEmpty(u.Name) && u.Name.Contains(query, StringComparison.OrdinalIgnoreCase))
+                )
+                .Select(u => new {
+                    u.Id,
+                    u.Name,
+                    u.State,
+                    u.RegisterDate
+                })
+                .ToList();
+
+            return Ok(filtered);
+        }
     }
 }

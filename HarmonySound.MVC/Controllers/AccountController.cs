@@ -54,13 +54,21 @@ namespace HarmonySound.MVC.Controllers
                     var responseContent = await response.Content.ReadAsStringAsync();
                     var loginResult = JsonConvert.DeserializeObject<LoginResult>(responseContent);
 
-                    // Agrega este log temporal
-                    Console.WriteLine("TOKEN JWT: " + loginResult.Token);
+                    if (string.IsNullOrEmpty(loginResult?.Token))
+                    {
+                        ModelState.AddModelError("", "No se pudo iniciar sesión. Verifica tu correo y contraseña, y asegúrate de haber confirmado tu email.");
+                        return View(model);
+                    }
 
                     // Decodificar el JWT y extraer los claims
                     var handler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
                     var jwt = handler.ReadJwtToken(loginResult.Token);
                     var claimsList = jwt.Claims.ToList();
+
+                    // Log de claims para depuración
+                    System.Diagnostics.Debug.WriteLine("Claims del usuario:");
+                    foreach (var claim in claimsList)
+                        System.Diagnostics.Debug.WriteLine($"{claim.Type}: {claim.Value}");
 
                     // Asegurarse de que haya un NameIdentifier
                     if (!claimsList.Any(c => c.Type == ClaimTypes.NameIdentifier))
@@ -81,15 +89,33 @@ namespace HarmonySound.MVC.Controllers
                         authProperties
                     );
 
-                    var role = claimsList.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+                    // Buscar el rol del usuario (ahora solo ClaimTypes.Role si el mapeo está bien)
+                    var roleClaim = claimsList.FirstOrDefault(c =>
+                        c.Type == ClaimTypes.Role ||
+                        c.Type == "role" ||
+                        c.Type == "roles" ||
+                        c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role");
+
+                    var role = roleClaim?.Value;
+
+                    if (string.IsNullOrEmpty(role))
+                    {
+                        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                        ModelState.AddModelError("", "Tu cuenta no tiene un rol asignado. Contacta al administrador.");
+                        return View(model);
+                    }
 
                     // Redirigir según el rol
-                    if (role != null && role.Equals("Client", StringComparison.OrdinalIgnoreCase))
+                    if (role.Equals("Client", System.StringComparison.OrdinalIgnoreCase))
                         return RedirectToAction("Home", "Clients");
-                    else if (role != null && role.Equals("Artist", StringComparison.OrdinalIgnoreCase))
+                    else if (role.Equals("Artist", System.StringComparison.OrdinalIgnoreCase))
                         return RedirectToAction("Home", "Artists");
                     else
-                        return RedirectToAction("Index", "Home");
+                    {
+                        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                        ModelState.AddModelError("", $"No tienes permisos para acceder con el rol '{role}'.");
+                        return View(model);
+                    }
                 }
             }
             catch (Exception ex)
@@ -145,7 +171,8 @@ namespace HarmonySound.MVC.Controllers
 
                     if (response.IsSuccessStatusCode)
                     {
-                        return RedirectToAction("Login", "Account");
+                        // Redirige a la vista de confirmación de registro
+                        return RedirectToAction("RegisterConfirmation", "Account");
                     }
                     else
                     {
@@ -194,6 +221,11 @@ namespace HarmonySound.MVC.Controllers
         }
 
         public IActionResult AccessDenied()
+        {
+            return View();
+        }
+
+        public IActionResult RegisterConfirmation()
         {
             return View();
         }
