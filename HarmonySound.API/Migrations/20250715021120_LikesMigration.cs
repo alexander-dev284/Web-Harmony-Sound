@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace HarmonySound.API.Migrations
 {
     /// <inheritdoc />
-    public partial class HarmonySound : Migration
+    public partial class LikesMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -380,6 +380,33 @@ namespace HarmonySound.API.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "UserLikes",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    UserId = table.Column<int>(type: "integer", nullable: false),
+                    ContentId = table.Column<int>(type: "integer", nullable: false),
+                    LikeDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserLikes", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UserLikes_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UserLikes_Contents_ContentId",
+                        column: x => x.ContentId,
+                        principalTable: "Contents",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "PlaylistContents",
                 columns: table => new
                 {
@@ -491,6 +518,16 @@ namespace HarmonySound.API.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_UserLikes_ContentId",
+                table: "UserLikes",
+                column: "ContentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserLikes_UserId",
+                table: "UserLikes",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_UsersPlans_PlanId",
                 table: "UsersPlans",
                 column: "PlanId");
@@ -533,6 +570,9 @@ namespace HarmonySound.API.Migrations
 
             migrationBuilder.DropTable(
                 name: "SubscriptionsHistories");
+
+            migrationBuilder.DropTable(
+                name: "UserLikes");
 
             migrationBuilder.DropTable(
                 name: "UsersPlans");

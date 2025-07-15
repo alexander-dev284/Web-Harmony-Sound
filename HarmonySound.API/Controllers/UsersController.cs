@@ -236,6 +236,7 @@ namespace HarmonySound.API.Controllers
                 .Select(u => new {
                     u.Id,
                     u.Name,
+                    u.ProfileImageUrl, 
                     u.State,
                     u.RegisterDate
                 })

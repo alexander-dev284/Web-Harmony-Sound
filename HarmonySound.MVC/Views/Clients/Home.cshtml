@@ -44,29 +44,56 @@
                 <ul>
                     @foreach (var artist in Model.Artists)
                     {
-                        <li>@artist.Name</li> <!-- Email oculto -->
+                        <li style="display: flex; align-items: center; margin-bottom: 10px;">
+                            <img src="@artist.ProfileImageUrl ?? Url.Content("~/images/default-profile.png")"
+                                 alt="Foto de @artist.Name"
+                                 style="width:40px;height:40px;border-radius:50%;object-fit:cover;margin-right:8px;" />
+                            <span>@artist.Name</span>
+                        </li>
                     }
                 </ul>
             }
             if (Model.Contents?.Any() == true)
             {
                 <h4>Contenidos encontrados</h4>
-                <ul>
+                <div class="row">
                     @foreach (var content in Model.Contents)
                     {
-                        <li>
-                            @content.Title (@content.Type)
-                            @if (!string.IsNullOrEmpty(content.UrlMedia))
-                            {
-                                <br />
-                                <audio controls style="width: 250px;">
-                                    <source src="@content.UrlMedia" type="audio/mpeg" />
-                                    Tu navegador no soporta el elemento de audio.
-                                </audio>
-                            }
-                        </li>
+                        <div class="col-md-6 mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">@content.Title</h5>
+                                    <p class="card-text">@content.Type</p>
+                                    
+                                    @if (!string.IsNullOrEmpty(content.UrlMedia))
+                                    {
+                                        <audio controls style="width: 100%;" class="mb-2">
+                                            <source src="@content.UrlMedia" type="audio/mpeg" />
+                                            Tu navegador no soporta el elemento de audio.
+                                        </audio>
+                                    }
+                                    
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <button class="btn btn-outline-primary btn-sm like-btn" 
+                                                    data-content-id="@content.Id" 
+                                                    data-user-id="@Model.Profile.Id">
+                                                ❤️ <span class="like-count">0</span>
+                                            </button>
+                                            <button class="btn btn-outline-secondary btn-sm ms-2 playlist-btn" 
+                                                    data-content-id="@content.Id" 
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#playlistModal">
+                                                📋 Agregar a Playlist
+                                            </button>
+                                        </div>
+                                        <small class="text-muted">Por: Artista</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     }
-                </ul>
+                </div>
             }
             if ((Model.Artists == null || !Model.Artists.Any()) && (Model.Contents == null || !Model.Contents.Any()))
             {
@@ -76,13 +103,196 @@
     </div>
 </div>
 
+<!-- Agregar este contenedor después del div principal -->
+<div class="toast-container position-fixed top-0 end-0 p-3">
+    <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <strong class="me-auto">Harmony Sound</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body" id="toast-message">
+            <!-- Mensaje dinámico aquí -->
+        </div>
+    </div>
+</div>
+
+<!-- Modal para seleccionar playlist -->
+<div class="modal fade" id="playlistModal" tabindex="-1" aria-labelledby="playlistModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="playlistModalLabel">Agregar a Playlist</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="playlist-list">
+                    <!-- Las playlists se cargarán aquí dinámicamente -->
+                </div>
+                <hr>
+                <div class="mt-3">
+                    <input type="text" id="new-playlist-name" class="form-control" placeholder="Nombre de nueva playlist">
+                    <button type="button" class="btn btn-success mt-2" id="create-playlist-btn">Crear Nueva Playlist</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script>
+        let selectedContentId = null;
+        
         $(document).ready(function () {
-            var success = '@ViewBag.Success';
-            if (success) {
-                alert(success);
-            }
+            // Cargar likes iniciales
+            loadLikes();
+            
+            // Manejar click en botón de like
+            $('.like-btn').click(function() {
+                var contentId = $(this).data('content-id');
+                var userId = $(this).data('user-id');
+                var button = $(this);
+                
+                $.post('@Url.Action("LikeContent", "Clients")', { contentId: contentId, userId: userId })
+                    .done(function(data) {
+                        if (data.success) {
+                            loadLikesForContent(contentId);
+                            button.addClass('btn-primary').removeClass('btn-outline-primary');
+                            showToast('¡Contenido agregado a favoritos!', 'success');
+                        } else {
+                            $.post('@Url.Action("UnlikeContent", "Clients")', { contentId: contentId, userId: userId })
+                                .done(function(data) {
+                                    if (data.success) {
+                                        loadLikesForContent(contentId);
+                                        button.addClass('btn-outline-primary').removeClass('btn-primary');
+                                        showToast('Contenido removido de favoritos', 'info');
+                                    }
+                                });
+                        }
+                    })
+                    .fail(function() {
+                        showToast('Error al procesar la solicitud', 'error');
+                    });
+            });
+            
+            // Manejar click en botón de playlist
+            $('.playlist-btn').click(function() {
+                console.log('=== CLICK EN BOTÓN PLAYLIST ===');
+                selectedContentId = $(this).data('content-id');
+                console.log('Content ID seleccionado:', selectedContentId);
+                
+                // Verificar que el modal existe
+                var modal = document.getElementById('playlistModal');
+                console.log('Modal encontrado:', modal);
+                
+                loadUserPlaylists();
+            });
+            
+            // Manejar creación de nueva playlist
+            $('#create-playlist-btn').click(function() {
+                var playlistName = $('#new-playlist-name').val();
+                if (playlistName.trim() === '') {
+                    showToast('Por favor ingresa un nombre para la playlist', 'error');
+                    return;
+                }
+                
+                $.post('@Url.Action("CreatePlaylist", "Clients")', { 
+                    name: playlistName,
+                    contentId: selectedContentId 
+                })
+                .done(function(data) {
+                    if (data.success) {
+                        showToast(data.message, 'success');
+                        $('#new-playlist-name').val('');
+                        $('#playlistModal').modal('hide');
+                    } else {
+                        showToast(data.message, 'error');
+                    }
+                });
+            });
         });
+        
+        function loadUserPlaylists() {
+            console.log('Cargando playlists...');
+            $.get('@Url.Action("GetUserPlaylists", "Clients")')
+                .done(function(data) {
+                    console.log('Playlists recibidas:', data);
+                    var playlistHtml = '';
+                    if (data && data.length > 0) {
+                        data.forEach(function(playlist) {
+                            console.log('Procesando playlist:', playlist);
+                            playlistHtml += `
+                                <div class="d-flex justify-content-between align-items-center mb-2 p-2 border rounded">
+                                    <span>${playlist.name}</span>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="addToPlaylist(${playlist.id})">
+                                        Agregar
+                                    </button>
+                                </div>
+                            `;
+                        });
+                    } else {
+                        playlistHtml = '<p class="text-muted">No tienes playlists creadas</p>';
+                    }
+                    console.log('HTML que se va a insertar:', playlistHtml);
+                    $('#playlist-list').html(playlistHtml);
+                    
+                    // Verificar que el HTML se insertó correctamente
+                    console.log('Contenido del div después de insertar:', $('#playlist-list').html());
+                })
+                .fail(function(xhr, status, error) {
+                    console.error('Error al cargar playlists:', error);
+                    $('#playlist-list').html('<p class="text-danger">Error al cargar playlists</p>');
+                });
+        }
+        
+        function addToPlaylist(playlistId) {
+            $.post('@Url.Action("AddToPlaylist", "Clients")', { 
+                playlistId: playlistId, 
+                contentId: selectedContentId 
+            })
+            .done(function(data) {
+                if (data.success) {
+                    showToast('Contenido agregado a la playlist', 'success');
+                    $('#playlistModal').modal('hide');
+                } else {
+                    showToast(data.message, 'error');
+                }
+            })
+            .fail(function() {
+                showToast('Error al agregar contenido a la playlist', 'error');
+            });
+        }
+        
+        function loadLikes() {
+            $('.like-btn').each(function() {
+                var contentId = $(this).data('content-id');
+                loadLikesForContent(contentId);
+            });
+        }
+        
+        function loadLikesForContent(contentId) {
+            $.get('@Url.Action("GetContentLikes", "Clients")', { contentId: contentId })
+                .done(function(data) {
+                    $('[data-content-id="' + contentId + '"] .like-count').text(data.likes);
+                });
+        }
+        
+        function showToast(message, type) {
+            const toastElement = document.getElementById('liveToast');
+            const messageElement = document.getElementById('toast-message');
+            
+            toastElement.className = 'toast';
+            if (type === 'success') {
+                toastElement.classList.add('bg-success', 'text-white');
+            } else if (type === 'error') {
+                toastElement.classList.add('bg-danger', 'text-white');
+            } else {
+                toastElement.classList.add('bg-info', 'text-white');
+            }
+            
+            messageElement.textContent = message;
+            
+            const toast = new bootstrap.Toast(toastElement);
+            toast.show();
+        }
     </script>
 }

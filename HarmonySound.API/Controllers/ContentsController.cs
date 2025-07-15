@@ -167,6 +167,156 @@ namespace HarmonySound.API.Controllers
             return Ok(results);
         }
 
+        // POST: api/Contents/5/like
+        [HttpPost("{id}/like")]
+        public async Task<IActionResult> LikeContent(int id, [FromBody] int userId)
+        {
+            var content = await _context.Contents.FindAsync(id);
+            if (content == null)
+                return NotFound();
+
+            // Verificar si ya dio like
+            var existingLike = await _context.UserLikes
+                .FirstOrDefaultAsync(ul => ul.UserId == userId && ul.ContentId == id);
+
+            if (existingLike != null)
+                return BadRequest("Ya diste like a este contenido.");
+
+            // Agregar like
+            var userLike = new UserLike
+            {
+                UserId = userId,
+                ContentId = id,
+                LikeDate = DateTimeOffset.UtcNow
+            };
+
+            _context.UserLikes.Add(userLike);
+
+            // Actualizar contador de likes en Statistics
+            var statistic = await _context.Statistics
+                .FirstOrDefaultAsync(s => s.ContentId == id);
+
+            if (statistic != null)
+            {
+                statistic.Likes++;
+                _context.Entry(statistic).State = EntityState.Modified;
+            }
+            else
+            {
+                // Crear nueva estadística si no existe
+                var newStatistic = new Statistic
+                {
+                    ContentId = id,
+                    Likes = 1,
+                    Reproductions = 0,
+                    Comments = 0,
+                    ReportDate = DateTimeOffset.UtcNow
+                };
+                _context.Statistics.Add(newStatistic);
+            }
+
+            // Agregar a playlist de favoritos
+            await AddToFavoritesPlaylist(userId, id);
+
+            await _context.SaveChangesAsync();
+            return Ok(new { Message = "Like agregado y contenido añadido a favoritos." });
+        }
+
+        // POST: api/Contents/5/unlike
+        [HttpPost("{id}/unlike")]
+        public async Task<IActionResult> UnlikeContent(int id, [FromBody] int userId)
+        {
+            var userLike = await _context.UserLikes
+                .FirstOrDefaultAsync(ul => ul.UserId == userId && ul.ContentId == id);
+
+            if (userLike == null)
+                return BadRequest("No habías dado like a este contenido.");
+
+            _context.UserLikes.Remove(userLike);
+
+            // Actualizar contador de likes en Statistics
+            var statistic = await _context.Statistics
+                .FirstOrDefaultAsync(s => s.ContentId == id);
+
+            if (statistic != null && statistic.Likes > 0)
+            {
+                statistic.Likes--;
+                _context.Entry(statistic).State = EntityState.Modified;
+            }
+
+            // Remover de playlist de favoritos
+            await RemoveFromFavoritesPlaylist(userId, id);
+
+            await _context.SaveChangesAsync();
+            return Ok(new { Message = "Like removido y contenido eliminado de favoritos." });
+        }
+
+        // GET: api/Contents/5/likes
+        [HttpGet("{id}/likes")]
+        public async Task<IActionResult> GetContentLikes(int id)
+        {
+            var likesCount = await _context.UserLikes.CountAsync(ul => ul.ContentId == id);
+            return Ok(new { ContentId = id, Likes = likesCount });
+        }
+
+        // GET: api/Contents/5/user-liked/1
+        [HttpGet("{id}/user-liked/{userId}")]
+        public async Task<IActionResult> HasUserLiked(int id, int userId)
+        {
+            var hasLiked = await _context.UserLikes
+                .AnyAsync(ul => ul.UserId == userId && ul.ContentId == id);
+            return Ok(new { HasLiked = hasLiked });
+        }
+
+        private async Task AddToFavoritesPlaylist(int userId, int contentId)
+        {
+            // Buscar o crear playlist de favoritos
+            var favoritesPlaylist = await _context.Playlist
+                .FirstOrDefaultAsync(p => p.UserId == userId && p.Name == "Favoritos");
+
+            if (favoritesPlaylist == null)
+            {
+                favoritesPlaylist = new Playlist
+                {
+                    Name = "Favoritos",
+                    UserId = userId
+                };
+                _context.Playlist.Add(favoritesPlaylist);
+                await _context.SaveChangesAsync();
+            }
+
+            // Verificar si ya está en la playlist
+            var exists = await _context.PlaylistContents
+                .AnyAsync(pc => pc.PlaylistId == favoritesPlaylist.Id && pc.ContentId == contentId);
+
+            if (!exists)
+            {
+                var playlistContent = new PlaylistContent
+                {
+                    PlaylistId = favoritesPlaylist.Id,
+                    ContentId = contentId
+                };
+                _context.PlaylistContents.Add(playlistContent);
+            }
+        }
+
+        private async Task RemoveFromFavoritesPlaylist(int userId, int contentId)
+        {
+            var favoritesPlaylist = await _context.Playlist
+                .FirstOrDefaultAsync(p => p.UserId == userId && p.Name == "Favoritos");
+
+            if (favoritesPlaylist != null)
+            {
+                var playlistContent = await _context.PlaylistContents
+                    .FirstOrDefaultAsync(pc => pc.PlaylistId == favoritesPlaylist.Id && pc.ContentId == contentId);
+
+                if (playlistContent != null)
+                {
+                    _context.PlaylistContents.Remove(playlistContent);
+                }
+            }
+        }
+
         private bool ContentExists(int id)
         {
             return _context.Contents.Any(e => e.Id == id);

@@ -518,6 +518,85 @@
   },
   {
     "ContainingType": "HarmonySound.API.Controllers.ContentsController",
+    "Method": "LikeContent",
+    "RelativePath": "api/Contents/{id}/like",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "userId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "HarmonySound.API.Controllers.ContentsController",
+    "Method": "GetContentLikes",
+    "RelativePath": "api/Contents/{id}/likes",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "HarmonySound.API.Controllers.ContentsController",
+    "Method": "UnlikeContent",
+    "RelativePath": "api/Contents/{id}/unlike",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "userId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "HarmonySound.API.Controllers.ContentsController",
+    "Method": "HasUserLiked",
+    "RelativePath": "api/Contents/{id}/user-liked/{userId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "userId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "HarmonySound.API.Controllers.ContentsController",
     "Method": "Search",
     "RelativePath": "api/Contents/search",
     "HttpMethod": "GET",
@@ -789,17 +868,7 @@
     "IsController": true,
     "Order": 0,
     "Parameters": [],
-    "ReturnTypes": [
-      {
-        "Type": "System.Collections.Generic.IEnumerable\u00601[[HarmonySound.API.DTOs.PlaylistDto, HarmonySound.API, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
-        "MediaTypes": [
-          "text/plain",
-          "application/json",
-          "text/json"
-        ],
-        "StatusCode": 200
-      }
-    ]
+    "ReturnTypes": []
   },
   {
     "ContainingType": "HarmonySound.API.Controllers.PlaylistsController",
@@ -903,6 +972,16 @@
   },
   {
     "ContainingType": "HarmonySound.API.Controllers.PlaylistsController",
+    "Method": "GetDetailedPlaylists",
+    "RelativePath": "api/Playlists/detailed",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "HarmonySound.API.Controllers.PlaylistsController",
     "Method": "GetUserPlaylists",
     "RelativePath": "api/Playlists/user/{userId}",
     "HttpMethod": "GET",
@@ -917,7 +996,7 @@
     ],
     "ReturnTypes": [
       {
-        "Type": "System.Collections.Generic.IEnumerable\u00601[[HarmonySound.Models.Playlist, HarmonySound.Models, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "Type": "System.Collections.Generic.IEnumerable\u00601[[System.Object, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
         "MediaTypes": [
           "text/plain",
           "application/json",

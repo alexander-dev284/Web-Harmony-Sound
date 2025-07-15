@@ -23,28 +23,31 @@ namespace HarmonySound.API.Controllers
 
         // GET: api/Playlists
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<PlaylistDto>>> GetPlaylist()
+        public async Task<IActionResult> GetPlaylist()
         {
-            var playlists = await _context.Playlist
-                .Include(p => p.PlaylistContents)
-                    .ThenInclude(pc => pc.Content)
-                .ToListAsync();
-
-            var result = playlists.Select(p => new PlaylistDto
+            try
             {
-                Id = p.Id,
-                Name = p.Name,
-                Songs = p.PlaylistContents?
-                    .Where(pc => pc.Content != null)
-                    .Select(pc => new PlaylistSongDto
-                    {
-                        ContentId = pc.Content.Id,
-                        Title = pc.Content.Title,
-                        UrlMedia = pc.Content.UrlMedia
-                    }).ToList() ?? new List<PlaylistSongDto>()
-            }).ToList();
-
-            return Ok(result);
+                System.Diagnostics.Debug.WriteLine("GetPlaylist called in API");
+                
+                var playlists = await _context.Playlist.ToListAsync();
+                
+                System.Diagnostics.Debug.WriteLine($"Found {playlists.Count} playlists in database");
+                
+                var result = playlists.Select(p => new {
+                    id = p.Id,
+                    name = p.Name,
+                    userId = p.UserId
+                }).ToList();
+                
+                System.Diagnostics.Debug.WriteLine($"Returning {result.Count} playlists with userId");
+                
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error in API GetPlaylist: {ex.Message}");
+                return StatusCode(500, new { error = ex.Message });
+            }
         }
 
         // GET: api/Playlists/5
@@ -116,13 +119,34 @@ namespace HarmonySound.API.Controllers
 
         // Obtener playlists de un usuario
         [HttpGet("user/{userId}")]
-        public async Task<ActionResult<IEnumerable<Playlist>>> GetUserPlaylists(int userId)
+        public async Task<ActionResult<IEnumerable<object>>> GetUserPlaylists(int userId)
         {
-            return await _context.Playlist
-                .Where(p => p.UserId == userId)
-                .Include(p => p.PlaylistContents)
-                    .ThenInclude(pc => pc.Content)
-                .ToListAsync();
+            try
+            {
+                System.Diagnostics.Debug.WriteLine($"GetUserPlaylists called with userId: {userId}");
+                
+                // Simplificar la consulta para evitar problemas
+                var playlists = await _context.Playlist
+                    .Where(p => p.UserId == userId)
+                    .ToListAsync();
+                
+                System.Diagnostics.Debug.WriteLine($"Found {playlists.Count} playlists for user {userId}");
+                
+                // Mapear a objetos simples
+                var result = playlists.Select(p => new {
+                    id = p.Id,
+                    name = p.Name,
+                    userId = p.UserId
+                }).ToList();
+                
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error in GetUserPlaylists: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Inner exception: {ex.InnerException?.Message}");
+                return StatusCode(500, new { error = ex.Message, innerError = ex.InnerException?.Message });
+            }
         }
 
 

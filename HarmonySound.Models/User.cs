@@ -21,5 +21,6 @@ namespace HarmonySound.Models
         public virtual ICollection<Content> Content { get; set; } = new List<Content>();
         public virtual ICollection<Report> Reports { get; set; } = new List<Report>();
         public virtual ICollection<SubscriptionHistory> SubscriptionHistory { get; set; } = new List<SubscriptionHistory>();
+        public virtual ICollection<UserLike> UserLikes { get; set; } = new List<UserLike>();
     }
 }

@@ -29,6 +29,7 @@ namespace HarmonySound.API.Data
         public DbSet<Statistic> Statistics { get; set; } = default!;
         public DbSet<SubscriptionHistory> SubscriptionsHistories { get; set; } = default!;
         public DbSet<UserPlan> UsersPlans { get; set; } = default!;
+        public DbSet<UserLike> UserLikes { get; set; } = default!;
 
         // No agregues DbSet<Role> ni DbSet<UserRole> aquí
 

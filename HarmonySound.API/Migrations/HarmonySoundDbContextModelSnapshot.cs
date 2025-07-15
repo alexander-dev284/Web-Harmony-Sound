@@ -399,6 +399,32 @@ namespace HarmonySound.API.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("HarmonySound.Models.UserLike", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ContentId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("LikeDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ContentId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserLikes");
+                });
+
             modelBuilder.Entity("HarmonySound.Models.UserPlan", b =>
                 {
                     b.Property<int>("Id")
@@ -642,6 +668,25 @@ namespace HarmonySound.API.Migrations
                         .IsRequired();
 
                     b.Navigation("Plan");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("HarmonySound.Models.UserLike", b =>
+                {
+                    b.HasOne("HarmonySound.Models.Content", "Content")
+                        .WithMany()
+                        .HasForeignKey("ContentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("HarmonySound.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Content");
 
                     b.Navigation("User");
                 });

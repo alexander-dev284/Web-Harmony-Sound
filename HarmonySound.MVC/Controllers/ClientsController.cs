@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using HarmonySound.MVC.Models;
+using System.Text.Json;
 namespace HarmonySound.MVC.Controllers
 {
     [Authorize(Roles = "client")]
@@ -158,6 +159,211 @@ namespace HarmonySound.MVC.Controllers
 
             ViewBag.Success = TempData["Success"];
             return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> LikeContent(int contentId, int userId)
+        {
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    var json = System.Text.Json.JsonSerializer.Serialize(userId);
+                    var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+                    var response = await client.PostAsync($"https://localhost:7120/api/Contents/{contentId}/like", content);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        return Json(new { success = true, message = "Like agregado" });
+                    }
+                    else
+                    {
+                        return Json(new { success = false, message = "Error al agregar like" });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UnlikeContent(int contentId, int userId)
+        {
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    var json = System.Text.Json.JsonSerializer.Serialize(userId);
+                    var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+                    var response = await client.PostAsync($"https://localhost:7120/api/Contents/{contentId}/unlike", content);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        return Json(new { success = true, message = "Like removido" });
+                    }
+                    else
+                    {
+                        return Json(new { success = false, message = "Error al remover like" });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetContentLikes(int contentId)
+        {
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    var response = await client.GetAsync($"https://localhost:7120/api/Contents/{contentId}/likes");
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var json = await response.Content.ReadAsStringAsync();
+                        var result = System.Text.Json.JsonSerializer.Deserialize<dynamic>(json);
+                        return Json(result);
+                    }
+                    else
+                    {
+                        return Json(new { likes = 0 });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { likes = 0 });
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetUserPlaylists()
+        {
+            try
+            {
+                int userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier).Value);
+                
+                using (var client = new HttpClient())
+                {
+                    var response = await client.GetAsync($"https://localhost:7120/api/Playlists/user/{userId}");
+                    
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var json = await response.Content.ReadAsStringAsync();
+                        var playlists = System.Text.Json.JsonSerializer.Deserialize<JsonElement[]>(json);
+                        
+                        var userPlaylists = playlists.Select(p => new {
+                            id = p.GetProperty("id").GetInt32(),
+                            name = p.GetProperty("name").GetString()
+                        }).ToList();
+                        
+                        return Json(userPlaylists);
+                    }
+                    else
+                    {
+                        var errorContent = await response.Content.ReadAsStringAsync();
+                        System.Diagnostics.Debug.WriteLine($"API Error: {response.StatusCode} - {errorContent}");
+                        return Json(new List<object>());
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Exception: {ex.Message}");
+                return Json(new List<object>());
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddToPlaylist(int playlistId, int contentId)
+        {
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    var json = System.Text.Json.JsonSerializer.Serialize(contentId);
+                    var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+                    var response = await client.PostAsync($"https://localhost:7120/api/Playlists/{playlistId}/add", content);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        return Json(new { success = true, message = "Contenido agregado a la playlist" });
+                    }
+                    else
+                    {
+                        var errorContent = await response.Content.ReadAsStringAsync();
+                        return Json(new { success = false, message = "Error al agregar a playlist: " + errorContent });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreatePlaylist(string name, int? contentId = null)
+        {
+            try
+            {
+                int userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier).Value);
+                
+                var playlistDto = new
+                {
+                    Name = name,
+                    UserId = userId
+                };
+
+                using (var client = new HttpClient())
+                {
+                    var json = System.Text.Json.JsonSerializer.Serialize(playlistDto);
+                    var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+                    var response = await client.PostAsync("https://localhost:7120/api/Playlists", content);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var responseContent = await response.Content.ReadAsStringAsync();
+                        
+                        // Si se creó correctamente y hay un contentId, agregarlo a la playlist
+                        if (contentId.HasValue)
+                        {
+                            var createdPlaylist = System.Text.Json.JsonSerializer.Deserialize<JsonElement>(responseContent);
+                            var playlistId = createdPlaylist.GetProperty("id").GetInt32();
+                            
+                            // Agregar el contenido a la playlist recién creada
+                            var contentJson = System.Text.Json.JsonSerializer.Serialize(contentId.Value);
+                            var contentToAdd = new StringContent(contentJson, System.Text.Encoding.UTF8, "application/json");
+                            var addResponse = await client.PostAsync($"https://localhost:7120/api/Playlists/{playlistId}/add", contentToAdd);
+                            
+                            if (addResponse.IsSuccessStatusCode)
+                            {
+                                return Json(new { success = true, message = "Playlist creada y contenido agregado correctamente" });
+                            }
+                            else
+                            {
+                                return Json(new { success = true, message = "Playlist creada, pero no se pudo agregar el contenido" });
+                            }
+                        }
+                        
+                        return Json(new { success = true, message = "Playlist creada correctamente" });
+                    }
+                    else
+                    {
+                        var errorContent = await response.Content.ReadAsStringAsync();
+                        return Json(new { success = false, message = "Error al crear playlist: " + errorContent });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
         }
     }
 }
