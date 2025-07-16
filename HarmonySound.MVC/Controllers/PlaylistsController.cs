@@ -26,25 +26,29 @@ namespace HarmonySound.MVC.Controllers
             {
                 int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
                 
-                // Usar el endpoint básico que funciona
-                var playlistsResponse = await _httpClient.GetAsync("https://localhost:7120/api/Playlists");
+                // Usar el endpoint específico del usuario
+                var playlistsResponse = await _httpClient.GetAsync($"https://localhost:7120/api/Playlists/user/{userId}");
                 
                 if (playlistsResponse.IsSuccessStatusCode)
                 {
                     var playlistsJson = await playlistsResponse.Content.ReadAsStringAsync();
                     var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                    var allPlaylists = JsonSerializer.Deserialize<JsonElement[]>(playlistsJson, options);
+                    var playlistsData = JsonSerializer.Deserialize<JsonElement[]>(playlistsJson, options);
                     
-                    // Filtrar solo las playlists del usuario actual y convertir a PlaylistDto
-                    var userPlaylists = allPlaylists
-                        .Where(p => p.TryGetProperty("userId", out var userIdProp) && userIdProp.GetInt32() == userId)
-                        .Select(p => new PlaylistDto
-                        {
-                            Id = p.GetProperty("id").GetInt32(),
-                            Name = p.GetProperty("name").GetString(),
-                            Songs = new List<PlaylistSongDto>() // Temporalmente vacío
-                        })
-                        .ToList();
+                    // Convertir a PlaylistDto con canciones
+                    var userPlaylists = playlistsData.Select(p => new PlaylistDto
+                    {
+                        Id = p.GetProperty("id").GetInt32(),
+                        Name = p.GetProperty("name").GetString(),
+                        Songs = p.TryGetProperty("songs", out var songs) 
+                            ? songs.EnumerateArray().Select(s => new PlaylistSongDto
+                            {
+                                ContentId = s.GetProperty("contentId").GetInt32(),
+                                Title = s.GetProperty("title").GetString(),
+                                UrlMedia = s.GetProperty("urlMedia").GetString()
+                            }).ToList() 
+                            : new List<PlaylistSongDto>()
+                    }).ToList();
                         
                     return View(userPlaylists);
                 }
@@ -53,7 +57,6 @@ namespace HarmonySound.MVC.Controllers
             }
             catch (Exception ex)
             {
-                // Log del error
                 System.Diagnostics.Debug.WriteLine($"Error in PlaylistsController.Index: {ex.Message}");
                 return View(new List<PlaylistDto>());
             }

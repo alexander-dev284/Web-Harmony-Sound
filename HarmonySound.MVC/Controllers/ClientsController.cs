@@ -247,21 +247,37 @@ namespace HarmonySound.MVC.Controllers
             try
             {
                 int userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier).Value);
+                System.Diagnostics.Debug.WriteLine($"=== MVC GetUserPlaylists called with userId: {userId} ===");
                 
                 using (var client = new HttpClient())
                 {
-                    var response = await client.GetAsync($"https://localhost:7120/api/Playlists/user/{userId}");
+                    var apiUrl = $"https://localhost:7120/api/Playlists/user/{userId}";
+                    System.Diagnostics.Debug.WriteLine($"Calling API: {apiUrl}");
+                    
+                    var response = await client.GetAsync(apiUrl);
+                    System.Diagnostics.Debug.WriteLine($"API Response Status: {response.StatusCode}");
                     
                     if (response.IsSuccessStatusCode)
                     {
                         var json = await response.Content.ReadAsStringAsync();
+                        System.Diagnostics.Debug.WriteLine($"API Response JSON: {json}");
+                        
+                        if (string.IsNullOrEmpty(json) || json == "null")
+                        {
+                            System.Diagnostics.Debug.WriteLine("Empty response from API");
+                            return Json(new List<object>());
+                        }
+                        
                         var playlists = System.Text.Json.JsonSerializer.Deserialize<JsonElement[]>(json);
+                        System.Diagnostics.Debug.WriteLine($"Deserialized {playlists.Length} playlists");
                         
                         var userPlaylists = playlists.Select(p => new {
                             id = p.GetProperty("id").GetInt32(),
-                            name = p.GetProperty("name").GetString()
+                            name = p.GetProperty("name").GetString(),
+                            songsCount = p.TryGetProperty("songs", out var songs) ? songs.GetArrayLength() : 0
                         }).ToList();
                         
+                        System.Diagnostics.Debug.WriteLine($"Returning {userPlaylists.Count} processed playlists");
                         return Json(userPlaylists);
                     }
                     else
@@ -274,7 +290,8 @@ namespace HarmonySound.MVC.Controllers
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Exception: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Exception in GetUserPlaylists: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
                 return Json(new List<object>());
             }
         }
@@ -284,25 +301,36 @@ namespace HarmonySound.MVC.Controllers
         {
             try
             {
+                System.Diagnostics.Debug.WriteLine($"=== MVC AddToPlaylist: playlist {playlistId}, content {contentId} ===");
+                
                 using (var client = new HttpClient())
                 {
                     var json = System.Text.Json.JsonSerializer.Serialize(contentId);
                     var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-                    var response = await client.PostAsync($"https://localhost:7120/api/Playlists/{playlistId}/add", content);
+                    
+                    var apiUrl = $"https://localhost:7120/api/Playlists/{playlistId}/add";
+                    System.Diagnostics.Debug.WriteLine($"Calling API: {apiUrl} with content: {json}");
+                    
+                    var response = await client.PostAsync(apiUrl, content);
+                    System.Diagnostics.Debug.WriteLine($"API Response Status: {response.StatusCode}");
 
                     if (response.IsSuccessStatusCode)
                     {
+                        var responseContent = await response.Content.ReadAsStringAsync();
+                        System.Diagnostics.Debug.WriteLine($"API Response: {responseContent}");
                         return Json(new { success = true, message = "Contenido agregado a la playlist" });
                     }
                     else
                     {
                         var errorContent = await response.Content.ReadAsStringAsync();
+                        System.Diagnostics.Debug.WriteLine($"API Error: {errorContent}");
                         return Json(new { success = false, message = "Error al agregar a playlist: " + errorContent });
                     }
                 }
             }
             catch (Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine($"Exception in AddToPlaylist: {ex.Message}");
                 return Json(new { success = false, message = ex.Message });
             }
         }
@@ -314,6 +342,8 @@ namespace HarmonySound.MVC.Controllers
             {
                 int userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier).Value);
                 
+                System.Diagnostics.Debug.WriteLine($"Creating playlist: {name} for user: {userId} with content: {contentId}");
+                
                 var playlistDto = new
                 {
                     Name = name,
@@ -324,17 +354,23 @@ namespace HarmonySound.MVC.Controllers
                 {
                     var json = System.Text.Json.JsonSerializer.Serialize(playlistDto);
                     var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+                    
+                    System.Diagnostics.Debug.WriteLine($"Sending to API: {json}");
+                    
                     var response = await client.PostAsync("https://localhost:7120/api/Playlists", content);
 
                     if (response.IsSuccessStatusCode)
                     {
                         var responseContent = await response.Content.ReadAsStringAsync();
+                        System.Diagnostics.Debug.WriteLine($"API Response: {responseContent}");
                         
                         // Si se creó correctamente y hay un contentId, agregarlo a la playlist
                         if (contentId.HasValue)
                         {
                             var createdPlaylist = System.Text.Json.JsonSerializer.Deserialize<JsonElement>(responseContent);
                             var playlistId = createdPlaylist.GetProperty("id").GetInt32();
+            
+                            System.Diagnostics.Debug.WriteLine($"Adding content {contentId} to playlist {playlistId}");
                             
                             // Agregar el contenido a la playlist recién creada
                             var contentJson = System.Text.Json.JsonSerializer.Serialize(contentId.Value);
@@ -347,6 +383,8 @@ namespace HarmonySound.MVC.Controllers
                             }
                             else
                             {
+                                var addError = await addResponse.Content.ReadAsStringAsync();
+                                System.Diagnostics.Debug.WriteLine($"Error adding content: {addError}");
                                 return Json(new { success = true, message = "Playlist creada, pero no se pudo agregar el contenido" });
                             }
                         }
@@ -356,12 +394,14 @@ namespace HarmonySound.MVC.Controllers
                     else
                     {
                         var errorContent = await response.Content.ReadAsStringAsync();
+                        System.Diagnostics.Debug.WriteLine($"API Error: {errorContent}");
                         return Json(new { success = false, message = "Error al crear playlist: " + errorContent });
                     }
                 }
             }
             catch (Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine($"Exception in CreatePlaylist: {ex.Message}");
                 return Json(new { success = false, message = ex.Message });
             }
         }
