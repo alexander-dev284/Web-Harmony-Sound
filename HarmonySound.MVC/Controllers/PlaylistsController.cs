@@ -6,7 +6,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using HarmonySound.API.DTOs;
+using HarmonySound.MVC.Models; // Usar el namespace local
 
 namespace HarmonySound.MVC.Controllers
 {
@@ -19,14 +19,26 @@ namespace HarmonySound.MVC.Controllers
             _httpClient = httpClient;
         }
 
-        // Mostrar todas las canciones y playlists del usuario
-        public async Task<IActionResult> Index()
+        // Mostrar todas las playlists del usuario con opción de agregar contenido
+        public async Task<IActionResult> Index(int? contentId = null)
         {
             try
             {
                 int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
                 
-                // Usar el endpoint específico del usuario
+                // Obtener información del contenido si se está agregando
+                Content selectedContent = null;
+                if (contentId.HasValue)
+                {
+                    var contentResponse = await _httpClient.GetAsync($"https://localhost:7120/api/Contents/{contentId.Value}");
+                    if (contentResponse.IsSuccessStatusCode)
+                    {
+                        var contentJson = await contentResponse.Content.ReadAsStringAsync();
+                        selectedContent = JsonSerializer.Deserialize<Content>(contentJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    }
+                }
+                
+                // Obtener playlists del usuario
                 var playlistsResponse = await _httpClient.GetAsync($"https://localhost:7120/api/Playlists/user/{userId}");
                 
                 if (playlistsResponse.IsSuccessStatusCode)
@@ -35,24 +47,31 @@ namespace HarmonySound.MVC.Controllers
                     var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                     var playlistsData = JsonSerializer.Deserialize<JsonElement[]>(playlistsJson, options);
                     
-                    // Convertir a PlaylistDto con canciones
                     var userPlaylists = playlistsData.Select(p => new PlaylistDto
                     {
                         Id = p.GetProperty("id").GetInt32(),
-                        Name = p.GetProperty("name").GetString(),
+                        Name = p.GetProperty("name").GetString() ?? "",
                         Songs = p.TryGetProperty("songs", out var songs) 
                             ? songs.EnumerateArray().Select(s => new PlaylistSongDto
                             {
                                 ContentId = s.GetProperty("contentId").GetInt32(),
-                                Title = s.GetProperty("title").GetString(),
-                                UrlMedia = s.GetProperty("urlMedia").GetString()
+                                Title = s.GetProperty("title").GetString() ?? "",
+                                UrlMedia = s.GetProperty("urlMedia").GetString() ?? "",
+                                ArtistName = s.TryGetProperty("artistName", out var artistName) 
+                                    ? artistName.GetString() ?? "Artista desconocido"
+                                    : "Artista desconocido"
                             }).ToList() 
                             : new List<PlaylistSongDto>()
                     }).ToList();
-                        
+                    
+                    ViewBag.SelectedContent = selectedContent;
+                    ViewBag.ContentId = contentId;
+                    
                     return View(userPlaylists);
                 }
                 
+                ViewBag.SelectedContent = selectedContent;
+                ViewBag.ContentId = contentId;
                 return View(new List<PlaylistDto>());
             }
             catch (Exception ex)
@@ -66,14 +85,25 @@ namespace HarmonySound.MVC.Controllers
         [HttpPost]
         public async Task<IActionResult> AddToPlaylist(int playlistId, int contentId)
         {
-            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
-            var content = new StringContent(contentId.ToString(), Encoding.UTF8, "application/json");
-            var response = await _httpClient.PostAsync($"https://localhost:7120/api/Playlists/{playlistId}/add", content);
+            try
+            {
+                var content = new StringContent(contentId.ToString(), Encoding.UTF8, "application/json");
+                var response = await _httpClient.PostAsync($"https://localhost:7120/api/Playlists/{playlistId}/add", content);
 
-            if (response.IsSuccessStatusCode)
-                TempData["Success"] = "Canción agregada a la playlist.";
-            else
-                TempData["Error"] = "No se pudo agregar la canción.";
+                if (response.IsSuccessStatusCode)
+                {
+                    TempData["Success"] = "Canción agregada a la playlist exitosamente.";
+                }
+                else
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    TempData["Error"] = $"No se pudo agregar la canción: {errorContent}";
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Error al agregar la canción: {ex.Message}";
+            }
 
             return RedirectToAction("Index");
         }

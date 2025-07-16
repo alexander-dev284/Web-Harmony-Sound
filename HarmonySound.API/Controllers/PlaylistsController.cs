@@ -117,7 +117,7 @@ namespace HarmonySound.API.Controllers
             return _context.Playlist.Any(e => e.Id == id);
         }
 
-        // Obtener playlists de un usuario con debugging mejorado
+        // Método mejorado para obtener playlists con información del artista
         [HttpGet("user/{userId}")]
         public async Task<ActionResult<IEnumerable<object>>> GetUserPlaylists(int userId)
         {
@@ -147,9 +147,10 @@ namespace HarmonySound.API.Controllers
                 {
                     System.Diagnostics.Debug.WriteLine($"Processing playlist: {playlist.Name} (ID: {playlist.Id})");
                     
-                    // Obtener contenidos de esta playlist
+                    // Obtener contenidos de esta playlist con información del artista
                     var playlistContents = await _context.PlaylistContents
                         .Include(pc => pc.Content)
+                        .ThenInclude(c => c.Artist)
                         .Where(pc => pc.PlaylistId == playlist.Id)
                         .ToListAsync();
                     
@@ -159,7 +160,8 @@ namespace HarmonySound.API.Controllers
                     {
                         ContentId = pc.ContentId,
                         Title = pc.Content?.Title ?? "Sin título",
-                        UrlMedia = pc.Content?.UrlMedia ?? ""
+                        UrlMedia = pc.Content?.UrlMedia ?? "",
+                        ArtistName = pc.Content?.Artist?.Name ?? "Artista desconocido"
                     }).ToList();
                     
                     result.Add(new {

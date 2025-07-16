@@ -86,14 +86,12 @@
                                                     data-user-id="@Model.Profile.Id">
                                                 ❤️ <span class="like-count">0</span>
                                             </button>
-                                            <button class="btn btn-outline-secondary btn-sm ms-2 playlist-btn" 
-                                                    data-content-id="@content.Id" 
-                                                    data-bs-toggle="modal" 
-                                                    data-bs-target="#playlistModal">
+                                            <button class="btn btn-outline-secondary btn-sm ms-2" 
+                                                    onclick="redirectToPlaylistsWithContent(@content.Id)">
                                                 📋 Agregar a Playlist
                                             </button>
                                         </div>
-                                        <small class="text-muted">Por: Artista</small>
+                                        <small class="text-muted">Por: @content.ArtistName</small>
                                     </div>
                                 </div>
                             </div>
@@ -109,7 +107,7 @@
     </div>
 </div>
 
-<!-- Modal y toast containers igual que antes -->
+<!-- Toast container -->
 <div class="toast-container position-fixed top-0 end-0 p-3">
     <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
         <div class="toast-header">
@@ -118,28 +116,6 @@
         </div>
         <div class="toast-body" id="toast-message">
             <!-- Mensaje dinámico aquí -->
-        </div>
-    </div>
-</div>
-
-<!-- Modal para seleccionar playlist -->
-<div class="modal fade" id="playlistModal" tabindex="-1" aria-labelledby="playlistModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="playlistModalLabel">Agregar a Playlist</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div id="playlist-list">
-                    <!-- Las playlists se cargarán aquí dinámicamente -->
-                </div>
-                <hr>
-                <div class="mt-3">
-                    <input type="text" id="new-playlist-name" class="form-control" placeholder="Nombre de nueva playlist">
-                    <button type="button" class="btn btn-success mt-2" id="create-playlist-btn">Crear Nueva Playlist</button>
-                </div>
-            </div>
         </div>
     </div>
 </div>
@@ -159,81 +135,6 @@
             
             // Configurar sistema de anuncios para cada audio
             setupAudioAds();
-            
-            // EVENT HANDLER PARA BOTÓN DE PLAYLIST - CORREGIDO
-            $(document).on('click', '.playlist-btn', function(e) {
-                e.preventDefault();
-                selectedContentId = $(this).data('content-id');
-                console.log('=== BOTÓN PLAYLIST CLICKEADO ===');
-                console.log('Contenido seleccionado:', selectedContentId);
-                console.log('Elemento que disparó el evento:', this);
-                
-                // Verificar que el ID se guardó correctamente
-                if (!selectedContentId) {
-                    console.error('No se pudo obtener el content-id del botón');
-                    showToast('Error: No se pudo seleccionar el contenido', 'error');
-                    return;
-                }
-            });
-            
-            // EVENT HANDLER PARA CREAR NUEVA PLAYLIST
-            $('#create-playlist-btn').click(function() {
-                console.log('=== CREAR PLAYLIST CLICKEADO ===');
-                console.log('selectedContentId actual:', selectedContentId);
-                
-                if (!selectedContentId) {
-                    console.error('No hay contenido seleccionado para crear playlist');
-                    showToast('Error: No se ha seleccionado contenido', 'error');
-                    return;
-                }
-                
-                var playlistName = $('#new-playlist-name').val().trim();
-                if (playlistName === '') {
-                    showToast('Por favor ingresa un nombre para la playlist', 'error');
-                    return;
-                }
-                
-                createPlaylistAndAddContent(playlistName);
-            });
-            
-            // EVENT HANDLER PARA CUANDO SE ABRE EL MODAL - ESTE ES EL IMPORTANTE
-            $('#playlistModal').on('show.bs.modal', function (e) {
-                console.log('=== MODAL ABIERTO ===');
-                console.log('selectedContentId:', selectedContentId);
-                console.log('Botón que disparó el modal:', e.relatedTarget);
-                
-                // Si no hay selectedContentId, tratar de obtenerlo del botón que disparó el modal
-                if (!selectedContentId && e.relatedTarget) {
-                    selectedContentId = $(e.relatedTarget).data('content-id');
-                    console.log('Obtenido selectedContentId del relatedTarget:', selectedContentId);
-                }
-                
-                if (selectedContentId) {
-                    console.log('Cargando playlists...');
-                    loadUserPlaylists();
-                } else {
-                    console.error('No hay contenido seleccionado');
-                    $('#playlist-list').html('<div class="text-center p-4"><p class="text-danger">Error: No se ha seleccionado contenido</p><small class="text-muted">Intenta hacer clic en el botón "Agregar a Playlist" de una canción</small></div>');
-                }
-            });
-            
-            // EVENT HANDLER PARA LIMPIAR EL INPUT CUANDO SE CIERRA EL MODAL
-            $('#playlistModal').on('hide.bs.modal', function (e) {
-                console.log('=== MODAL CERRADO ===');
-                $('#new-playlist-name').val('');
-                // NO limpiar selectedContentId aquí para mantener la selección
-                // selectedContentId = null; // COMENTADO - Esta línea causaba el problema
-            });
-            
-            // EVENT HANDLER ADICIONAL - Para cuando se hace clic fuera del modal
-            $('#playlistModal').on('hidden.bs.modal', function (e) {
-                console.log('=== MODAL COMPLETAMENTE CERRADO ===');
-                // Limpiar selectedContentId solo después de que el modal se cierre completamente
-                setTimeout(function() {
-                    selectedContentId = null;
-                    console.log('selectedContentId limpiado después del cierre completo');
-                }, 500);
-            });
             
             // Event handler para likes
             $('.like-btn').click(function() {
@@ -263,6 +164,12 @@
                     });
             });
         });
+        
+        // Función para redirigir a playlists con el contenido seleccionado
+        function redirectToPlaylistsWithContent(contentId) {
+            console.log('Redirecting to playlists with content:', contentId);
+            window.location.href = '@Url.Action("Index", "Playlists")?contentId=' + contentId;
+        }
         
         function checkPremiumStatus() {
             $.get('@Url.Action("CheckPremiumStatus", "Clients")')
@@ -452,6 +359,7 @@
                         data.forEach(function(playlist, index) {
                             var playlistName = playlist.name || 'Sin nombre';
                             var playlistId = playlist.id || 0;
+                            // CORRECCIÓN: Usar songsCount en lugar de songs.length
                             var songsCount = playlist.songsCount || 0;
                             
                             playlistHtml += `
@@ -481,9 +389,11 @@
                 },
                 error: function(xhr, status, error) {
                     console.error('Error al cargar playlists:', error);
+                    console.error('Response:', xhr.responseText);
                     $('#playlist-list').html(`
                         <div class="text-center p-4">
                             <p class="text-danger mb-1">Error al cargar playlists</p>
+                            <small class="text-muted">Status: ${status}, Error: ${error}</small><br>
                             <button class="btn btn-sm btn-outline-primary mt-2" onclick="loadUserPlaylists()">
                                 Intentar de nuevo
                             </button>
@@ -614,5 +524,26 @@
             console.log('selectedContentId actual:', selectedContentId);
             return selectedContentId;
         };
+        
+        // Función de debugging temporal - agregar después de la función loadUserPlaylists
+        function debugPlaylistData() {
+            $.ajax({
+                url: '@Url.Action("GetUserPlaylists", "Clients")',
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    console.log('=== DEBUG PLAYLIST DATA ===');
+                    console.log('Full response:', data);
+                    if (data && data.length > 0) {
+                        console.log('First playlist structure:', data[0]);
+                        console.log('Properties:', Object.keys(data[0]));
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Debug error:', error);
+                    console.error('Response text:', xhr.responseText);
+                }
+            });
+        }
     </script>
 }

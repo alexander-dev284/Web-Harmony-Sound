@@ -1,4 +1,4 @@
-﻿@model IEnumerable<HarmonySound.Models.Content>
+﻿@model IEnumerable<HarmonySound.MVC.Models.ContentWithArtistDto>
 
 @{
     ViewData["Title"] = "Contenido de Audio";
@@ -6,34 +6,97 @@
 
 <h2>Contenido de Audio</h2>
 
-@foreach (var item in Model)
-{
-    <div class="audio-item" style="margin-bottom: 2em;">
-        <h4>@item.Title</h4>
-        <div class="audio-container" data-content-id="@item.Id">
-            <audio controls style="width: 100%;" class="main-audio" data-src="@item.UrlMedia">
-                <source src="@item.UrlMedia" type="audio/mpeg" />
-                Tu navegador no soporta el elemento de audio.
-            </audio>
-            <div class="ad-notification" style="display: none;">
-                <small class="text-muted">Reproduciendo anuncio... <span class="ad-countdown"></span></small>
+<div class="row">
+    @foreach (var content in Model)
+    {
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">@content.Title</h5>
+                    <p class="card-text">@content.Type</p>
+                    <small class="text-muted mb-2">Por: @content.ArtistName</small>
+                    
+                    @if (!string.IsNullOrEmpty(content.UrlMedia))
+                    {
+                        <!-- Audio personalizado con sistema de anuncios -->
+                        <div class="audio-container mt-auto" data-content-id="@content.Id">
+                            <audio controls style="width: 100%;" class="mb-2 main-audio" data-src="@content.UrlMedia">
+                                <source src="@content.UrlMedia" type="audio/mpeg" />
+                                Tu navegador no soporta el elemento de audio.
+                            </audio>
+                            <div class="ad-notification" style="display: none;">
+                                <small class="text-muted">Reproduciendo anuncio... <span class="ad-countdown"></span></small>
+                            </div>
+                        </div>
+                    }
+                    
+                    <div class="mt-2">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <button class="btn btn-outline-primary btn-sm like-btn" 
+                                        data-content-id="@content.Id" 
+                                        data-user-id="@ViewBag.UserId">
+                                    ❤️ <span class="like-count">0</span>
+                                </button>
+                                <button class="btn btn-outline-secondary btn-sm ms-2" 
+                                        onclick="redirectToPlaylistsWithContent(@content.Id)">
+                                    📋 Agregar a Playlist
+                                </button>
+                            </div>
+                            <small class="text-muted">Duración: @content.Duration</small>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-        <div>
-            <small>Duración: @item.Duration</small>
-        </div>
-    </div>
-}
+    }
+</div>
 
 @section Scripts {
     <script>
+        let selectedContentId = null;
         let isPremiumUser = false;
         let audioStates = new Map();
         
         $(document).ready(function () {
             checkPremiumStatus();
             setupAudioAds();
+            loadLikes();
+            
+            // Event handler para likes
+            $('.like-btn').click(function() {
+                var contentId = $(this).data('content-id');
+                var userId = $(this).data('user-id');
+                var button = $(this);
+                
+                $.post('@Url.Action("LikeContent", "Clients")', { contentId: contentId, userId: userId })
+                    .done(function(data) {
+                        if (data.success) {
+                            loadLikesForContent(contentId);
+                            button.addClass('btn-primary').removeClass('btn-outline-primary');
+                            showToast('¡Contenido agregado a favoritos!', 'success');
+                        } else {
+                            $.post('@Url.Action("UnlikeContent", "Clients")', { contentId: contentId, userId: userId })
+                                .done(function(data) {
+                                    if (data.success) {
+                                        loadLikesForContent(contentId);
+                                        button.addClass('btn-outline-primary').removeClass('btn-primary');
+                                        showToast('Contenido removido de favoritos', 'info');
+                                    }
+                                });
+                        }
+                    })
+                    .fail(function() {
+                        showToast('Error al procesar la solicitud', 'error');
+                    });
+            });
         });
+        
+        // Función para redirigir a playlists con el contenido seleccionado
+        function redirectToPlaylistsWithContent(contentId) {
+            console.log('Redirecting to playlists with content:', contentId);
+            window.location.href = '@Url.Action("Index", "Playlists")?contentId=' + contentId;
+        }
         
         function checkPremiumStatus() {
             $.get('@Url.Action("CheckPremiumStatus", "Clients")')
@@ -117,6 +180,8 @@
                         console.error('Error al reproducir canción:', error);
                     });
                 }, 100);
+                
+                showToast('¡Ahora reproduciendo tu música!', 'success');
             } else {
                 state.hasPlayedAd = false;
                 state.isPlayingAd = false;
@@ -146,6 +211,8 @@
                         console.error('Error al reproducir canción después del error:', error);
                     });
                 }, 100);
+                
+                showToast('Error en anuncio, reproduciendo música', 'info');
             }
             
             audioStates.set(audioId, state);
@@ -198,6 +265,52 @@
                     });
                 });
         }
+        
+        function loadLikes() {
+            $('.like-btn').each(function() {
+                var contentId = $(this).data('content-id');
+                loadLikesForContent(contentId);
+            });
+        }
+        
+        function loadLikesForContent(contentId) {
+            $.get('@Url.Action("GetContentLikes", "Clients")', { contentId: contentId })
+                .done(function(data) {
+                    $('[data-content-id="' + contentId + '"] .like-count').text(data.likes);
+                });
+        }
+        
+        function showToast(message, type) {
+            const toastElement = document.getElementById('liveToast');
+            const messageElement = document.getElementById('toast-message');
+            
+            toastElement.className = 'toast';
+            if (type === 'success') {
+                toastElement.classList.add('bg-success', 'text-white');
+            } else if (type === 'error') {
+                toastElement.classList.add('bg-danger', 'text-white');
+            } else {
+                toastElement.classList.add('bg-info', 'text-white');
+            }
+            
+            messageElement.textContent = message;
+            
+            const toast = new bootstrap.Toast(toastElement);
+            toast.show();
+        }
     </script>
 }
+
+<!-- Toast container -->
+<div class="toast-container position-fixed top-0 end-0 p-3">
+    <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <strong class="me-auto">Harmony Sound</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body" id="toast-message">
+            <!-- Mensaje dinámico aquí -->
+        </div>
+    </div>
+</div>
 
