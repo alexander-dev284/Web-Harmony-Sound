@@ -546,7 +546,6 @@ C:\Universidad\Tercer Semestre\Web-Harmony-Sound\HarmonySound.API\bin\Debug\net8
 C:\Universidad\Tercer Semestre\Web-Harmony-Sound\HarmonySound.API\bin\Debug\net8.0\Microsoft.Extensions.Identity.Stores.dll
 C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.API\bin\Debug\net8.0\appsettings.Development.json
 C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.API\bin\Debug\net8.0\appsettings.json
-C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.API\bin\Debug\net8.0\HarmonySound.API.staticwebassets.runtime.json
 C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.API\bin\Debug\net8.0\HarmonySound.API.staticwebassets.endpoints.json
 C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.API\bin\Debug\net8.0\HarmonySound.API.exe
 C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.API\bin\Debug\net8.0\HarmonySound.API.deps.json
@@ -1107,3 +1106,5 @@ C:\Users\GIGABYTE\Desktop\Web-Harmony-Sound\HarmonySound.API\obj\Debug\net8.0\re
 C:\Users\GIGABYTE\Desktop\Web-Harmony-Sound\HarmonySound.API\obj\Debug\net8.0\HarmonySound.API.pdb
 C:\Users\GIGABYTE\Desktop\Web-Harmony-Sound\HarmonySound.API\obj\Debug\net8.0\HarmonySound.API.genruntimeconfig.cache
 C:\Users\GIGABYTE\Desktop\Web-Harmony-Sound\HarmonySound.API\obj\Debug\net8.0\ref\HarmonySound.API.dll
+C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.API\bin\Debug\net8.0\PayPal.dll
+C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.API\bin\Debug\net8.0\HarmonySound.API.staticwebassets.runtime.json

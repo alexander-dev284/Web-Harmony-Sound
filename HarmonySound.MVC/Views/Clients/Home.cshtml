@@ -67,10 +67,16 @@
                                     
                                     @if (!string.IsNullOrEmpty(content.UrlMedia))
                                     {
-                                        <audio controls style="width: 100%;" class="mb-2">
-                                            <source src="@content.UrlMedia" type="audio/mpeg" />
-                                            Tu navegador no soporta el elemento de audio.
-                                        </audio>
+                                        <!-- Audio personalizado con sistema de anuncios -->
+                                        <div class="audio-container" data-content-id="@content.Id">
+                                            <audio controls style="width: 100%;" class="mb-2 main-audio" data-src="@content.UrlMedia">
+                                                <source src="@content.UrlMedia" type="audio/mpeg" />
+                                                Tu navegador no soporta el elemento de audio.
+                                            </audio>
+                                            <div class="ad-notification" style="display: none;">
+                                                <small class="text-muted">Reproduciendo anuncio... <span class="ad-countdown"></span></small>
+                                            </div>
+                                        </div>
                                     }
                                     
                                     <div class="d-flex justify-content-between align-items-center">
@@ -103,7 +109,7 @@
     </div>
 </div>
 
-<!-- Agregar este contenedor después del div principal -->
+<!-- Modal y toast containers igual que antes -->
 <div class="toast-container position-fixed top-0 end-0 p-3">
     <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
         <div class="toast-header">
@@ -141,12 +147,20 @@
 @section Scripts {
     <script>
         let selectedContentId = null;
+        let isPremiumUser = false;
+        let audioStates = new Map(); // Para rastrear el estado de cada audio
         
         $(document).ready(function () {
+            // Verificar estado premium del usuario
+            checkPremiumStatus();
+            
             // Cargar likes iniciales
             loadLikes();
             
-            // Manejar click en botón de like
+            // Configurar sistema de anuncios para cada audio
+            setupAudioAds();
+            
+            // Resto del código JavaScript...
             $('.like-btn').click(function() {
                 var contentId = $(this).data('content-id');
                 var userId = $(this).data('user-id');
@@ -173,53 +187,228 @@
                         showToast('Error al procesar la solicitud', 'error');
                     });
             });
-            
-            // Manejar click en botón de playlist
-            $('.playlist-btn').click(function() {
-                console.log('=== CLICK EN BOTÓN PLAYLIST ===');
-                selectedContentId = $(this).data('content-id');
-                console.log('Content ID seleccionado:', selectedContentId);
-                
-                // Verificar que el modal existe
-                var modal = document.getElementById('playlistModal');
-                console.log('Modal encontrado:', modal);
-                
-                loadUserPlaylists();
-            });
-            
-            // Manejar creación de nueva playlist
-            $('#create-playlist-btn').click(function() {
-                var playlistName = $('#new-playlist-name').val();
-                if (playlistName.trim() === '') {
-                    showToast('Por favor ingresa un nombre para la playlist', 'error');
-                    return;
-                }
-                
-                $.post('@Url.Action("CreatePlaylist", "Clients")', { 
-                    name: playlistName,
-                    contentId: selectedContentId 
-                })
-                .done(function(data) {
-                    if (data.success) {
-                        showToast(data.message, 'success');
-                        $('#new-playlist-name').val('');
-                        $('#playlistModal').modal('hide');
-                    } else {
-                        showToast(data.message, 'error');
-                    }
-                });
-            });
         });
         
+        function checkPremiumStatus() {
+            $.get('@Url.Action("CheckPremiumStatus", "Clients")')
+                .done(function(data) {
+                    isPremiumUser = data.isPremium;
+                    console.log('Usuario premium:', isPremiumUser);
+                })
+                .fail(function() {
+                    isPremiumUser = false;
+                });
+        }
+        
+        function setupAudioAds() {
+            $('.main-audio').each(function() {
+                var audioElement = this;
+                var $container = $(audioElement).closest('.audio-container');
+                var originalSrc = $(audioElement).data('src');
+                var audioId = 'audio_' + Math.random().toString(36).substr(2, 9);
+                
+                // Inicializar estado del audio
+                audioStates.set(audioId, {
+                    isPlayingAd: false,
+                    hasPlayedAd: false,
+                    originalSrc: originalSrc,
+                    adProcessing: false
+                });
+                
+                // Agregar ID único al elemento
+                audioElement.dataset.audioId = audioId;
+                
+                // Agregar event listener para cuando se intente reproducir
+                audioElement.addEventListener('play', function(e) {
+                    handleAudioPlay(audioElement, audioId, $container);
+                });
+                
+                // Agregar event listener para cuando termine la reproducción
+                audioElement.addEventListener('ended', function(e) {
+                    handleAudioEnded(audioElement, audioId, $container);
+                });
+                
+                // Agregar event listener para errores
+                audioElement.addEventListener('error', function(e) {
+                    handleAudioError(audioElement, audioId, $container);
+                });
+            });
+        }
+        
+        function handleAudioPlay(audioElement, audioId, $container) {
+            var state = audioStates.get(audioId);
+            
+            if (!state) return;
+            
+            console.log('Play event - Estado:', state);
+            
+            // Si es premium, reproducir directamente
+            if (isPremiumUser) {
+                console.log('Usuario premium - reproduciendo directamente');
+                return;
+            }
+            
+            // Si ya está procesando un anuncio, no hacer nada
+            if (state.adProcessing) {
+                console.log('Ya procesando anuncio, ignorando...');
+                return;
+            }
+            
+            // Si ya está reproduciendo un anuncio, continuar
+            if (state.isPlayingAd) {
+                console.log('Reproduciendo anuncio, continuando...');
+                return;
+            }
+            
+            // Si ya reprodujo el anuncio, reproducir la canción
+            if (state.hasPlayedAd) {
+                console.log('Anuncio ya reproducido, reproduciendo canción');
+                return;
+            }
+            
+            // Reproducir anuncio antes del contenido
+            console.log('Iniciando reproducción de anuncio');
+            audioElement.pause();
+            playAdBeforeContent(audioElement, audioId, $container);
+        }
+        
+        function handleAudioEnded(audioElement, audioId, $container) {
+            var state = audioStates.get(audioId);
+            
+            if (!state) return;
+            
+            if (state.isPlayingAd) {
+                console.log('Anuncio terminado, reproduciendo canción original');
+                
+                // Marcar que el anuncio ya se reprodujo
+                state.hasPlayedAd = true;
+                state.isPlayingAd = false;
+                state.adProcessing = false;
+                
+                // Ocultar notificación de anuncio
+                $container.find('.ad-notification').hide();
+                
+                // Cambiar a la canción original
+                audioElement.src = state.originalSrc;
+                audioElement.load();
+                
+                // Reproducir la canción con un pequeño delay
+                setTimeout(function() {
+                    audioElement.play().catch(function(error) {
+                        console.error('Error al reproducir canción:', error);
+                    });
+                }, 100);
+                
+                showToast('¡Ahora reproduciendo tu música!', 'success');
+            } else {
+                console.log('Canción terminada');
+                // Resetear estado para próxima reproducción
+                state.hasPlayedAd = false;
+                state.isPlayingAd = false;
+                state.adProcessing = false;
+            }
+            
+            audioStates.set(audioId, state);
+        }
+        
+        function handleAudioError(audioElement, audioId, $container) {
+            var state = audioStates.get(audioId);
+            
+            if (!state) return;
+            
+            console.error('Error en audio:', audioElement.error);
+            
+            if (state.isPlayingAd) {
+                console.log('Error en anuncio, reproduciendo canción directamente');
+                
+                // Si hay error en el anuncio, reproducir la canción original
+                state.hasPlayedAd = true;
+                state.isPlayingAd = false;
+                state.adProcessing = false;
+                
+                $container.find('.ad-notification').hide();
+                
+                audioElement.src = state.originalSrc;
+                audioElement.load();
+                
+                setTimeout(function() {
+                    audioElement.play().catch(function(error) {
+                        console.error('Error al reproducir canción después del error:', error);
+                    });
+                }, 100);
+                
+                showToast('Error en anuncio, reproduciendo música', 'info');
+            }
+            
+            audioStates.set(audioId, state);
+        }
+        
+        function playAdBeforeContent(audioElement, audioId, $container) {
+            var state = audioStates.get(audioId);
+            
+            if (!state || state.adProcessing) return;
+            
+            // Marcar que se está procesando el anuncio
+            state.adProcessing = true;
+            audioStates.set(audioId, state);
+            
+            $.get('@Url.Action("GetRandomAd", "Clients")')
+                .done(function(adData) {
+                    console.log('Anuncio recibido:', adData);
+                    
+                    // Actualizar estado
+                    state.isPlayingAd = true;
+                    state.adProcessing = false;
+                    audioStates.set(audioId, state);
+                    
+                    // Mostrar notificación de anuncio
+                    $container.find('.ad-notification').show();
+                    
+                    // Cambiar la fuente del audio al anuncio
+                    audioElement.src = adData.url;
+                    audioElement.load();
+                    
+                    // Iniciar countdown
+                    var countdown = adData.duration;
+                    var countdownInterval = setInterval(function() {
+                        if (countdown > 0) {
+                            $container.find('.ad-countdown').text(countdown + 's');
+                            countdown--;
+                        } else {
+                            clearInterval(countdownInterval);
+                        }
+                    }, 1000);
+                    
+                    // Reproducir anuncio
+                    audioElement.play().catch(function(error) {
+                        console.error('Error al reproducir anuncio:', error);
+                        handleAudioError(audioElement, audioId, $container);
+                    });
+                })
+                .fail(function() {
+                    console.error('Error al cargar anuncio');
+                    
+                    // Si falla la carga del anuncio, reproducir música directamente
+                    state.hasPlayedAd = true;
+                    state.isPlayingAd = false;
+                    state.adProcessing = false;
+                    audioStates.set(audioId, state);
+                    
+                    audioElement.src = state.originalSrc;
+                    audioElement.load();
+                    audioElement.play().catch(function(error) {
+                        console.error('Error al reproducir canción después del fallo:', error);
+                    });
+                });
+        }
+        
+        // Resto de funciones existentes...
         function loadUserPlaylists() {
-            console.log('Cargando playlists...');
             $.get('@Url.Action("GetUserPlaylists", "Clients")')
                 .done(function(data) {
-                    console.log('Playlists recibidas:', data);
                     var playlistHtml = '';
                     if (data && data.length > 0) {
                         data.forEach(function(playlist) {
-                            console.log('Procesando playlist:', playlist);
                             playlistHtml += `
                                 <div class="d-flex justify-content-between align-items-center mb-2 p-2 border rounded">
                                     <span>${playlist.name}</span>
@@ -232,11 +421,7 @@
                     } else {
                         playlistHtml = '<p class="text-muted">No tienes playlists creadas</p>';
                     }
-                    console.log('HTML que se va a insertar:', playlistHtml);
                     $('#playlist-list').html(playlistHtml);
-                    
-                    // Verificar que el HTML se insertó correctamente
-                    console.log('Contenido del div después de insertar:', $('#playlist-list').html());
                 })
                 .fail(function(xhr, status, error) {
                     console.error('Error al cargar playlists:', error);

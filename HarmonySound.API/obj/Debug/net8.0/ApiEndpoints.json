@@ -1,5 +1,25 @@
 [
   {
+    "ContainingType": "HarmonySound.API.Controllers.AdsController",
+    "Method": "GetAvailableAds",
+    "RelativePath": "api/Ads/available",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "HarmonySound.API.Controllers.AdsController",
+    "Method": "GetRandomAd",
+    "RelativePath": "api/Ads/random",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "HarmonySound.API.Controllers.AlbumsController",
     "Method": "GetAlbums",
     "RelativePath": "api/Albums",
@@ -972,16 +992,6 @@
   },
   {
     "ContainingType": "HarmonySound.API.Controllers.PlaylistsController",
-    "Method": "GetDetailedPlaylists",
-    "RelativePath": "api/Playlists/detailed",
-    "HttpMethod": "GET",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "HarmonySound.API.Controllers.PlaylistsController",
     "Method": "GetUserPlaylists",
     "RelativePath": "api/Playlists/user/{userId}",
     "HttpMethod": "GET",
@@ -1421,6 +1431,80 @@
       }
     ],
     "ReturnTypes": []
+  },
+  {
+    "ContainingType": "HarmonySound.API.Controllers.UserPlansController",
+    "Method": "CancelSubscription",
+    "RelativePath": "api/UserPlans/cancel",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "HarmonySound.API.Controllers.CancelSubscriptionRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "HarmonySound.API.Controllers.UserPlansController",
+    "Method": "IsUserPremium",
+    "RelativePath": "api/UserPlans/is-premium/{userId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "HarmonySound.API.Controllers.UserPlansController",
+    "Method": "Subscribe",
+    "RelativePath": "api/UserPlans/subscribe",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "HarmonySound.API.Controllers.SubscribeRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "HarmonySound.API.Controllers.UserPlansController",
+    "Method": "GetUserPlan",
+    "RelativePath": "api/UserPlans/user/{userId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "HarmonySound.Models.UserPlan",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
   },
   {
     "ContainingType": "HarmonySound.API.Controllers.UserRolesController",

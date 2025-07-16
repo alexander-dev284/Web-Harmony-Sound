@@ -62,6 +62,7 @@ namespace HarmonySound.API
             builder.Services.AddTransient<IEmailSender, EmailService>();
             builder.Services.AddTransient<IJwtService, JwtService>();
             builder.Services.AddTransient<I2FAService, TwoFactorAuthService>();
+            builder.Services.AddTransient<IPayPalService, PayPalService>();
             builder.Services.AddMemoryCache(); // Necesario para TwoFactorAuthService
 
             var app = builder.Build();
@@ -74,6 +75,9 @@ namespace HarmonySound.API
             }
 
             app.UseHttpsRedirection();
+            
+            // AGREGAR ESTA LÍNEA PARA SERVIR ARCHIVOS ESTÁTICOS
+            app.UseStaticFiles();
 
             app.UseAuthentication();
             app.UseAuthorization();

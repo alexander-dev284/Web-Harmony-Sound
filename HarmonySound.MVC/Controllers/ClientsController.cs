@@ -365,5 +365,61 @@ namespace HarmonySound.MVC.Controllers
                 return Json(new { success = false, message = ex.Message });
             }
         }
+
+        [HttpGet]
+        public async Task<IActionResult> CheckPremiumStatus()
+        {
+            try
+            {
+                int userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier).Value);
+                
+                using (var client = new HttpClient())
+                {
+                    var response = await client.GetAsync($"https://localhost:7120/api/UserPlans/is-premium/{userId}");
+                    
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var json = await response.Content.ReadAsStringAsync();
+                        var result = System.Text.Json.JsonSerializer.Deserialize<dynamic>(json);
+                        return Json(result);
+                    }
+                    else
+                    {
+                        return Json(new { isPremium = false });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { isPremium = false });
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetRandomAd()
+        {
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    var response = await client.GetAsync("https://localhost:7120/api/Ads/random");
+                    
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var json = await response.Content.ReadAsStringAsync();
+                        var result = System.Text.Json.JsonSerializer.Deserialize<dynamic>(json);
+                        return Json(result);
+                    }
+                    else
+                    {
+                        return Json(new { url = "/ads/ad1.mp3", duration = 15, title = "Suscríbete a Premium" });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { url = "/ads/ad1.mp3", duration = 15, title = "Suscríbete a Premium" });
+            }
+        }
     }
 }

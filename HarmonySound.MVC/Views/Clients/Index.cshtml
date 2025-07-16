@@ -10,13 +10,194 @@
 {
     <div class="audio-item" style="margin-bottom: 2em;">
         <h4>@item.Title</h4>
-        <audio controls style="width: 100%;">
-            <source src="@item.UrlMedia" type="audio/mpeg" />
-            Tu navegador no soporta el elemento de audio.
-        </audio>
+        <div class="audio-container" data-content-id="@item.Id">
+            <audio controls style="width: 100%;" class="main-audio" data-src="@item.UrlMedia">
+                <source src="@item.UrlMedia" type="audio/mpeg" />
+                Tu navegador no soporta el elemento de audio.
+            </audio>
+            <div class="ad-notification" style="display: none;">
+                <small class="text-muted">Reproduciendo anuncio... <span class="ad-countdown"></span></small>
+            </div>
+        </div>
         <div>
             <small>Duración: @item.Duration</small>
         </div>
     </div>
+}
+
+@section Scripts {
+    <script>
+        let isPremiumUser = false;
+        let audioStates = new Map();
+        
+        $(document).ready(function () {
+            checkPremiumStatus();
+            setupAudioAds();
+        });
+        
+        function checkPremiumStatus() {
+            $.get('@Url.Action("CheckPremiumStatus", "Clients")')
+                .done(function(data) {
+                    isPremiumUser = data.isPremium;
+                    console.log('Usuario premium:', isPremiumUser);
+                })
+                .fail(function() {
+                    isPremiumUser = false;
+                });
+        }
+        
+        function setupAudioAds() {
+            $('.main-audio').each(function() {
+                var audioElement = this;
+                var $container = $(audioElement).closest('.audio-container');
+                var originalSrc = $(audioElement).data('src');
+                var audioId = 'audio_' + Math.random().toString(36).substr(2, 9);
+                
+                audioStates.set(audioId, {
+                    isPlayingAd: false,
+                    hasPlayedAd: false,
+                    originalSrc: originalSrc,
+                    adProcessing: false
+                });
+                
+                audioElement.dataset.audioId = audioId;
+                
+                audioElement.addEventListener('play', function(e) {
+                    handleAudioPlay(audioElement, audioId, $container);
+                });
+                
+                audioElement.addEventListener('ended', function(e) {
+                    handleAudioEnded(audioElement, audioId, $container);
+                });
+                
+                audioElement.addEventListener('error', function(e) {
+                    handleAudioError(audioElement, audioId, $container);
+                });
+            });
+        }
+        
+        function handleAudioPlay(audioElement, audioId, $container) {
+            var state = audioStates.get(audioId);
+            
+            if (!state) return;
+            
+            if (isPremiumUser) {
+                return;
+            }
+            
+            if (state.adProcessing || state.isPlayingAd) {
+                return;
+            }
+            
+            if (state.hasPlayedAd) {
+                return;
+            }
+            
+            audioElement.pause();
+            playAdBeforeContent(audioElement, audioId, $container);
+        }
+        
+        function handleAudioEnded(audioElement, audioId, $container) {
+            var state = audioStates.get(audioId);
+            
+            if (!state) return;
+            
+            if (state.isPlayingAd) {
+                state.hasPlayedAd = true;
+                state.isPlayingAd = false;
+                state.adProcessing = false;
+                
+                $container.find('.ad-notification').hide();
+                
+                audioElement.src = state.originalSrc;
+                audioElement.load();
+                
+                setTimeout(function() {
+                    audioElement.play().catch(function(error) {
+                        console.error('Error al reproducir canción:', error);
+                    });
+                }, 100);
+            } else {
+                state.hasPlayedAd = false;
+                state.isPlayingAd = false;
+                state.adProcessing = false;
+            }
+            
+            audioStates.set(audioId, state);
+        }
+        
+        function handleAudioError(audioElement, audioId, $container) {
+            var state = audioStates.get(audioId);
+            
+            if (!state) return;
+            
+            if (state.isPlayingAd) {
+                state.hasPlayedAd = true;
+                state.isPlayingAd = false;
+                state.adProcessing = false;
+                
+                $container.find('.ad-notification').hide();
+                
+                audioElement.src = state.originalSrc;
+                audioElement.load();
+                
+                setTimeout(function() {
+                    audioElement.play().catch(function(error) {
+                        console.error('Error al reproducir canción después del error:', error);
+                    });
+                }, 100);
+            }
+            
+            audioStates.set(audioId, state);
+        }
+        
+        function playAdBeforeContent(audioElement, audioId, $container) {
+            var state = audioStates.get(audioId);
+            
+            if (!state || state.adProcessing) return;
+            
+            state.adProcessing = true;
+            audioStates.set(audioId, state);
+            
+            $.get('@Url.Action("GetRandomAd", "Clients")')
+                .done(function(adData) {
+                    state.isPlayingAd = true;
+                    state.adProcessing = false;
+                    audioStates.set(audioId, state);
+                    
+                    $container.find('.ad-notification').show();
+                    
+                    audioElement.src = adData.url;
+                    audioElement.load();
+                    
+                    var countdown = adData.duration;
+                    var countdownInterval = setInterval(function() {
+                        if (countdown > 0) {
+                            $container.find('.ad-countdown').text(countdown + 's');
+                            countdown--;
+                        } else {
+                            clearInterval(countdownInterval);
+                        }
+                    }, 1000);
+                    
+                    audioElement.play().catch(function(error) {
+                        console.error('Error al reproducir anuncio:', error);
+                        handleAudioError(audioElement, audioId, $container);
+                    });
+                })
+                .fail(function() {
+                    state.hasPlayedAd = true;
+                    state.isPlayingAd = false;
+                    state.adProcessing = false;
+                    audioStates.set(audioId, state);
+                    
+                    audioElement.src = state.originalSrc;
+                    audioElement.load();
+                    audioElement.play().catch(function(error) {
+                        console.error('Error al reproducir canción después del fallo:', error);
+                    });
+                });
+        }
+    </script>
 }
 

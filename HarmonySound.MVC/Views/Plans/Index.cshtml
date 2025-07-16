@@ -2,6 +2,22 @@
 
 <h2>Subscription Management</h2>
 
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
 @if (Model.CurrentPlan != null)
 {
     <div class="alert alert-info">
@@ -15,6 +31,14 @@
             <span class="badge bg-success">No ads</span>
             <span class="badge bg-primary">Account limit: @Model.CurrentPlan.AccountLimit</span>
         }
+        <div class="mt-2">
+            <form asp-action="Cancel" method="post" style="display:inline;">
+                <button type="submit" class="btn btn-outline-danger btn-sm" 
+                        onclick="return confirm('¿Estás seguro de que quieres cancelar tu suscripción?')">
+                    Cancel Subscription
+                </button>
+            </form>
+        </div>
     </div>
 }
 else
@@ -33,10 +57,20 @@ else
                     <p>@plan.Description</p>
                     <p><strong>Price:</strong> $@plan.Price</p>
                     <p><strong>Account limit:</strong> @plan.AccountLimit</p>
-                    <form asp-action="Subscribe" method="post">
-                        <input type="hidden" name="planId" value="@plan.Id" />
-                        <button type="submit" class="btn btn-success">Subscribe</button>
-                    </form>
+                    
+                    @if (Model.CurrentPlan?.Id == plan.Id)
+                    {
+                        <button class="btn btn-success" disabled>Current Plan</button>
+                    }
+                    else
+                    {
+                        <form asp-action="Subscribe" method="post">
+                            <input type="hidden" name="planId" value="@plan.Id" />
+                            <button type="submit" class="btn btn-success">
+                                Subscribe (30 days free trial)
+                            </button>
+                        </form>
+                    }
                 </div>
             </div>
         </div>
