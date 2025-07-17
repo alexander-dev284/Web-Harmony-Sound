@@ -16,6 +16,8 @@ namespace HarmonySound.API.Controllers
             _context = context;
         }
 
+        // ============= ENDPOINTS DE NEGOCIO (ORIGINALES) =============
+
         [HttpGet("user/{userId}")]
         public async Task<ActionResult<UserPlan>> GetUserPlan(int userId)
         {
@@ -308,9 +310,100 @@ namespace HarmonySound.API.Controllers
                 return StatusCode(500, new { error = "Error al obtener historial", details = ex.Message });
             }
         }
+
+        // ============= ENDPOINTS CRUD (DE UsersPlansController) =============
+
+        // GET: api/UserPlans
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<UserPlan>>> GetAllUserPlans()
+        {
+            return await _context.UsersPlans
+                .Include(up => up.User)
+                .Include(up => up.Plan)
+                .ToListAsync();
+        }
+
+        // GET: api/UserPlans/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<UserPlan>> GetUserPlanById(int id)
+        {
+            var userPlan = await _context.UsersPlans
+                .Include(up => up.User)
+                .Include(up => up.Plan)
+                .FirstOrDefaultAsync(up => up.Id == id);
+
+            if (userPlan == null)
+            {
+                return NotFound();
+            }
+
+            return userPlan;
+        }
+
+        // PUT: api/UserPlans/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutUserPlan(int id, UserPlan userPlan)
+        {
+            if (id != userPlan.Id)
+            {
+                return BadRequest();
+            }
+
+            _context.Entry(userPlan).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!UserPlanExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
+        }
+
+        // POST: api/UserPlans
+        [HttpPost]
+        public async Task<ActionResult<UserPlan>> PostUserPlan(UserPlan userPlan)
+        {
+            _context.UsersPlans.Add(userPlan);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetUserPlanById), new { id = userPlan.Id }, userPlan);
+        }
+
+        // DELETE: api/UserPlans/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteUserPlan(int id)
+        {
+            var userPlan = await _context.UsersPlans.FindAsync(id);
+            if (userPlan == null)
+            {
+                return NotFound();
+            }
+
+            _context.UsersPlans.Remove(userPlan);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        private bool UserPlanExists(int id)
+        {
+            return _context.UsersPlans.Any(e => e.Id == id);
+        }
     }
 
-    // CLASES DE REQUEST EXISTENTES
+    // ============= CLASES DE REQUEST =============
+
     public class SubscribeRequest
     {
         public int UserId { get; set; }

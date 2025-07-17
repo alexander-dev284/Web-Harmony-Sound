@@ -2,56 +2,53 @@
     ViewData["Title"] = "Pago Exitoso";
 }
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card border-success payment-success-card">
-                <div class="card-header bg-success text-white text-center">
-                    <div class="success-icon">
-                        <i class="fas fa-check-circle fa-4x mb-3"></i>
+<div class="payment-success-container">
+    <div class="payment-success-card">
+        <div class="success-header">
+            <div class="success-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h1 class="success-title">¡Pago Exitoso!</h1>
+        </div>
+        
+        <div class="success-content">
+            <div class="success-message">
+                <h2 class="activation-title">Tu suscripción ha sido activada</h2>
+                <p class="success-description">
+                    ¡Felicidades! Ahora puedes disfrutar de todas las características premium de HarmonySound.
+                </p>
+                
+                <div class="premium-features">
+                    <h3 class="features-title">Ahora tienes acceso a:</h3>
+                    <div class="features-grid">
+                        <div class="feature-item">
+                            <i class="fas fa-check feature-check"></i>
+                            <span>Sin anuncios</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-check feature-check"></i>
+                            <span>Audio HD</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-check feature-check"></i>
+                            <span>Descargas offline</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-check feature-check"></i>
+                            <span>Soporte prioritario</span>
+                        </div>
                     </div>
-                    <h3 class="mb-0">¡Pago Exitoso!</h3>
                 </div>
-                <div class="card-body text-center p-4">
-                    <div class="success-message">
-                        <h5 class="text-success mb-3">Tu suscripción ha sido activada</h5>
-                        <p class="lead mb-4">
-                            ¡Felicidades! Ahora puedes disfrutar de todas las características premium de HarmonySound.
-                        </p>
-                        
-                        <div class="premium-features mb-4">
-                            <h6 class="text-muted mb-3">Ahora tienes acceso a:</h6>
-                            <div class="row">
-                                <div class="col-6 mb-2">
-                                    <i class="fas fa-check text-success me-2"></i>
-                                    <small>Sin anuncios</small>
-                                </div>
-                                <div class="col-6 mb-2">
-                                    <i class="fas fa-check text-success me-2"></i>
-                                    <small>Audio HD</small>
-                                </div>
-                                <div class="col-6 mb-2">
-                                    <i class="fas fa-check text-success me-2"></i>
-                                    <small>Descargas offline</small>
-                                </div>
-                                <div class="col-6 mb-2">
-                                    <i class="fas fa-check text-success me-2"></i>
-                                    <small>Soporte prioritario</small>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="action-buttons">
-                            <a href="@Url.Action("Index", "Plans")" class="btn btn-success me-2">
-                                <i class="fas fa-arrow-left me-1"></i>
-                                Volver a Planes
-                            </a>
-                            <a href="@Url.Action("Home", "Clients")" class="btn btn-primary">
-                                <i class="fas fa-music me-1"></i>
-                                Explorar Música
-                            </a>
-                        </div>
-                    </div>
+                
+                <div class="action-buttons">
+                    <a href="@Url.Action("Index", "Plans")" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>
+                        Volver a Planes
+                    </a>
+                    <a href="@Url.Action("Home", "Clients")" class="btn btn-primary">
+                        <i class="fas fa-music me-2"></i>
+                        Explorar Música
+                    </a>
                 </div>
             </div>
         </div>
@@ -59,54 +56,205 @@
 </div>
 
 <style>
+    /* CSS Base - Mantener consistencia con la app */
+    body { 
+        background: #000 !important; 
+        color: #fff !important; 
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important; 
+        margin: 0; 
+        padding: 0; 
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Contenedor principal */
+    .payment-success-container {
+        width: 100%;
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+    }
+
+    /* Tarjeta de éxito */
     .payment-success-card {
-        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-        border: none;
-        border-radius: 15px;
+        background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+        border: 1px solid #333;
+        border-radius: 20px;
         overflow: hidden;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        width: 100%;
+        animation: slideInUp 0.6s ease-out;
     }
-    
-    .card-header {
-        border-bottom: none;
-        padding: 2rem 1rem;
+
+    /* Header con ícono de éxito */
+    .success-header {
+        background: linear-gradient(135deg, #1db954, #1ed760);
+        text-align: center;
+        padding: 3rem 2rem 2rem;
+        position: relative;
     }
-    
+
     .success-icon {
-        animation: bounceIn 0.8s ease-out;
+        font-size: 4rem;
+        color: #fff;
+        margin-bottom: 1rem;
+        animation: bounceIn 0.8s ease-out 0.2s both;
     }
-    
+
+    .success-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #fff;
+        margin: 0;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Contenido principal */
+    .success-content {
+        padding: 2.5rem;
+    }
+
     .success-message {
-        animation: fadeInUp 0.6s ease-out 0.2s both;
+        text-align: center;
+        animation: fadeInUp 0.6s ease-out 0.4s both;
     }
-    
+
+    .activation-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #1db954;
+        margin-bottom: 1rem;
+    }
+
+    .success-description {
+        font-size: 1.1rem;
+        color: #b3b3b3;
+        line-height: 1.6;
+        margin-bottom: 2rem;
+        max-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    /* Características premium */
     .premium-features {
-        background: #f8f9fa;
+        background: #1a1a1a;
+        border: 1px solid #333;
+        border-radius: 15px;
+        padding: 2rem;
+        margin: 2rem 0;
+        animation: fadeInUp 0.6s ease-out 0.6s both;
+    }
+
+    .features-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #fff;
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    .feature-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        background: #121212;
         border-radius: 10px;
-        padding: 1.5rem;
-        margin: 1rem 0;
-    }
-    
-    .premium-features .col-6 {
-        text-align: left;
-    }
-    
-    .action-buttons {
-        margin-top: 2rem;
-    }
-    
-    .btn {
-        border-radius: 8px;
-        font-weight: 500;
-        padding: 10px 20px;
+        border: 1px solid #282828;
         transition: all 0.3s ease;
     }
-    
-    .btn:hover {
+
+    .feature-item:hover {
+        border-color: #1db954;
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     }
-    
-    /* CORRECCIÓN: Usar @@ para keyframes en Razor */
+
+    .feature-check {
+        color: #1db954;
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+
+    .feature-item span {
+        color: #fff;
+        font-weight: 500;
+        font-size: 0.95rem;
+    }
+
+    /* Botones de acción */
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2.5rem;
+        animation: fadeInUp 0.6s ease-out 0.8s both;
+    }
+
+    .btn {
+        padding: 12px 24px;
+        border-radius: 25px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        font-size: 1rem;
+        min-width: 160px;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #1db954, #1ed760);
+        color: #000;
+        box-shadow: 0 4px 15px rgba(29, 185, 84, 0.3);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(29, 185, 84, 0.4);
+        color: #000;
+    }
+
+    .btn-secondary {
+        background: transparent;
+        color: #b3b3b3;
+        border: 1px solid #404040;
+    }
+
+    .btn-secondary:hover {
+        background: #1a1a1a;
+        color: #fff;
+        border-color: #1db954;
+        transform: translateY(-2px);
+    }
+
+    /* Animaciones */
+    @@keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
     @@keyframes bounceIn {
         0% {
             transform: scale(0);
@@ -121,15 +269,77 @@
             opacity: 1;
         }
     }
-    
+
     @@keyframes fadeInUp {
         from {
             opacity: 0;
-            transform: translateY(20px);
+            transform: translateY(30px);
         }
         to {
             opacity: 1;
             transform: translateY(0);
         }
     }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .payment-success-container {
+            padding: 1rem;
+        }
+
+        .success-header {
+            padding: 2rem 1.5rem 1.5rem;
+        }
+
+        .success-icon {
+            font-size: 3rem;
+        }
+
+        .success-title {
+            font-size: 2rem;
+        }
+
+        .success-content {
+            padding: 2rem 1.5rem;
+        }
+
+        .features-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .btn {
+            width: 100%;
+            max-width: 280px;
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .success-title {
+            font-size: 1.75rem;
+        }
+
+        .activation-title {
+            font-size: 1.25rem;
+        }
+
+        .success-description {
+            font-size: 1rem;
+        }
+    }
+
+    /* Ocultar elementos del layout si es necesario */
+    header, footer { display: none !important; }
+    
+    /* FontAwesome */
+    .fas { 
+        font-family: "Font Awesome 5 Free" !important; 
+        font-weight: 900 !important; 
+    }
 </style>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">

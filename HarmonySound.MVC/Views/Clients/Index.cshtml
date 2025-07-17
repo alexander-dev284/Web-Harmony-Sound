@@ -129,7 +129,7 @@
             </div>
         </div>
 
-        <!-- Controles adicionales (SIN botón de pantalla completa) -->
+        <!-- Controles adicionales -->
         <div class="extra-controls">
             <button class="control-btn" id="queue-btn" title="Cola">
                 <i class="fas fa-list"></i>
@@ -138,18 +138,16 @@
                 <button class="control-btn" id="volume-btn" title="Volumen">
                     <i class="fas fa-volume-up"></i>
                 </button>
-                <!-- Control de volumen personalizado - SIEMPRE VISIBLE -->
                 <div class="custom-volume-slider" id="custom-volume-slider">
                     <div class="volume-background"></div>
                     <div class="volume-fill" id="volume-fill"></div>
                     <div class="volume-handle" id="volume-handle"></div>
                 </div>
             </div>
-            <!-- ❌ ELIMINADO: Botón de pantalla completa -->
         </div>
     </div>
 
-    <!-- Audio oculto SIN controles nativos y SIN autoplay -->
+    <!-- Audio oculto -->
     <audio id="hidden-audio" style="display: none;" preload="metadata">
         <source id="audio-source" src="" type="audio/mpeg">
     </audio>
@@ -229,14 +227,6 @@
     .song-actions .btn:hover { background: #1a1a1a !important; color: #fff !important; transform: scale(1.1); }
     .btn-like:hover, .btn-playlist:hover, .btn-play:hover { color: #1db954 !important; }
 
-    /* ✅ NUEVO: Estilos para botón de like activado */
-    .song-actions .btn-like.liked {
-        color: #1db954 !important;
-    }
-    .song-actions .btn-like.liked:hover {
-        color: #1ed760 !important;
-    }
-
     .song-duration { 
         grid-area: duration; font-size: 14px; color: #b3b3b3 !important; 
         font-variant-numeric: tabular-nums; text-align: right; 
@@ -282,14 +272,6 @@
     }
     .btn-heart:hover { color: #1db954; }
     
-    /* ✅ NUEVO: Estilos para corazón activado en el reproductor */
-    .btn-heart.liked {
-        color: #1db954 !important;
-    }
-    .btn-heart.liked:hover {
-        color: #1ed760 !important;
-    }
-
     /* Controles centrales */
     .player-controls { display: flex; flex-direction: column; align-items: center; gap: 8px; }
     .control-buttons { display: flex; align-items: center; gap: 16px; }
@@ -343,17 +325,12 @@
     .extra-controls { 
         display: flex; align-items: center; justify-content: flex-end; gap: 16px; 
     }
-
-    /* ✅ MODIFICADO: Control de volumen personalizado - SIEMPRE VISIBLE */
     .volume-control { display: flex; align-items: center; gap: 8px; }
     .custom-volume-slider {
         position: relative; width: 80px; height: 4px; cursor: pointer;
-        border-radius: 2px; overflow: hidden; 
-        /* ✅ CAMBIO: Removido opacity: 0 para que sea siempre visible */
-        opacity: 1 !important; 
+        border-radius: 2px; overflow: hidden; opacity: 1 !important; 
         transition: opacity 0.3s ease;
     }
-    /* ✅ CAMBIO: Ya no necesita hover para mostrarse */
     .volume-background { 
         position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
         background: #535353; border-radius: 2px; 
@@ -380,7 +357,7 @@
     @@media (max-width: 480px) {
         .custom-player { height: 80px; }
         .now-playing { gap: 8px; }
-        .track-cover { width: 48px; height: 48px; }
+        .track-cover { width: 48px; height: 48px; } 
         .control-btn { width: 28px; height: 28px; }
         .play-btn { width: 36px !important; height: 36px !important; }
     }
@@ -397,9 +374,9 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
 <script>
-// ===== REPRODUCTOR DE AUDIO 100% PERSONALIZADO =====
+// ===== REPRODUCTOR DE AUDIO 100% PERSONALIZADO PARA INDEX =====
 
-class CustomAudioPlayer {
+class IndexAudioPlayer {
     constructor() {
         this.audio = null;
         this.currentTrack = null;
@@ -413,7 +390,7 @@ class CustomAudioPlayer {
         this.isProgressDragging = false;
         this.isVolumeDragging = false;
         
-        // ✅ NUEVO: Set para almacenar IDs de contenido con like
+        // Set para almacenar IDs de contenido con like
         this.likedContentIds = new Set();
         
         // Referencias a elementos DOM
@@ -434,16 +411,15 @@ class CustomAudioPlayer {
     }
     
     init() {
-        console.log('Inicializando reproductor personalizado...');
+        console.log('Inicializando reproductor personalizado para Index...');
         
-        // Crear elemento de audio oculto - ✅ SIN AUTOPLAY
+        // Crear elemento de audio oculto
         this.audio = document.getElementById('hidden-audio');
         if (!this.audio) {
             this.audio = document.createElement('audio');
             this.audio.id = 'hidden-audio';
             this.audio.style.display = 'none';
             this.audio.preload = 'metadata';
-            // ✅ IMPORTANTE: NO agregar autoplay
             document.body.appendChild(this.audio);
         }
         
@@ -456,13 +432,13 @@ class CustomAudioPlayer {
         // Verificar estado premium
         this.checkPremiumStatus();
         
-        // ✅ NUEVO: Cargar estados de likes
+        // Cargar estados de likes
         this.loadLikeStates();
         
         // Configurar volumen inicial
         this.setVolume(this.volume);
         
-        console.log('Reproductor personalizado inicializado');
+        console.log('Reproductor personalizado para Index inicializado');
     }
     
     getElementReferences() {
@@ -510,7 +486,7 @@ class CustomAudioPlayer {
             btn.addEventListener('click', (e) => {
                 e.preventDefault();
                 const track = this.extractTrackData(btn);
-                this.playTrack(track);
+                this.playTrackAndStart(track);
             });
         });
         
@@ -522,7 +498,7 @@ class CustomAudioPlayer {
             });
         });
         
-        // ✅ NUEVO: Botón de like en el reproductor
+        // Botón de like en el reproductor
         const heartBtn = document.getElementById('like-current-btn');
         if (heartBtn) {
             heartBtn.addEventListener('click', () => {
@@ -537,7 +513,6 @@ class CustomAudioPlayer {
     }
     
     setupProgressBar() {
-        // Mouse down en la barra
         this.progressBar.addEventListener('mousedown', (e) => {
             this.isProgressDragging = true;
             this.progressBar.classList.add('dragging');
@@ -545,7 +520,6 @@ class CustomAudioPlayer {
             this.seekToPosition(e);
         });
         
-        // Mouse down en el handle
         this.progressHandle.addEventListener('mousedown', (e) => {
             e.stopPropagation();
             this.isProgressDragging = true;
@@ -553,14 +527,12 @@ class CustomAudioPlayer {
             document.body.classList.add('noselect');
         });
         
-        // Mouse move global
         document.addEventListener('mousemove', (e) => {
             if (this.isProgressDragging) {
                 this.seekToPosition(e);
             }
         });
         
-        // Mouse up global
         document.addEventListener('mouseup', () => {
             if (this.isProgressDragging) {
                 this.isProgressDragging = false;
@@ -571,26 +543,22 @@ class CustomAudioPlayer {
     }
     
     setupVolumeControl() {
-        // Mouse down en control de volumen
         this.volumeControl.addEventListener('mousedown', (e) => {
             this.isVolumeDragging = true;
             this.setVolumeFromPosition(e);
         });
         
-        // Mouse down en el handle
         this.volumeHandle.addEventListener('mousedown', (e) => {
             e.stopPropagation();
             this.isVolumeDragging = true;
         });
         
-        // Mouse move global para volumen
         document.addEventListener('mousemove', (e) => {
             if (this.isVolumeDragging) {
                 this.setVolumeFromPosition(e);
             }
         });
         
-        // Mouse up global para volumen
         document.addEventListener('mouseup', () => {
             this.isVolumeDragging = false;
         });
@@ -605,13 +573,14 @@ class CustomAudioPlayer {
         };
     }
     
-    async playTrack(track) {
+    // Cargar y reproducir automáticamente
+    async playTrackAndStart(track) {
         if (!track || !track.url) {
             console.error('Track inválido');
             return;
         }
         
-        console.log('Reproduciendo:', track.title);
+        console.log('Reproduciendo automáticamente:', track.title);
         
         this.currentTrack = track;
         
@@ -619,7 +588,7 @@ class CustomAudioPlayer {
         if (this.trackTitle) this.trackTitle.textContent = track.title || 'Canción desconocida';
         if (this.trackArtist) this.trackArtist.textContent = track.artist || 'Artista desconocido';
         
-        // ✅ NUEVO: Actualizar estado del corazón en el reproductor
+        // Actualizar estado del corazón en el reproductor
         this.updatePlayerHeartButton();
         
         // Mostrar reproductor
@@ -637,12 +606,25 @@ class CustomAudioPlayer {
             songItem.classList.add('playing');
         }
         
-        // ✅ MODIFICADO: Configurar y reproducir SIN autoplay
-        this.audio.src = track.url;
-        await this.audio.load();
-        
-        // NO reproducir automáticamente, solo cargar
-        console.log('Audio cargado y listo. Esperando interacción del usuario.');
+        try {
+            // Configurar y cargar audio
+            this.audio.src = track.url;
+            await this.audio.load();
+            
+            // REPRODUCIR AUTOMÁTICAMENTE (para usuarios premium)
+            if (this.isPremiumUser) {
+                await this.audio.play();
+                this.isPlaying = true;
+                this.updatePlayPauseButton();
+                console.log('Reproduciendo automáticamente (usuario premium):', track.title);
+            } else {
+                // Para usuarios no premium, iniciar con anuncios
+                await this.playWithAds(track);
+            }
+        } catch (error) {
+            console.error('Error al reproducir automáticamente:', error);
+            console.log('Fallback: Audio cargado, esperando interacción del usuario');
+        }
     }
     
     async playWithAds(track) {
@@ -694,7 +676,6 @@ class CustomAudioPlayer {
         
         try {
             if (this.audio.paused) {
-                // ✅ NUEVO: Verificar si necesita anuncios al iniciar reproducción
                 if (this.audio.currentTime === 0 && !this.isPremiumUser) {
                     await this.playWithAds(this.currentTrack);
                 } else {
@@ -748,7 +729,6 @@ class CustomAudioPlayer {
             this.audio.volume = this.volume;
         }
         
-        // Actualizar visualización del volumen
         if (this.volumeFill) {
             this.volumeFill.style.width = (this.volume * 100) + '%';
         }
@@ -757,7 +737,6 @@ class CustomAudioPlayer {
             this.volumeHandle.style.left = (this.volume * 100) + '%';
         }
         
-        // Cambiar icono según volumen
         const volumeBtn = document.getElementById('volume-btn');
         if (volumeBtn) {
             const icon = volumeBtn.querySelector('i');
@@ -841,7 +820,6 @@ class CustomAudioPlayer {
         }
     }
     
-    // ✅ NUEVO: Cargar estados de likes al inicializar
     async loadLikeStates() {
         try {
             const response = await fetch('@Url.Action("GetUserLikes", "Clients")');
@@ -855,7 +833,6 @@ class CustomAudioPlayer {
         }
     }
     
-    // ✅ NUEVO: Actualizar todos los botones de like
     updateAllLikeButtons() {
         document.querySelectorAll('.like-btn').forEach(btn => {
             const contentId = btn.getAttribute('data-content-id');
@@ -869,7 +846,6 @@ class CustomAudioPlayer {
         });
     }
     
-    // ✅ NUEVO: Actualizar botón del corazón en el reproductor
     updatePlayerHeartButton() {
         const heartBtn = document.getElementById('like-current-btn');
         if (heartBtn && this.currentTrack) {
@@ -897,7 +873,6 @@ class CustomAudioPlayer {
             const isCurrentlyLiked = this.likedContentIds.has(contentId);
             
             if (isCurrentlyLiked) {
-                // Unlike
                 const response = await fetch('@Url.Action("UnlikeContent", "Clients")', {
                     method: 'POST',
                     body: formData
@@ -911,7 +886,6 @@ class CustomAudioPlayer {
                     this.showToast('Contenido removido de favoritos', 'info');
                 }
             } else {
-                // Like
                 const response = await fetch('@Url.Action("LikeContent", "Clients")', {
                     method: 'POST',
                     body: formData
@@ -926,7 +900,6 @@ class CustomAudioPlayer {
                 }
             }
             
-            // ✅ Actualizar botón del reproductor si es la canción actual
             if (this.currentTrack && this.currentTrack.id === contentId) {
                 this.updatePlayerHeartButton();
             }
@@ -1007,7 +980,7 @@ function redirectToPlaylistsWithContent(contentId) {
 
 // Inicializar reproductor cuando se carga el DOM
 document.addEventListener('DOMContentLoaded', () => {
-    window.customPlayer = new CustomAudioPlayer();
+    window.indexPlayer = new IndexAudioPlayer();
 });
 
 // Funciones de debug

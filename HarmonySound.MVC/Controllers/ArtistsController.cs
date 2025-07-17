@@ -1,6 +1,6 @@
 ﻿using HarmonySound.Models;
 using HarmonySound.API.Consumer;
-using HarmonySound.MVC.Models; // Asegúrate de tener el using correcto
+using HarmonySound.MVC.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
@@ -36,7 +36,7 @@ namespace HarmonySound.MVC.Controllers
                 var dto = System.Text.Json.JsonSerializer.Deserialize<ProfileEditViewModel>(json, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
                 ViewBag.Success = TempData["Success"];
-                return View(dto); // Pasa el perfil a la vista Home
+                return View(dto);
             }
         }
 
@@ -69,7 +69,7 @@ namespace HarmonySound.MVC.Controllers
                 return View(model);
             }
 
-            // Subida de imagen (igual que en ClientsController)
+            // Subida de imagen
             if (model.ProfileImageFile != null && model.ProfileImageFile.Length > 0)
             {
                 using (var client = new HttpClient())
@@ -144,46 +144,47 @@ namespace HarmonySound.MVC.Controllers
             return RedirectToAction("Home");
         }
 
-        // Este método se invoca cuando el formulario de la vista "UploadAudio" se envía.
+        // ✅ NUEVO: Vista Upload - Solo para mostrar el formulario de subida
+        public IActionResult Upload()
+        {
+            return View();
+        }
+
+        // ✅ MODIFICADO: UploadAudio - Redirige a Upload después de subir
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UploadAudio(IFormCollection form)
         {
             try
             {
-                // Obtener el archivo desde el formulario
                 var file = form.Files["File"];
                 if (file == null || file.Length == 0)
                 {
                     TempData["Error"] = "Archivo no válido.";
-                    return RedirectToAction("Index"); // Redirige a la vista Index en caso de error
+                    return RedirectToAction("Upload");
                 }
 
-                // Log de información sobre el archivo
                 System.Diagnostics.Debug.WriteLine($"Nombre: {file.FileName}, Tamaño: {file.Length}");
 
                 if (string.IsNullOrWhiteSpace(form["Title"]) || string.IsNullOrWhiteSpace(form["Type"]) || string.IsNullOrWhiteSpace(form["ArtistId"]))
                 {
                     TempData["Error"] = "Todos los campos son obligatorios.";
-                    return RedirectToAction("Index");
+                    return RedirectToAction("Upload");
                 }
 
                 using var content = new MultipartFormDataContent();
-                content.Add(new StringContent(form["Title"]), "Title"); // Título del contenido
-                content.Add(new StringContent(form["Type"]), "Type");   // Tipo del contenido
-                content.Add(new StringContent(form["ArtistId"]), "ArtistId"); // ID del artista
+                content.Add(new StringContent(form["Title"]), "Title");
+                content.Add(new StringContent(form["Type"]), "Type");
+                content.Add(new StringContent(form["ArtistId"]), "ArtistId");
 
-                // Validar tamaño máximo antes de abrir el stream
                 if (file.Length > 50 * 1024 * 1024)
                 {
                     TempData["Error"] = "El archivo es demasiado grande.";
-                    return RedirectToAction("Index");
+                    return RedirectToAction("Upload");
                 }
 
-                // Agregar el archivo al contenido
                 content.Add(new StreamContent(file.OpenReadStream()), "File", file.FileName);
 
-                // Realizar la solicitud POST a la API para cargar el archivo
                 var response = await _httpClient.PostAsync("https://localhost:7120/api/Contents/upload", content);
 
                 if (response.IsSuccessStatusCode)
@@ -202,27 +203,23 @@ namespace HarmonySound.MVC.Controllers
                 System.Diagnostics.Debug.WriteLine("Excepción: " + ex.ToString());
             }
 
-            return RedirectToAction("Index"); // Redirige al Index después de intentar subir el archivo
+            return RedirectToAction("Upload");
         }
 
-        // Método que muestra todos los contenidos del artista
+        // ✅ MODIFICADO: Index - Para mostrar las canciones con reproductor
         public async Task<IActionResult> Index()
         {
-            // Obtén el ID del artista (usuario autenticado)
             var nameIdentifierClaim = User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
             if (nameIdentifierClaim == null || !int.TryParse(nameIdentifierClaim.Value, out int artistId))
             {
                 ViewBag.Error = "Tu sesión no es válida. Por favor, cierra sesión y vuelve a iniciar sesión.";
-                return View("Error401"); // Muestra una vista de error si el usuario no tiene sesión
+                return View("Error401");
             }
 
-            // Configura el endpoint de la API para obtener todos los contenidos del artista
             Crud<Content>.EndPoint = "https://localhost:7120/api/Contents";
-            var allContents = Crud<Content>.GetAll(); // Obtiene todos los contenidos
-
-            // Filtra los contenidos para mostrar solo los del artista actual
+            var allContents = Crud<Content>.GetAll();
             var myContents = allContents.Where(c => c.ArtistId == artistId).ToList();
-            return View(myContents); // Pasa los contenidos al Index
+            return View(myContents);
         }
     }
 }
