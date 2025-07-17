@@ -1,78 +1,529 @@
 ﻿@model HarmonySound.MVC.Models.SubscriptionViewModel
 
-<h2>Subscription Management</h2>
+@{
+    ViewData["Title"] = "Planes de Suscripción";
+}
 
-@if (TempData["Success"] != null)
-{
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        @TempData["Success"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+<div class="plans-container">
+    <div class="plans-header">
+        <h1 class="plans-title">
+            <i class="fas fa-crown me-3"></i>
+            Planes de Suscripción
+        </h1>
+        <p class="plans-subtitle">Elige el plan que mejor se adapte a tus necesidades</p>
     </div>
-}
-
-@if (TempData["Error"] != null)
-{
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        @TempData["Error"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-}
-
-@if (Model.CurrentPlan != null)
-{
-    <div class="alert alert-info">
-        <strong>Your current plan:</strong> @Model.CurrentPlan.PlanName
-        @if (Model.CurrentPlan.Price == 0)
-        {
-            <span class="badge bg-warning text-dark">With ads</span>
-        }
-        else
-        {
-            <span class="badge bg-success">No ads</span>
-            <span class="badge bg-primary">Account limit: @Model.CurrentPlan.AccountLimit</span>
-        }
-        <div class="mt-2">
-            <form asp-action="Cancel" method="post" style="display:inline;">
-                <button type="submit" class="btn btn-outline-danger btn-sm" 
-                        onclick="return confirm('¿Estás seguro de que quieres cancelar tu suscripción?')">
-                    Cancel Subscription
-                </button>
-            </form>
-        </div>
-    </div>
-}
-else
-{
-    <div class="alert alert-warning">You currently have the Free plan (with ads).</div>
-}
-
-<h3>Premium Plans</h3>
-<div class="row">
-    @foreach (var plan in Model.PremiumPlans)
+    
+    @if (TempData["Success"] != null)
     {
-        <div class="col-md-4">
-            <div class="card mb-3">
-                <div class="card-body plan-card">
-                    <h5 class="card-title">@plan.PlanName</h5>
-                    <p>@plan.Description</p>
-                    <p><strong>Price:</strong> $@plan.Price</p>
-                    <p><strong>Account limit:</strong> @plan.AccountLimit</p>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Warning"] != null)
+    {
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            @TempData["Warning"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Plan Actual -->
+    @if (Model.CurrentPlan != null)
+    {
+        <div class="current-plan-card">
+            <div class="current-plan-header">
+                <h3>
+                    <i class="fas fa-crown me-2"></i>
+                    Tu Plan Actual
+                </h3>
+            </div>
+            <div class="current-plan-body">
+                <div class="current-plan-info">
+                    <h4>@Model.CurrentPlan.PlanName</h4>
+                    <p>@Model.CurrentPlan.Description</p>
+                    <div class="current-plan-price">
+                        <span class="price-amount">$@Model.CurrentPlan.Price.ToString("F2")</span>
+                        <span class="price-period">/mes</span>
+                    </div>
+                </div>
+                <div class="current-plan-actions">
+                    <form asp-action="Cancel" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-cancel" 
+                                onclick="return confirm('¿Estás seguro de que deseas cancelar tu suscripción?');">
+                            <i class="fas fa-times me-1"></i>
+                            Cancelar Suscripción
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="no-plan-alert">
+            <i class="fas fa-info-circle me-2"></i>
+            No tienes ningún plan activo. ¡Suscríbete a un plan premium para disfrutar de todas las funcionalidades!
+        </div>
+    }
+
+    <!-- Planes Disponibles -->
+    <div class="plans-grid">
+        @foreach (var plan in Model.PremiumPlans)
+        {
+            <div class="plan-card @(Model.CurrentPlan?.Id == plan.Id ? "active-plan" : "")">
+                <div class="plan-header">
+                    <h3 class="plan-name">
+                        @plan.PlanName
+                        @if (Model.CurrentPlan?.Id == plan.Id)
+                        {
+                            <i class="fas fa-check-circle ms-2 text-success"></i>
+                        }
+                    </h3>
+                    <p class="plan-description">@plan.Description</p>
+                </div>
+                
+                <div class="plan-features">
+                    <ul class="features-list">
+                        <li class="feature-item">
+                            <i class="fas fa-check text-success me-2"></i>
+                            <span>Reproducción sin anuncios</span>
+                        </li>
+                        <li class="feature-item">
+                            <i class="fas fa-check text-success me-2"></i>
+                            <span>Calidad de audio superior</span>
+                        </li>
+                        <li class="feature-item">
+                            <i class="fas fa-check text-success me-2"></i>
+                            <span>Descargas offline</span>
+                        </li>
+                        <li class="feature-item">
+                            <i class="fas fa-check text-success me-2"></i>
+                            <span>Soporte prioritario</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="plan-footer">
+                    <div class="plan-price">
+                        <span class="price-amount">$@plan.Price.ToString("F2")</span>
+                        <span class="price-period">/mes</span>
+                    </div>
                     
                     @if (Model.CurrentPlan?.Id == plan.Id)
                     {
-                        <button class="btn btn-success" disabled>Current Plan</button>
+                        <button class="btn btn-active" disabled>
+                            <i class="fas fa-check me-1"></i>
+                            Plan Activo
+                        </button>
                     }
                     else
                     {
-                        <form asp-action="Subscribe" method="post">
+                        <form asp-action="Subscribe" method="post" class="subscription-form">
                             <input type="hidden" name="planId" value="@plan.Id" />
-                            <button type="submit" class="btn btn-success">
-                                Subscribe (30 days free trial)
+                            <button type="submit" class="btn btn-subscribe">
+                                <i class="fab fa-paypal me-1"></i>
+                                Suscribirse con PayPal
                             </button>
                         </form>
                     }
                 </div>
             </div>
-        </div>
-    }
+        }
+    </div>
 </div>
+
+<style>
+    /* Resetear estilos del layout principal */
+    .container {
+        max-width: none !important;
+        padding: 0 !important;
+    }
+
+    body {
+        background: #000 !important;
+        color: #fff !important;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+        margin: 0;
+        padding: 0;
+    }
+
+    .plans-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+        min-height: 100vh;
+    }
+
+    .plans-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .plans-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: #fff !important;
+        background: linear-gradient(135deg, #1db954, #1ed760);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .plans-subtitle {
+        color: #b3b3b3 !important;
+        font-size: 1.1rem;
+        margin-bottom: 0;
+    }
+
+    /* Alertas */
+    .alert {
+        border-radius: 8px;
+        border: none;
+        margin-bottom: 2rem;
+    }
+
+    .alert-success {
+        background: rgba(29, 185, 84, 0.1);
+        color: #1db954;
+        border: 1px solid rgba(29, 185, 84, 0.3);
+    }
+
+    .alert-danger {
+        background: rgba(220, 53, 69, 0.1);
+        color: #dc3545;
+        border: 1px solid rgba(220, 53, 69, 0.3);
+    }
+
+    .alert-warning {
+        background: rgba(255, 193, 7, 0.1);
+        color: #ffc107;
+        border: 1px solid rgba(255, 193, 7, 0.3);
+    }
+
+    .no-plan-alert {
+        background: rgba(23, 162, 184, 0.1);
+        color: #17a2b8;
+        border: 1px solid rgba(23, 162, 184, 0.3);
+        padding: 1rem;
+        border-radius: 8px;
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    /* Plan Actual */
+    .current-plan-card {
+        background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+        border: 2px solid #1db954;
+        border-radius: 12px;
+        margin-bottom: 3rem;
+        overflow: hidden;
+        box-shadow: 0 8px 25px rgba(29, 185, 84, 0.2);
+    }
+
+    .current-plan-header {
+        background: linear-gradient(135deg, #1db954, #1ed760);
+        color: #000;
+        padding: 1.5rem;
+        text-align: center;
+    }
+
+    .current-plan-header h3 {
+        margin: 0;
+        font-weight: 600;
+        font-size: 1.5rem;
+    }
+
+    .current-plan-body {
+        padding: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .current-plan-info h4 {
+        color: #fff;
+        margin-bottom: 0.5rem;
+        font-size: 1.5rem;
+    }
+
+    .current-plan-info p {
+        color: #b3b3b3;
+        margin-bottom: 1rem;
+    }
+
+    .current-plan-price {
+        display: flex;
+        align-items: baseline;
+        gap: 0.5rem;
+    }
+
+    .current-plan-price .price-amount {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #1db954;
+    }
+
+    .current-plan-price .price-period {
+        color: #b3b3b3;
+        font-size: 1rem;
+    }
+
+    .btn-cancel {
+        background: transparent;
+        border: 2px solid #dc3545;
+        color: #dc3545;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+
+    .btn-cancel:hover {
+        background: #dc3545;
+        color: #fff;
+        transform: translateY(-2px);
+    }
+
+    /* Grid de Planes */
+    .plans-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 2rem;
+    }
+
+    .plan-card {
+        background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+        border: 2px solid #333;
+        border-radius: 12px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .plan-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        border-color: #1db954;
+    }
+
+    .plan-card.active-plan {
+        border-color: #1db954;
+        box-shadow: 0 8px 25px rgba(29, 185, 84, 0.3);
+    }
+
+    .plan-header {
+        padding: 2rem;
+        text-align: center;
+        border-bottom: 1px solid #333;
+    }
+
+    .plan-name {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 0.5rem;
+    }
+
+    .plan-description {
+        color: #b3b3b3;
+        margin: 0;
+        font-size: 0.95rem;
+    }
+
+    .plan-features {
+        padding: 2rem;
+        flex-grow: 1;
+    }
+
+    .features-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .feature-item {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 0;
+        color: #fff;
+        font-weight: 500;
+    }
+
+    .feature-item:not(:last-child) {
+        border-bottom: 1px solid #333;
+    }
+
+    .plan-footer {
+        padding: 2rem;
+        text-align: center;
+        border-top: 1px solid #333;
+    }
+
+    .plan-price {
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: baseline;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .plan-price .price-amount {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #1db954;
+    }
+
+    .plan-price .price-period {
+        color: #b3b3b3;
+        font-size: 1rem;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        border: none;
+        width: 100%;
+        font-size: 1rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .btn-subscribe {
+        background: linear-gradient(135deg, #1db954, #1ed760);
+        color: #000;
+        box-shadow: 0 4px 15px rgba(29, 185, 84, 0.3);
+    }
+
+    .btn-subscribe:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(29, 185, 84, 0.4);
+        color: #000;
+    }
+
+    .btn-active {
+        background: #28a745;
+        color: #fff;
+        cursor: not-allowed;
+        opacity: 0.8;
+    }
+
+    .subscription-form {
+        width: 100%;
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .plans-container {
+            padding: 1rem;
+        }
+
+        .plans-title {
+            font-size: 2rem;
+        }
+
+        .plans-grid {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        .current-plan-body {
+            flex-direction: column;
+            gap: 1.5rem;
+            text-align: center;
+        }
+
+        .plan-header {
+            padding: 1.5rem;
+        }
+
+        .plan-features {
+            padding: 1.5rem;
+        }
+
+        .plan-footer {
+            padding: 1.5rem;
+        }
+    }
+
+    /* Ocultar elementos del layout principal */
+    header, footer {
+        display: none !important;
+    }
+
+    /* FontAwesome */
+    .fas, .fab {
+        font-family: "Font Awesome 5 Free" !important;
+        font-weight: 900 !important;
+    }
+
+    .fab {
+        font-family: "Font Awesome 5 Brands" !important;
+        font-weight: 400 !important;
+    }
+</style>
+
+<!-- FontAwesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const subscriptionForms = document.querySelectorAll('.subscription-form');
+        
+        subscriptionForms.forEach(form => {
+            form.addEventListener('submit', function(e) {
+                const button = this.querySelector('.btn-subscribe');
+                
+                // Mostrar loading
+                button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Procesando...';
+                button.disabled = true;
+                
+                // Crear y mostrar modal de carga
+                showPaymentModal();
+            });
+        });
+        
+        function showPaymentModal() {
+            const modalHtml = `
+                <div class="modal fade" id="paymentModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content" style="background: #1a1a1a; border: 1px solid #333;">
+                            <div class="modal-body text-center p-4">
+                                <div class="spinner-border text-primary mb-3" role="status">
+                                    <span class="visually-hidden">Cargando...</span>
+                                </div>
+                                <h5 style="color: #fff;">Procesando pago...</h5>
+                                <p style="color: #b3b3b3;">Serás redirigido a PayPal para completar el pago.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            const modal = new bootstrap.Modal(document.getElementById('paymentModal'));
+            modal.show();
+        }
+    });
+</script>

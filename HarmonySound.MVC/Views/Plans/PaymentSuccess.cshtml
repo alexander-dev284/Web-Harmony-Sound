@@ -1,0 +1,135 @@
+@{
+    ViewData["Title"] = "Pago Exitoso";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-success payment-success-card">
+                <div class="card-header bg-success text-white text-center">
+                    <div class="success-icon">
+                        <i class="fas fa-check-circle fa-4x mb-3"></i>
+                    </div>
+                    <h3 class="mb-0">¡Pago Exitoso!</h3>
+                </div>
+                <div class="card-body text-center p-4">
+                    <div class="success-message">
+                        <h5 class="text-success mb-3">Tu suscripción ha sido activada</h5>
+                        <p class="lead mb-4">
+                            ¡Felicidades! Ahora puedes disfrutar de todas las características premium de HarmonySound.
+                        </p>
+                        
+                        <div class="premium-features mb-4">
+                            <h6 class="text-muted mb-3">Ahora tienes acceso a:</h6>
+                            <div class="row">
+                                <div class="col-6 mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    <small>Sin anuncios</small>
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    <small>Audio HD</small>
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    <small>Descargas offline</small>
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    <small>Soporte prioritario</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="action-buttons">
+                            <a href="@Url.Action("Index", "Plans")" class="btn btn-success me-2">
+                                <i class="fas fa-arrow-left me-1"></i>
+                                Volver a Planes
+                            </a>
+                            <a href="@Url.Action("Home", "Clients")" class="btn btn-primary">
+                                <i class="fas fa-music me-1"></i>
+                                Explorar Música
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .payment-success-card {
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        border: none;
+        border-radius: 15px;
+        overflow: hidden;
+    }
+    
+    .card-header {
+        border-bottom: none;
+        padding: 2rem 1rem;
+    }
+    
+    .success-icon {
+        animation: bounceIn 0.8s ease-out;
+    }
+    
+    .success-message {
+        animation: fadeInUp 0.6s ease-out 0.2s both;
+    }
+    
+    .premium-features {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin: 1rem 0;
+    }
+    
+    .premium-features .col-6 {
+        text-align: left;
+    }
+    
+    .action-buttons {
+        margin-top: 2rem;
+    }
+    
+    .btn {
+        border-radius: 8px;
+        font-weight: 500;
+        padding: 10px 20px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    
+    /* CORRECCIÓN: Usar @@ para keyframes en Razor */
+    @@keyframes bounceIn {
+        0% {
+            transform: scale(0);
+            opacity: 0;
+        }
+        50% {
+            transform: scale(1.1);
+            opacity: 1;
+        }
+        100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+    
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>

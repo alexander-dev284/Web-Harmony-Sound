@@ -8,7 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Http.Features;
 using HarmonySound.API.Services;
-using Microsoft.AspNetCore.Identity.UI.Services; 
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 namespace HarmonySound.API
 {
@@ -17,6 +17,7 @@ namespace HarmonySound.API
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            
             builder.Services.AddDbContext<HarmonySoundDbContext>(options =>
                 options.UseNpgsql(builder.Configuration.GetConnectionString("HarmonySoundDbContext") ?? throw new InvalidOperationException("Connection string 'HarmonySoundDbContext' not found.")));
 
@@ -54,7 +55,6 @@ namespace HarmonySound.API
             });
 
             builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
@@ -62,7 +62,8 @@ namespace HarmonySound.API
             builder.Services.AddTransient<IEmailSender, EmailService>();
             builder.Services.AddTransient<IJwtService, JwtService>();
             builder.Services.AddTransient<I2FAService, TwoFactorAuthService>();
-            builder.Services.AddTransient<IPayPalService, PayPalService>();
+            // CORRECCIÓN: Registrar PayPalService con logger
+            builder.Services.AddScoped<IPayPalService, PayPalService>();
             builder.Services.AddMemoryCache(); // Necesario para TwoFactorAuthService
 
             var app = builder.Build();

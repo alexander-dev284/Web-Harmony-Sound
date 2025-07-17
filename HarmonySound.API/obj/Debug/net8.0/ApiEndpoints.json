@@ -663,6 +663,38 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "HarmonySound.API.Controllers.PayPalController",
+    "Method": "CreatePayment",
+    "RelativePath": "api/PayPal/create-payment",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "HarmonySound.API.Controllers.CreatePaymentRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "HarmonySound.API.Controllers.PayPalController",
+    "Method": "ExecutePayment",
+    "RelativePath": "api/PayPal/execute-payment",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "HarmonySound.API.Controllers.ExecutePaymentRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "HarmonySound.API.Controllers.PlansController",
     "Method": "GetPlan",
     "RelativePath": "api/Plans",
@@ -1450,6 +1482,32 @@
   },
   {
     "ContainingType": "HarmonySound.API.Controllers.UserPlansController",
+    "Method": "CheckExpiredSubscriptions",
+    "RelativePath": "api/UserPlans/check-expired",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "HarmonySound.API.Controllers.UserPlansController",
+    "Method": "GetSubscriptionHistory",
+    "RelativePath": "api/UserPlans/history/{userId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "HarmonySound.API.Controllers.UserPlansController",
     "Method": "IsUserPremium",
     "RelativePath": "api/UserPlans/is-premium/{userId}",
     "HttpMethod": "GET",
@@ -1459,6 +1517,22 @@
       {
         "Name": "userId",
         "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "HarmonySound.API.Controllers.UserPlansController",
+    "Method": "ProcessSubscription",
+    "RelativePath": "api/UserPlans/process-subscription",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "HarmonySound.API.Controllers.ProcessSubscriptionRequest",
         "IsRequired": true
       }
     ],

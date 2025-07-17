@@ -1,38 +1,481 @@
 ﻿@model IEnumerable<HarmonySound.API.DTOs.AlbumDto>
 
 @{
-    ViewData["Title"] = "Albums";
+    ViewData["Title"] = "Mis Álbumes";
 }
 
-<h2>Albums</h2>
-<a asp-action="Create" class="btn btn-primary mb-3">Create New Album</a>
+<div class="albums-container">
+    <div class="albums-header">
+        <h1 class="albums-title">
+            <i class="fas fa-compact-disc me-3"></i>
+            Mis Álbumes
+        </h1>
+        <p class="albums-subtitle">Gestiona y organiza tus álbumes musicales</p>
+        
+        <div class="header-actions">
+            <a asp-action="Create" class="btn-create">
+                <i class="fas fa-plus me-2"></i>
+                Crear Nuevo Álbum
+            </a>
+        </div>
+    </div>
 
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Title</th>
-            <th>Artist</th>
-            <th>Creation Date</th>
-            <th>Songs</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-    @foreach (var album in Model)
-    {
-        <tr>
-            <td>@album.Title</td>
-            <td>@album.ArtistName</td>
-            <td>@album.CreationDate.ToString("yyyy-MM-dd")</td>
-            <td>@(album.Contents?.Count ?? 0)</td>
-            <td>
-                <a asp-action="Details" asp-route-id="@album.Id" class="btn btn-info btn-sm">Details</a>
-                <a asp-action="Edit" asp-route-id="@album.Id" class="btn btn-warning btn-sm">Edit</a>
-                <form asp-action="Delete" asp-route-id="@album.Id" method="post" class="d-inline">
-                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?');">Delete</button>
-                </form>
-            </td>
-        </tr>
+    <div class="albums-grid">
+        @if (Model.Any())
+        {
+            @foreach (var album in Model)
+            {
+                <div class="album-card">
+                    <div class="album-cover">
+                        <div class="cover-placeholder">
+                            <i class="fas fa-compact-disc"></i>
+                        </div>
+                        <div class="album-overlay">
+                            <button class="play-album-btn" title="Reproducir álbum">
+                                <i class="fas fa-play"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="album-info">
+                        <h3 class="album-title">@album.Title</h3>
+                        <p class="album-artist">@album.ArtistName</p>
+                        <div class="album-meta">
+                            <span class="album-date">
+                                <i class="fas fa-calendar-alt me-1"></i>
+                                @album.CreationDate.ToString("MMM yyyy")
+                            </span>
+                            <span class="album-songs">
+                                <i class="fas fa-music me-1"></i>
+                                @(album.Contents?.Count ?? 0) canción(es)
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="album-actions">
+                        <div class="action-buttons">
+                            <a asp-action="Details" asp-route-id="@album.Id" class="btn-action btn-details" title="Ver detalles">
+                                <i class="fas fa-info-circle"></i>
+                            </a>
+                            <a asp-action="Edit" asp-route-id="@album.Id" class="btn-action btn-edit" title="Editar">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <form asp-action="Delete" asp-route-id="@album.Id" method="post" class="d-inline delete-form">
+                                <button type="submit" class="btn-action btn-delete" title="Eliminar" onclick="return confirm('¿Estás seguro de que quieres eliminar este álbum?');">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-compact-disc"></i>
+                </div>
+                <h3>No tienes álbumes aún</h3>
+                <p>Crea tu primer álbum para organizar tus canciones</p>
+                <a asp-action="Create" class="btn-create">
+                    <i class="fas fa-plus me-2"></i>
+                    Crear Mi Primer Álbum
+                </a>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    /* Resetear estilos del layout principal */
+    .container {
+        max-width: none !important;
+        padding: 0 !important;
     }
-    </tbody>
-</table>
+
+    body {
+        background: #000 !important;
+        color: #fff !important;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+        margin: 0;
+        padding: 0;
+    }
+
+    .albums-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+        min-height: 100vh;
+    }
+
+    .albums-header {
+        margin-bottom: 3rem;
+        position: relative;
+    }
+
+    .albums-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: #fff !important;
+        background: linear-gradient(135deg, #1db954, #1ed760);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .albums-subtitle {
+        color: #b3b3b3 !important;
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+    }
+
+    .header-actions {
+        display: flex;
+        justify-content: flex-start;
+        margin-top: 2rem;
+    }
+
+    .btn-create {
+        background: linear-gradient(135deg, #1db954, #1ed760);
+        color: #000 !important;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 25px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(29, 185, 84, 0.3);
+    }
+
+    .btn-create:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(29, 185, 84, 0.4);
+        color: #000 !important;
+    }
+
+    .albums-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 2rem;
+    }
+
+    .album-card {
+        background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+        border-radius: 12px;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .album-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(29, 185, 84, 0.1), rgba(30, 215, 96, 0.1));
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: 1;
+    }
+
+    .album-card:hover::before {
+        opacity: 1;
+    }
+
+    .album-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        border-color: rgba(29, 185, 84, 0.5);
+    }
+
+    .album-cover {
+        position: relative;
+        margin-bottom: 1.5rem;
+        border-radius: 8px;
+        overflow: hidden;
+        aspect-ratio: 1;
+        z-index: 2;
+    }
+
+    .cover-placeholder {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #282828, #404040);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #b3b3b3;
+        font-size: 3rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .album-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        border-radius: 8px;
+    }
+
+    .album-card:hover .album-overlay {
+        opacity: 1;
+    }
+
+    .play-album-btn {
+        background: #1db954;
+        border: none;
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #000;
+        font-size: 1.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(29, 185, 84, 0.3);
+    }
+
+    .play-album-btn:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 20px rgba(29, 185, 84, 0.4);
+    }
+
+    .album-info {
+        margin-bottom: 1.5rem;
+        z-index: 2;
+        position: relative;
+    }
+
+    .album-title {
+        font-size: 1.4rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: #fff;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .album-artist {
+        color: #b3b3b3;
+        font-size: 1rem;
+        margin-bottom: 1rem;
+        font-weight: 500;
+    }
+
+    .album-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .album-date,
+    .album-songs {
+        color: #b3b3b3;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .album-actions {
+        z-index: 2;
+        position: relative;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: center;
+    }
+
+    .btn-action {
+        background: rgba(255, 255, 255, 0.1);
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #b3b3b3;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        font-size: 0.9rem;
+    }
+
+    .btn-action:hover {
+        transform: scale(1.1);
+        color: #fff;
+    }
+
+    .btn-details:hover {
+        background: rgba(30, 215, 96, 0.2);
+        color: #1ed760;
+    }
+
+    .btn-edit:hover {
+        background: rgba(255, 193, 7, 0.2);
+        color: #ffc107;
+    }
+
+    .btn-delete:hover {
+        background: rgba(220, 53, 69, 0.2);
+        color: #dc3545;
+    }
+
+    .delete-form {
+        display: inline;
+    }
+
+    .empty-state {
+        grid-column: 1 / -1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 4rem 2rem;
+        text-align: center;
+    }
+
+    .empty-icon {
+        font-size: 5rem;
+        color: #404040;
+        margin-bottom: 2rem;
+    }
+
+    .empty-state h3 {
+        font-size: 1.8rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: #fff;
+    }
+
+    .empty-state p {
+        color: #b3b3b3;
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+        max-width: 400px;
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 768px) {
+        .albums-container {
+            padding: 1rem;
+        }
+
+        .albums-title {
+            font-size: 2rem;
+        }
+
+        .albums-grid {
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .album-card {
+            padding: 1rem;
+        }
+
+        .album-title {
+            font-size: 1.2rem;
+        }
+
+        .play-album-btn {
+            width: 50px;
+            height: 50px;
+            font-size: 1.2rem;
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .albums-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .header-actions {
+            justify-content: center;
+        }
+
+        .btn-create {
+            padding: 10px 20px;
+            font-size: 0.9rem;
+        }
+    }
+
+    /* Ocultar elementos del layout principal */
+    header, footer {
+        display: none !important;
+    }
+
+    /* Forzar el link de FontAwesome si no está cargado */
+    .fas {
+        font-family: "Font Awesome 5 Free" !important;
+        font-weight: 900 !important;
+    }
+</style>
+
+<!-- Asegurar que FontAwesome esté cargado -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animación de entrada para las tarjetas
+        const cards = document.querySelectorAll('.album-card');
+        cards.forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            
+            setTimeout(() => {
+                card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
+
+        // Confirmación mejorada para eliminar
+        const deleteForms = document.querySelectorAll('.delete-form');
+        deleteForms.forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const albumTitle = this.closest('.album-card').querySelector('.album-title').textContent;
+                
+                if (confirm(`¿Estás seguro de que quieres eliminar el álbum "${albumTitle}"?\n\nEsta acción no se puede deshacer.`)) {
+                    this.submit();
+                }
+            });
+        });
+
+        // Efecto de hover mejorado
+        cards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-8px)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+
+        console.log('Vista de álbumes mejorada cargada correctamente');
+    });
+</script>

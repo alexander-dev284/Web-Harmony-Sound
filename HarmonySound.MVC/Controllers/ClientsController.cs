@@ -12,6 +12,10 @@ namespace HarmonySound.MVC.Controllers
     {
         public async Task<IActionResult> Index()
         {
+            // Agregar esta línea para obtener el userId
+            int userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier).Value);
+            ViewBag.UserId = userId; // ESTO ES LO QUE FALTA
+
             Crud<Content>.EndPoint = "https://localhost:7120/api/Contents";
             var contents = Crud<Content>.GetAll();
             
