@@ -663,6 +663,22 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "HarmonySound.API.Controllers.ContentsController",
+    "Method": "GetUserLikes",
+    "RelativePath": "api/Contents/user-likes/{userId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "HarmonySound.API.Controllers.PayPalController",
     "Method": "CreatePayment",
     "RelativePath": "api/PayPal/create-payment",

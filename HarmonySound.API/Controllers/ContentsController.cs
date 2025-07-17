@@ -7,11 +7,14 @@ using Microsoft.Extensions.Logging;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using HarmonySound.API.Data;
+using NAudio.Wave;
+using NAudio.MediaFoundation;
+
 namespace HarmonySound.API.Controllers
 {
     [Route("api/[controller]")]
-    [ApiController]
-    public class ContentsController : ControllerBase
+    [ApiController]  // <- ESTO INDICA QUE ES UN API CONTROLLER
+    public class ContentsController : ControllerBase  // <- HEREDA DE ControllerBase, NO de Controller
     {
         private readonly HarmonySoundDbContext _context;
         private readonly IWebHostEnvironment _env;
@@ -26,6 +29,9 @@ namespace HarmonySound.API.Controllers
             _logger = logger;
             _blobConnectionString = configuration["AzureBlobStorage:ConnectionString"];
             _blobContainerName = configuration["AzureBlobStorage:ContainerName"];
+            
+            // Inicializar MediaFoundation para soporte de archivos de audio avanzados
+            MediaFoundationApi.Startup();
         }
 
         // GET: api/Contents
@@ -73,6 +79,89 @@ namespace HarmonySound.API.Controllers
             return CreatedAtAction("GetContent", new { id = content.Id }, content);
         }
 
+        // Método para obtener la duración del audio
+        private async Task<TimeSpan> GetAudioDurationAsync(IFormFile file)
+        {
+            try
+            {
+                var extension = Path.GetExtension(file.FileName).ToLower();
+                
+                switch (extension)
+                {
+                    case ".mp3":
+                        using (var stream = new MemoryStream())
+                        {
+                            await file.CopyToAsync(stream);
+                            stream.Position = 0;
+                            using (var mp3Reader = new Mp3FileReader(stream))
+                            {
+                                return mp3Reader.TotalTime;
+                            }
+                        }
+                    
+                    case ".wav":
+                        using (var stream = new MemoryStream())
+                        {
+                            await file.CopyToAsync(stream);
+                            stream.Position = 0;
+                            using (var waveReader = new WaveFileReader(stream))
+                            {
+                                return waveReader.TotalTime;
+                            }
+                        }
+                    
+                    case ".aac":
+                    case ".m4a":
+                        try
+                        {
+                            // MediaFoundation requiere archivo físico
+                            var tempFile = Path.GetTempFileName();
+                            try
+                            {
+                                // Guardar archivo temporal
+                                using (var fileStream = new FileStream(tempFile, FileMode.Create))
+                                {
+                                    await file.CopyToAsync(fileStream);
+                                }
+                                
+                                // Leer duración desde archivo temporal
+                                using (var mediaReader = new MediaFoundationReader(tempFile))
+                                {
+                                    return mediaReader.TotalTime;
+                                }
+                            }
+                            finally
+                            {
+                                // Limpiar archivo temporal - CORRECCIÓN AQUÍ
+                                if (System.IO.File.Exists(tempFile))
+                                {
+                                    System.IO.File.Delete(tempFile);
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning($"Error procesando archivo AAC/M4A {file.FileName}: {ex.Message}");
+                            return TimeSpan.Zero;
+                        }
+                    
+                    case ".ogg":
+                    case ".flac":
+                        _logger.LogInformation($"Formato {extension} no soportado para cálculo de duración");
+                        return TimeSpan.Zero;
+                    
+                    default:
+                        _logger.LogWarning($"Extensión no reconocida: {extension}");
+                        return TimeSpan.Zero;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error obteniendo duración del archivo {file.FileName}");
+                return TimeSpan.Zero;
+            }
+        }
+
         // POST: api/Contents/upload
         [HttpPost("upload")]
         [Consumes("multipart/form-data")]
@@ -94,6 +183,11 @@ namespace HarmonySound.API.Controllers
                 var allowedExtensions = new[] { ".mp3", ".wav", ".ogg", ".flac", ".aac", ".m4a" };
                 if (!allowedExtensions.Contains(extension))
                     return BadRequest("Solo se permiten archivos de audio: .mp3, .wav, .ogg, .flac, .aac, .m4a");
+
+                // **NUEVO: Calcular duración del archivo**
+                _logger.LogInformation($"Calculando duración para: {model.File.FileName}");
+                var audioDuration = await GetAudioDurationAsync(model.File);
+                _logger.LogInformation($"Duración calculada: {audioDuration}");
 
                 // Forzar el tipo MIME correcto para .wav
                 string contentType = model.File.ContentType;
@@ -121,14 +215,21 @@ namespace HarmonySound.API.Controllers
                     Type = model.Type,
                     UrlMedia = fileUrl,
                     UploadDate = DateTimeOffset.UtcNow,
-                    Duration = TimeSpan.Zero,
+                    Duration = audioDuration, // **CORRECCIÓN: Usar duración calculada**
                     ArtistId = model.ArtistId
                 };
 
                 _context.Contents.Add(content);
                 await _context.SaveChangesAsync();
 
-                return Ok(new { content.Id, content.Title, content.UrlMedia });
+                _logger.LogInformation($"Archivo subido exitosamente. Duración: {audioDuration}");
+
+                return Ok(new { 
+                    content.Id, 
+                    content.Title, 
+                    content.UrlMedia,
+                    Duration = audioDuration.ToString(@"mm\:ss")
+                });
             }
             catch (Exception ex)
             {
@@ -268,6 +369,27 @@ namespace HarmonySound.API.Controllers
             return Ok(new { HasLiked = hasLiked });
         }
 
+        // GET: api/Contents/user-likes/1
+        [HttpGet("user-likes/{userId}")]
+        public async Task<IActionResult> GetUserLikes(int userId)
+        {
+            try
+            {
+                var likedContentIds = await _context.UserLikes
+                    .Where(ul => ul.UserId == userId)
+                    .Select(ul => ul.ContentId)
+                    .ToListAsync();
+
+                return Ok(likedContentIds);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error al obtener likes del usuario {userId}");
+                return StatusCode(500, "Error interno del servidor");
+            }
+        }
+
+        // ✅ AGREGAR: Método privado para agregar a playlist de favoritos
         private async Task AddToFavoritesPlaylist(int userId, int contentId)
         {
             // Buscar o crear playlist de favoritos
@@ -300,6 +422,7 @@ namespace HarmonySound.API.Controllers
             }
         }
 
+        // ✅ AGREGAR: Método privado para remover de playlist de favoritos
         private async Task RemoveFromFavoritesPlaylist(int userId, int contentId)
         {
             var favoritesPlaylist = await _context.Playlist

@@ -63,7 +63,8 @@
                                 <source src="@item.UrlMedia" type="audio/mpeg" />
                                 Tu navegador no soporta el elemento de audio.
                             </audio>
-                            <p>Duración: @item.Duration</p>
+                            <p>Duración: @(item.Duration.TotalSeconds > 0 ? item.Duration.ToString(@"mm\:ss") : "--:--")</p>
+                            <small class="text-muted">Tipo: @item.Type</small>
                         </div>
                     </div>
                 </div>

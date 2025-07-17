@@ -1165,6 +1165,29 @@
         }
       }
     },
+    "/api/Contents/user-likes/{userId}": {
+      "get": {
+        "tags": [
+          "Contents"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/PayPal/create-payment": {
       "post": {
         "tags": [

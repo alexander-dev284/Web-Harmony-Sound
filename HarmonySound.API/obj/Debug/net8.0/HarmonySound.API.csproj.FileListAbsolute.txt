@@ -1393,3 +1393,12 @@ C:\Users\ALEXANDER\Desktop\Web-Harmony-Sound\HarmonySound.API\obj\Debug\net8.0\r
 C:\Users\ALEXANDER\Desktop\Web-Harmony-Sound\HarmonySound.API\obj\Debug\net8.0\HarmonySound.API.pdb
 C:\Users\ALEXANDER\Desktop\Web-Harmony-Sound\HarmonySound.API\obj\Debug\net8.0\HarmonySound.API.genruntimeconfig.cache
 C:\Users\ALEXANDER\Desktop\Web-Harmony-Sound\HarmonySound.API\obj\Debug\net8.0\ref\HarmonySound.API.dll
+C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.API\bin\Debug\net8.0\libmp3lame.32.dll
+C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.API\bin\Debug\net8.0\libmp3lame.64.dll
+C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.API\bin\Debug\net8.0\NAudio.dll
+C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.API\bin\Debug\net8.0\NAudio.Asio.dll
+C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.API\bin\Debug\net8.0\NAudio.Core.dll
+C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.API\bin\Debug\net8.0\NAudio.Lame.dll
+C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.API\bin\Debug\net8.0\NAudio.Midi.dll
+C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.API\bin\Debug\net8.0\NAudio.Wasapi.dll
+C:\Users\Victus\Desktop\Web-Harmony-Sound\HarmonySound.API\bin\Debug\net8.0\NAudio.WinMM.dll

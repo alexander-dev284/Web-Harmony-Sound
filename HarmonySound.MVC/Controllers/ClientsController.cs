@@ -535,5 +535,35 @@ namespace HarmonySound.MVC.Controllers
                 return Json(new { url = "/ads/ad1.mp3", duration = 15, title = "Suscríbete a Premium" });
             }
         }
+
+        [HttpGet]
+        public async Task<IActionResult> GetUserLikes()
+        {
+            try
+            {
+                int userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier).Value);
+                
+                using (var client = new HttpClient())
+                {
+                    var response = await client.GetAsync($"https://localhost:7120/api/Contents/user-likes/{userId}");
+                    
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var json = await response.Content.ReadAsStringAsync();
+                        var likedContentIds = System.Text.Json.JsonSerializer.Deserialize<List<int>>(json);
+                        return Json(likedContentIds ?? new List<int>());
+                    }
+                    else
+                    {
+                        return Json(new List<int>());
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error en GetUserLikes: {ex.Message}");
+                return Json(new List<int>());
+            }
+        }
     }
 }

@@ -64,6 +64,7 @@
                                 <div class="card-body">
                                     <h5 class="card-title">@content.Title</h5>
                                     <p class="card-text">@content.Type</p>
+                                    <small class="text-muted">Duración: @content.FormattedDuration</small>
                                     
                                     @if (!string.IsNullOrEmpty(content.UrlMedia))
                                     {
@@ -91,7 +92,7 @@
                                                 📋 Agregar a Playlist
                                             </button>
                                         </div>
-                                        <small class="text-muted">Por: @content.ArtistName</small>
+                                        <small class="text-muted">Por: @content.ArtistName | @content.FormattedDuration</small>
                                     </div>
                                 </div>
                             </div>
