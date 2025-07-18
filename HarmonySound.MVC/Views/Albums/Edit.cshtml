@@ -1,58 +1,1312 @@
 ﻿@model HarmonySound.API.DTOs.AlbumDto
 
 @{
-    ViewData["Title"] = "Edit Album";
-    // Se espera que ViewBag.AllSongs sea List<ContentDto>
+    ViewData["Title"] = "Editar Álbum";
     var allSongs = ViewBag.AllSongs as List<HarmonySound.API.DTOs.ContentDto>;
 }
 
-<h2>Edit Album</h2>
+<div class="edit-album-container">
+    <!-- Header con navegación -->
+    <div class="edit-header">
+        <div class="navigation-bar">
+            <a href="@Url.Action("Index", "Albums")" class="btn-back">
+                <i class="fas fa-arrow-left me-2"></i>
+                Volver a Álbumes
+            </a>
+        </div>
 
-<form asp-action="Edit" method="post">
-    <input type="hidden" asp-for="Id" />
-    <div class="form-group mb-3">
-        <label asp-for="Title" class="form-label">Album Name</label>
-        <input asp-for="Title" class="form-control" maxlength="20" required />
-        <span asp-validation-for="Title" class="text-danger"></span>
+        <h1 class="edit-title">
+            <i class="fas fa-edit me-3"></i>
+            Editar Álbum
+        </h1>
+        <p class="edit-subtitle">Modifica la información y canciones de tu álbum</p>
     </div>
 
-    <div class="form-group mb-3">
-        <label class="form-label">Select Songs for this album</label>
-        <select name="selectedSongIds" class="form-select" multiple size="8">
-            @if (allSongs != null)
-            {
-                foreach (var song in allSongs)
+    <div class="edit-content">
+        <form asp-action="Edit" method="post" class="edit-form" id="albumEditForm">
+            <input type="hidden" asp-for="Id" />
+            
+            <!-- Sección de información básica -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Información del Álbum
+                </h3>
+
+                <div class="form-group">
+                    <label asp-for="Title" class="form-label">
+                        <i class="fas fa-compact-disc me-2"></i>
+                        Nombre del Álbum
+                    </label>
+                    <input asp-for="Title" class="form-control" maxlength="20" required placeholder="Ingresa el nombre del álbum" />
+                    <span asp-validation-for="Title" class="validation-error"></span>
+                    <small class="form-text">Máximo 20 caracteres</small>
+                </div>
+            </div>
+
+            <!-- Sección de selección de canciones -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-music me-2"></i>
+                    Seleccionar Canciones
+                </h3>
+
+                @if (allSongs != null && allSongs.Any())
                 {
-                    var selected = Model.Contents != null && Model.Contents.Any(c => c.Id == song.Id) ? "selected" : "";
-                    <option value="@song.Id" (selected)>@song.Title (@song.Type)</option>
-                }
-            }
-        </select>
-        <small class="form-text text-muted">Mantén presionada Ctrl (Windows) o Cmd (Mac) para seleccionar varias canciones.</small>
-    </div>
+                    <div class="songs-selection-container">
+                        <div class="songs-header">
+                            <div class="selection-info">
+                                <span id="selection-count">@(Model.Contents?.Count ?? 0)</span> canción(es) seleccionada(s)
+                            </div>
+                            <div class="selection-actions">
+                                <button type="button" class="btn-select-all" onclick="selectAllSongs()">
+                                    <i class="fas fa-check-double me-1"></i>
+                                    Seleccionar Todo
+                                </button>
+                                <button type="button" class="btn-clear-all" onclick="clearAllSongs()">
+                                    <i class="fas fa-times me-1"></i>
+                                    Limpiar Todo
+                                </button>
+                            </div>
+                        </div>
 
-    <div class="form-group mb-3">
-        <label class="form-label">Songs currently in this album</label>
-        <ul class="list-group">
-            @if (Model.Contents != null && Model.Contents.Any())
-            {
-                foreach (var song in Model.Contents)
+                        <div class="songs-grid">
+                            @foreach (var song in allSongs)
+                            {
+                                var isSelected = Model.Contents != null && Model.Contents.Any(c => c.Id == song.Id);
+                                <div class="song-card @(isSelected ? "selected" : "")" data-song-id="@song.Id">
+                                    <div class="song-checkbox">
+                                        <input type="checkbox" 
+                                               name="selectedSongIds" 
+                                               value="@song.Id" 
+                                               id="song-@song.Id"
+                                               @(isSelected ? "checked" : "")
+                                               class="song-selection-checkbox"
+                                               onchange="updateSongSelection(this)" />
+                                        <label for="song-@song.Id" class="checkbox-label">
+                                            <i class="fas fa-check"></i>
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="song-info">
+                                        <div class="song-cover">
+                                            <div class="cover-placeholder">
+                                                <i class="fas fa-music"></i>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="song-details">
+                                            <div class="song-title">@song.Title</div>
+                                            <div class="song-type">@song.Type</div>
+                                            <div class="song-duration">
+                                                <i class="fas fa-clock me-1"></i>
+                                                @song.Duration.ToString(@"mm\:ss")
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="song-actions">
+                                        <button type="button" class="btn-preview play-preview-btn"
+                                                data-content-id="@song.Id"
+                                                data-title="@song.Title"
+                                                data-artist="@Model.ArtistName"
+                                                data-url="@(song.UrlMedia ?? "")"
+                                                title="Vista previa">
+                                            <i class="fas fa-play"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+                else
                 {
-                    <li class="list-group-item d-flex align-items-center">
-                        @song.Title
-                        <span class="ms-auto text-muted">@song.Type</span>
-                    </li>
+                    <div class="no-songs-available">
+                        <div class="no-songs-icon">
+                            <i class="fas fa-music-slash"></i>
+                        </div>
+                        <h4>No tienes canciones disponibles</h4>
+                        <p>Sube algunas canciones primero para poder añadirlas a tu álbum</p>
+                        <a href="@Url.Action("Upload", "Artists")" class="btn-primary">
+                            <i class="fas fa-upload me-2"></i>
+                            Subir Canciones
+                        </a>
+                    </div>
                 }
-            }
-            else
-            {
-                <li class="list-group-item">No songs in this album.</li>
-            }
-        </ul>
-    </div>
+            </div>
 
-    <div class="text-center">
-        <button type="submit" class="btn btn-success">Save Changes</button>
-        <a asp-action="Index" class="btn btn-secondary ms-2">Cancel</a>
+            <!-- Vista previa del álbum -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-eye me-2"></i>
+                    Vista Previa del Álbum
+                </h3>
+
+                <div class="album-preview">
+                    <div class="preview-header">
+                        <div class="preview-artwork">
+                            <div class="artwork-placeholder">
+                                <i class="fas fa-compact-disc"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="preview-info">
+                            <h4 class="preview-title" id="preview-album-title">@Model.Title</h4>
+                            <p class="preview-artist">@Model.ArtistName</p>
+                            <div class="preview-metadata">
+                                <span class="preview-year">@Model.CreationDate.ToString("yyyy")</span>
+                                <span class="separator">•</span>
+                                <span class="preview-track-count" id="preview-track-count">
+                                    @(Model.Contents?.Count ?? 0) canción(es)
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="preview-tracklist" id="preview-tracklist">
+                        @if (Model.Contents?.Any() == true)
+                        {
+                            @for (int i = 0; i < Model.Contents.Count; i++)
+                            {
+                                var track = Model.Contents[i];
+                                <div class="preview-track" data-content-id="@track.Id">
+                                    <span class="track-number">@(i + 1)</span>
+                                    <span class="track-title">@track.Title</span>
+                                    <span class="track-duration">@track.Duration.ToString(@"mm\:ss")</span>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="empty-preview">
+                                <p>Selecciona canciones para ver la vista previa del álbum</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Acciones del formulario -->
+            <div class="form-actions">
+                <button type="submit" class="btn-save">
+                    <i class="fas fa-save me-2"></i>
+                    Guardar Cambios
+                </button>
+                <a href="@Url.Action("Details", "Albums", new { id = Model.Id })" class="btn-secondary">
+                    <i class="fas fa-eye me-2"></i>
+                    Ver Álbum
+                </a>
+                <a href="@Url.Action("Index", "Albums")" class="btn-cancel">
+                    <i class="fas fa-times me-2"></i>
+                    Cancelar
+                </a>
+            </div>
+        </form>
     </div>
-</form>
+</div>
+
+<!-- Reproductor para vista previa -->
+<div id="preview-player" class="preview-player d-none">
+    <div class="preview-player-content">
+        <div class="preview-track-info">
+            <div class="preview-cover">
+                <div class="cover-placeholder">
+                    <i class="fas fa-music"></i>
+                </div>
+            </div>
+            <div class="preview-details">
+                <div id="preview-track-title" class="preview-track-title">Vista previa</div>
+                <div id="preview-track-artist" class="preview-track-artist">Artista</div>
+            </div>
+        </div>
+        
+        <div class="preview-controls">
+            <button class="preview-control-btn" id="preview-play-pause">
+                <i class="fas fa-play"></i>
+            </button>
+            <button class="preview-control-btn" id="preview-close" title="Cerrar">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="preview-progress">
+            <div class="preview-progress-bar" id="preview-progress-bar">
+                <div class="preview-progress-fill" id="preview-progress-fill"></div>
+            </div>
+            <div class="preview-time">
+                <span id="preview-current-time">0:00</span> / <span id="preview-total-time">0:00</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Audio para vista previa -->
+    <audio id="preview-audio" style="display: none;" preload="metadata">
+        <source id="preview-audio-source" src="" type="audio/mpeg">
+    </audio>
+</div>
+
+<style>
+    /* Reset base */
+    .container {
+        max-width: none !important;
+        padding: 0 !important;
+    }
+
+    body {
+        background: #000 !important;
+        color: #fff !important;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+    }
+
+    /* Contenedor principal */
+    .edit-album-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+        min-height: 100vh;
+        position: relative;
+    }
+
+    /* Header */
+    .edit-header {
+        margin-bottom: 3rem;
+        position: relative;
+        padding-top: 3rem;
+        text-align: center;
+    }
+
+    .navigation-bar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 10;
+    }
+
+    .btn-back {
+        background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+        color: #fff !important;
+        border: 1px solid #333;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        font-size: 0.9rem;
+    }
+
+    .btn-back:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        color: #000 !important;
+        border-color: #1db954;
+        background: linear-gradient(135deg, #1db954, #1ed760);
+    }
+
+    .edit-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: #fff !important;
+        background: linear-gradient(135deg, #ffc107, #ff8f00);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .edit-subtitle {
+        color: #b3b3b3;
+        font-size: 1.1rem;
+        margin-bottom: 0;
+    }
+
+    /* Contenido principal */
+    .edit-content {
+        background: linear-gradient(135deg, #121212, #1a1a1a);
+        border-radius: 16px;
+        padding: 2rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .edit-form {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    /* Secciones del formulario */
+    .form-section {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        padding: 1.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .section-title {
+        font-size: 1.4rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        color: #fff;
+        display: flex;
+        align-items: center;
+    }
+
+    /* Grupos de formulario */
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: flex;
+        align-items: center;
+        font-weight: 600;
+        color: #fff;
+        margin-bottom: 0.5rem;
+        font-size: 1rem;
+    }
+
+    .form-control {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 8px;
+        color: #fff;
+        padding: 12px 16px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        background: rgba(255, 255, 255, 0.15);
+        border-color: #1db954;
+        box-shadow: 0 0 0 0.2rem rgba(29, 185, 84, 0.25);
+        color: #fff;
+    }
+
+    .form-control::placeholder {
+        color: #888;
+    }
+
+    .validation-error {
+        color: #ff6b6b;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        display: block;
+    }
+
+    .form-text {
+        color: #b3b3b3;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        display: block;
+    }
+
+    /* Selección de canciones */
+    .songs-selection-container {
+        margin-top: 1rem;
+    }
+
+    .songs-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        background: rgba(29, 185, 84, 0.1);
+        border-radius: 8px;
+        border: 1px solid rgba(29, 185, 84, 0.2);
+    }
+
+    .selection-info {
+        color: #1db954;
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+
+    .selection-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn-select-all, .btn-clear-all {
+        background: none;
+        border: 1px solid #1db954;
+        color: #1db954;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+    }
+
+    .btn-select-all:hover {
+        background: #1db954;
+        color: #000;
+    }
+
+    .btn-clear-all {
+        border-color: #ff6b6b;
+        color: #ff6b6b;
+    }
+
+    .btn-clear-all:hover {
+        background: #ff6b6b;
+        color: #fff;
+    }
+
+    /* Grid de canciones */
+    .songs-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 1rem;
+        max-height: 600px;
+        overflow-y: auto;
+        padding: 1rem;
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 8px;
+    }
+
+    .song-card {
+        background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+        border: 2px solid transparent;
+        border-radius: 12px;
+        padding: 1rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .song-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        border-color: rgba(29, 185, 84, 0.5);
+    }
+
+    .song-card.selected {
+        border-color: #1db954;
+        background: linear-gradient(135deg, rgba(29, 185, 84, 0.2), rgba(30, 215, 96, 0.1));
+    }
+
+    .song-checkbox {
+        position: absolute;
+        top: 0.75rem;
+        right: 0.75rem;
+        z-index: 10;
+    }
+
+    .song-selection-checkbox {
+        display: none;
+    }
+
+    .checkbox-label {
+        width: 24px;
+        height: 24px;
+        border: 2px solid #666;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: rgba(0, 0, 0, 0.5);
+    }
+
+    .checkbox-label i {
+        color: transparent;
+        font-size: 14px;
+        transition: color 0.3s ease;
+    }
+
+    .song-selection-checkbox:checked + .checkbox-label {
+        background: #1db954;
+        border-color: #1db954;
+    }
+
+    .song-selection-checkbox:checked + .checkbox-label i {
+        color: #000;
+    }
+
+    .song-info {
+        display: flex;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+
+    .song-cover {
+        width: 60px;
+        height: 60px;
+        flex-shrink: 0;
+    }
+
+    .cover-placeholder {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #333, #555);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #888;
+        font-size: 1.5rem;
+    }
+
+    .song-details {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .song-title {
+        font-weight: 600;
+        color: #fff;
+        margin-bottom: 0.25rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 1rem;
+    }
+
+    .song-type {
+        background: #1db954;
+        color: #000;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        display: inline-block;
+        margin-bottom: 0.25rem;
+    }
+
+    .song-duration {
+        color: #b3b3b3;
+        font-size: 0.875rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .song-actions {
+        position: absolute;
+        bottom: 0.75rem;
+        right: 0.75rem;
+    }
+
+    .btn-preview {
+        background: rgba(29, 185, 84, 0.2);
+        border: 1px solid #1db954;
+        color: #1db954;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.875rem;
+    }
+
+    .btn-preview:hover {
+        background: #1db954;
+        color: #000;
+        transform: scale(1.1);
+    }
+
+    /* Vista previa del álbum */
+    .album-preview {
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 12px;
+        padding: 1.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .preview-header {
+        display: flex;
+        gap: 1.5rem;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .preview-artwork {
+        width: 80px;
+        height: 80px;
+        flex-shrink: 0;
+    }
+
+    .artwork-placeholder {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #333, #555);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #888;
+        font-size: 2rem;
+    }
+
+    .preview-info {
+        flex: 1;
+    }
+
+    .preview-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 0.25rem;
+    }
+
+    .preview-artist {
+        color: #b3b3b3;
+        margin-bottom: 0.5rem;
+        font-size: 1rem;
+    }
+
+    .preview-metadata {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #888;
+        font-size: 0.875rem;
+    }
+
+    .separator {
+        opacity: 0.6;
+    }
+
+    .preview-tracklist {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    .preview-track {
+        display: grid;
+        grid-template-columns: 30px 1fr auto;
+        gap: 1rem;
+        align-items: center;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .track-number {
+        color: #888;
+        font-size: 0.875rem;
+        text-align: center;
+    }
+
+    .track-title {
+        color: #fff;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .track-duration {
+        color: #888;
+        font-size: 0.875rem;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .empty-preview {
+        text-align: center;
+        padding: 2rem;
+        color: #888;
+        font-style: italic;
+    }
+
+    /* Sin canciones disponibles */
+    .no-songs-available {
+        text-align: center;
+        padding: 3rem 1rem;
+        background: rgba(255, 193, 7, 0.1);
+        border: 1px solid rgba(255, 193, 7, 0.3);
+        border-radius: 12px;
+    }
+
+    .no-songs-icon {
+        font-size: 4rem;
+        color: #ffc107;
+        margin-bottom: 1rem;
+    }
+
+    .no-songs-available h4 {
+        color: #ffc107;
+        margin-bottom: 0.5rem;
+    }
+
+    .no-songs-available p {
+        color: #ffdb4d;
+        margin-bottom: 1.5rem;
+    }
+
+    /* Acciones del formulario */
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+        padding-top: 1rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-save, .btn-secondary, .btn-cancel, .btn-primary {
+        padding: 12px 24px;
+        border-radius: 25px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        border: none;
+        font-size: 1rem;
+        display: inline-flex;
+        align-items: center;
+        min-width: 140px;
+        justify-content: center;
+    }
+
+    .btn-save {
+        background: linear-gradient(135deg, #1db954, #1ed760);
+        color: #000;
+        box-shadow: 0 4px 15px rgba(29, 185, 84, 0.3);
+    }
+
+    .btn-save:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(29, 185, 84, 0.4);
+        color: #000;
+    }
+
+    .btn-secondary {
+        background: transparent;
+        border: 2px solid #666;
+        color: #fff;
+    }
+
+    .btn-secondary:hover {
+        background: #1a1a1a;
+        border-color: #999;
+        transform: translateY(-2px);
+        color: #fff;
+    }
+
+    .btn-cancel {
+        background: transparent;
+        border: 2px solid #ff6b6b;
+        color: #ff6b6b;
+    }
+
+    .btn-cancel:hover {
+        background: #ff6b6b;
+        color: #fff;
+        transform: translateY(-2px);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #ffc107, #ff8f00);
+        color: #000;
+        box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 193, 7, 0.4);
+        color: #000;
+    }
+
+    /* Reproductor de vista previa */
+    .preview-player {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 350px;
+        background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+        border: 1px solid #444;
+        border-radius: 16px;
+        padding: 1rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        backdrop-filter: blur(10px);
+    }
+
+    .preview-player.d-none {
+        display: none !important;
+    }
+
+    .preview-player-content {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .preview-track-info {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .preview-cover {
+        width: 50px;
+        height: 50px;
+        flex-shrink: 0;
+    }
+
+    .preview-details {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .preview-track-title {
+        font-weight: 600;
+        color: #fff;
+        margin-bottom: 0.25rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 0.9rem;
+    }
+
+    .preview-track-artist {
+        color: #b3b3b3;
+        font-size: 0.8rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .preview-controls {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+    }
+
+    .preview-control-btn {
+        background: rgba(29, 185, 84, 0.2);
+        border: 1px solid #1db954;
+        color: #1db954;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .preview-control-btn:hover {
+        background: #1db954;
+        color: #000;
+    }
+
+    .preview-progress {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .preview-progress-bar {
+        height: 4px;
+        background: #333;
+        border-radius: 2px;
+        overflow: hidden;
+        cursor: pointer;
+        position: relative;
+    }
+
+    .preview-progress-fill {
+        height: 100%;
+        background: #1db954;
+        width: 0%;
+        transition: width 0.1s ease;
+    }
+
+    .preview-time {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.75rem;
+        color: #888;
+        font-variant-numeric: tabular-nums;
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .edit-album-container {
+            padding: 1rem;
+        }
+
+        .edit-title {
+            font-size: 2rem;
+        }
+
+        .songs-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .preview-header {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .form-actions {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .btn-save, .btn-secondary, .btn-cancel, .btn-primary {
+            width: 100%;
+            max-width: 280px;
+        }
+
+        .preview-player {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            width: auto;
+            border-radius: 16px 16px 0 0;
+        }
+    }
+
+    /* Ocultar elementos del layout */
+    header, footer {
+        display: none !important;
+    }
+
+    /* FontAwesome */
+    .fas {
+        font-family: "Font Awesome 5 Free" !important;
+        font-weight: 900 !important;
+    }
+
+    /* Scrollbar personalizado */
+    .songs-grid::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .songs-grid::-webkit-scrollbar-track {
+        background: #1a1a1a;
+        border-radius: 4px;
+    }
+
+    .songs-grid::-webkit-scrollbar-thumb {
+        background: #333;
+        border-radius: 4px;
+    }
+
+    .songs-grid::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+</style>
+
+<!-- FontAwesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+<script>
+// ===== LÓGICA PARA EDICIÓN DE ÁLBUM =====
+
+// Datos de canciones para búsqueda rápida
+let allSongsData = [];
+
+// Inicializar cuando se carga el DOM
+document.addEventListener('DOMContentLoaded', () => {
+    // Cargar datos de canciones
+    loadSongsData();
+    
+    // Configurar listeners
+    setupEventListeners();
+    
+    // Actualizar vista previa inicial
+    updateAlbumPreview();
+    
+    console.log('Editor de álbum inicializado correctamente');
+});
+
+function loadSongsData() {
+    // Cargar datos de todas las canciones disponibles desde el servidor
+    const songCards = document.querySelectorAll('.song-card');
+    allSongsData = Array.from(songCards).map(card => ({
+        id: parseInt(card.dataset.songId),
+        title: card.querySelector('.song-title').textContent,
+        type: card.querySelector('.song-type').textContent,
+        duration: card.querySelector('.song-duration').textContent.replace(/[^\d:]/g, ''),
+        selected: card.classList.contains('selected')
+    }));
+}
+
+function setupEventListeners() {
+    // Listener para cambios en el título del álbum
+    const titleInput = document.querySelector('input[name="Title"]');
+    if (titleInput) {
+        titleInput.addEventListener('input', () => {
+            document.getElementById('preview-album-title').textContent = titleInput.value || 'Álbum sin título';
+        });
+    }
+    
+    // Listeners para botones de vista previa
+    document.querySelectorAll('.play-preview-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const trackData = {
+                id: btn.getAttribute('data-content-id'),
+                title: btn.getAttribute('data-title'),
+                artist: btn.getAttribute('data-artist'),
+                url: btn.getAttribute('data-url')
+            };
+            playPreview(trackData);
+        });
+    });
+}
+
+function updateSongSelection(checkbox) {
+    const songCard = checkbox.closest('.song-card');
+    const songId = parseInt(songCard.dataset.songId);
+    
+    // Actualizar estado visual
+    if (checkbox.checked) {
+        songCard.classList.add('selected');
+    } else {
+        songCard.classList.remove('selected');
+    }
+    
+    // Actualizar datos
+    const songData = allSongsData.find(s => s.id === songId);
+    if (songData) {
+        songData.selected = checkbox.checked;
+    }
+    
+    // Actualizar contador y vista previa
+    updateSelectionCount();
+    updateAlbumPreview();
+}
+
+function updateSelectionCount() {
+    const selectedCount = document.querySelectorAll('.song-selection-checkbox:checked').length;
+    document.getElementById('selection-count').textContent = selectedCount;
+}
+
+function selectAllSongs() {
+    document.querySelectorAll('.song-selection-checkbox').forEach(checkbox => {
+        checkbox.checked = true;
+        updateSongSelection(checkbox);
+    });
+}
+
+function clearAllSongs() {
+    document.querySelectorAll('.song-selection-checkbox').forEach(checkbox => {
+        checkbox.checked = false;
+        updateSong_selection(checkbox);
+    });
+}
+
+function updateAlbumPreview() {
+    const selectedSongs = allSongsData.filter(s => s.selected);
+    const tracklistContainer = document.getElementById('preview-tracklist');
+    const trackCountElement = document.getElementById('preview-track-count');
+    
+    // Actualizar contador
+    trackCountElement.textContent = `${selectedSongs.length} canción(es)`;
+    
+    if (selectedSongs.length === 0) {
+        tracklistContainer.innerHTML = '<div class="empty-preview"><p>Selecciona canciones para ver la vista previa del álbum</p></div>';
+        return;
+    }
+    
+    // Generar lista de canciones
+    const tracklistHTML = selectedSongs.map((song, index) => `
+        <div class="preview-track" data-content-id="${song.id}">
+            <span class="track-number">${index + 1}</span>
+            <span class="track-title">${song.title}</span>
+            <span class="track-duration">${song.duration}</span>
+        </div>
+    `).join('');
+    
+    tracklistContainer.innerHTML = tracklistHTML;
+}
+
+// ===== REPRODUCTOR DE VISTA PREVIA =====
+class PreviewPlayer {
+    constructor() {
+        this.audio = null;
+        this.currentTrack = null;
+        this.isPlaying = false;
+        this.playerElement = null;
+        
+        this.init();
+    }
+    
+    init() {
+        this.audio = document.getElementById('preview-audio');
+        this.playerElement = document.getElementById('preview-player');
+        
+        if (this.audio) {
+            this.audio.addEventListener('loadedmetadata', () => this.onLoadedMetadata());
+            this.audio.addEventListener('timeupdate', () => this.onTimeUpdate());
+            this.audio.addEventListener('ended', () => this.onEnded());
+            this.audio.addEventListener('error', (e) => this.onError(e));
+        }
+        
+        // Controles
+        const playPauseBtn = document.getElementById('preview-play-pause');
+        const closeBtn = document.getElementById('preview-close');
+        
+        if (playPauseBtn) {
+            playPauseBtn.addEventListener('click', () => this.togglePlayPause());
+        }
+        
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => this.close());
+        }
+    }
+    
+    async play(track) {
+        if (!track || !track.url) {
+            console.error('Track inválido para vista previa');
+            return;
+        }
+        
+        this.currentTrack = track;
+        
+        // Actualizar información
+        document.getElementById('preview-track-title').textContent = track.title || 'Vista previa';
+        document.getElementById('preview-track-artist').textContent = track.artist || 'Artista';
+        
+        // Mostrar reproductor
+        this.playerElement.classList.remove('d-none');
+        
+        try {
+            this.audio.src = track.url;
+            await this.audio.load();
+            await this.audio.play();
+            this.isPlaying = true;
+            this.updatePlayPauseButton();
+        } catch (error) {
+            console.error('Error al reproducir vista previa:', error);
+        }
+    }
+    
+    async togglePlayPause() {
+        if (!this.audio || !this.currentTrack) return;
+        
+        try {
+            if (this.audio.paused) {
+                await this.audio.play();
+                this.isPlaying = true;
+            } else {
+                this.audio.pause();
+                this.isPlaying = false;
+            }
+            this.updatePlayPauseButton();
+        } catch (error) {
+            console.error('Error al cambiar estado de vista previa:', error);
+        }
+    }
+    
+    updatePlayPauseButton() {
+        const btn = document.getElementById('preview-play-pause');
+        const icon = btn?.querySelector('i');
+        if (icon) {
+            icon.className = this.isPlaying ? 'fas fa-pause' : 'fas fa-play';
+        }
+    }
+    
+    close() {
+        if (this.audio) {
+            this.audio.pause();
+            this.audio.currentTime = 0;
+        }
+        this.isPlaying = false;
+        this.currentTrack = null;
+        this.playerElement.classList.add('d-none');
+        this.updatePlayPauseButton();
+    }
+    
+    onLoadedMetadata() {
+        const totalTimeElement = document.getElementById('preview-total-time');
+        if (totalTimeElement) {
+            totalTimeElement.textContent = this.formatTime(this.audio.duration);
+        }
+    }
+    
+    onTimeUpdate() {
+        const currentTimeElement = document.getElementById('preview-current-time');
+        const progressFill = document.getElementById('preview-progress-fill');
+        
+        if (currentTimeElement) {
+            currentTimeElement.textContent = this.formatTime(this.audio.currentTime);
+        }
+        
+        if (progressFill && this.audio.duration) {
+            const percent = (this.audio.currentTime / this.audio.duration) * 100;
+            progressFill.style.width = percent + '%';
+        }
+    }
+    
+    onEnded() {
+        this.isPlaying = false;
+        this.updatePlayPauseButton();
+        
+        // Auto-cerrar después de unos segundos
+        setTimeout(() => {
+            this.close();
+        }, 2000);
+    }
+    
+    onError(e) {
+        console.error('Error en reproductor de vista previa:', e);
+    }
+    
+    formatTime(seconds) {
+        if (!seconds || isNaN(seconds)) return '0:00';
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
+    }
+}
+
+// Instancia global del reproductor
+window.previewPlayer = new PreviewPlayer();
+
+// Función global para reproducir vista previa
+function playPreview(trackData) {
+    window.previewPlayer.play(trackData);
+}
+
+// Función de validación antes del envío
+document.getElementById('albumEditForm').addEventListener('submit', function(e) {
+    const selectedSongs = document.querySelectorAll('.song-selection-checkbox:checked');
+    
+    if (selectedSongs.length === 0) {
+        e.preventDefault();
+        alert('Debes seleccionar al menos una canción para el álbum.');
+        return false;
+    }
+    
+    // Validación del título
+    const titleInput = document.querySelector('input[name="Title"]');
+    if (!titleInput.value.trim()) {
+        e.preventDefault();
+        alert('El título del álbum es obligatorio.');
+        titleInput.focus();
+        return false;
+    }
+    
+    if (titleInput.value.length > 20) {
+        e.preventDefault();
+        alert('El título del álbum no puede exceder los 20 caracteres.');
+        titleInput.focus();
+        return false;
+    }
+    
+    console.log('Formulario válido, enviando...');
+});
+</script>

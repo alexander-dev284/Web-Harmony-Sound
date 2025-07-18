@@ -1,46 +1,470 @@
 ﻿@model HarmonySound.MVC.Models.ProfileEditViewModel
 
-<h2>Edit Profile</h2>
-
-@Html.ValidationSummary(true, "", new { @class = "text-danger" })
-
-<div class="alert alert-success">@TempData["Success"]</div>
-@if (TempData["Error"] != null)
-{
-    <div class="alert alert-danger">@TempData["Error"]</div>
-}
-
-@using (Html.BeginForm("EditProfile", "Clients", FormMethod.Post, new { enctype = "multipart/form-data" }))
-{
-    @Html.AntiForgeryToken()
-    @Html.HiddenFor(m => m.Id)
-
-    <div class="form-group">
-        <label asp-for="Email">Email</label>
-        @Html.TextBoxFor(m => m.Email, new { @class = "form-control", @readonly = "readonly" })
-        @Html.HiddenFor(m => m.Email)
-        @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
+<div class="edit-profile-container">
+    <!-- ✅ NUEVO: Botón de navegación al Home del Cliente -->
+    <div class="navigation-bar">
+        <a href="@Url.Action("Home", "Clients")" class="btn-home">
+            <i class="fas fa-home me-2"></i>
+            Home Cliente
+        </a>
     </div>
-    <div class="form-group">
-        <label asp-for="Name">Name</label>
-        @Html.TextBoxFor(m => m.Name, new { @class = "form-control" })
-        @Html.ValidationMessageFor(m => m.Name, "", new { @class = "text-danger" })
-    </div>
-    <div class="form-group">
-        <label asp-for="Biography">Biography</label>
-        @Html.TextAreaFor(m => m.Biography, new { @class = "form-control", rows = 4 })
-        @Html.ValidationMessageFor(m => m.Biography, "", new { @class = "text-danger" })
-    </div>
-    <div class="form-group">
-        <label asp-for="ProfileImageFile">Profile Image</label><br />
-        @if (!string.IsNullOrEmpty(Model.ProfileImageUrl))
+
+    <div class="edit-profile-content">
+        <h2 class="edit-profile-title">
+            <i class="fas fa-user-edit me-3"></i>
+            Editar Perfil de Cliente
+        </h2>
+
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+        @if (TempData["Success"] != null)
         {
-            <img src="@Model.ProfileImageUrl" alt="Profile Image" style="max-width: 150px; max-height: 150px;" />
-    
-            <br />
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle me-2"></i>
+                @TempData["Success"]
+            </div>
         }
-        <input asp-for="ProfileImageFile" type="file" class="form-control-file" accept="image/*" />
-        @Html.ValidationMessageFor(m => m.ProfileImageFile, "", new { @class = "text-danger" })
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                @TempData["Error"]
+            </div>
+        }
+
+        @using (Html.BeginForm("EditProfile", "Clients", FormMethod.Post, new { enctype = "multipart/form-data", @class = "edit-form" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.Id)
+
+            <div class="form-group">
+                <label asp-for="Email" class="form-label">
+                    <i class="fas fa-envelope me-2"></i>
+                    Email
+                </label>
+                @Html.TextBoxFor(m => m.Email, new { @class = "form-control", @readonly = "readonly" })
+                @Html.HiddenFor(m => m.Email)
+                @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
+                <small class="form-text text-muted">El email no se puede modificar</small>
+            </div>
+            
+            <div class="form-group">
+                <label asp-for="Name" class="form-label">
+                    <i class="fas fa-user me-2"></i>
+                    Nombre
+                </label>
+                @Html.TextBoxFor(m => m.Name, new { @class = "form-control", placeholder = "Tu nombre completo" })
+                @Html.ValidationMessageFor(m => m.Name, "", new { @class = "text-danger" })
+            </div>
+            
+            <div class="form-group">
+                <label asp-for="Biography" class="form-label">
+                    <i class="fas fa-quote-left me-2"></i>
+                    Biografía
+                </label>
+                @Html.TextAreaFor(m => m.Biography, new { @class = "form-control", rows = 4, placeholder = "Cuéntanos sobre ti..." })
+                @Html.ValidationMessageFor(m => m.Biography, "", new { @class = "text-danger" })
+            </div>
+            
+            <div class="form-group">
+                <label asp-for="ProfileImageFile" class="form-label">
+                    <i class="fas fa-camera me-2"></i>
+                    Imagen de Perfil
+                </label>
+                
+                @if (!string.IsNullOrEmpty(Model.ProfileImageUrl))
+                {
+                    <div class="current-image-preview">
+                        <img src="@Model.ProfileImageUrl" alt="Imagen de perfil actual" class="current-profile-image" />
+                    </div>
+                }
+                
+                <div class="file-upload-area">
+                    <input asp-for="ProfileImageFile" type="file" class="form-control file-input" accept="image/*" />
+                    <div class="file-upload-placeholder">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Haz clic para seleccionar una imagen</p>
+                        <small>Formatos: JPG, PNG, GIF</small>
+                        <small>Tamaño máximo: 5MB</small>
+                    </div>
+                </div>
+                @Html.ValidationMessageFor(m => m.ProfileImageFile, "", new { @class = "text-danger" })
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn btn-save">
+                    <i class="fas fa-save me-2"></i>
+                    Guardar Cambios
+                </button>
+                <a href="@Url.Action("Home", "Clients")" class="btn btn-cancel">
+                    <i class="fas fa-times me-2"></i>
+                    Cancelar
+                </a>
+            </div>
+        }
     </div>
-    <button type="submit" class="btn btn-primary">Save Changes</button>
-}
+</div>
+
+<style>
+    /* Resetear estilos del layout principal */
+    .container {
+        max-width: none !important;
+        padding: 0 !important;
+    }
+
+    body {
+        background: #000 !important;
+        color: #fff !important;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+        margin: 0;
+        padding: 0;
+    }
+
+    .edit-profile-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+        min-height: 100vh;
+        position: relative;
+    }
+
+    /* ✅ NUEVO: Estilos para barra de navegación */
+    .navigation-bar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        margin-bottom: 1rem;
+        z-index: 10;
+    }
+
+    .btn-home {
+        background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+        color: #fff !important;
+        border: 1px solid #333;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        font-size: 0.9rem;
+    }
+
+    .btn-home:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        color: #000 !important;
+        border-color: #1db954;
+        background: linear-gradient(135deg, #1db954, #1ed760);
+    }
+
+    .edit-profile-content {
+        background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+        border-radius: 12px;
+        padding: 2rem;
+        border: 1px solid #333;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        margin-top: 3rem;
+    }
+
+    .edit-profile-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 2rem;
+        color: #fff !important;
+        text-align: center;
+        background: linear-gradient(135deg, #1db954, #1ed760);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .edit-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #fff;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .form-control {
+        background: #121212 !important;
+        border: 2px solid #333 !important;
+        color: #fff !important;
+        padding: 12px 16px;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        border-color: #1db954 !important;
+        box-shadow: 0 0 0 0.2rem rgba(29, 185, 84, 0.25) !important;
+        background: #1a1a1a !important;
+    }
+
+    .form-control::placeholder {
+        color: #b3b3b3 !important;
+    }
+
+    .form-control[readonly] {
+        background: #0a0a0a !important;
+        opacity: 0.7;
+    }
+
+    .form-text {
+        color: #b3b3b3 !important;
+        font-size: 0.875rem;
+    }
+
+    .current-image-preview {
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+
+    .current-profile-image {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid #1db954;
+        box-shadow: 0 4px 15px rgba(29, 185, 84, 0.3);
+    }
+
+    .file-upload-area {
+        position: relative;
+        border: 2px dashed #333;
+        border-radius: 8px;
+        padding: 2rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        background: #121212;
+    }
+
+    .file-upload-area:hover {
+        border-color: #1db954;
+        background: #1a1a1a;
+    }
+
+    .file-input {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: pointer;
+        background: transparent !important;
+        border: none !important;
+        padding: 0 !important;
+    }
+
+    .file-upload-placeholder {
+        pointer-events: none;
+    }
+
+    .file-upload-placeholder i {
+        font-size: 3rem;
+        color: #1db954;
+        margin-bottom: 1rem;
+    }
+
+    .file-upload-placeholder p {
+        color: #fff;
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .file-upload-placeholder small {
+        color: #b3b3b3;
+        display: block;
+        margin-bottom: 0.25rem;
+    }
+
+    .alert {
+        border-radius: 8px;
+        border: none;
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .alert-success {
+        background: rgba(29, 185, 84, 0.1);
+        color: #1db954;
+        border: 1px solid rgba(29, 185, 84, 0.3);
+    }
+
+    .alert-danger {
+        background: rgba(220, 53, 69, 0.1);
+        color: #dc3545;
+        border: 1px solid rgba(220, 53, 69, 0.3);
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        border: none;
+        font-size: 1rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 150px;
+    }
+
+    .btn-save {
+        background: linear-gradient(135deg, #1db954, #1ed760);
+        color: #000;
+        box-shadow: 0 4px 15px rgba(29, 185, 84, 0.3);
+    }
+
+    .btn-save:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(29, 185, 84, 0.4);
+        color: #000;
+    }
+
+    .btn-cancel {
+        background: transparent;
+        border: 2px solid #666;
+        color: #b3b3b3;
+    }
+
+    .btn-cancel:hover {
+        background: #1a1a1a;
+        color: #fff;
+        border-color: #999;
+        transform: translateY(-2px);
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .edit-profile-container {
+            padding: 1rem;
+        }
+
+        .edit-profile-content {
+            padding: 1.5rem;
+        }
+
+        .edit-profile-title {
+            font-size: 1.5rem;
+        }
+
+        .form-actions {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .btn {
+            min-width: 200px;
+        }
+    }
+
+    /* Ocultar elementos del layout principal */
+    header, footer {
+        display: none !important;
+    }
+
+    /* FontAwesome */
+    .fas {
+        font-family: "Font Awesome 5 Free" !important;
+        font-weight: 900 !important;
+    }
+
+    /* Override Bootstrap validation */
+    .field-validation-error {
+        color: #dc3545 !important;
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+    }
+</style>
+
+<!-- FontAwesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const fileInput = document.querySelector('.file-input');
+        const fileUploadArea = document.querySelector('.file-upload-area');
+        const placeholder = document.querySelector('.file-upload-placeholder');
+
+        if (fileInput && fileUploadArea && placeholder) {
+            fileInput.addEventListener('change', function(e) {
+                if (e.target.files.length > 0) {
+                    const fileName = e.target.files[0].name;
+                    const fileSize = (e.target.files[0].size / (1024 * 1024)).toFixed(2) + ' MB';
+                    
+                    placeholder.innerHTML = `
+                        <i class="fas fa-file-image"></i>
+                        <p style="color: #1db954; font-weight: 600;">${fileName}</p>
+                        <small style="color: #1db954;">Tamaño: ${fileSize}</small>
+                        <small style="color: #b3b3b3;">Haz clic para cambiar la imagen</small>
+                    `;
+                    fileUploadArea.style.borderColor = '#1db954';
+                    fileUploadArea.style.background = '#1a1a1a';
+                } else {
+                    placeholder.innerHTML = `
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Haz clic para seleccionar una imagen</p>
+                        <small>Formatos: JPG, PNG, GIF</small>
+                        <small>Tamaño máximo: 5MB</small>
+                    `;
+                    fileUploadArea.style.borderColor = '#333';
+                    fileUploadArea.style.background = '#121212';
+                }
+            });
+
+            // Efectos de drag and drop
+            fileUploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.style.borderColor = '#1db954';
+                this.style.background = '#1a1a1a';
+            });
+
+            fileUploadArea.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                if (!fileInput.files.length) {
+                    this.style.borderColor = '#333';
+                    this.style.background = '#121212';
+                }
+            });
+
+            fileUploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    fileInput.files = files;
+                    fileInput.dispatchEvent(new Event('change'));
+                }
+            });
+        }
+    });
+</script>

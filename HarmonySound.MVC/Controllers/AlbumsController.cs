@@ -81,7 +81,7 @@ namespace HarmonySound.MVC.Controllers
 
             int artistId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier).Value);
             var allSongs = await GetAllSongsForArtist(artistId);
-            ViewBag.AllSongs = allSongs;
+            ViewBag.AllSongs = allSongs; // ✅ Ahora será List<ContentDto> con UrlMedia
 
             return View(album);
         }
@@ -121,7 +121,7 @@ namespace HarmonySound.MVC.Controllers
             {
                 int artistId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
                 var allSongs = await GetAllSongsForArtist(artistId);
-                ViewBag.AllSongs = allSongs;
+                ViewBag.AllSongs = allSongs; // ✅ También aquí
 
                 var response = await _httpClient.GetAsync($"https://localhost:7120/api/Albums/{id}");
                 AlbumDto album = null;
@@ -143,8 +143,24 @@ namespace HarmonySound.MVC.Controllers
                 return new List<ContentDto>();
 
             var json = await response.Content.ReadAsStringAsync();
-            var allSongs = System.Text.Json.JsonSerializer.Deserialize<List<ContentDto>>(json, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-            return allSongs.Where(c => c.ArtistId == artistId).ToList();
+            var allSongs = System.Text.Json.JsonSerializer.Deserialize<List<Content>>(json, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            
+            // ✅ CONVERTIR Content a ContentDto incluyendo UrlMedia
+            var contentDtos = allSongs.Where(c => c.ArtistId == artistId)
+                .Select(c => new ContentDto
+                {
+                    Id = c.Id,
+                    Title = c.Title,
+                    Type = c.Type,
+                    UrlMedia = c.UrlMedia, // ✅ INCLUIR UrlMedia
+                    Duration = c.Duration,
+                    UploadDate = c.UploadDate,
+                    ArtistId = c.ArtistId,
+                    ArtistName = null, // Se puede llenar si necesitas
+                    AlbumTitle = null
+                }).ToList();
+            
+            return contentDtos;
         }
 
         // POST: Albums/RemoveSong

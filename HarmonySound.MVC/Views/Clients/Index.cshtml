@@ -6,6 +6,24 @@
 
 <div class="music-library-container">
     <div class="library-header">
+        <!-- ✅ NUEVO: Botón de navegación al Home del Cliente -->
+        <div class="navigation-bar">
+            <a href="@Url.Action("Home", "Clients")" class="btn-home">
+                <i class="fas fa-home me-2"></i>
+                Home
+            </a>
+        </div>
+        
+        <!-- ✅ NUEVO: Botón de cerrar sesión -->
+        <div class="logout-section">
+            <form asp-action="Logout" asp-controller="Account" method="post" class="logout-form">
+                <button type="submit" class="btn-logout">
+                    <i class="fas fa-sign-out-alt me-2"></i>
+                    Cerrar Sesión
+                </button>
+            </form>
+        </div>
+        
         <h1 class="library-title">
             <i class="fas fa-music me-3"></i>
             Biblioteca Musical
@@ -174,9 +192,83 @@
         margin: 0; padding: 0; padding-bottom: 90px; 
     }
 
+    /* ✅ NUEVO: Estilos para barra de navegación */
+    .navigation-bar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        margin-bottom: 1rem;
+        z-index: 10;
+    }
+
+    .btn-home {
+        background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+        color: #fff !important;
+        border: 1px solid #333;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        font-size: 0.9rem;
+    }
+
+    .btn-home:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        color: #000 !important;
+        border-color: #1db954;
+        background: linear-gradient(135deg, #1db954, #1ed760);
+    }
+
+    /* ✅ NUEVO: Estilos para botón de logout */
+    .logout-section {
+        position: absolute;
+        top: 0;
+        right: 0;
+        z-index: 10;
+    }
+
+    .logout-form {
+        margin: 0;
+        padding: 0;
+    }
+
+    .btn-logout {
+        background: linear-gradient(135deg, #dc2626, #ef4444);
+        color: #fff !important;
+        border: 1px solid #dc2626;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 10px rgba(220, 38, 38, 0.3);
+        font-size: 0.9rem;
+        text-decoration: none;
+    }
+
+    .btn-logout:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(220, 38, 38, 0.5);
+        background: linear-gradient(135deg, #b91c1c, #dc2626);
+        border-color: #b91c1c;
+        color: #fff !important;
+    }
+
+    .btn-logout:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 10px rgba(220, 38, 38, 0.3);
+    }
+
     /* Biblioteca Musical */
-    .music-library-container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
-    .library-header { margin-bottom: 2rem; }
+    .music-library-container { max-width: 1200px; margin: 0 auto; padding: 2rem; position: relative; }
+    .library-header { margin-bottom: 2rem; padding-top: 3rem; }
     .library-title { font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem; color: #fff !important; }
     .library-subtitle { color: #b3b3b3 !important; font-size: 1rem; }
     .songs-container { background: #121212 !important; border-radius: 8px; padding: 1.5rem; }
@@ -226,6 +318,7 @@
     }
     .song-actions .btn:hover { background: #1a1a1a !important; color: #fff !important; transform: scale(1.1); }
     .btn-like:hover, .btn-playlist:hover, .btn-play:hover { color: #1db954 !important; }
+    .song-actions .btn-like.liked { color: #1db954 !important; }
 
     .song-duration { 
         grid-area: duration; font-size: 14px; color: #b3b3b3 !important; 
@@ -271,6 +364,7 @@
         cursor: pointer; border-radius: 50%; transition: color 0.3s ease; 
     }
     .btn-heart:hover { color: #1db954; }
+    .btn-heart.liked { color: #1db954 !important; }
     
     /* Controles centrales */
     .player-controls { display: flex; flex-direction: column; align-items: center; gap: 8px; }
@@ -352,6 +446,22 @@
         .song-item { grid-template-columns: 1fr 80px; grid-template-areas: "info actions"; }
         .song-duration, .song-menu { display: none; }
         .progress-section { max-width: 300px; }
+        
+        .logout-section {
+            position: relative;
+            top: auto;
+            right: auto;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        
+        .navigation-bar {
+            position: relative;
+            top: auto;
+            left: auto;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
     }
 
     @@media (max-width: 480px) {
@@ -369,6 +479,26 @@
     /* Clases de utilidad */
     .noselect { user-select: none !important; }
     .dragging { cursor: grabbing !important; }
+
+    /*** ANIMACIONES ***/
+    @@keyframes slideIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @@keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    /*** ESTILOS PARA ANIMACIONES ***/
+    .slide-in {
+        animation: slideIn 0.4s ease-out forwards;
+    }
+
+    .fade-in {
+        animation: fadeIn 0.5s ease forwards;
+    }
 </style>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">

@@ -1,22 +1,768 @@
 ﻿@model HarmonySound.API.DTOs.CreateAlbumDto
 
 @{
-    ViewData["Title"] = "Create Album";
+    ViewData["Title"] = "Crear Nuevo Álbum";
 }
 
-<h2 class="mb-4">Create New Album</h2>
+<div class="create-album-container">
+    <!-- Header con navegación -->
+    <div class="create-header">
+        <div class="navigation-bar">
+            <a href="@Url.Action("Index", "Albums")" class="btn-back">
+                <i class="fas fa-arrow-left me-2"></i>
+                Volver a Álbumes
+            </a>
+        </div>
 
-<form asp-action="Create" method="post">
-    <div class="form-group mb-3">
-        <label asp-for="Title" class="form-label">Album Name</label>
-        <input asp-for="Title" class="form-control" maxlength="20" required placeholder="Enter album name" />
-        <span asp-validation-for="Title" class="text-danger"></span>
+        <h1 class="create-title">
+            <i class="fas fa-plus-circle me-3"></i>
+            Crear Nuevo Álbum
+        </h1>
+        <p class="create-subtitle">Crea un álbum para organizar tus canciones</p>
     </div>
-    <div class="text-center">
-        <button type="submit" class="btn btn-success">Create</button>
-        <a asp-action="Index" class="btn btn-secondary ms-2">Cancel</a>
+
+    <div class="create-content">
+        <form asp-action="Create" method="post" class="create-form" id="albumCreateForm">
+            @Html.AntiForgeryToken()
+            
+            <!-- Sección principal del formulario -->
+            <div class="form-section">
+                <div class="form-left">
+                    <!-- Vista previa del álbum -->
+                    <div class="album-preview">
+                        <div class="preview-cover">
+                            <div class="cover-placeholder">
+                                <i class="fas fa-compact-disc"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="preview-info">
+                            <h3 class="preview-title" id="preview-title">Álbum sin título</h3>
+                            <p class="preview-artist">Mi nuevo álbum</p>
+                            <div class="preview-metadata">
+                                <span class="preview-type">
+                                    <i class="fas fa-compact-disc me-1"></i>
+                                    Álbum
+                                </span>
+                                <span class="preview-year">@DateTime.Now.Year</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Información adicional -->
+                    <div class="creation-info">
+                        <div class="info-card">
+                            <div class="info-icon">
+                                <i class="fas fa-lightbulb"></i>
+                            </div>
+                            <div class="info-content">
+                                <h4>Consejo</h4>
+                                <p>Después de crear el álbum, podrás agregar canciones desde la sección de edición.</p>
+                            </div>
+                        </div>
+
+                        <div class="info-card">
+                            <div class="info-icon">
+                                <i class="fas fa-music"></i>
+                            </div>
+                            <div class="info-content">
+                                <h4>Organización</h4>
+                                <p>Los álbumes te ayudan a agrupar canciones relacionadas y ofrecen una mejor experiencia a tus oyentes.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-right">
+                    <div class="form-container">
+                        <h3 class="form-title">
+                            <i class="fas fa-edit me-2"></i>
+                            Información del Álbum
+                        </h3>
+
+                        <!-- Mostrar errores de validación -->
+                        @if (!ViewData.ModelState.IsValid)
+                        {
+                            <div class="alert alert-danger">
+                                <i class="fas fa-exclamation-circle me-2"></i>
+                                <strong>Error:</strong> Por favor corrige los siguientes problemas:
+                                <ul class="error-list">
+                                    @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                                    {
+                                        <li>@error.ErrorMessage</li>
+                                    }
+                                </ul>
+                            </div>
+                        }
+
+                        <div class="form-group">
+                            <label asp-for="Title" class="form-label">
+                                <i class="fas fa-compact-disc me-2"></i>
+                                Nombre del Álbum
+                            </label>
+                            <input asp-for="Title" 
+                                   class="form-control" 
+                                   maxlength="20" 
+                                   required 
+                                   placeholder="Ingresa el nombre de tu álbum"
+                                   id="album-title-input" />
+                            <span asp-validation-for="Title" class="validation-error"></span>
+                            <small class="form-text">Máximo 20 caracteres. Elige un nombre memorable y descriptivo.</small>
+                        </div>
+
+                        <!-- Contador de caracteres -->
+                        <div class="character-counter">
+                            <span id="char-count">0</span> / 20 caracteres
+                        </div>
+
+                        <!-- Vista previa en tiempo real -->
+                        <div class="live-preview">
+                            <h4 class="preview-section-title">Vista Previa</h4>
+                            <div class="mini-album-card">
+                                <div class="mini-cover">
+                                    <i class="fas fa-compact-disc"></i>
+                                </div>
+                                <div class="mini-info">
+                                    <div class="mini-title" id="mini-preview-title">Álbum sin título</div>
+                                    <div class="mini-artist">Mi álbum</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Acciones del formulario -->
+            <div class="form-actions">
+                <button type="submit" class="btn-create" id="create-btn">
+                    <i class="fas fa-plus me-2"></i>
+                    Crear Álbum
+                </button>
+                <a asp-action="Index" class="btn-cancel">
+                    <i class="fas fa-times me-2"></i>
+                    Cancelar
+                </a>
+            </div>
+        </form>
     </div>
-</form>
+</div>
+
+<style>
+    /* Reset base */
+    .container {
+        max-width: none !important;
+        padding: 0 !important;
+    }
+
+    body {
+        background: #000 !important;
+        color: #fff !important;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+    }
+
+    /* Contenedor principal */
+    .create-album-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+        min-height: 100vh;
+        position: relative;
+    }
+
+    /* Header */
+    .create-header {
+        margin-bottom: 3rem;
+        position: relative;
+        padding-top: 3rem;
+        text-align: center;
+    }
+
+    .navigation-bar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 10;
+    }
+
+    .btn-back {
+        background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+        color: #fff !important;
+        border: 1px solid #333;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        font-size: 0.9rem;
+    }
+
+    .btn-back:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        color: #000 !important;
+        border-color: #1db954;
+        background: linear-gradient(135deg, #1db954, #1ed760);
+    }
+
+    .create-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: #fff !important;
+        background: linear-gradient(135deg, #ffc107, #ff8f00);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .create-subtitle {
+        color: #b3b3b3;
+        font-size: 1.1rem;
+        margin-bottom: 0;
+    }
+
+    /* Contenido principal */
+    .create-content {
+        background: linear-gradient(135deg, #121212, #1a1a1a);
+        border-radius: 16px;
+        padding: 2rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .create-form {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    /* Sección principal dividida */
+    .form-section {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 3rem;
+        align-items: start;
+    }
+
+    /* Lado izquierdo - Vista previa */
+    .form-left {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .album-preview {
+        background: rgba(29, 185, 84, 0.1);
+        border: 1px solid rgba(29, 185, 84, 0.3);
+        border-radius: 12px;
+        padding: 2rem;
+        text-align: center;
+    }
+
+    .preview-cover {
+        width: 200px;
+        height: 200px;
+        margin: 0 auto 1.5rem;
+        position: relative;
+    }
+
+    .cover-placeholder {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #282828, #404040);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 4rem;
+        color: #b3b3b3;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        transition: all 0.3s ease;
+    }
+
+    .cover-placeholder:hover {
+        transform: scale(1.05);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .preview-info {
+        text-align: center;
+    }
+
+    .preview-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 0.5rem;
+    }
+
+    .preview-artist {
+        color: #b3b3b3;
+        font-size: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .preview-metadata {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        font-size: 0.9rem;
+        color: #888;
+    }
+
+    .preview-type {
+        background: #1db954;
+        color: #000;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.8rem;
+    }
+
+    /* Información adicional */
+    .creation-info {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .info-card {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        padding: 1rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .info-icon {
+        background: #1db954;
+        color: #000;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 1.2rem;
+    }
+
+    .info-content h4 {
+        color: #fff;
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .info-content p {
+        color: #b3b3b3;
+        font-size: 0.9rem;
+        line-height: 1.4;
+        margin: 0;
+    }
+
+    /* Lado derecho - Formulario */
+    .form-right {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-container {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 2rem;
+    }
+
+    .form-title {
+        color: #fff;
+        font-size: 1.4rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* Grupos de formulario */
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: flex;
+        align-items: center;
+        font-weight: 600;
+        color: #fff;
+        margin-bottom: 0.5rem;
+        font-size: 1rem;
+    }
+
+    .form-control {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 8px;
+        color: #fff;
+        padding: 12px 16px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+
+    .form-control:focus {
+        background: rgba(255, 255, 255, 0.15);
+        border-color: #1db954;
+        box-shadow: 0 0 0 0.2rem rgba(29, 185, 84, 0.25);
+        color: #fff;
+        outline: none;
+    }
+
+    .form-control::placeholder {
+        color: #888;
+    }
+
+    .validation-error {
+        color: #ff6b6b;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        display: block;
+    }
+
+    .form-text {
+        color: #b3b3b3;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        display: block;
+        line-height: 1.4;
+    }
+
+    /* Alertas */
+    .alert {
+        border-radius: 8px;
+        border: none;
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+    }
+
+    .alert-danger {
+        background: rgba(220, 53, 69, 0.1);
+        color: #dc3545;
+        border: 1px solid rgba(220, 53, 69, 0.3);
+    }
+
+    .error-list {
+        margin: 0.5rem 0 0 0;
+        padding-left: 1rem;
+    }
+
+    /* Contador de caracteres */
+    .character-counter {
+        text-align: right;
+        font-size: 0.8rem;
+        color: #888;
+        margin-top: 0.5rem;
+    }
+
+    .character-counter.warning {
+        color: #ffc107;
+    }
+
+    .character-counter.danger {
+        color: #dc3545;
+    }
+
+    /* Vista previa en tiempo real */
+    .live-preview {
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .preview-section-title {
+        color: #fff;
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+
+    .mini-album-card {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        padding: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .mini-album-card:hover {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(29, 185, 84, 0.3);
+    }
+
+    .mini-cover {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #333, #555);
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #888;
+        font-size: 1.5rem;
+        flex-shrink: 0;
+    }
+
+    .mini-info {
+        flex-grow: 1;
+        min-width: 0;
+    }
+
+    .mini-title {
+        font-weight: 600;
+        color: #fff;
+        margin-bottom: 0.25rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .mini-artist {
+        color: #b3b3b3;
+        font-size: 0.9rem;
+    }
+
+    /* Acciones del formulario */
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+        padding-top: 2rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-create, .btn-cancel {
+        padding: 12px 24px;
+        border-radius: 25px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        border: none;
+        font-size: 1rem;
+        display: inline-flex;
+        align-items: center;
+        min-width: 140px;
+        justify-content: center;
+    }
+
+    .btn-create {
+        background: linear-gradient(135deg, #1db954, #1ed760);
+        color: #000;
+        box-shadow: 0 4px 15px rgba(29, 185, 84, 0.3);
+    }
+
+    .btn-create:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(29, 185, 84, 0.4);
+        color: #000;
+    }
+
+    .btn-create:disabled {
+        background: #666;
+        color: #999;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+
+    .btn-cancel {
+        background: transparent;
+        border: 2px solid #666;
+        color: #b3b3b3;
+    }
+
+    .btn-cancel:hover {
+        background: #1a1a1a;
+        color: #fff;
+        border-color: #999;
+        transform: translateY(-2px);
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .create-album-container {
+            padding: 1rem;
+        }
+
+        .create-title {
+            font-size: 2rem;
+        }
+
+        .form-section {
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        .form-left {
+            order: 2;
+        }
+
+        .form-right {
+            order: 1;
+        }
+
+        .preview-cover {
+            width: 150px;
+            height: 150px;
+        }
+
+        .cover-placeholder {
+            font-size: 3rem;
+        }
+
+        .form-actions {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .btn-create, .btn-cancel {
+            width: 100%;
+            max-width: 280px;
+        }
+    }
+
+    /* Ocultar elementos del layout */
+    header, footer {
+        display: none !important;
+    }
+
+    /* FontAwesome */
+    .fas {
+        font-family: "Font Awesome 5 Free" !important;
+        font-weight: 900 !important;
+    }
+</style>
+
+<!-- FontAwesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+<script>
+// ===== FUNCIONALIDADES INTERACTIVAS PARA CREAR ÁLBUM =====
+
+document.addEventListener('DOMContentLoaded', () => {
+    const titleInput = document.getElementById('album-title-input');
+    const previewTitle = document.getElementById('preview-title');
+    const miniPreviewTitle = document.getElementById('mini-preview-title');
+    const charCount = document.getElementById('char-count');
+    const characterCounter = document.querySelector('.character-counter');
+    const createBtn = document.getElementById('create-btn');
+    
+    // Actualizar vista previa en tiempo real
+    function updatePreview() {
+        const title = titleInput.value.trim();
+        const displayTitle = title || 'Álbum sin título';
+        
+        if (previewTitle) {
+            previewTitle.textContent = displayTitle;
+        }
+        
+        if (miniPreviewTitle) {
+            miniPreviewTitle.textContent = displayTitle;
+        }
+        
+        // Actualizar contador de caracteres
+        if (charCount) {
+            charCount.textContent = title.length;
+        }
+        
+        // Cambiar color del contador según la longitud
+        if (characterCounter) {
+            characterCounter.classList.remove('warning', 'danger');
+            
+            if (title.length >= 18) {
+                characterCounter.classList.add('danger');
+            } else if (title.length >= 15) {
+                characterCounter.classList.add('warning');
+            }
+        }
+        
+        // Habilitar/deshabilitar botón según validez
+        if (createBtn) {
+            createBtn.disabled = title.length === 0 || title.length > 20;
+        }
+    }
+    
+    // Event listeners
+    if (titleInput) {
+        titleInput.addEventListener('input', updatePreview);
+        titleInput.addEventListener('keyup', updatePreview);
+        titleInput.addEventListener('paste', () => {
+            setTimeout(updatePreview, 10);
+        });
+    }
+    
+    // Validación del formulario
+    const form = document.getElementById('albumCreateForm');
+    if (form) {
+        form.addEventListener('submit', (e) => {
+            const title = titleInput.value.trim();
+            
+            if (!title) {
+                e.preventDefault();
+                alert('El nombre del álbum es obligatorio.');
+                titleInput.focus();
+                return false;
+            }
+            
+            if (title.length > 20) {
+                e.preventDefault();
+                alert('El nombre del álbum no puede exceder los 20 caracteres.');
+                titleInput.focus();
+                return false;
+            }
+            
+            // Deshabilitar botón para evitar doble envío
+            if (createBtn) {
+                createBtn.disabled = true;
+                createBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Creando...';
+            }
+            
+            console.log('Creando álbum:', title);
+        });
+    }
+    
+    // Animaciones de entrada
+    const sections = document.querySelectorAll('.form-section > *');
+    sections.forEach((section, index) => {
+        section.style.opacity = '0';
+        section.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            section.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            section.style.opacity = '1';
+            section.style.transform = 'translateY(0)';
+        }, index * 200);
+    });
+    
+    // Inicializar vista previa
+    updatePreview();
+    
+    console.log('Vista de creación de álbum inicializada');
+});
+</script>
 
 @section Scripts {
     @{

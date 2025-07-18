@@ -1,0 +1,1340 @@
+﻿@model HarmonySound.Models.Content
+
+@{
+    ViewData["Title"] = "Detalles de la Canción";
+}
+
+<div class="details-container">
+    <div class="details-header">
+        <!-- Navegación -->
+        <div class="navigation-bar">
+            <a href="@Url.Action("Index", "Artists")" class="btn-back">
+                <i class="fas fa-arrow-left me-2"></i>
+                Volver a Mis Canciones
+            </a>
+        </div>
+
+        <h1 class="details-title">
+            <i class="fas fa-info-circle me-3"></i>
+            Detalles de la Canción
+        </h1>
+    </div>
+
+    <div class="details-content">
+        <div class="song-showcase">
+            <div class="song-cover-large">
+                <div class="cover-placeholder-large">
+                    <i class="fas fa-music"></i>
+                </div>
+                <div class="play-overlay">
+                    <button class="play-large-btn play-in-player-btn"
+                            data-content-id="@Model.Id"
+                            data-title="@Model.Title"
+                            data-artist="@ViewBag.ArtistName"
+                            data-url="@Model.UrlMedia"
+                            title="Reproducir">
+                        <i class="fas fa-play"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="song-info">
+                <h2 class="song-title-large">@Model.Title</h2>
+                <p class="song-artist-large">@ViewBag.ArtistName</p>
+                <span class="song-type-badge">@Model.Type</span>
+            </div>
+        </div>
+
+        <div class="song-details-grid">
+            <div class="detail-card">
+                <div class="detail-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="detail-info">
+                    <h3>Duración</h3>
+                    <p>@(Model.Duration.TotalSeconds > 0 ? Model.Duration.ToString(@"mm\:ss") : "No disponible")</p>
+                </div>
+            </div>
+
+            <div class="detail-card">
+                <div class="detail-icon">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <div class="detail-info">
+                    <h3>Fecha de Subida</h3>
+                    <p>@Model.UploadDate.ToString("dd/MM/yyyy HH:mm")</p>
+                </div>
+            </div>
+
+            <div class="detail-card">
+                <div class="detail-icon">
+                    <i class="fas fa-file-audio"></i>
+                </div>
+                <div class="detail-info">
+                    <h3>Tipo de Contenido</h3>
+                    <p>@Model.Type</p>
+                </div>
+            </div>
+
+            <!-- ✅ NUEVO: Tarjeta con nombre del artista -->
+            <div class="detail-card">
+                <div class="detail-icon">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="detail-info">
+                    <h3>Artista</h3>
+                    <p>@ViewBag.ArtistName</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <a href="@Url.Action("Edit", "Artists", new { id = Model.Id })" class="btn-action btn-edit">
+                <i class="fas fa-edit me-2"></i>
+                Editar Canción
+            </a>
+
+            <!-- ✅ MODIFICADO: Botón de eliminar con modal -->
+            <button type="button" class="btn-action btn-delete" onclick="showDeleteModal(@Model.Id, '@Model.Title')">
+                <i class="fas fa-trash-alt me-2"></i>
+                Eliminar Canción
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ✅ NUEVO: Modal de confirmación para eliminar -->
+<div id="deleteModal" class="modal-overlay d-none">
+    <div class="modal-container">
+        <div class="modal-header">
+            <div class="modal-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h3 class="modal-title">Confirmar Eliminación</h3>
+        </div>
+        
+        <div class="modal-body">
+            <p class="modal-message">¿Estás seguro de que quieres eliminar la canción <strong id="songToDelete"></strong>?</p>
+            <div class="modal-warning">
+                <i class="fas fa-info-circle"></i>
+                <span>Esta acción eliminará el archivo de Azure Storage y no se puede deshacer.</span>
+            </div>
+        </div>
+        
+        <div class="modal-actions">
+            <button type="button" class="btn-modal btn-cancel" onclick="hideDeleteModal()">
+                <i class="fas fa-times me-2"></i>
+                Cancelar
+            </button>
+            <button type="button" class="btn-modal btn-confirm" onclick="confirmDelete()">
+                <i class="fas fa-trash-alt me-2"></i>
+                Eliminar Canción
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Formulario oculto para eliminar -->
+<form id="deleteForm" asp-action="Delete" asp-controller="Artists" method="post" style="display: none;">
+    <input type="hidden" id="contentIdToDelete" name="id" value="" />
+</form>
+
+<!-- Reproductor estilo Spotify - Para detalles -->
+<div id="custom-player" class="custom-player d-none">
+    <div class="player-container">
+        <!-- Información de la canción -->
+        <div class="now-playing">
+            <div class="track-cover">
+                <div class="cover-placeholder">
+                    <i class="fas fa-music"></i>
+                </div>
+            </div>
+            <div class="track-info">
+                <div id="track-title" class="track-title">Selecciona una canción</div>
+                <div id="track-artist" class="track-artist">Artista</div>
+            </div>
+        </div>
+
+        <!-- Controles centrales -->
+        <div class="player-controls">
+            <div class="control-buttons">
+                <button class="control-btn" id="shuffle-btn" title="Aleatorio">
+                    <i class="fas fa-random"></i>
+                </button>
+                <button class="control-btn" id="prev-btn" title="Anterior">
+                    <i class="fas fa-step-backward"></i>
+                </button>
+                <button class="control-btn play-btn" id="play-pause-btn" title="Reproducir/Pausar">
+                    <i class="fas fa-play"></i>
+                </button>
+                <button class="control-btn" id="next-btn" title="Siguiente">
+                    <i class="fas fa-step-forward"></i>
+                </button>
+                <button class="control-btn" id="repeat-btn" title="Repetir">
+                    <i class="fas fa-redo"></i>
+                </button>
+            </div>
+
+            <!-- Barra de progreso -->
+            <div class="progress-section">
+                <span id="current-time" class="time">0:00</span>
+                <div class="custom-progress-bar" id="custom-progress-bar">
+                    <div class="progress-background"></div>
+                    <div class="progress-fill" id="progress-fill"></div>
+                    <div class="progress-handle" id="progress-handle"></div>
+                </div>
+                <span id="total-time" class="time">0:00</span>
+            </div>
+        </div>
+
+        <!-- Controles adicionales -->
+        <div class="extra-controls">
+            <button class="control-btn" id="queue-btn" title="Cola">
+                <i class="fas fa-list"></i>
+            </button>
+            <div class="volume-control">
+                <button class="control-btn" id="volume-btn" title="Volumen">
+                    <i class="fas fa-volume-up"></i>
+                </button>
+                <div class="custom-volume-slider" id="custom-volume-slider">
+                    <div class="volume-background"></div>
+                    <div class="volume-fill" id="volume-fill"></div>
+                    <div class="volume-handle" id="volume-handle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audio oculto -->
+    <audio id="hidden-audio" style="display: none;" preload="metadata">
+        <source id="audio-source" src="" type="audio/mpeg">
+    </audio>
+</div>
+
+<style>
+    /* CSS Base */
+    .container {
+        max-width: none !important;
+        padding: 0 !important;
+    }
+
+    body {
+        background: #000 !important;
+        color: #fff !important;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+        margin: 0;
+        padding: 0;
+        padding-bottom: 90px;
+    }
+
+    .details-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+        min-height: 100vh;
+        position: relative;
+    }
+
+    .details-header {
+        margin-bottom: 3rem;
+        position: relative;
+        padding-top: 3rem;
+    }
+
+    .navigation-bar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        margin-bottom: 1rem;
+        z-index: 10;
+    }
+
+    .btn-back {
+        background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+        color: #fff !important;
+        border: 1px solid #333;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        font-size: 0.9rem;
+    }
+
+        .btn-back:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            color: #000 !important;
+            border-color: #1db954;
+            background: linear-gradient(135deg, #1db954, #1ed760);
+        }
+
+    .details-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: #fff !important;
+        background: linear-gradient(135deg, #1db954, #1ed760);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .details-content {
+        background: linear-gradient(135deg, #121212, #1a1a1a);
+        border-radius: 16px;
+        padding: 2rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .song-showcase {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        margin-bottom: 3rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .song-cover-large {
+        position: relative;
+        width: 200px;
+        height: 200px;
+        flex-shrink: 0;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .cover-placeholder-large {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #282828, #404040);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #b3b3b3;
+        font-size: 4rem;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+
+    .play-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        border-radius: 12px;
+    }
+
+    .song-cover-large:hover .play-overlay {
+        opacity: 1;
+    }
+
+    .play-large-btn {
+        background: #1db954;
+        border: none;
+        border-radius: 50%;
+        width: 80px;
+        height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #000;
+        font-size: 2rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 20px rgba(29, 185, 84, 0.3);
+    }
+
+        .play-large-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 25px rgba(29, 185, 84, 0.4);
+        }
+
+    .song-info {
+        flex-grow: 1;
+    }
+
+    .song-title-large {
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: #fff;
+        line-height: 1.2;
+    }
+
+    .song-artist-large {
+        font-size: 1.5rem;
+        color: #b3b3b3;
+        margin-bottom: 1rem;
+        font-weight: 500;
+    }
+
+    .song-type-badge {
+        background: linear-gradient(135deg, #1db954, #1ed760);
+        color: #000;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 1rem;
+        font-weight: 600;
+        display: inline-block;
+    }
+
+    .song-details-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+    }
+
+    .detail-card {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 1.5rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        transition: all 0.3s ease;
+    }
+
+        .detail-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(29, 185, 84, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+    .detail-icon {
+        background: linear-gradient(135deg, #1db954, #1ed760);
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #000;
+        font-size: 1.2rem;
+        flex-shrink: 0;
+    }
+
+    .detail-info {
+        flex-grow: 1;
+    }
+
+        .detail-info h3 {
+            color: #fff;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .detail-info p {
+            color: #b3b3b3;
+            margin: 0;
+            font-size: 1rem;
+            line-height: 1.4;
+        }
+
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .btn-action {
+        padding: 12px 24px;
+        border-radius: 25px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        border: none;
+        font-size: 1rem;
+        display: inline-flex;
+        align-items: center;
+        min-width: 160px;
+        justify-content: center;
+    }
+
+    .btn-edit {
+        background: linear-gradient(135deg, #ffc107, #ff8f00);
+        color: #000;
+        box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+    }
+
+        .btn-edit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 193, 7, 0.4);
+            color: #000;
+        }
+
+    .btn-delete {
+        background: linear-gradient(135deg, #dc3545, #c82333);
+        color: #fff;
+        box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+    }
+
+        .btn-delete:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+            color: #fff;
+        }
+
+    /* ✅ NUEVO: Estilos del Modal */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        backdrop-filter: blur(5px);
+    }
+
+    .modal-overlay.d-none {
+        display: none !important;
+    }
+
+    .modal-container {
+        background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+        border: 1px solid #444;
+        border-radius: 16px;
+        padding: 0;
+        max-width: 480px;
+        width: 90%;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        overflow: hidden;
+        animation: modalSlideIn 0.3s ease-out;
+    }
+
+    @@keyframes modalSlideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-20px) scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    .modal-header {
+        background: linear-gradient(135deg, #dc3545, #c82333);
+        padding: 1.5rem;
+        text-align: center;
+        color: #fff;
+    }
+
+    .modal-icon {
+        font-size: 3rem;
+        margin-bottom: 0.5rem;
+        opacity: 0.9;
+    }
+
+    .modal-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .modal-body {
+        padding: 2rem 1.5rem;
+        text-align: center;
+    }
+
+    .modal-message {
+        font-size: 1.1rem;
+        color: #fff;
+        margin-bottom: 1.5rem;
+        line-height: 1.5;
+    }
+
+    .modal-warning {
+        background: rgba(255, 193, 7, 0.1);
+        border: 1px solid rgba(255, 193, 7, 0.3);
+        border-radius: 8px;
+        padding: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: #ffc107;
+        font-size: 0.9rem;
+    }
+
+    .modal-actions {
+        padding: 1.5rem;
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-modal {
+        padding: 12px 24px;
+        border-radius: 25px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: none;
+        font-size: 1rem;
+        display: inline-flex;
+        align-items: center;
+        min-width: 140px;
+        justify-content: center;
+    }
+
+    .btn-cancel {
+        background: transparent;
+        color: #b3b3b3;
+        border: 2px solid #666;
+    }
+
+    .btn-cancel:hover {
+        background: #1a1a1a;
+        color: #fff;
+        border-color: #999;
+        transform: translateY(-2px);
+    }
+
+    .btn-confirm {
+        background: linear-gradient(135deg, #dc3545, #c82333);
+        color: #fff;
+        box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+    }
+
+    .btn-confirm:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+        background: linear-gradient(135deg, #c82333, #a71e2a);
+    }
+
+    /* ===== REPRODUCTOR PERSONALIZADO ===== */
+    .custom-player {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(135deg, #181818, #1a1a1a);
+        border-top: 1px solid #282828;
+        height: 90px;
+        z-index: 1000;
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
+    }
+
+        .custom-player.d-none {
+            display: none !important;
+        }
+
+    .player-container {
+        display: grid;
+        grid-template-columns: 1fr 2fr 1fr;
+        align-items: center;
+        height: 100%;
+        padding: 0 16px;
+        gap: 16px;
+    }
+
+    .now-playing {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+    }
+
+    .track-cover {
+        width: 56px;
+        height: 56px;
+        flex-shrink: 0;
+    }
+
+    .track-info {
+        min-width: 0;
+        flex-grow: 1;
+    }
+
+    .track-title {
+        font-size: 14px;
+        font-weight: 400;
+        color: #fff;
+        margin-bottom: 4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .track-artist {
+        font-size: 12px;
+        color: #b3b3b3;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .player-controls {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .control-buttons {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .control-btn {
+        background: none;
+        border: none;
+        color: #b3b3b3;
+        padding: 8px;
+        cursor: pointer;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .control-btn:hover {
+            color: #fff;
+            transform: scale(1.1);
+        }
+
+        .control-btn.active {
+            color: #1db954;
+        }
+
+    .play-btn {
+        background: #fff !important;
+        color: #000 !important;
+        width: 40px !important;
+        height: 40px !important;
+        font-size: 18px !important;
+    }
+
+        .play-btn:hover {
+            background: #f0f0f0 !important;
+            transform: scale(1.05) !important;
+        }
+
+    .progress-section {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
+        max-width: 500px;
+    }
+
+    .time {
+        font-size: 11px;
+        color: #b3b3b3;
+        font-variant-numeric: tabular-nums;
+        min-width: 40px;
+        text-align: center;
+    }
+
+    .custom-progress-bar {
+        position: relative;
+        width: 100%;
+        height: 6px;
+        cursor: pointer;
+        border-radius: 3px;
+        overflow: hidden;
+    }
+
+    .progress-background {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #535353;
+        border-radius: 3px;
+    }
+
+    .progress-fill {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        background: linear-gradient(90deg, #1db954, #1ed760);
+        border-radius: 3px;
+        width: 0%;
+        transition: width 0.1s ease;
+    }
+
+    .progress-handle {
+        position: absolute;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: 14px;
+        height: 14px;
+        background: #fff;
+        border-radius: 50%;
+        cursor: pointer;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        left: 0%;
+    }
+
+    .custom-progress-bar:hover .progress-handle {
+        opacity: 1;
+    }
+
+    .custom-progress-bar.dragging .progress-handle {
+        opacity: 1;
+    }
+
+    .extra-controls {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 16px;
+    }
+
+    .volume-control {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .custom-volume-slider {
+        position: relative;
+        width: 80px;
+        height: 4px;
+        cursor: pointer;
+        border-radius: 2px;
+        overflow: hidden;
+        opacity: 1 !important;
+        transition: opacity 0.3s ease;
+    }
+
+    .volume-background {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #535353;
+        border-radius: 2px;
+    }
+
+    .volume-fill {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        background: #1db954;
+        border-radius: 2px;
+        width: 50%;
+    }
+
+    .volume-handle {
+        position: absolute;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: 12px;
+        height: 12px;
+        background: #fff;
+        border-radius: 50%;
+        cursor: pointer;
+        left: 50%;
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .details-container {
+            padding: 1rem;
+        }
+
+        .details-title {
+            font-size: 2rem;
+        }
+
+        .song-showcase {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .song-cover-large {
+            width: 150px;
+            height: 150px;
+        }
+
+        .song-title-large {
+            font-size: 2rem;
+        }
+
+        .song-artist-large {
+            font-size: 1.2rem;
+        }
+
+        .song-details-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .player-container {
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .extra-controls {
+            display: none;
+        }
+
+        .modal-container {
+            width: 95%;
+            margin: 1rem;
+        }
+        
+        .modal-actions {
+            flex-direction: column;
+        }
+        
+        .btn-modal {
+            width: 100%;
+        }
+    }
+
+    /* Ocultar elementos del layout */
+    header, footer {
+        display: none !important;
+    }
+
+    .fas {
+        font-family: "Font Awesome 5 Free" !important;
+        font-weight: 900 !important;
+    }
+
+    /* Clases de utilidad */
+    .noselect {
+        user-select: none !important;
+    }
+
+    .dragging {
+        cursor: grabbing !important;
+    }
+</style>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+<script>
+    // ===== REPRODUCTOR DE AUDIO PARA DETALLES =====
+
+    class DetailsAudioPlayer {
+        constructor() {
+            this.audio = null;
+            this.currentTrack = null;
+            this.isPlaying = false;
+            this.volume = 0.5;
+            this.currentTime = 0;
+            this.duration = 0;
+
+            // Estados de interacción
+            this.isProgressDragging = false;
+            this.isVolumeDragging = false;
+
+            // Referencias a elementos DOM
+            this.playerElement = null;
+            this.playPauseBtn = null;
+            this.trackTitle = null;
+            this.trackArtist = null;
+            this.currentTimeElement = null;
+            this.totalTimeElement = null;
+            this.progressBar = null;
+            this.progressFill = null;
+            this.progressHandle = null;
+            this.volumeControl = null;
+            this.volumeFill = null;
+            this.volumeHandle = null;
+
+            this.init();
+        }
+
+        init() {
+            console.log('Inicializando reproductor para detalles...');
+
+            // Crear elemento de audio oculto
+            this.audio = document.getElementById('hidden-audio');
+            if (!this.audio) {
+                this.audio = document.createElement('audio');
+                this.audio.id = 'hidden-audio';
+                this.audio.style.display = 'none';
+                this.audio.preload = 'metadata';
+                document.body.appendChild(this.audio);
+            }
+
+            // Obtener referencias a elementos
+            this.getElementReferences();
+
+            // Configurar event listeners
+            this.setupEventListeners();
+
+            // Configurar volumen inicial
+            this.setVolume(this.volume);
+
+            console.log('Reproductor para detalles inicializado');
+        }
+
+        getElementReferences() {
+            this.playerElement = document.getElementById('custom-player');
+            this.playPauseBtn = document.getElementById('play-pause-btn');
+            this.trackTitle = document.getElementById('track-title');
+            this.trackArtist = document.getElementById('track-artist');
+            this.currentTimeElement = document.getElementById('current-time');
+            this.totalTimeElement = document.getElementById('total-time');
+            this.progressBar = document.getElementById('custom-progress-bar');
+            this.progressFill = document.getElementById('progress-fill');
+            this.progressHandle = document.getElementById('progress-handle');
+            this.volumeControl = document.getElementById('custom-volume-slider');
+            this.volumeFill = document.getElementById('volume-fill');
+            this.volumeHandle = document.getElementById('volume-handle');
+        }
+
+        setupEventListeners() {
+            // Eventos del audio
+            if (this.audio) {
+                this.audio.addEventListener('loadedmetadata', () => this.onLoadedMetadata());
+                this.audio.addEventListener('timeupdate', () => this.onTimeUpdate());
+                this.audio.addEventListener('ended', () => this.onTrackEnded());
+                this.audio.addEventListener('error', (e) => this.onError(e));
+                this.audio.addEventListener('canplay', () => console.log('Audio listo para reproducir'));
+            }
+
+            // Botón play/pause
+            if (this.playPauseBtn) {
+                this.playPauseBtn.addEventListener('click', () => this.togglePlayPause());
+            }
+
+            // Barra de progreso
+            if (this.progressBar) {
+                this.setupProgressBar();
+            }
+
+            // Control de volumen
+            if (this.volumeControl) {
+                this.setupVolumeControl();
+            }
+
+            // Botón de reproducir grande
+            document.querySelectorAll('.play-in-player-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const track = this.extractTrackData(btn);
+                    this.playTrackAndStart(track);
+                });
+            });
+        }
+
+        setupProgressBar() {
+            this.progressBar.addEventListener('mousedown', (e) => {
+                this.isProgressDragging = true;
+                this.progressBar.classList.add('dragging');
+                document.body.classList.add('noselect');
+                this.seekToPosition(e);
+            });
+
+            this.progressHandle.addEventListener('mousedown', (e) => {
+                e.stopPropagation();
+                this.isProgressDragging = true;
+                this.progressBar.classList.add('dragging');
+                document.body.classList.add('noselect');
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (this.isProgressDragging) {
+                    this.seekToPosition(e);
+                }
+            });
+
+            document.addEventListener('mouseup', () => {
+                if (this.isProgressDragging) {
+                    this.isProgressDragging = false;
+                    this.progressBar.classList.remove('dragging');
+                    document.body.classList.remove('noselect');
+                }
+            });
+        }
+
+        setupVolumeControl() {
+            this.volumeControl.addEventListener('mousedown', (e) => {
+                this.isVolumeDragging = true;
+                this.setVolumeFromPosition(e);
+            });
+
+            this.volumeHandle.addEventListener('mousedown', (e) => {
+                e.stopPropagation();
+                this.isVolumeDragging = true;
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (this.isVolumeDragging) {
+                    this.setVolumeFromPosition(e);
+                }
+            });
+
+            document.addEventListener('mouseup', () => {
+                this.isVolumeDragging = false;
+            });
+        }
+
+        extractTrackData(button) {
+            return {
+                id: button.getAttribute('data-content-id'),
+                title: button.getAttribute('data-title'),
+                artist: button.getAttribute('data-artist'),
+                url: button.getAttribute('data-url')
+            };
+        }
+
+        async playTrackAndStart(track) {
+            if (!track || !track.url) {
+                console.error('Track inválido');
+                return;
+            }
+
+            console.log('Reproduciendo automáticamente:', track.title);
+
+            this.currentTrack = track;
+
+            // Actualizar información
+            if (this.trackTitle) this.trackTitle.textContent = track.title || 'Canción desconocida';
+            if (this.trackArtist) this.trackArtist.textContent = track.artist || 'Artista desconocido';
+
+            // Mostrar reproductor
+            if (this.playerElement) {
+                this.playerElement.classList.remove('d-none');
+            }
+
+            try {
+                // Configurar y cargar audio
+                this.audio.src = track.url;
+                await this.audio.load();
+
+                // Reproducir automáticamente
+                await this.audio.play();
+                this.isPlaying = true;
+                this.updatePlayPauseButton();
+
+                console.log('Reproduciendo automáticamente:', track.title);
+            } catch (error) {
+                console.error('Error al reproducir automáticamente:', error);
+                console.log('Fallback: Canción cargada, esperando interacción del usuario');
+            }
+        }
+
+        async togglePlayPause() {
+            if (!this.audio || !this.currentTrack) return;
+
+            try {
+                if (this.audio.paused) {
+                    await this.audio.play();
+                    this.isPlaying = true;
+                } else {
+                    this.audio.pause();
+                    this.isPlaying = false;
+                }
+                this.updatePlayPauseButton();
+            } catch (error) {
+                console.error('Error al cambiar estado de reproducción:', error);
+            }
+        }
+
+        updatePlayPauseButton() {
+            if (!this.playPauseBtn) return;
+
+            const icon = this.playPauseBtn.querySelector('i');
+            if (icon) {
+                icon.className = this.isPlaying ? 'fas fa-pause' : 'fas fa-play';
+            }
+        }
+
+        seekToPosition(e) {
+            if (!this.audio || !this.audio.duration || !this.progressBar) return;
+
+            const rect = this.progressBar.getBoundingClientRect();
+            const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+            const percent = x / rect.width;
+
+            this.audio.currentTime = percent * this.audio.duration;
+            this.updateProgressDisplay();
+        }
+
+        setVolumeFromPosition(e) {
+            if (!this.volumeControl) return;
+
+            const rect = this.volumeControl.getBoundingClientRect();
+            const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+            const volume = x / rect.width;
+
+            this.setVolume(volume);
+        }
+
+        setVolume(volume) {
+            this.volume = Math.max(0, Math.min(1, volume));
+
+            if (this.audio) {
+                this.audio.volume = this.volume;
+            }
+
+            if (this.volumeFill) {
+                this.volumeFill.style.width = (this.volume * 100) + '%';
+            }
+
+            if (this.volumeHandle) {
+                this.volumeHandle.style.left = (this.volume * 100) + '%';
+            }
+
+            const volumeBtn = document.getElementById('volume-btn');
+            if (volumeBtn) {
+                const icon = volumeBtn.querySelector('i');
+                if (icon) {
+                    if (this.volume === 0) {
+                        icon.className = 'fas fa-volume-mute';
+                    } else if (this.volume < 0.5) {
+                        icon.className = 'fas fa-volume-down';
+                    } else {
+                        icon.className = 'fas fa-volume-up';
+                    }
+                }
+            }
+        }
+
+        onLoadedMetadata() {
+            this.duration = this.audio.duration;
+            this.updateTimeDisplay();
+        }
+
+        onTimeUpdate() {
+            if (!this.isProgressDragging) {
+                this.currentTime = this.audio.currentTime;
+                this.updateProgressDisplay();
+                this.updateTimeDisplay();
+            }
+        }
+
+        updateProgressDisplay() {
+            if (!this.audio || !this.audio.duration) return;
+
+            const percent = (this.audio.currentTime / this.audio.duration) * 100;
+
+            if (this.progressFill) {
+                this.progressFill.style.width = percent + '%';
+            }
+
+            if (this.progressHandle) {
+                this.progressHandle.style.left = percent + '%';
+            }
+        }
+
+        updateTimeDisplay() {
+            if (this.currentTimeElement) {
+                this.currentTimeElement.textContent = this.formatTime(this.audio.currentTime);
+            }
+
+            if (this.totalTimeElement) {
+                this.totalTimeElement.textContent = this.formatTime(this.audio.duration);
+            }
+        }
+
+        formatTime(seconds) {
+            if (!seconds || isNaN(seconds)) return '0:00';
+
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        onTrackEnded() {
+            this.isPlaying = false;
+            this.updatePlayPauseButton();
+            console.log('Canción terminada');
+        }
+
+        onError(e) {
+            console.error('Error en audio:', e);
+        }
+    }
+
+    // ✅ NUEVO: Funciones del modal de eliminación
+    let contentIdToDelete = null;
+
+    function showDeleteModal(contentId, songTitle) {
+        contentIdToDelete = contentId;
+        document.getElementById('songToDelete').textContent = songTitle;
+        document.getElementById('contentIdToDelete').value = contentId;
+        document.getElementById('deleteModal').classList.remove('d-none');
+    }
+
+    function hideDeleteModal() {
+        document.getElementById('deleteModal').classList.add('d-none');
+        contentIdToDelete = null;
+    }
+
+    function confirmDelete() {
+        if (contentIdToDelete) {
+            document.getElementById('deleteForm').submit();
+        }
+    }
+
+    // Cerrar modal al hacer click fuera
+    document.addEventListener('click', function(e) {
+        const modal = document.getElementById('deleteModal');
+        if (e.target === modal) {
+            hideDeleteModal();
+        }
+    });
+
+    // Cerrar modal con Escape
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            hideDeleteModal();
+        }
+    });
+
+    // Inicializar reproductor cuando se carga el DOM
+    document.addEventListener('DOMContentLoaded', () => {
+        window.detailsPlayer = new DetailsAudioPlayer();
+
+        // Animación de entrada
+        const cards = document.querySelectorAll('.detail-card');
+        cards.forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+
+            setTimeout(() => {
+                card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
+
+        console.log('Vista de detalles cargada correctamente');
+    });
+</script>

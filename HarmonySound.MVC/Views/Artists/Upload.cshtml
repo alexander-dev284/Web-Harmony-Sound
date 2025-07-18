@@ -4,49 +4,497 @@
     ViewData["Title"] = "Subir nuevo contenido";
 }
 
-<link rel="stylesheet" href="~/css/artist.css" />
+<div class="upload-container">
+    <!-- ? NUEVO: Botón de navegación al Home del Artista -->
+    <div class="navigation-bar">
+        <a href="@Url.Action("Home", "Artists")" class="btn-home">
+            <i class="fas fa-home me-2"></i>
+            Home Artista
+        </a>
+    </div>
 
-<div class="container">
-    <h2 class="text-center">Subir nuevo contenido</h2>
+    <div class="upload-content">
+        <h2 class="upload-title">
+            <i class="fas fa-upload me-3"></i>
+            Subir Nuevo Contenido
+        </h2>
+        <p class="upload-subtitle">Comparte tu música con el mundo</p>
 
-    @if (TempData["Error"] != null)
-    {
-        <div class="alert alert-danger">@TempData["Error"]</div>
-    }
-    @if (TempData["Success"] != null)
-    {
-        <div class="alert alert-success">@TempData["Success"]</div>
-    }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                @TempData["Error"]
+            </div>
+        }
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle me-2"></i>
+                @TempData["Success"]
+            </div>
+        }
 
-    <!-- Formulario para subir contenido -->
-    @using (Html.BeginForm("UploadAudio", "Artists", FormMethod.Post, new { enctype = "multipart/form-data" }))
-    {
-        @Html.AntiForgeryToken()
+        <!-- Formulario para subir contenido -->
+        @using (Html.BeginForm("UploadAudio", "Artists", FormMethod.Post, new { enctype = "multipart/form-data", @class = "upload-form" }))
+        {
+            @Html.AntiForgeryToken()
 
-        <div class="form-group">
-            <label for="Title">Título</label>
-            <input type="text" name="Title" class="form-control" placeholder="Escribe el título del contenido" required />
-        </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="Title" class="form-label">
+                        <i class="fas fa-music me-2"></i>
+                        Título
+                    </label>
+                    <input type="text" name="Title" class="form-control" placeholder="Nombre de tu canción" required />
+                </div>
 
-        <div class="form-group">
-            <label for="File">Archivo de audio</label>
-            <input type="file" name="File" class="form-control" accept=".mp3,.wav,.ogg,.flac,.aac,.m4a,audio/*" required />
-            <small class="form-text text-muted">Formatos permitidos: mp3, wav, ogg, flac, aac, m4a. Tamaño máximo: 200 MB.</small>
-        </div>
+                <div class="form-group">
+                    <label for="Type" class="form-label">
+                        <i class="fas fa-tag me-2"></i>
+                        Tipo
+                    </label>
+                    <select name="Type" class="form-control" required>
+                        <option value="">Selecciona el tipo</option>
+                        <option value="Canción">Canción</option>
+                        <option value="Podcast">Podcast</option>
+                        <option value="Instrumental">Instrumental</option>
+                        <option value="Cover">Cover</option>
+                    </select>
+                </div>
+            </div>
 
-        <div class="form-group">
-            <label for="Type">Tipo</label>
-            <input type="text" name="Type" class="form-control" placeholder="Ej: Canción, Podcast" />
-        </div>
+            <div class="form-group file-upload-group">
+                <label for="File" class="form-label">
+                    <i class="fas fa-file-audio me-2"></i>
+                    Archivo de Audio
+                </label>
+                <div class="file-upload-area">
+                    <input type="file" name="File" class="form-control file-input" 
+                           accept=".mp3,.wav,.ogg,.flac,.aac,.m4a,audio/*" required />
+                    <div class="file-upload-placeholder">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Haz clic para seleccionar un archivo de audio</p>
+                        <small>Formatos: MP3, WAV, OGG, FLAC, AAC, M4A</small>
+                        <small>Tamaño máximo: 50 MB</small>
+                    </div>
+                </div>
+            </div>
 
-        <input type="hidden" name="ArtistId" value="@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value" />
+            <input type="hidden" name="ArtistId" value="@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value" />
 
-        <div class="text-center">
-            <button type="submit" class="btn btn-primary">Subir</button>
-        </div>
-    }
-
-    <div class="text-center mt-3">
-        <a href="@Url.Action("Index", "Artists")" class="btn btn-secondary">Ver mis canciones</a>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-upload">
+                    <i class="fas fa-upload me-2"></i>
+                    Subir Contenido
+                </button>
+                <a href="@Url.Action("Index", "Artists")" class="btn btn-secondary">
+                    <i class="fas fa-music me-2"></i>
+                    Ver Mis Canciones
+                </a>
+            </div>
+        }
     </div>
 </div>
+
+<style>
+    /* Resetear estilos del layout principal */
+    .container {
+        max-width: none !important;
+        padding: 0 !important;
+    }
+
+    body {
+        background: #000 !important;
+        color: #fff !important;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+        margin: 0;
+        padding: 0;
+    }
+
+    .upload-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+        min-height: 100vh;
+        position: relative;
+    }
+
+    /* ? NUEVO: Estilos para barra de navegación */
+    .navigation-bar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        margin-bottom: 1rem;
+        z-index: 10;
+    }
+
+    .btn-home {
+        background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+        color: #fff !important;
+        border: 1px solid #333;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        font-size: 0.9rem;
+    }
+
+    .btn-home:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        color: #000 !important;
+        border-color: #1db954;
+        background: linear-gradient(135deg, #1db954, #1ed760);
+    }
+
+    .upload-content {
+        background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+        border-radius: 12px;
+        padding: 2rem;
+        border: 1px solid #333;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        margin-top: 3rem;
+    }
+
+    .upload-title {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: #fff !important;
+        text-align: center;
+        background: linear-gradient(135deg, #1db954, #1ed760);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .upload-subtitle {
+        color: #b3b3b3;
+        text-align: center;
+        margin-bottom: 2rem;
+        font-size: 1.1rem;
+    }
+
+    .upload-form {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .file-upload-group {
+        grid-column: 1 / -1;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #fff;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .form-control {
+        background: #121212 !important;
+        border: 2px solid #333 !important;
+        color: #fff !important;
+        padding: 12px 16px;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        border-color: #1db954 !important;
+        box-shadow: 0 0 0 0.2rem rgba(29, 185, 84, 0.25) !important;
+        background: #1a1a1a !important;
+    }
+
+    .form-control::placeholder {
+        color: #b3b3b3 !important;
+    }
+
+    select.form-control {
+        cursor: pointer;
+    }
+
+    .file-upload-area {
+        position: relative;
+        border: 2px dashed #333;
+        border-radius: 8px;
+        padding: 2rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        background: #121212;
+    }
+
+    .file-upload-area:hover {
+        border-color: #1db954;
+        background: #1a1a1a;
+    }
+
+    .file-input {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: pointer;
+        background: transparent !important;
+        border: none !important;
+        padding: 0 !important;
+    }
+
+    .file-upload-placeholder {
+        pointer-events: none;
+    }
+
+    .file-upload-placeholder i {
+        font-size: 3rem;
+        color: #1db954;
+        margin-bottom: 1rem;
+    }
+
+    .file-upload-placeholder p {
+        color: #fff;
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .file-upload-placeholder small {
+        color: #b3b3b3;
+        display: block;
+        margin-bottom: 0.25rem;
+    }
+
+    .alert {
+        border-radius: 8px;
+        border: none;
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .alert-success {
+        background: rgba(29, 185, 84, 0.1);
+        color: #1db954;
+        border: 1px solid rgba(29, 185, 84, 0.3);
+    }
+
+    .alert-danger {
+        background: rgba(220, 53, 69, 0.1);
+        color: #dc3545;
+        border: 1px solid rgba(220, 53, 69, 0.3);
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        border: none;
+        font-size: 1rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 180px;
+    }
+
+    .btn-upload {
+        background: linear-gradient(135deg, #1db954, #1ed760);
+        color: #000;
+        box-shadow: 0 4px 15px rgba(29, 185, 84, 0.3);
+    }
+
+    .btn-upload:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(29, 185, 84, 0.4);
+        color: #000;
+    }
+
+    .btn-secondary {
+        background: transparent;
+        border: 2px solid #666;
+        color: #b3b3b3;
+    }
+
+    .btn-secondary:hover {
+        background: #1a1a1a;
+        color: #fff;
+        border-color: #999;
+        transform: translateY(-2px);
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .upload-container {
+            padding: 1rem;
+        }
+
+        .upload-content {
+            padding: 1.5rem;
+        }
+
+        .upload-title {
+            font-size: 1.5rem;
+        }
+
+        .form-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .form-actions {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .btn {
+            min-width: 200px;
+        }
+
+        .file-upload-area {
+            padding: 1.5rem;
+        }
+
+        .file-upload-placeholder i {
+            font-size: 2rem;
+        }
+    }
+
+    /* Ocultar elementos del layout principal */
+    header, footer {
+        display: none !important;
+    }
+
+    /* FontAwesome */
+    .fas {
+        font-family: "Font Awesome 5 Free" !important;
+        font-weight: 900 !important;
+    }
+</style>
+
+<!-- FontAwesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const fileInput = document.querySelector('.file-input');
+        const fileUploadArea = document.querySelector('.file-upload-area');
+        const placeholder = document.querySelector('.file-upload-placeholder');
+
+        if (fileInput && fileUploadArea && placeholder) {
+            fileInput.addEventListener('change', function(e) {
+                if (e.target.files.length > 0) {
+                    const fileName = e.target.files[0].name;
+                    const fileSize = (e.target.files[0].size / (1024 * 1024)).toFixed(2) + ' MB';
+                    
+                    placeholder.innerHTML = `
+                        <i class="fas fa-file-audio"></i>
+                        <p style="color: #1db954; font-weight: 600;">${fileName}</p>
+                        <small style="color: #1db954;">Tamaño: ${fileSize}</small>
+                        <small style="color: #b3b3b3;">Haz clic para cambiar el archivo</small>
+                    `;
+                    fileUploadArea.style.borderColor = '#1db954';
+                    fileUploadArea.style.background = '#1a1a1a';
+                } else {
+                    placeholder.innerHTML = `
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Haz clic para seleccionar un archivo de audio</p>
+                        <small>Formatos: MP3, WAV, OGG, FLAC, AAC, M4A</small>
+                        <small>Tamaño máximo: 50 MB</small>
+                    `;
+                    fileUploadArea.style.borderColor = '#333';
+                    fileUploadArea.style.background = '#121212';
+                }
+            });
+
+            // Efectos de drag and drop
+            fileUploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.style.borderColor = '#1db954';
+                this.style.background = '#1a1a1a';
+            });
+
+            fileUploadArea.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                if (!fileInput.files.length) {
+                    this.style.borderColor = '#333';
+                    this.style.background = '#121212';
+                }
+            });
+
+            fileUploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    fileInput.files = files;
+                    fileInput.dispatchEvent(new Event('change'));
+                }
+            });
+        }
+
+        // Validación del formulario
+        const form = document.querySelector('.upload-form');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                const fileInput = form.querySelector('input[type="file"]');
+                const titleInput = form.querySelector('input[name="Title"]');
+                const typeSelect = form.querySelector('select[name="Type"]');
+
+                if (!fileInput.files.length) {
+                    e.preventDefault();
+                    alert('Por favor selecciona un archivo de audio');
+                    return;
+                }
+
+                if (!titleInput.value.trim()) {
+                    e.preventDefault();
+                    alert('Por favor ingresa un título para tu contenido');
+                    titleInput.focus();
+                    return;
+                }
+
+                if (!typeSelect.value) {
+                    e.preventDefault();
+                    alert('Por favor selecciona el tipo de contenido');
+                    typeSelect.focus();
+                    return;
+                }
+
+                // Mostrar indicador de carga
+                const submitBtn = form.querySelector('.btn-upload');
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Subiendo...';
+                submitBtn.disabled = true;
+            });
+        }
+    });
+</script>

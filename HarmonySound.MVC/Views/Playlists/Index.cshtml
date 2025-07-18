@@ -6,93 +6,121 @@
     var contentId = ViewBag.ContentId as int?;
 }
 
-<h2>Mis Playlists</h2>
-
-@if (selectedContent != null)
-{
-    <div class="alert alert-info">
-        <h5>Agregando canción a playlist</h5>
-        <p><strong>Canción:</strong> @selectedContent.Title</p>
-        <p><strong>Tipo:</strong> @selectedContent.Type</p>
-        <p>Selecciona la playlist donde quieres agregar esta canción:</p>
+<div class="playlists-container">
+    <div class="playlists-header">
+        <!-- ✅ NUEVO: Botón de navegación al Home del Cliente -->
+        <div class="navigation-bar">
+            <a href="@Url.Action("Home", "Clients")" class="btn-home">
+                <i class="fas fa-home me-2"></i>
+                Home Cliente
+            </a>
+        </div>
+        
+        <h2 class="playlists-title">
+            <i class="fas fa-list-music me-3"></i>
+            Mis Playlists
+        </h2>
+        <p class="playlists-subtitle">Organiza tu música en listas personalizadas</p>
     </div>
-}
 
-@if (TempData["Success"] != null)
-{
-    <div class="alert alert-success">
-        @TempData["Success"]
-    </div>
-}
+    @if (selectedContent != null)
+    {
+        <div class="selected-content-alert">
+            <div class="alert-content">
+                <div class="alert-icon">
+                    <i class="fas fa-music"></i>
+                </div>
+                <div class="alert-info">
+                    <h5>Agregando canción a playlist</h5>
+                    <p><strong>Canción:</strong> @selectedContent.Title</p>
+                    <p><strong>Tipo:</strong> @selectedContent.Type</p>
+                    <p>Selecciona la playlist donde quieres agregar esta canción:</p>
+                </div>
+            </div>
+        </div>
+    }
 
-@if (TempData["Error"] != null)
-{
-    <div class="alert alert-danger">
-        @TempData["Error"]
-    </div>
-}
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">
+            <i class="fas fa-check-circle me-2"></i>
+            @TempData["Success"]
+        </div>
+    }
 
-<div class="row">
-    <div class="col-md-12">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h3>Tus Playlists</h3>
-            <a href="@Url.Action("Create", "Playlists")" class="btn btn-primary">
-                <i class="fas fa-plus"></i> Crear Nueva Playlist
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            @TempData["Error"]
+        </div>
+    }
+
+    <div class="playlists-content">
+        <div class="playlists-actions">
+            <h3 class="section-title">Tus Playlists</h3>
+            <a href="@Url.Action("Create", "Playlists")" class="btn btn-create">
+                <i class="fas fa-plus me-2"></i> 
+                Crear Nueva Playlist
             </a>
         </div>
         
         @if (Model != null && Model.Any())
         {
-            <div class="row">
+            <div class="playlists-grid">
                 @foreach (var playlist in Model)
                 {
-                    <div class="col-md-6 col-lg-4 mb-4">
-                        <div class="card h-100">
-                            <div class="card-body d-flex flex-column">
-                                <h5 class="card-title playlist-title">@playlist.Name</h5>
-                                <p class="card-text">
-                                    <small class="text-muted">@playlist.Songs.Count canción(es)</small>
-                                </p>
-                                
-                                @if (selectedContent != null)
-                                {
-                                    <form asp-action="AddToPlaylist" method="post" class="d-inline mb-2">
-                                        <input type="hidden" name="playlistId" value="@playlist.Id" />
-                                        <input type="hidden" name="contentId" value="@contentId" />
-                                        <button type="submit" class="btn btn-success btn-sm">
-                                            <i class="fas fa-plus"></i> Agregar aquí
-                                        </button>
-                                    </form>
-                                }
-                                
-                                <!-- Mostrar solo la información de las canciones -->
-                                <div class="mt-auto">
-                                    <h6 class="mb-2">Canciones:</h6>
-                                    @if (playlist.Songs.Any())
+                    <div class="playlist-card">
+                        <div class="playlist-header">
+                            <div class="playlist-icon">
+                                <i class="fas fa-list-music"></i>
+                            </div>
+                            <div class="playlist-info">
+                                <h5 class="playlist-name">@playlist.Name</h5>
+                                <p class="playlist-count">@playlist.Songs.Count canción(es)</p>
+                            </div>
+                        </div>
+                        
+                        @if (selectedContent != null)
+                        {
+                            <div class="playlist-action">
+                                <form asp-action="AddToPlaylist" method="post" class="add-form">
+                                    <input type="hidden" name="playlistId" value="@playlist.Id" />
+                                    <input type="hidden" name="contentId" value="@contentId" />
+                                    <button type="submit" class="btn btn-add">
+                                        <i class="fas fa-plus me-1"></i> 
+                                        Agregar aquí
+                                    </button>
+                                </form>
+                            </div>
+                        }
+                        
+                        <div class="playlist-songs">
+                            <h6 class="songs-title">Canciones:</h6>
+                            @if (playlist.Songs.Any())
+                            {
+                                <div class="songs-list">
+                                    @foreach (var song in playlist.Songs)
                                     {
-                                        <div class="songs-list" style="max-height: 300px; overflow-y: auto;">
-                                            @foreach (var song in playlist.Songs)
-                                            {
-                                                <div class="song-item mb-2 p-2 border rounded bg-light">
-                                                    <div class="d-flex align-items-center">
-                                                        <div class="song-icon me-2">
-                                                            <i class="fas fa-music text-primary"></i>
-                                                        </div>
-                                                        <div class="song-info flex-grow-1">
-                                                            <h6 class="mb-0 text-truncate song-title">@song.Title</h6>
-                                                            <small class="text-muted song-artist">Por: @song.ArtistName</small>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            }
+                                        <div class="song-item">
+                                            <div class="song-icon">
+                                                <i class="fas fa-music"></i>
+                                            </div>
+                                            <div class="song-details">
+                                                <h6 class="song-title">@song.Title</h6>
+                                                <small class="song-artist">Por: @song.ArtistName</small>
+                                            </div>
                                         </div>
                                     }
-                                    else
-                                    {
-                                        <p class="text-muted mb-0">No hay canciones en esta playlist</p>
-                                    }
                                 </div>
-                            </div>
+                            }
+                            else
+                            {
+                                <div class="empty-playlist">
+                                    <i class="fas fa-music-slash"></i>
+                                    <p>No hay canciones en esta playlist</p>
+                                </div>
+                            }
                         </div>
                     </div>
                 }
@@ -100,69 +128,519 @@
         }
         else
         {
-            <div class="text-center">
-                <p>No tienes playlists creadas aún.</p>
-                <a href="@Url.Action("Create", "Playlists")" class="btn btn-primary">
-                    Crear tu primera playlist
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-list-music"></i>
+                </div>
+                <h3>No tienes playlists creadas aún</h3>
+                <p>Crea tu primera playlist para organizar tu música favorita</p>
+                <a href="@Url.Action("Create", "Playlists")" class="btn btn-create">
+                    <i class="fas fa-plus me-2"></i>
+                    Crear Mi Primera Playlist
                 </a>
             </div>
         }
     </div>
+
+    @if (selectedContent != null)
+    {
+        <div class="back-navigation">
+            <a href="@Url.Action("Home", "Clients")" class="btn btn-back">
+                <i class="fas fa-arrow-left me-2"></i> 
+                Volver a la búsqueda
+            </a>
+        </div>
+    }
 </div>
 
-@if (selectedContent != null)
-{
-    <div class="mt-4">
-        <a href="@Url.Action("Home", "Clients")" class="btn btn-secondary">
-            <i class="fas fa-arrow-left"></i> Volver a la búsqueda
-        </a>
-    </div>
-}
-
 <style>
-    .playlist-title {
-        color: #333 !important;
+    /* Resetear estilos del layout principal */
+    .container {
+        max-width: none !important;
+        padding: 0 !important;
+    }
+
+    body {
+        background: #000 !important;
+        color: #fff !important;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+        margin: 0;
+        padding: 0;
+    }
+
+    .playlists-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+        min-height: 100vh;
+        position: relative;
+    }
+
+    .playlists-header {
+        margin-bottom: 2rem;
+        padding-top: 3rem;
+        position: relative;
+    }
+
+    /* ✅ NUEVO: Estilos para barra de navegación */
+    .navigation-bar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        margin-bottom: 1rem;
+        z-index: 10;
+    }
+
+    .btn-home {
+        background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+        color: #fff !important;
+        border: 1px solid #333;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        font-size: 0.9rem;
+    }
+
+    .btn-home:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        color: #000 !important;
+        border-color: #1db954;
+        background: linear-gradient(135deg, #1db954, #1ed760);
+    }
+
+    .playlists-title {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: #fff !important;
+        background: linear-gradient(135deg, #1db954, #1ed760);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .playlists-subtitle {
+        color: #b3b3b3 !important;
+        font-size: 1rem;
+        margin-bottom: 0;
+    }
+
+    .selected-content-alert {
+        background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+        border: 1px solid #1db954;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 15px rgba(29, 185, 84, 0.2);
+    }
+
+    .alert-content {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .alert-icon {
+        font-size: 2rem;
+        color: #1db954;
+        flex-shrink: 0;
+    }
+
+    .alert-info h5 {
+        color: #1db954;
+        margin-bottom: 0.5rem;
         font-weight: 600;
     }
-    
-    .songs-list {
-        border: 1px solid #dee2e6;
-        border-radius: 0.375rem;
-        padding: 0.5rem;
-        background-color: #f8f9fa;
+
+    .alert-info p {
+        color: #b3b3b3;
+        margin-bottom: 0.5rem;
     }
-    
-    .song-item {
-        background-color: white !important;
-        border: 1px solid #e9ecef !important;
-        transition: background-color 0.2s ease;
+
+    .alert {
+        border-radius: 8px;
+        border: none;
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        display: flex;
+        align-items: center;
     }
-    
-    .song-item:hover {
-        background-color: #f8f9fa !important;
-        cursor: default;
+
+    .alert-success {
+        background: rgba(29, 185, 84, 0.1);
+        color: #1db954;
+        border: 1px solid rgba(29, 185, 84, 0.3);
     }
-    
-    .song-icon {
-        width: 30px;
+
+    .alert-danger {
+        background: rgba(220, 53, 69, 0.1);
+        color: #dc3545;
+        border: 1px solid rgba(220, 53, 69, 0.3);
+    }
+
+    .playlists-content {
+        background: #121212;
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .playlists-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #fff;
+        margin: 0;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        border: none;
+        font-size: 0.9rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-create {
+        background: linear-gradient(135deg, #1db954, #1ed760);
+        color: #000;
+        box-shadow: 0 4px 15px rgba(29, 185, 84, 0.3);
+    }
+
+    .btn-create:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(29, 185, 84, 0.4);
+        color: #000;
+    }
+
+    .btn-add {
+        background: #1db954;
+        color: #000;
+        font-size: 0.8rem;
+        padding: 8px 16px;
+    }
+
+    .btn-add:hover {
+        background: #1ed760;
+        transform: translateY(-1px);
+        color: #000;
+    }
+
+    .btn-back {
+        background: transparent;
+        border: 2px solid #666;
+        color: #b3b3b3;
+    }
+
+    .btn-back:hover {
+        background: #1a1a1a;
+        color: #fff;
+        border-color: #999;
+        transform: translateY(-2px);
+    }
+
+    .playlists-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .playlist-card {
+        background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+        border: 1px solid #333;
+        border-radius: 12px;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .playlist-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        border-color: #1db954;
+    }
+
+    .playlist-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #333;
+    }
+
+    .playlist-icon {
+        background: #1db954;
+        color: #000;
+        width: 50px;
+        height: 50px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        flex-shrink: 0;
+    }
+
+    .playlist-info {
+        flex-grow: 1;
+        min-width: 0;
+    }
+
+    .playlist-name {
+        color: #fff;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .playlist-count {
+        color: #b3b3b3;
+        font-size: 0.9rem;
+        margin: 0;
+    }
+
+    .playlist-action {
+        margin-bottom: 1rem;
         text-align: center;
     }
-    
+
+    .add-form {
+        display: inline;
+    }
+
+    .playlist-songs {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .songs-title {
+        color: #fff;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        font-size: 1rem;
+    }
+
+    .songs-list {
+        border: 1px solid #333;
+        border-radius: 8px;
+        padding: 0.5rem;
+        background: #0a0a0a;
+        max-height: 200px;
+        overflow-y: auto;
+        flex-grow: 1;
+    }
+
+    .song-item {
+        background: #121212;
+        border: 1px solid #282828;
+        border-radius: 6px;
+        padding: 0.75rem;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        transition: background-color 0.2s ease;
+    }
+
+    .song-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .song-item:hover {
+        background: #1a1a1a;
+    }
+
+    .song-icon {
+        color: #1db954;
+        width: 30px;
+        text-align: center;
+        flex-shrink: 0;
+    }
+
+    .song-details {
+        flex-grow: 1;
+        min-width: 0;
+    }
+
     .song-title {
-        color: #333 !important;
+        color: #fff;
         font-weight: 500;
+        margin-bottom: 0.25rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 0.9rem;
     }
-    
+
     .song-artist {
-        color: #6c757d !important;
-        font-size: 0.85em;
+        color: #b3b3b3;
+        font-size: 0.8rem;
     }
-    
-    .card {
-        transition: box-shadow 0.15s ease-in-out;
+
+    .empty-playlist {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        color: #666;
+        text-align: center;
     }
-    
-    .card:hover {
-        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+
+    .empty-playlist i {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 4rem 2rem;
+        text-align: center;
+    }
+
+    .empty-icon {
+        font-size: 5rem;
+        color: #404040;
+        margin-bottom: 2rem;
+    }
+
+    .empty-state h3 {
+        font-size: 1.8rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: #fff;
+    }
+
+    .empty-state p {
+        color: #b3b3b3;
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+        max-width: 400px;
+    }
+
+    .back-navigation {
+        text-align: center;
+        margin-top: 2rem;
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .playlists-container {
+            padding: 1rem;
+        }
+
+        .playlists-title {
+            font-size: 1.5rem;
+        }
+
+        .playlists-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .playlists-actions {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .playlist-card {
+            padding: 1rem;
+        }
+
+        .alert-content {
+            flex-direction: column;
+            text-align: center;
+        }
+    }
+
+    /* Ocultar elementos del layout principal */
+    header, footer {
+        display: none !important;
+    }
+
+    /* FontAwesome */
+    .fas {
+        font-family: "Font Awesome 5 Free" !important;
+        font-weight: 900 !important;
+    }
+
+    /* Scrollbar personalizado */
+    .songs-list::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .songs-list::-webkit-scrollbar-track {
+        background: #1a1a1a;
+        border-radius: 3px;
+    }
+
+    .songs-list::-webkit-scrollbar-thumb {
+        background: #333;
+        border-radius: 3px;
+    }
+
+    .songs-list::-webkit-scrollbar-thumb:hover {
+        background: #555;
     }
 </style>
+
+<!-- FontAwesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animación de entrada para las tarjetas
+        const cards = document.querySelectorAll('.playlist-card');
+        cards.forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            
+            setTimeout(() => {
+                card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
+
+        // Mejorar UX de los formularios
+        const addForms = document.querySelectorAll('.add-form');
+        addForms.forEach(form => {
+            form.addEventListener('submit', function(e) {
+                const button = this.querySelector('.btn-add');
+                button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Agregando...';
+                button.disabled = true;
+            });
+        });
+
+        console.log('Vista de playlists mejorada cargada correctamente');
+    });
+</script>

@@ -1,12 +1,12 @@
-﻿using HarmonySound.Models;
-using HarmonySound.API.Consumer;
+﻿using HarmonySound.API.Consumer;
+using HarmonySound.Models;
 using HarmonySound.MVC.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
-using System.IO;
-using System.Net.Http;
-using System.Net.Http.Headers;
+using System.Security.Claims;
+using System.Text;
+using System.Text.Json;
 
 namespace HarmonySound.MVC.Controllers
 {
@@ -220,6 +220,256 @@ namespace HarmonySound.MVC.Controllers
             var allContents = Crud<Content>.GetAll();
             var myContents = allContents.Where(c => c.ArtistId == artistId).ToList();
             return View(myContents);
+        }
+
+        // ✅ MODIFICADO: Ver detalles de una canción con nombre del artista
+        public async Task<IActionResult> Details(int id)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"https://localhost:7120/api/Contents/{id}");
+                if (!response.IsSuccessStatusCode)
+                {
+                    TempData["Error"] = "No se pudo encontrar la canción.";
+                    return RedirectToAction("Index");
+                }
+
+                var json = await response.Content.ReadAsStringAsync();
+                var content = JsonSerializer.Deserialize<Content>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                // Verificar que el contenido pertenece al artista actual
+                int artistId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                if (content.ArtistId != artistId)
+                {
+                    TempData["Error"] = "No tienes permisos para ver esta canción.";
+                    return RedirectToAction("Index");
+                }
+
+                // ✅ NUEVO: Obtener nombre del artista
+                var artistResponse = await _httpClient.GetAsync($"https://localhost:7120/api/Users/profile/{artistId}");
+                if (artistResponse.IsSuccessStatusCode)
+                {
+                    var artistJson = await artistResponse.Content.ReadAsStringAsync();
+                    var artistData = JsonSerializer.Deserialize<ProfileEditViewModel>(artistJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    ViewBag.ArtistName = artistData?.Name ?? "Artista desconocido";
+                }
+                else
+                {
+                    ViewBag.ArtistName = "Artista desconocido";
+                }
+
+                return View(content);
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Error al cargar los detalles: {ex.Message}";
+                return RedirectToAction("Index");
+            }
+        }
+
+        // ✅ MODIFICADO: GET - Editar canción con nombre del artista
+        public async Task<IActionResult> Edit(int id)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"https://localhost:7120/api/Contents/{id}");
+                if (!response.IsSuccessStatusCode)
+                {
+                    TempData["Error"] = "No se pudo encontrar la canción.";
+                    return RedirectToAction("Index");
+                }
+
+                var json = await response.Content.ReadAsStringAsync();
+                var content = JsonSerializer.Deserialize<Content>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                // Verificar que el contenido pertenece al artista actual
+                int artistId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                if (content.ArtistId != artistId)
+                {
+                    TempData["Error"] = "No tienes permisos para editar esta canción.";
+                    return RedirectToAction("Index");
+                }
+
+                // ✅ NUEVO: Obtener nombre del artista
+                var artistResponse = await _httpClient.GetAsync($"https://localhost:7120/api/Users/profile/{artistId}");
+                if (artistResponse.IsSuccessStatusCode)
+                {
+                    var artistJson = await artistResponse.Content.ReadAsStringAsync();
+                    var artistData = JsonSerializer.Deserialize<ProfileEditViewModel>(artistJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    ViewBag.ArtistName = artistData?.Name ?? "Artista desconocido";
+                }
+                else
+                {
+                    ViewBag.ArtistName = "Artista desconocido";
+                }
+
+                return View(content);
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Error al cargar la canción: {ex.Message}";
+                return RedirectToAction("Index");
+            }
+        }
+
+        // ✅ MODIFICADO: POST - Editar canción - Incluir UrlMedia
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, string title, string type)
+        {
+            try
+            {
+                // Verificar que el contenido existe y pertenece al artista actual
+                var getResponse = await _httpClient.GetAsync($"https://localhost:7120/api/Contents/{id}");
+                if (!getResponse.IsSuccessStatusCode)
+                {
+                    TempData["Error"] = "No se pudo encontrar la canción.";
+                    return RedirectToAction("Index");
+                }
+
+                var json = await getResponse.Content.ReadAsStringAsync();
+                var existingContent = JsonSerializer.Deserialize<Content>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                int artistId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                if (existingContent.ArtistId != artistId)
+                {
+                    TempData["Error"] = "No tienes permisos para editar esta canción.";
+                    return RedirectToAction("Index");
+                }
+
+                // Validar que el título no esté vacío
+                if (string.IsNullOrWhiteSpace(title))
+                {
+                    // Obtener nombre del artista para la vista
+                    var artistResponse = await _httpClient.GetAsync($"https://localhost:7120/api/Users/profile/{artistId}");
+                    if (artistResponse.IsSuccessStatusCode)
+                    {
+                        var artistJson = await artistResponse.Content.ReadAsStringAsync();
+                        var artistData = JsonSerializer.Deserialize<ProfileEditViewModel>(artistJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                        ViewBag.ArtistName = artistData?.Name ?? "Artista desconocido";
+                    }
+                    else
+                    {
+                        ViewBag.ArtistName = "Artista desconocido";
+                    }
+
+                    TempData["Error"] = "El título de la canción es obligatorio.";
+                    return View(existingContent);
+                }
+
+                // Validar longitud máxima del título
+                if (title.Length > 20)
+                {
+                    // Obtener nombre del artista para la vista
+                    var artistResponse = await _httpClient.GetAsync($"https://localhost:7120/api/Users/profile/{artistId}");
+                    if (artistResponse.IsSuccessStatusCode)
+                    {
+                        var artistJson = await artistResponse.Content.ReadAsStringAsync();
+                        var artistData = JsonSerializer.Deserialize<ProfileEditViewModel>(artistJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                        ViewBag.ArtistName = artistData?.Name ?? "Artista desconocido";
+                    }
+                    else
+                    {
+                        ViewBag.ArtistName = "Artista desconocido";
+                    }
+
+                    TempData["Error"] = "El título no puede exceder los 20 caracteres.";
+                    return View(existingContent);
+                }
+
+                // ✅ CORREGIDO: Incluir todos los campos requeridos, incluyendo UrlMedia
+                var updateModel = new
+                {
+                    Id = id,
+                    Title = title.Trim(),
+                    Type = type ?? existingContent.Type,
+                    UrlMedia = existingContent.UrlMedia, // ✅ AGREGADO: Campo requerido
+                    Duration = existingContent.Duration, // ✅ AGREGADO: Mantener duración
+                    UploadDate = existingContent.UploadDate, // ✅ AGREGADO: Mantener fecha
+                    ArtistId = existingContent.ArtistId // ✅ AGREGADO: Mantener artista
+                };
+
+                var updateJson = JsonSerializer.Serialize(updateModel);
+                var content = new StringContent(updateJson, Encoding.UTF8, "application/json");
+                var response = await _httpClient.PutAsync($"https://localhost:7120/api/Contents/{id}", content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    TempData["Success"] = "Canción actualizada correctamente.";
+                    return RedirectToAction("Index");
+                }
+                else
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+                    TempData["Error"] = $"Error al actualizar la canción: {error}";
+                    
+                    // Obtener nombre del artista para la vista de error
+                    var artistResponse = await _httpClient.GetAsync($"https://localhost:7120/api/Users/profile/{artistId}");
+                    if (artistResponse.IsSuccessStatusCode)
+                    {
+                        var artistJson = await artistResponse.Content.ReadAsStringAsync();
+                        var artistData = JsonSerializer.Deserialize<ProfileEditViewModel>(artistJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                        ViewBag.ArtistName = artistData?.Name ?? "Artista desconocido";
+                    }
+                    else
+                    {
+                        ViewBag.ArtistName = "Artista desconocido";
+                    }
+                    
+                    return View(existingContent);
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Error al actualizar la canción: {ex.Message}";
+                return RedirectToAction("Index");
+            }
+        }
+
+        // ✅ NUEVO: POST - Eliminar canción (incluye eliminación de Azure)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id)
+        {
+            try
+            {
+                // Verificar que el contenido pertenece al artista actual
+                var getResponse = await _httpClient.GetAsync($"https://localhost:7120/api/Contents/{id}");
+                if (!getResponse.IsSuccessStatusCode)
+                {
+                    TempData["Error"] = "No se pudo encontrar la canción.";
+                    return RedirectToAction("Index");
+                }
+
+                var json = await getResponse.Content.ReadAsStringAsync();
+                var content = JsonSerializer.Deserialize<Content>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                int artistId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                if (content.ArtistId != artistId)
+                {
+                    TempData["Error"] = "No tienes permisos para eliminar esta canción.";
+                    return RedirectToAction("Index");
+                }
+
+                // Eliminar de la base de datos Y de Azure Storage
+                var deleteResponse = await _httpClient.DeleteAsync($"https://localhost:7120/api/Contents/{id}");
+
+                if (deleteResponse.IsSuccessStatusCode)
+                {
+                    TempData["Success"] = "Canción eliminada correctamente (incluido el archivo de Azure).";
+                }
+                else
+                {
+                    var error = await deleteResponse.Content.ReadAsStringAsync();
+                    TempData["Error"] = $"Error al eliminar la canción: {error}";
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Error al eliminar la canción: {ex.Message}";
+            }
+
+            return RedirectToAction("Index");
         }
     }
 }

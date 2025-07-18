@@ -6,6 +6,24 @@
 
 <div class="plans-container">
     <div class="plans-header">
+        <!-- ✅ NUEVO: Botón de navegación que detecta el rol del usuario -->
+        <div class="navigation-bar">
+            @if (User.IsInRole("artist"))
+            {
+                <a href="@Url.Action("Home", "Artists")" class="btn-home">
+                    <i class="fas fa-home me-2"></i>
+                    Home Artista
+                </a>
+            }
+            else if (User.IsInRole("client"))
+            {
+                <a href="@Url.Action("Home", "Clients")" class="btn-home">
+                    <i class="fas fa-home me-2"></i>
+                    Home Cliente
+                </a>
+            }
+        </div>
+        
         <h1 class="plans-title">
             <i class="fas fa-crown me-3"></i>
             Planes de Suscripción
@@ -60,13 +78,11 @@
                     </div>
                 </div>
                 <div class="current-plan-actions">
-                    <form asp-action="Cancel" method="post" class="d-inline">
-                        <button type="submit" class="btn btn-cancel" 
-                                onclick="return confirm('¿Estás seguro de que deseas cancelar tu suscripción?');">
-                            <i class="fas fa-times me-1"></i>
-                            Cancelar Suscripción
-                        </button>
-                    </form>
+                    <!-- ✅ MODIFICADO: Cambiar onclick por función personalizada -->
+                    <button type="button" class="btn btn-cancel" onclick="showCancelModal('@Model.CurrentPlan.PlanName')">
+                        <i class="fas fa-times me-1"></i>
+                        Cancelar Suscripción
+                    </button>
                 </div>
             </div>
         </div>
@@ -145,8 +161,52 @@
     </div>
 </div>
 
+<!-- ✅ NUEVO: Modal personalizado para cancelar suscripción -->
+<div id="cancelModal" class="cancel-modal-overlay d-none">
+    <div class="cancel-modal-container">
+        <div class="cancel-modal-header">
+            <div class="cancel-modal-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h3 class="cancel-modal-title">Cancelar Suscripción</h3>
+        </div>
+        
+        <div class="cancel-modal-body">
+            <p class="cancel-modal-message">
+                ¿Estás seguro de que deseas cancelar tu suscripción al plan <strong id="planToCancel"></strong>?
+            </p>
+            
+            <div class="cancel-modal-warning">
+                <i class="fas fa-info-circle"></i>
+                <div>
+                    <p class="warning-title">Ten en cuenta:</p>
+                    <ul class="warning-list">
+                        <li>Perderás acceso a las funciones premium al finalizar el período actual</li>
+                        <li>Tu suscripción se desactivará inmediatamente</li>
+                        <li>Podrás reactivar tu plan en cualquier momento</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="cancel-modal-actions">
+            <button type="button" class="btn-modal btn-keep" onclick="hideCancelModal()">
+                <i class="fas fa-heart me-2"></i>
+                Mantener Suscripción
+            </button>
+            <button type="button" class="btn-modal btn-confirm-cancel" onclick="confirmCancelSubscription()">
+                <i class="fas fa-times me-2"></i>
+                Cancelar Plan
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Formulario oculto para cancelar -->
+<form id="cancelForm" asp-action="Cancel" method="post" style="display: none;"></form>
+
 <style>
-    /* Resetear estilos del layout principal */
+    /* Estilos base existentes... */
     .container {
         max-width: none !important;
         padding: 0 !important;
@@ -165,11 +225,45 @@
         margin: 0 auto;
         padding: 2rem;
         min-height: 100vh;
+        position: relative;
     }
 
     .plans-header {
         text-align: center;
         margin-bottom: 3rem;
+        padding-top: 3rem;
+        position: relative;
+    }
+
+    .navigation-bar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        margin-bottom: 1rem;
+        z-index: 10;
+    }
+
+    .btn-home {
+        background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+        color: #fff !important;
+        border: 1px solid #333;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        font-size: 0.9rem;
+    }
+
+    .btn-home:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        color: #000 !important;
+        border-color: #1db954;
+        background: linear-gradient(135deg, #1db954, #1ed760);
     }
 
     .plans-title {
@@ -300,7 +394,186 @@
         transform: translateY(-2px);
     }
 
-    /* Grid de Planes */
+    /* ✅ NUEVO: Estilos del Modal de Cancelación */
+    .cancel-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.85);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        backdrop-filter: blur(8px);
+        animation: fadeIn 0.3s ease-out;
+    }
+
+    .cancel-modal-overlay.d-none {
+        display: none !important;
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    .cancel-modal-container {
+        background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+        border: 1px solid #444;
+        border-radius: 20px;
+        padding: 0;
+        max-width: 520px;
+        width: 90%;
+        box-shadow: 0 25px 80px rgba(0, 0, 0, 0.7);
+        overflow: hidden;
+        animation: modalSlideIn 0.4s ease-out;
+        position: relative;
+    }
+
+    @@keyframes modalSlideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-30px) scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    .cancel-modal-header {
+        background: linear-gradient(135deg, #ff6b6b, #ff5252);
+        padding: 2rem;
+        text-align: center;
+        color: #fff;
+        position: relative;
+    }
+
+    .cancel-modal-icon {
+        font-size: 3.5rem;
+        margin-bottom: 1rem;
+        opacity: 0.9;
+        animation: pulse 2s infinite;
+    }
+
+    @@keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.05);
+        }
+    }
+
+    .cancel-modal-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin: 0;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .cancel-modal-body {
+        padding: 2rem;
+    }
+
+    .cancel-modal-message {
+        font-size: 1.2rem;
+        color: #fff;
+        margin-bottom: 2rem;
+        line-height: 1.6;
+        text-align: center;
+    }
+
+    .cancel-modal-warning {
+        background: rgba(255, 193, 7, 0.1);
+        border: 1px solid rgba(255, 193, 7, 0.3);
+        border-radius: 12px;
+        padding: 1.5rem;
+        display: flex;
+        gap: 1rem;
+        align-items: flex-start;
+        color: #ffc107;
+    }
+
+    .cancel-modal-warning i {
+        font-size: 1.5rem;
+        margin-top: 0.2rem;
+        flex-shrink: 0;
+    }
+
+    .warning-title {
+        font-weight: 700;
+        margin-bottom: 0.75rem;
+        font-size: 1.1rem;
+        color: #ffc107;
+    }
+
+    .warning-list {
+        margin: 0;
+        padding-left: 1.5rem;
+        color: #e0e0e0;
+    }
+
+    .warning-list li {
+        margin-bottom: 0.5rem;
+        line-height: 1.4;
+    }
+
+    .cancel-modal-actions {
+        padding: 2rem;
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-modal {
+        padding: 12px 28px;
+        border-radius: 25px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: none;
+        font-size: 1rem;
+        display: inline-flex;
+        align-items: center;
+        min-width: 180px;
+        justify-content: center;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .btn-keep {
+        background: linear-gradient(135deg, #1db954, #1ed760);
+        color: #000;
+        box-shadow: 0 4px 15px rgba(29, 185, 84, 0.3);
+    }
+
+    .btn-keep:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(29, 185, 84, 0.4);
+        background: linear-gradient(135deg, #1ed760, #22c55e);
+    }
+
+    .btn-confirm-cancel {
+        background: linear-gradient(135deg, #dc3545, #c82333);
+        color: #fff;
+        box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+    }
+
+    .btn-confirm-cancel:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(220, 53, 69, 0.4);
+        background: linear-gradient(135deg, #c82333, #a71e2a);
+    }
+
+    /* Grid de Planes - mantener estilos existentes */
     .plans-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -465,6 +738,35 @@
         .plan-footer {
             padding: 1.5rem;
         }
+
+        .cancel-modal-container {
+            width: 95%;
+            margin: 1rem;
+        }
+
+        .cancel-modal-actions {
+            flex-direction: column;
+        }
+
+        .btn-modal {
+            width: 100%;
+        }
+
+        .cancel-modal-header {
+            padding: 1.5rem;
+        }
+
+        .cancel-modal-body {
+            padding: 1.5rem;
+        }
+
+        .cancel-modal-icon {
+            font-size: 3rem;
+        }
+
+        .cancel-modal-title {
+            font-size: 1.5rem;
+        }
     }
 
     /* Ocultar elementos del layout principal */
@@ -524,6 +826,50 @@
             document.body.insertAdjacentHTML('beforeend', modalHtml);
             const modal = new bootstrap.Modal(document.getElementById('paymentModal'));
             modal.show();
+        }
+    });
+
+    // ✅ NUEVAS FUNCIONES: Modal de cancelación personalizado
+    function showCancelModal(planName) {
+        document.getElementById('planToCancel').textContent = planName;
+        document.getElementById('cancelModal').classList.remove('d-none');
+        
+        // Prevenir scroll del body
+        document.body.style.overflow = 'hidden';
+    }
+
+    function hideCancelModal() {
+        document.getElementById('cancelModal').classList.add('d-none');
+        
+        // Restaurar scroll del body
+        document.body.style.overflow = 'auto';
+    }
+
+    function confirmCancelSubscription() {
+        // Mostrar loading en el botón
+        const confirmBtn = document.querySelector('.btn-confirm-cancel');
+        const originalContent = confirmBtn.innerHTML;
+        confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Cancelando...';
+        confirmBtn.disabled = true;
+        
+        // Simular delay para mejor UX
+        setTimeout(() => {
+            document.getElementById('cancelForm').submit();
+        }, 1000);
+    }
+
+    // Cerrar modal al hacer click fuera
+    document.addEventListener('click', function(e) {
+        const modal = document.getElementById('cancelModal');
+        if (e.target === modal) {
+            hideCancelModal();
+        }
+    });
+
+    // Cerrar modal con Escape
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            hideCancelModal();
         }
     });
 </script>

@@ -5,105 +5,787 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="page-container text-center">
-    <h1 class="page-title">Welcome, @Model.Name!</h1>
+<div class="artist-dashboard">
+    <!-- Header con información del artista -->
+    <div class="dashboard-header">
+        <!-- Botón de cerrar sesión elegante -->
+        <div class="logout-section">
+            <form asp-action="Logout" asp-controller="Account" method="post" class="logout-form">
+                <button type="submit" class="btn-logout">
+                    <i class="fas fa-sign-out-alt me-2"></i>
+                    Cerrar Sesión
+                </button>
+            </form>
+        </div>
 
+        <!-- Hero Section -->
+        <div class="hero-section">
+            <div class="artist-profile">
+                <div class="profile-image-container">
+                    @if (!string.IsNullOrEmpty(Model.ProfileImageUrl))
+                    {
+                        <img src="@Model.ProfileImageUrl" alt="Profile Image" class="profile-image" />
+                    }
+                    else
+                    {
+                        <img src="~/images/default-profile.png" alt="Profile Image" class="profile-image" />
+                    }
+                    <div class="profile-overlay">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                </div>
+                
+                <div class="artist-info">
+                    <span class="artist-badge">
+                        <i class="fas fa-microphone-alt me-2"></i>
+                        Artista
+                    </span>
+                    <h1 class="artist-name">Welcome, @Model.Name!</h1>
+                    <p class="artist-bio">@(!string.IsNullOrEmpty(Model.Biography) ? Model.Biography : "Comparte tu música con el mundo")</p>
+                    <p class="artist-email">@Model.Email</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mensajes de estado -->
     @if (ViewBag.Success != null)
     {
-        <div class="alert alert-success">@ViewBag.Success</div>
+        <div class="alert alert-success">
+            <i class="fas fa-check-circle me-2"></i>
+            @ViewBag.Success
+        </div>
     }
     @if (TempData["Error"] != null)
     {
-        <div class="alert alert-danger">@TempData["Error"]</div>
+        <div class="alert alert-danger">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            @TempData["Error"]
+        </div>
     }
 
-    <div>
-        @if (!string.IsNullOrEmpty(Model.ProfileImageUrl))
-        {
-            <img src="@Model.ProfileImageUrl" alt="Profile Image" class="rounded-circle mb-3" style="width: 160px; height: 160px; object-fit: cover;" />
-        }
-        else
-        {
-            <img src="~/images/default-profile.png" alt="Profile Image" class="rounded-circle mb-3" style="width: 160px; height: 160px; object-fit: cover;" />
-        }
-    </div>
-    <p class="page-description">
-        @Model.Biography
-    </p>
-    <p class="text-muted">@Model.Email</p>
-    
-    <!-- Botones de acción del artista -->
-    <div class="artist-actions">
-        <a href="@Url.Action("EditProfile", "Artists")" class="btn btn-primary mb-2">
-            <i class="fas fa-user-edit me-2"></i>Edit Profile
-        </a>
-        
-        <!-- ✅ NUEVO: Botón para subir contenido -->
-        <a href="@Url.Action("Upload", "Artists")" class="btn-green mb-2">
-            <i class="fas fa-upload me-2"></i>Subir Contenido
-        </a>
-        
-        <!-- Botón para ver canciones -->
-        <a href="@Url.Action("Index", "Artists")" class="btn btn-success mb-2">
-            <i class="fas fa-music me-2"></i>Mis Canciones
-        </a>
-        
-        <a href="@Url.Action("Index", "Albums")" class="btn btn-info mb-2">
-            <i class="fas fa-compact-disc me-2"></i>My Albums
-        </a>
+    <!-- Dashboard Principal -->
+    <div class="dashboard-content">
+        <!-- Sección de acciones rápidas -->
+        <div class="quick-actions-section">
+            <h2 class="section-title">
+                <i class="fas fa-bolt me-2"></i>
+                Acciones Rápidas
+            </h2>
+            
+            <div class="quick-actions-grid">
+                <!-- Editar Perfil -->
+                <a href="@Url.Action("EditProfile", "Artists")" class="action-card profile-card">
+                    <div class="card-icon">
+                        <i class="fas fa-user-edit"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>Editar Perfil</h3>
+                        <p>Actualiza tu información personal</p>
+                    </div>
+                    <div class="card-arrow">
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                </a>
+
+                <!-- Subir Contenido -->
+                <a href="@Url.Action("Upload", "Artists")" class="action-card upload-card">
+                    <div class="card-icon">
+                        <i class="fas fa-upload"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>Subir Contenido</h3>
+                        <p>Comparte tu nueva música</p>
+                    </div>
+                    <div class="card-arrow">
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Sección de gestión de contenido -->
+        <div class="content-management-section">
+            <h2 class="section-title">
+                <i class="fas fa-folder-open me-2"></i>
+                Gestionar Contenido
+            </h2>
+            
+            <div class="management-grid">
+                <!-- Mis Canciones -->
+                <a href="@Url.Action("Index", "Artists")" class="management-card songs-card">
+                    <div class="card-background">
+                        <i class="fas fa-music"></i>
+                    </div>
+                    <div class="card-overlay">
+                        <div class="card-info">
+                            <h3>Mis Canciones</h3>
+                            <p>Administra tu biblioteca musical</p>
+                            <span class="card-badge">
+                                <i class="fas fa-headphones me-1"></i>
+                                Audio
+                            </span>
+                        </div>
+                        <div class="card-action">
+                            <i class="fas fa-play"></i>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Mis Álbumes -->
+                <a href="@Url.Action("Index", "Albums")" class="management-card albums-card">
+                    <div class="card-background">
+                        <i class="fas fa-compact-disc"></i>
+                    </div>
+                    <div class="card-overlay">
+                        <div class="card-info">
+                            <h3>Mis Álbumes</h3>
+                            <p>Organiza tus colecciones</p>
+                            <span class="card-badge">
+                                <i class="fas fa-layer-group me-1"></i>
+                                Colecciones
+                            </span>
+                        </div>
+                        <div class="card-action">
+                            <i class="fas fa-plus"></i>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Estadísticas rápidas -->
+        <div class="stats-section">
+            <h2 class="section-title">
+                <i class="fas fa-chart-line me-2"></i>
+                Tu Actividad
+            </h2>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-music"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h4>Total Canciones</h4>
+                        <span class="stat-number">--</span>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-compact-disc"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h4>Álbumes</h4>
+                        <span class="stat-number">--</span>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h4>Última Subida</h4>
+                        <span class="stat-text">--</span>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
 <style>
-    .artist-actions {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 10px;
-        margin-top: 20px;
+    /* Reset base */
+    .container {
+        max-width: none !important;
+        padding: 0 !important;
     }
 
-    .artist-actions a {
-        min-width: 200px;
-        text-decoration: none;
-        border-radius: 8px;
-        padding: 12px 20px;
+    body {
+        background: linear-gradient(135deg, #000000, #121212) !important;
+        color: #fff !important;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+    }
+
+    /* Dashboard principal */
+    .artist-dashboard {
+        min-height: 100vh;
+        position: relative;
+    }
+
+    /* Header del dashboard */
+    .dashboard-header {
+        position: relative;
+        background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 50%, #1a1a1a 100%);
+        padding: 2rem 0;
+        margin-bottom: 3rem;
+    }
+
+    .dashboard-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="%23ffffff" opacity="0.02"/><circle cx="75" cy="75" r="1" fill="%23ffffff" opacity="0.02"/><circle cx="50" cy="10" r="1" fill="%23ffffff" opacity="0.02"/><circle cx="10" cy="60" r="1" fill="%23ffffff" opacity="0.02"/><circle cx="90" cy="40" r="1" fill="%23ffffff" opacity="0.02"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        opacity: 0.3;
+        z-index: 1;
+    }
+
+    /* Botón de logout elegante */
+    .logout-section {
+        position: absolute;
+        top: 2rem;
+        right: 2rem;
+        z-index: 10;
+    }
+
+    .logout-form {
+        margin: 0;
+        padding: 0;
+    }
+
+    .btn-logout {
+        background: linear-gradient(135deg, #dc2626, #ef4444);
+        color: #fff !important;
+        border: 1px solid rgba(220, 38, 38, 0.5);
+        padding: 10px 20px;
+        border-radius: 25px;
         font-weight: 600;
+        cursor: pointer;
         display: inline-flex;
         align-items: center;
-        justify-content: center;
         transition: all 0.3s ease;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
+        font-size: 0.9rem;
+        text-decoration: none;
+        backdrop-filter: blur(10px);
     }
 
-    .artist-actions a:hover {
+    .btn-logout:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 8px 25px rgba(220, 38, 38, 0.5);
+        background: linear-gradient(135deg, #ef4444, #f87171);
+        border-color: #ef4444;
+        color: #fff !important;
     }
 
-    .btn-green {
-        background: linear-gradient(135deg, #28a745, #20c997);
-        color: white;
+    /* Hero section */
+    .hero-section {
+        position: relative;
+        z-index: 2;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 4rem 2rem;
+    }
+
+    .artist-profile {
+        display: flex;
+        align-items: center;
+        gap: 3rem;
+        flex-wrap: wrap;
+    }
+
+    .profile-image-container {
+        position: relative;
+        flex-shrink: 0;
+    }
+
+    .profile-image {
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid #1db954;
+        box-shadow: 0 8px 32px rgba(29, 185, 84, 0.3);
+        transition: all 0.3s ease;
+    }
+
+    .profile-image:hover {
+        transform: scale(1.05);
+        box-shadow: 0 12px 40px rgba(29, 185, 84, 0.4);
+    }
+
+    .profile-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.6);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        color: #1db954;
+        font-size: 2rem;
+    }
+
+    .profile-image-container:hover .profile-overlay {
+        opacity: 1;
+    }
+
+    .artist-info {
+        flex: 1;
+        min-width: 300px;
+    }
+
+    .artist-badge {
+        display: inline-flex;
+        align-items: center;
+        background: linear-gradient(135deg, #1db954, #1ed760);
+        color: #000;
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 1rem;
+    }
+
+    .artist-name {
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        background: linear-gradient(135deg, #fff, #b3b3b3);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        line-height: 1.2;
+    }
+
+    .artist-bio {
+        font-size: 1.2rem;
+        color: #b3b3b3;
+        margin-bottom: 1rem;
+        line-height: 1.6;
+        max-width: 600px;
+    }
+
+    .artist-email {
+        color: #777;
+        font-size: 1rem;
+        font-style: italic;
+    }
+
+    /* Contenido del dashboard */
+    .dashboard-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 2rem 4rem;
+    }
+
+    .section-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 2rem;
+        color: #fff;
+        display: flex;
+        align-items: center;
+    }
+
+    /* Acciones rápidas */
+    .quick-actions-section {
+        margin-bottom: 4rem;
+    }
+
+    .quick-actions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+    }
+
+    .action-card {
+        background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        text-decoration: none;
+        color: #fff;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .action-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(29, 185, 84, 0.1), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .action-card:hover::before {
+        left: 100%;
+    }
+
+    .action-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        border-color: rgba(29, 185, 84, 0.5);
+    }
+
+    .card-icon {
+        background: linear-gradient(135deg, #1db954, #1ed760);
+        color: #000;
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        flex-shrink: 0;
+    }
+
+    .card-content {
+        flex: 1;
+    }
+
+    .card-content h3 {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #fff;
+    }
+
+    .card-content p {
+        color: #b3b3b3;
+        margin: 0;
+        font-size: 0.95rem;
+    }
+
+    .card-arrow {
+        color: #1db954;
+        font-size: 1.2rem;
+        opacity: 0.7;
+        transition: all 0.3s ease;
+    }
+
+    .action-card:hover .card-arrow {
+        opacity: 1;
+        transform: translateX(5px);
+    }
+
+    /* Gestión de contenido */
+    .content-management-section {
+        margin-bottom: 4rem;
+    }
+
+    .management-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 2rem;
+    }
+
+    .management-card {
+        position: relative;
+        height: 200px;
+        border-radius: 16px;
+        overflow: hidden;
+        text-decoration: none;
+        color: #fff;
+        transition: all 0.3s ease;
+        background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+    }
+
+    .card-background {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 6rem;
+        color: rgba(255, 255, 255, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .card-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(29, 185, 84, 0.9), rgba(30, 215, 96, 0.8));
+        padding: 2rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        opacity: 0;
+        transition: all 0.3s ease;
+    }
+
+    .management-card:hover .card-overlay {
+        opacity: 1;
+    }
+
+    .management-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .management-card:hover .card-background {
+        transform: scale(1.1);
+        color: rgba(255, 255, 255, 0.2);
+    }
+
+    .card-info h3 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: #000;
+    }
+
+    .card-info p {
+        color: rgba(0, 0, 0, 0.8);
+        font-size: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .card-badge {
+        display: inline-flex;
+        align-items: center;
+        background: rgba(0, 0, 0, 0.2);
+        color: #000;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .card-action {
+        align-self: flex-end;
+        background: rgba(0, 0, 0, 0.2);
+        color: #000;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+    }
+
+    /* Estadísticas */
+    .stats-section {
+        margin-bottom: 4rem;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .stat-card {
+        background: linear-gradient(135deg, #1a1a1a, #252525);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        border-color: rgba(29, 185, 84, 0.3);
+    }
+
+    .stat-icon {
+        background: linear-gradient(135deg, #333, #444);
+        color: #1db954;
+        width: 50px;
+        height: 50px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        flex-shrink: 0;
+    }
+
+    .stat-info h4 {
+        color: #b3b3b3;
+        font-size: 0.9rem;
+        font-weight: 500;
+        margin-bottom: 0.25rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .stat-number {
+        color: #fff;
+        font-size: 1.8rem;
+        font-weight: 700;
+    }
+
+    .stat-text {
+        color: #fff;
+        font-size: 1rem;
+        font-weight: 500;
+    }
+
+    /* Alertas */
+    .alert {
+        max-width: 1200px;
+        margin: 0 auto 2rem;
+        padding: 1rem 2rem;
+        border-radius: 12px;
         border: none;
+        display: flex;
+        align-items: center;
+        font-weight: 500;
     }
 
-    .btn-green:hover {
-        background: linear-gradient(135deg, #218838, #1aa179);
-        color: white;
+    .alert-success {
+        background: linear-gradient(135deg, rgba(29, 185, 84, 0.15), rgba(30, 215, 96, 0.1));
+        color: #1db954;
+        border: 1px solid rgba(29, 185, 84, 0.3);
     }
 
-    .btn-primary {
-        background: linear-gradient(135deg, #007bff, #0056b3);
-        border: none;
+    .alert-danger {
+        background: linear-gradient(135deg, rgba(220, 53, 69, 0.15), rgba(239, 68, 68, 0.1));
+        color: #dc3545;
+        border: 1px solid rgba(220, 53, 69, 0.3);
     }
 
-    .btn-success {
-        background: linear-gradient(135deg, #28a745, #1e7e34);
-        border: none;
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .hero-section {
+            padding: 2rem 1rem;
+        }
+
+        .artist-profile {
+            flex-direction: column;
+            text-align: center;
+            gap: 2rem;
+        }
+
+        .profile-image {
+            width: 150px;
+            height: 150px;
+        }
+
+        .artist-name {
+            font-size: 2rem;
+        }
+
+        .dashboard-content {
+            padding: 0 1rem 4rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+        }
+
+        .quick-actions-grid,
+        .management-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .logout-section {
+            position: relative;
+            top: auto;
+            right: auto;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
     }
 
-    .btn-info {
-        background: linear-gradient(135deg, #17a2b8, #117a8b);
-        border: none;
+    @@media (max-width: 480px) {
+        .action-card {
+            flex-direction: column;
+            text-align: center;
+            padding: 1.5rem;
+        }
+
+        .card-content h3 {
+            font-size: 1.1rem;
+        }
+
+        .management-card {
+            height: 150px;
+        }
+
+        .card-info h3 {
+            font-size: 1.2rem;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Ocultar elementos del layout */
+    header, footer {
+        display: none !important;
+    }
+
+    /* FontAwesome */
+    .fas {
+        font-family: "Font Awesome 5 Free" !important;
+        font-weight: 900 !important;
     }
 </style>
+
+<!-- FontAwesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animación de entrada para las tarjetas
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Aplicar animaciones a las tarjetas
+        document.querySelectorAll('.action-card, .management-card, .stat-card').forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(30px)';
+            card.style.transition = `opacity 0.6s ease ${index * 0.1}s, transform 0.6s ease ${index * 0.1}s`;
+            observer.observe(card);
+        });
+
+        // Efecto parallax sutil en el hero
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const hero = document.querySelector('.hero-section');
+            if (hero) {
+                hero.style.transform = `translateY(${scrolled * 0.3}px)`;
+            }
+        });
+
+        console.log('Dashboard del artista mejorado cargado correctamente');
+    });
+</script>

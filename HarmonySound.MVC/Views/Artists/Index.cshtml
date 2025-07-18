@@ -6,6 +6,24 @@
 
 <div class="music-library-container">
     <div class="library-header">
+        <!-- ✅ NUEVO: Botón de navegación al Home del Artista -->
+        <div class="navigation-bar">
+            <a href="@Url.Action("Home", "Artists")" class="btn-home">
+                <i class="fas fa-home me-2"></i>
+                Home
+            </a>
+        </div>
+        
+        <!-- ✅ NUEVO: Botón de cerrar sesión mejorado -->
+        <div class="logout-section">
+            <form asp-action="Logout" asp-controller="Account" method="post" class="logout-form">
+                <button type="submit" class="btn-logout">
+                    <i class="fas fa-sign-out-alt me-2"></i>
+                    Cerrar Sesión
+                </button>
+            </form>
+        </div>
+        
         <h1 class="library-title">
             <i class="fas fa-music me-3"></i>
             Mis Canciones
@@ -65,9 +83,25 @@
                         </div>
                         
                         <div class="song-menu">
-                            <button class="btn-menu" title="Más opciones">
+                            <button class="btn-menu" title="Más opciones" onclick="toggleDropdown(@content.Id)">
                                 <i class="fas fa-ellipsis-h"></i>
                             </button>
+                            <!-- ✅ NUEVO: Menú desplegable -->
+                            <div class="dropdown-menu" id="dropdown-@content.Id">
+                                <a href="@Url.Action("Details", "Artists", new { id = content.Id })" class="dropdown-item">
+                                    <i class="fas fa-info-circle"></i>
+                                    Ver Detalles
+                                </a>
+                                <a href="@Url.Action("Edit", "Artists", new { id = content.Id })" class="dropdown-item">
+                                    <i class="fas fa-edit"></i>
+                                    Editar Canción
+                                </a>
+                                <!-- ✅ MODIFICADO: Botón de eliminar con modal -->
+                                <button type="button" class="dropdown-item dropdown-delete" onclick="showDeleteModal(@content.Id, '@content.Title')">
+                                    <i class="fas fa-trash-alt"></i>
+                                    Eliminar Canción
+                                </button>
+                            </div>
                         </div>
                     </div>
                 }
@@ -89,6 +123,42 @@
         }
     </div>
 </div>
+
+<!-- ✅ NUEVO: Modal de confirmación para eliminar -->
+<div id="deleteModal" class="modal-overlay d-none">
+    <div class="modal-container">
+        <div class="modal-header">
+            <div class="modal-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h3 class="modal-title">Confirmar Eliminación</h3>
+        </div>
+        
+        <div class="modal-body">
+            <p class="modal-message">¿Estás seguro de que quieres eliminar la canción <strong id="songToDelete"></strong>?</p>
+            <div class="modal-warning">
+                <i class="fas fa-info-circle"></i>
+                <span>Esta acción eliminará el archivo y no se puede deshacer.</span>
+            </div>
+        </div>
+        
+        <div class="modal-actions">
+            <button type="button" class="btn-modal btn-cancel" onclick="hideDeleteModal()">
+                <i class="fas fa-times me-2"></i>
+                Cancelar
+            </button>
+            <button type="button" class="btn-modal btn-confirm" onclick="confirmDelete()">
+                <i class="fas fa-trash-alt me-2"></i>
+                Eliminar Canción
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Formulario oculto para eliminar -->
+<form id="deleteForm" asp-action="Delete" asp-controller="Artists" method="post" style="display: none;">
+    <input type="hidden" id="contentIdToDelete" name="id" value="" />
+</form>
 
 <!-- Reproductor estilo Spotify - SIN LIKES -->
 <div id="custom-player" class="custom-player d-none">
@@ -173,9 +243,83 @@
         margin: 0; padding: 0; padding-bottom: 90px; 
     }
 
+    /* ✅ NUEVO: Estilos para barra de navegación */
+    .navigation-bar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        margin-bottom: 1rem;
+        z-index: 10;
+    }
+
+    .btn-home {
+        background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+        color: #fff !important;
+        border: 1px solid #333;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        font-size: 0.9rem;
+    }
+
+    .btn-home:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        color: #000 !important;
+        border-color: #1db954;
+        background: linear-gradient(135deg, #1db954, #1ed760);
+    }
+
+    /* ✅ NUEVO: Estilos para botón de logout mejorado */
+    .logout-section {
+        position: absolute;
+        top: 0;
+        right: 0;
+        z-index: 10;
+    }
+
+    .logout-form {
+        margin: 0;
+        padding: 0;
+    }
+
+    .btn-logout {
+        background: linear-gradient(135deg, #dc2626, #ef4444);
+        color: #fff !important;
+        border: 1px solid #dc2626;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 10px rgba(220, 38, 38, 0.3);
+        font-size: 0.9rem;
+        text-decoration: none;
+    }
+
+    .btn-logout:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(220, 38, 38, 0.5);
+        background: linear-gradient(135deg, #b91c1c, #dc2626);
+        border-color: #b91c1c;
+        color: #fff !important;
+    }
+
+    .btn-logout:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 10px rgba(220, 38, 38, 0.3);
+    }
+
     /* Biblioteca Musical */
-    .music-library-container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
-    .library-header { margin-bottom: 2rem; }
+    .music-library-container { max-width: 1200px; margin: 0 auto; padding: 2rem; position: relative; }
+    .library-header { margin-bottom: 2rem; padding-top: 3rem; }
     .library-title { font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem; color: #fff !important; }
     .library-subtitle { color: #b3b3b3 !important; font-size: 1rem; }
     
@@ -243,14 +387,205 @@
         grid-area: duration; font-size: 14px; color: #b3b3b3 !important; 
         font-variant-numeric: tabular-nums; text-align: right; 
     }
-    .song-menu { grid-area: menu; opacity: 1 !important; visibility: visible !important; }
+    
+    /* ✅ NUEVO: Menú desplegable */
+    .song-menu { 
+        grid-area: menu; opacity: 1 !important; visibility: visible !important; 
+        position: relative;
+    }
     .btn-menu {
         background: none !important; border: none !important; color: #b3b3b3 !important;
         padding: 6px !important; cursor: pointer !important; border-radius: 50% !important;
         width: 28px !important; height: 28px !important; display: flex !important;
         align-items: center !important; justify-content: center !important; font-size: 12px !important;
+        transition: all 0.3s ease;
     }
     .btn-menu:hover { background: #1a1a1a !important; color: #fff !important; }
+
+    .dropdown-menu {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
+        border: 1px solid #444;
+        border-radius: 8px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        z-index: 1000;
+        min-width: 180px;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-10px);
+        transition: all 0.3s ease;
+    }
+
+    .dropdown-menu.show {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+
+    .dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 16px;
+        color: #fff !important;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        border: none;
+        background: none;
+        width: 100%;
+        text-align: left;
+        cursor: pointer;
+        font-size: 14px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .dropdown-item:last-child {
+        border-bottom: none;
+    }
+
+    .dropdown-item:hover {
+        background: rgba(29, 185, 84, 0.1);
+        color: #1db954 !important;
+    }
+
+    .dropdown-delete:hover {
+        background: rgba(220, 53, 69, 0.1) !important;
+        color: #dc3545 !important;
+    }
+
+    /* ✅ NUEVO: Estilos del Modal */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        backdrop-filter: blur(5px);
+    }
+
+    .modal-overlay.d-none {
+        display: none !important;
+    }
+
+    .modal-container {
+        background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+        border: 1px solid #444;
+        border-radius: 16px;
+        padding: 0;
+        max-width: 480px;
+        width: 90%;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        overflow: hidden;
+        animation: modalSlideIn 0.3s ease-out;
+    }
+
+    @@keyframes modalSlideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-20px) scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    .modal-header {
+        background: linear-gradient(135deg, #dc3545, #c82333);
+        padding: 1.5rem;
+        text-align: center;
+        color: #fff;
+    }
+
+    .modal-icon {
+        font-size: 3rem;
+        margin-bottom: 0.5rem;
+        opacity: 0.9;
+    }
+
+    .modal-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .modal-body {
+        padding: 2rem 1.5rem;
+        text-align: center;
+    }
+
+    .modal-message {
+        font-size: 1.1rem;
+        color: #fff;
+        margin-bottom: 1.5rem;
+        line-height: 1.5;
+    }
+
+    .modal-warning {
+        background: rgba(255, 193, 7, 0.1);
+        border: 1px solid rgba(255, 193, 7, 0.3);
+        border-radius: 8px;
+        padding: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: #ffc107;
+        font-size: 0.9rem;
+    }
+
+    .modal-actions {
+        padding: 1.5rem;
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-modal {
+        padding: 12px 24px;
+        border-radius: 25px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: none;
+        font-size: 1rem;
+        display: inline-flex;
+        align-items: center;
+        min-width: 140px;
+        justify-content: center;
+    }
+
+    .btn-cancel {
+        background: transparent;
+        color: #b3b3b3;
+        border: 2px solid #666;
+    }
+
+    .btn-cancel:hover {
+        background: #1a1a1a;
+        color: #fff;
+        border-color: #999;
+        transform: translateY(-2px);
+    }
+
+    .btn-confirm {
+        background: linear-gradient(135deg, #dc3545, #c82333);
+        color: #fff;
+        box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+    }
+
+    .btn-confirm:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+        background: linear-gradient(135deg, #c82333, #a71e2a);
+    }
 
     /* Estado vacío */
     .empty-state {
@@ -368,7 +703,20 @@
         .extra-controls { display: none; }
         .song-item { grid-template-columns: 1fr 60px; grid-template-areas: "info actions"; }
         .song-duration, .song-menu { display: none; }
-        .progress-section { max-width: 300px; }
+        .progress-section { max-width: 300px; } 
+        
+        .modal-container {
+            width: 95%;
+            margin: 1rem;
+        }
+        
+        .modal-actions {
+            flex-direction: column;
+        }
+        
+        .btn-modal {
+            width: 100%;
+        }
     }
 
     @@media (max-width: 480px) {
@@ -377,6 +725,22 @@
         .track-cover { width: 48px; height: 48px; }
         .control-btn { width: 28px; height: 28px; }
         .play-btn { width: 36px !important; height: 36px !important; }
+        
+        .logout-section {
+            position: relative;
+            top: auto;
+            right: auto;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        
+        .navigation-bar {
+            position: relative;
+            top: auto;
+            left: auto;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
     }
 
     /* Ocultar elementos del layout */
@@ -597,7 +961,6 @@ class ArtistAudioPlayer {
         console.log('Audio cargado. Listo para reproducir.');
     }
 
-    // ✅ NUEVO MÉTODO: Cargar y reproducir automáticamente
     async playTrackAndStart(track) {
         if (!track || !track.url) {
             console.error('Track inválido');
@@ -777,6 +1140,71 @@ class ArtistAudioPlayer {
         console.error('Error en audio:', e);
     }
 }
+
+// ✅ NUEVO: Funciones para el menú desplegable
+function toggleDropdown(contentId) {
+    // Cerrar otros dropdowns
+    document.querySelectorAll('.dropdown-menu').forEach(menu => {
+        if (menu.id !== `dropdown-${contentId}`) {
+            menu.classList.remove('show');
+        }
+    });
+    
+    // Toggle del dropdown actual
+    const dropdown = document.getElementById(`dropdown-${contentId}`);
+    dropdown.classList.toggle('show');
+    
+    // Cerrar al hacer click fuera
+    setTimeout(() => {
+        document.addEventListener('click', function handler(e) {
+            if (!e.target.closest('.song-menu')) {
+                dropdown.classList.remove('show');
+                document.removeEventListener('click', handler);
+            }
+        });
+    }, 100);
+}
+
+// ✅ NUEVO: Funciones del modal de eliminación
+let contentIdToDelete = null;
+
+function showDeleteModal(contentId, songTitle) {
+    contentIdToDelete = contentId;
+    document.getElementById('songToDelete').textContent = songTitle;
+    document.getElementById('contentIdToDelete').value = contentId;
+    document.getElementById('deleteModal').classList.remove('d-none');
+    
+    // Cerrar cualquier dropdown abierto
+    document.querySelectorAll('.dropdown-menu').forEach(menu => {
+        menu.classList.remove('show');
+    });
+}
+
+function hideDeleteModal() {
+    document.getElementById('deleteModal').classList.add('d-none');
+    contentIdToDelete = null;
+}
+
+function confirmDelete() {
+    if (contentIdToDelete) {
+        document.getElementById('deleteForm').submit();
+    }
+}
+
+// Cerrar modal al hacer click fuera
+document.addEventListener('click', function(e) {
+    const modal = document.getElementById('deleteModal');
+    if (e.target === modal) {
+        hideDeleteModal();
+    }
+});
+
+// Cerrar modal con Escape
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        hideDeleteModal();
+    }
+});
 
 // Inicializar reproductor cuando se carga el DOM
 document.addEventListener('DOMContentLoaded', () => {
