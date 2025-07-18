@@ -319,5 +319,40 @@ namespace HarmonySound.API.Controllers
                 });
             }
         }
+
+        // DELETE: api/Playlists/5/remove/3
+        [HttpDelete("{playlistId}/remove/{contentId}")]
+        public async Task<IActionResult> RemoveContentFromPlaylist(int playlistId, int contentId)
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine($"=== RemoveContentFromPlaylist: playlist {playlistId}, content {contentId} ===");
+                
+                // Buscar la relación
+                var playlistContent = await _context.PlaylistContents
+                    .FirstOrDefaultAsync(pc => pc.PlaylistId == playlistId && pc.ContentId == contentId);
+                
+                if (playlistContent == null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Content {contentId} not found in playlist {playlistId}");
+                    return NotFound($"Content with id {contentId} not found in playlist {playlistId}");
+                }
+                
+                // Eliminar la relación
+                _context.PlaylistContents.Remove(playlistContent);
+                await _context.SaveChangesAsync();
+                
+                System.Diagnostics.Debug.WriteLine($"Successfully removed content {contentId} from playlist {playlistId}");
+                return Ok(new { message = "Contenido eliminado exitosamente de la playlist" });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error in RemoveContentFromPlaylist: {ex.Message}");
+                return StatusCode(500, new { 
+                    error = "Error al eliminar contenido de la playlist", 
+                    details = ex.Message 
+                });
+            }
+        }
     }
 }

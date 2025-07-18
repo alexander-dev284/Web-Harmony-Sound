@@ -5,6 +5,9 @@ using HarmonySound.MVC.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace HarmonySound.MVC.Controllers
 {
@@ -36,6 +39,22 @@ namespace HarmonySound.MVC.Controllers
 
             var json = await response.Content.ReadAsStringAsync();
             var album = System.Text.Json.JsonSerializer.Deserialize<AlbumDto>(json, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            
+            // ✅ DEBUGGING: Verificar las URLs que llegan
+            if (album?.Contents != null)
+            {
+                System.Diagnostics.Debug.WriteLine($"=== Álbum '{album.Title}' con {album.Contents.Count} canciones ===");
+                foreach (var content in album.Contents)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Canción: {content.Title} - URL: {content.UrlMedia ?? "NULL"}");
+                    System.Diagnostics.Debug.WriteLine($"  - UrlMedia válida: {!string.IsNullOrEmpty(content.UrlMedia)}");
+                }
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine("⚠️ Álbum sin contenidos");
+            }
+            
             return View(album);
         }
 
@@ -189,6 +208,32 @@ namespace HarmonySound.MVC.Controllers
         {
             var response = await _httpClient.DeleteAsync($"https://localhost:7120/api/Albums/{id}");
             return RedirectToAction(nameof(Index));
+        }
+
+        // POST: Albums/RemoveTrackFromAlbum
+        [HttpPost]
+        public async Task<IActionResult> RemoveTrackFromAlbum(int albumId, int trackId)
+        {
+            try
+            {
+                // Usar el endpoint DELETE específico del API
+                var response = await _httpClient.DeleteAsync($"https://localhost:7120/api/Albums/{albumId}/RemoveSong/{trackId}");
+                
+                if (response.IsSuccessStatusCode)
+                {
+                    TempData["Success"] = "La canción se eliminó del álbum correctamente.";
+                }
+                else
+                {
+                    TempData["Error"] = "Error al eliminar la canción del álbum.";
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Error al eliminar la canción: {ex.Message}";
+            }
+
+            return RedirectToAction("Details", new { id = albumId });
         }
     }
 }

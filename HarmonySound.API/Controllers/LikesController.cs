@@ -1,0 +1,102 @@
+using HarmonySound.API.Data;
+using HarmonySound.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+
+namespace HarmonySound.API.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class LikesController : ControllerBase
+    {
+        private readonly HarmonySoundDbContext _context;
+        private readonly ILogger<LikesController> _logger;
+
+        public LikesController(HarmonySoundDbContext context, ILogger<LikesController> logger)
+        {
+            _context = context;
+            _logger = logger;
+        }
+
+        // GET: api/Likes/user/{userId}
+        [HttpGet("user/{userId}")]
+        public async Task<IActionResult> GetUserLikes(int userId)
+        {
+            try
+            {
+                var likedContentIds = await _context.UserLikes
+                    .Where(ul => ul.UserId == userId)
+                    .Select(ul => ul.ContentId)
+                    .ToListAsync();
+
+                return Ok(likedContentIds);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error al obtener likes del usuario {userId}");
+                return StatusCode(500, "Error interno del servidor");
+            }
+        }
+
+        // POST: api/Likes
+        [HttpPost]
+        public async Task<IActionResult> LikeContent([FromForm] int contentId, [FromForm] int userId)
+        {
+            try
+            {
+                // Verificar si ya existe el like
+                var existingLike = await _context.UserLikes
+                    .FirstOrDefaultAsync(ul => ul.UserId == userId && ul.ContentId == contentId);
+
+                if (existingLike != null)
+                {
+                    return BadRequest("Ya has dado like a este contenido");
+                }
+
+                // Crear nuevo like
+                var userLike = new UserLike
+                {
+                    UserId = userId,
+                    ContentId = contentId,
+                    LikeDate = DateTimeOffset.UtcNow
+                };
+
+                _context.UserLikes.Add(userLike);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { success = true, message = "Like agregado correctamente" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al agregar like");
+                return StatusCode(500, "Error interno del servidor");
+            }
+        }
+
+        // DELETE: api/Likes/{userId}/{contentId}
+        [HttpDelete("{userId}/{contentId}")]
+        public async Task<IActionResult> UnlikeContent(int userId, int contentId)
+        {
+            try
+            {
+                var userLike = await _context.UserLikes
+                    .FirstOrDefaultAsync(ul => ul.UserId == userId && ul.ContentId == contentId);
+
+                if (userLike == null)
+                {
+                    return NotFound("Like no encontrado");
+                }
+
+                _context.UserLikes.Remove(userLike);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { success = true, message = "Like removido correctamente" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al remover like");
+                return StatusCode(500, "Error interno del servidor");
+            }
+        }
+    }
+}

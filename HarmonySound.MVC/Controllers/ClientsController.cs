@@ -1,78 +1,71 @@
 ﻿using HarmonySound.API.Consumer;
 using HarmonySound.Models;
+using HarmonySound.MVC.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Net.Http;
 using System.Security.Claims;
-using HarmonySound.MVC.Models;
 using System.Text.Json;
+
 namespace HarmonySound.MVC.Controllers
 {
     [Authorize(Roles = "client")]
     public class ClientsController : Controller
     {
+        // ✅ AGREGADO: Campo HttpClient requerido
+        private readonly HttpClient _httpClient;
+
+        // ✅ AGREGADO: Constructor con inyección de dependencias
+        public ClientsController(HttpClient httpClient)
+        {
+            _httpClient = httpClient;
+            _httpClient.Timeout = TimeSpan.FromMinutes(10);
+        }
+
         public async Task<IActionResult> Index()
         {
-            // Agregar esta línea para obtener el userId
-            int userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier).Value);
-            ViewBag.UserId = userId; // ESTO ES LO QUE FALTA
-
-            Crud<Content>.EndPoint = "https://localhost:7120/api/Contents";
-            var contents = Crud<Content>.GetAll();
-            
-            // Obtener información de los artistas para cada contenido
-            var contentsWithArtists = new List<ContentWithArtistDto>();
-            
-            using (var client = new HttpClient())
+            try
             {
-                var userIds = contents.Select(c => c.ArtistId).Distinct().ToList();
-                var artists = new Dictionary<int, string>();
+                // ✅ IMPORTANTE: Agregar esta línea
+                int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                ViewBag.UserId = userId; // 👈 ESTO ES CRUCIAL
+
+                var response = await _httpClient.GetAsync("https://localhost:7120/api/Contents/with-artists");
                 
-                foreach (var artistId in userIds)
+                if (response.IsSuccessStatusCode)
                 {
-                    var artistResponse = await client.GetAsync($"https://localhost:7120/api/Users/profile/{artistId}");
-                    if (artistResponse.IsSuccessStatusCode)
-                    {
-                        var artistJson = await artistResponse.Content.ReadAsStringAsync();
-                        var artist = System.Text.Json.JsonSerializer.Deserialize<User>(artistJson, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                        artists[artistId] = artist?.Name ?? "Artista desconocido";
-                    }
-                    else
-                    {
-                        artists[artistId] = "Artista desconocido";
-                    }
+                    var json = await response.Content.ReadAsStringAsync();
+                    var contents = JsonSerializer.Deserialize<List<ContentWithArtistDto>>(json, 
+                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    
+                    return View(contents);
                 }
-
-                // Convertir a ContentWithArtistDto
-                contentsWithArtists = contents.Select(c => new ContentWithArtistDto
+                else
                 {
-                    Id = c.Id,
-                    Title = c.Title,
-                    Type = c.Type,
-                    UrlMedia = c.UrlMedia,
-                    Duration = c.Duration,
-                    UploadDate = c.UploadDate,
-                    ArtistId = c.ArtistId,
-                    ArtistName = artists.GetValueOrDefault(c.ArtistId, "Artista desconocido")
-                }).ToList();
+                    ViewBag.Error = "No se pudieron cargar las canciones.";
+                    return View(new List<ContentWithArtistDto>());
+                }
             }
-
-            return View(contentsWithArtists);
+            catch (Exception ex)
+            {
+                ViewBag.Error = $"Error al cargar contenido: {ex.Message}";
+                return View(new List<ContentWithArtistDto>());
+            }
         }
+
         public async Task<IActionResult> EditProfile()
         {
-            int userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier).Value);
+            int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
 
-            using (var client = new HttpClient())
-            {
-                var response = await client.GetAsync($"https://localhost:7120/api/Users/profile/{userId}");
-                if (!response.IsSuccessStatusCode)
-                    return View("Error");
+            var response = await _httpClient.GetAsync($"https://localhost:7120/api/Users/profile/{userId}");
+            if (!response.IsSuccessStatusCode)
+                return View("Error");
 
-                var json = await response.Content.ReadAsStringAsync();
-                var dto = System.Text.Json.JsonSerializer.Deserialize<ProfileEditViewModel>(json, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            var json = await response.Content.ReadAsStringAsync();
+            var dto = JsonSerializer.Deserialize<ProfileEditViewModel>(json, 
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-                return View(dto);
-            }
+            return View(dto);
         }
 
         [HttpPost]
@@ -90,47 +83,42 @@ namespace HarmonySound.MVC.Controllers
             // Si NO se sube una nueva imagen, recupera la URL actual antes de actualizar
             if (model.ProfileImageFile == null || model.ProfileImageFile.Length == 0)
             {
-                using (var client = new HttpClient())
+                var response = await _httpClient.GetAsync($"https://localhost:7120/api/Users/profile/{model.Id}");
+                if (response.IsSuccessStatusCode)
                 {
-                    var response = await client.GetAsync($"https://localhost:7120/api/Users/profile/{model.Id}");
-                    if (response.IsSuccessStatusCode)
-                    {
-                        var json = await response.Content.ReadAsStringAsync();
-                        var dto = System.Text.Json.JsonSerializer.Deserialize<ProfileEditViewModel>(json, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                        model.ProfileImageUrl = dto?.ProfileImageUrl;
-                    }
+                    var json = await response.Content.ReadAsStringAsync();
+                    var dto = JsonSerializer.Deserialize<ProfileEditViewModel>(json, 
+                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    model.ProfileImageUrl = dto?.ProfileImageUrl;
                 }
             }
             else
             {
-                using (var client = new HttpClient())
-                {
-                    var form = new MultipartFormDataContent();
-                    form.Add(new StringContent(model.Id.ToString()), "UserId");
-                    form.Add(new StreamContent(model.ProfileImageFile.OpenReadStream()), "file", model.ProfileImageFile.FileName);
+                var form = new MultipartFormDataContent();
+                form.Add(new StringContent(model.Id.ToString()), "UserId");
+                form.Add(new StreamContent(model.ProfileImageFile.OpenReadStream()), "file", model.ProfileImageFile.FileName);
 
-                    var response = await client.PostAsync("https://localhost:7120/api/Users/upload-profile-image", form);
-                    if (response.IsSuccessStatusCode)
+                var response = await _httpClient.PostAsync("https://localhost:7120/api/Users/upload-profile-image", form);
+                if (response.IsSuccessStatusCode)
+                {
+                    var json = await response.Content.ReadAsStringAsync();
+                    var result = JsonDocument.Parse(json);
+                    if (result.RootElement.TryGetProperty("ProfileImageUrl", out var urlProp) ||
+                        result.RootElement.TryGetProperty("profileImageUrl", out urlProp))
                     {
-                        var json = await response.Content.ReadAsStringAsync();
-                        var result = System.Text.Json.JsonDocument.Parse(json);
-                        if (result.RootElement.TryGetProperty("ProfileImageUrl", out var urlProp) ||
-                            result.RootElement.TryGetProperty("profileImageUrl", out urlProp))
-                        {
-                            model.ProfileImageUrl = urlProp.GetString();
-                        }
-                        else
-                        {
-                            ModelState.AddModelError("", "No se recibió la URL de la imagen del servidor.");
-                            return View(model);
-                        }
+                        model.ProfileImageUrl = urlProp.GetString();
                     }
                     else
                     {
-                        var error = await response.Content.ReadAsStringAsync();
-                        ModelState.AddModelError("", $"Error uploading profile image: {error}");
+                        ModelState.AddModelError("", "No se recibió la URL de la imagen del servidor.");
                         return View(model);
                     }
+                }
+                else
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+                    ModelState.AddModelError("", $"Error uploading profile image: {error}");
+                    return View(model);
                 }
             }
 
@@ -144,169 +132,108 @@ namespace HarmonySound.MVC.Controllers
                 Email = model.Email
             };
 
-            using (var client = new HttpClient())
-            {
-                var json = System.Text.Json.JsonSerializer.Serialize(userUpdate);
-                var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-                var response = await client.PutAsync($"https://localhost:7120/api/Users/profile/{model.Id}", content);
+            var updateJson = JsonSerializer.Serialize(userUpdate);
+            var content = new StringContent(updateJson, System.Text.Encoding.UTF8, "application/json");
+            var updateResponse = await _httpClient.PutAsync($"https://localhost:7120/api/Users/profile/{model.Id}", content);
 
-                if (!response.IsSuccessStatusCode)
-                {
-                    var error = await response.Content.ReadAsStringAsync();
-                    ModelState.AddModelError("", $"Error updating profile: {error}");
-                    return View(model);
-                }
+            if (!updateResponse.IsSuccessStatusCode)
+            {
+                var error = await updateResponse.Content.ReadAsStringAsync();
+                ModelState.AddModelError("", $"Error updating profile: {error}");
+                return View(model);
             }
+
             return RedirectToAction("Home");
         }
 
         public async Task<IActionResult> Home(string query)
         {
-            int userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier).Value);
+            int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
             var model = new SearchResultsViewModel { Query = query };
 
             // Obtén el perfil del usuario
-            using (var client = new HttpClient())
-            {
-                var response = await client.GetAsync($"https://localhost:7120/api/Users/profile/{userId}");
-                if (!response.IsSuccessStatusCode)
-                    return View("Error");
+            var response = await _httpClient.GetAsync($"https://localhost:7120/api/Users/profile/{userId}");
+            if (!response.IsSuccessStatusCode)
+                return View("Error");
 
-                var json = await response.Content.ReadAsStringAsync();
-                model.Profile = System.Text.Json.JsonSerializer.Deserialize<ProfileEditViewModel>(json, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-            }
+            var json = await response.Content.ReadAsStringAsync();
+            model.Profile = JsonSerializer.Deserialize<ProfileEditViewModel>(json, 
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             // Si hay búsqueda, consulta artistas y contenidos
             if (!string.IsNullOrWhiteSpace(query))
             {
-                using (var client = new HttpClient())
+                // Buscar artistas
+                var artistsResponse = await _httpClient.GetAsync($"https://localhost:7120/api/Users/search?query={Uri.EscapeDataString(query)}");
+                if (artistsResponse.IsSuccessStatusCode)
                 {
-                    // Buscar artistas
-                    var artistsResponse = await client.GetAsync($"https://localhost:7120/api/Users/search?query={Uri.EscapeDataString(query)}");
-                    if (artistsResponse.IsSuccessStatusCode)
-                    {
-                        var artistsJson = await artistsResponse.Content.ReadAsStringAsync();
-                        model.Artists = System.Text.Json.JsonSerializer.Deserialize<List<User>>(artistsJson, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new();
-                    }
+                    var artistsJson = await artistsResponse.Content.ReadAsStringAsync();
+                    model.Artists = JsonSerializer.Deserialize<List<User>>(artistsJson, 
+                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new();
+                }
 
-                    // Buscar contenidos
-                    var contentsResponse = await client.GetAsync($"https://localhost:7120/api/Contents/search?query={Uri.EscapeDataString(query)}");
-                    if (contentsResponse.IsSuccessStatusCode)
+                // Buscar contenidos
+                var contentsResponse = await _httpClient.GetAsync($"https://localhost:7120/api/Contents/search?query={Uri.EscapeDataString(query)}");
+                if (contentsResponse.IsSuccessStatusCode)
+                {
+                    var contentsJson = await contentsResponse.Content.ReadAsStringAsync();
+                    var contents = JsonSerializer.Deserialize<List<Content>>(contentsJson, 
+                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new();
+                    
+                    // Obtener información de los artistas para cada contenido
+                    var userIds = contents.Select(c => c.ArtistId).Distinct().ToList();
+                    var artists = new Dictionary<int, string>();
+                    
+                    foreach (var artistId in userIds)
                     {
-                        var contentsJson = await contentsResponse.Content.ReadAsStringAsync();
-                        var contents = System.Text.Json.JsonSerializer.Deserialize<List<Content>>(contentsJson, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new();
-                        
-                        // Obtener información de los artistas para cada contenido
-                        var userIds = contents.Select(c => c.ArtistId).Distinct().ToList();
-                        var artists = new Dictionary<int, string>();
-                        
-                        foreach (var artistId in userIds)
+                        var artistResponse = await _httpClient.GetAsync($"https://localhost:7120/api/Users/profile/{artistId}");
+                        if (artistResponse.IsSuccessStatusCode)
                         {
-                            var artistResponse = await client.GetAsync($"https://localhost:7120/api/Users/profile/{artistId}");
-                            if (artistResponse.IsSuccessStatusCode)
-                            {
-                                var artistJson = await artistResponse.Content.ReadAsStringAsync();
-                                var artist = System.Text.Json.JsonSerializer.Deserialize<User>(artistJson, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                                artists[artistId] = artist?.Name ?? "Artista desconocido";
-                            }
-                            else
-                            {
-                                artists[artistId] = "Artista desconocido";
-                            }
+                            var artistJson = await artistResponse.Content.ReadAsStringAsync();
+                            var artist = JsonSerializer.Deserialize<User>(artistJson, 
+                                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                            artists[artistId] = artist?.Name ?? "Artista desconocido";
                         }
-
-                        // Convertir a ContentWithArtistDto
-                        model.Contents = contents.Select(c => new ContentWithArtistDto
+                        else
                         {
-                            Id = c.Id,
-                            Title = c.Title,
-                            Type = c.Type,
-                            UrlMedia = c.UrlMedia,
-                            Duration = c.Duration,
-                            UploadDate = c.UploadDate,
-                            ArtistId = c.ArtistId,
-                            ArtistName = artists.GetValueOrDefault(c.ArtistId, "Artista desconocido")
-                        }).ToList();
+                            artists[artistId] = "Artista desconocido";
+                        }
                     }
+
+                    // Convertir a ContentWithArtistDto
+                    model.Contents = contents.Select(c => new ContentWithArtistDto
+                    {
+                        Id = c.Id,
+                        Title = c.Title,
+                        Type = c.Type,
+                        UrlMedia = c.UrlMedia,
+                        Duration = c.Duration,
+                        UploadDate = c.UploadDate,
+                        ArtistId = c.ArtistId,
+                        ArtistName = artists.GetValueOrDefault(c.ArtistId, "Artista desconocido")
+                    }).ToList();
                 }
             }
 
             ViewBag.Success = TempData["Success"];
             return View(model);
         }
-
-        [HttpPost]
-        public async Task<IActionResult> LikeContent(int contentId, int userId)
-        {
-            try
-            {
-                using (var client = new HttpClient())
-                {
-                    var json = System.Text.Json.JsonSerializer.Serialize(userId);
-                    var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-                    var response = await client.PostAsync($"https://localhost:7120/api/Contents/{contentId}/like", content);
-
-                    if (response.IsSuccessStatusCode)
-                    {
-                        return Json(new { success = true, message = "Like agregado" });
-                    }
-                    else
-                    {
-                        return Json(new { success = false, message = "Error al agregar like" });
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = ex.Message });
-            }
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> UnlikeContent(int contentId, int userId)
-        {
-            try
-            {
-                using (var client = new HttpClient())
-                {
-                    var json = System.Text.Json.JsonSerializer.Serialize(userId);
-                    var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-                    var response = await client.PostAsync($"https://localhost:7120/api/Contents/{contentId}/unlike", content);
-
-                    if (response.IsSuccessStatusCode)
-                    {
-                        return Json(new { success = true, message = "Like removido" });
-                    }
-                    else
-                    {
-                        return Json(new { success = false, message = "Error al remover like" });
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = ex.Message });
-            }
-        }
-
+                    
         [HttpGet]
         public async Task<IActionResult> GetContentLikes(int contentId)
         {
             try
             {
-                using (var client = new HttpClient())
+                var response = await _httpClient.GetAsync($"https://localhost:7120/api/Contents/{contentId}/likes");
+                if (response.IsSuccessStatusCode)
                 {
-                    var response = await client.GetAsync($"https://localhost:7120/api/Contents/{contentId}/likes");
-                    if (response.IsSuccessStatusCode)
-                    {
-                        var json = await response.Content.ReadAsStringAsync();
-                        var result = System.Text.Json.JsonSerializer.Deserialize<dynamic>(json);
-                        return Json(result);
-                    }
-                    else
-                    {
-                        return Json(new { likes = 0 });
-                    }
+                    var json = await response.Content.ReadAsStringAsync();
+                    var result = JsonSerializer.Deserialize<dynamic>(json);
+                    return Json(result);
+                }
+                else
+                {
+                    return Json(new { likes = 0 });
                 }
             }
             catch (Exception ex)
@@ -320,46 +247,43 @@ namespace HarmonySound.MVC.Controllers
         {
             try
             {
-                int userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier).Value);
+                int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
                 System.Diagnostics.Debug.WriteLine($"=== MVC GetUserPlaylists called with userId: {userId} ===");
                 
-                using (var client = new HttpClient())
+                var apiUrl = $"https://localhost:7120/api/Playlists/user/{userId}";
+                System.Diagnostics.Debug.WriteLine($"Calling API: {apiUrl}");
+                
+                var response = await _httpClient.GetAsync(apiUrl);
+                System.Diagnostics.Debug.WriteLine($"API Response Status: {response.StatusCode}");
+                
+                if (response.IsSuccessStatusCode)
                 {
-                    var apiUrl = $"https://localhost:7120/api/Playlists/user/{userId}";
-                    System.Diagnostics.Debug.WriteLine($"Calling API: {apiUrl}");
+                    var json = await response.Content.ReadAsStringAsync();
+                    System.Diagnostics.Debug.WriteLine($"API Response JSON: {json}");
                     
-                    var response = await client.GetAsync(apiUrl);
-                    System.Diagnostics.Debug.WriteLine($"API Response Status: {response.StatusCode}");
-                    
-                    if (response.IsSuccessStatusCode)
+                    if (string.IsNullOrEmpty(json) || json == "null")
                     {
-                        var json = await response.Content.ReadAsStringAsync();
-                        System.Diagnostics.Debug.WriteLine($"API Response JSON: {json}");
-                        
-                        if (string.IsNullOrEmpty(json) || json == "null")
-                        {
-                            System.Diagnostics.Debug.WriteLine("Empty response from API");
-                            return Json(new List<object>());
-                        }
-                        
-                        var playlists = System.Text.Json.JsonSerializer.Deserialize<JsonElement[]>(json);
-                        System.Diagnostics.Debug.WriteLine($"Deserialized {playlists.Length} playlists");
-                        
-                        var userPlaylists = playlists.Select(p => new {
-                            id = p.GetProperty("id").GetInt32(),
-                            name = p.GetProperty("name").GetString(),
-                            songsCount = p.TryGetProperty("songs", out var songs) ? songs.GetArrayLength() : 0
-                        }).ToList();
-                        
-                        System.Diagnostics.Debug.WriteLine($"Returning {userPlaylists.Count} processed playlists");
-                        return Json(userPlaylists);
-                    }
-                    else
-                    {
-                        var errorContent = await response.Content.ReadAsStringAsync();
-                        System.Diagnostics.Debug.WriteLine($"API Error: {response.StatusCode} - {errorContent}");
+                        System.Diagnostics.Debug.WriteLine("Empty response from API");
                         return Json(new List<object>());
                     }
+                    
+                    var playlists = JsonSerializer.Deserialize<JsonElement[]>(json);
+                    System.Diagnostics.Debug.WriteLine($"Deserialized {playlists.Length} playlists");
+                    
+                    var userPlaylists = playlists.Select(p => new {
+                        id = p.GetProperty("id").GetInt32(),
+                        name = p.GetProperty("name").GetString(),
+                        songsCount = p.TryGetProperty("songs", out var songs) ? songs.GetArrayLength() : 0
+                    }).ToList();
+                    
+                    System.Diagnostics.Debug.WriteLine($"Returning {userPlaylists.Count} processed playlists");
+                    return Json(userPlaylists);
+                }
+                else
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    System.Diagnostics.Debug.WriteLine($"API Error: {response.StatusCode} - {errorContent}");
+                    return Json(new List<object>());
                 }
             }
             catch (Exception ex)
@@ -377,29 +301,26 @@ namespace HarmonySound.MVC.Controllers
             {
                 System.Diagnostics.Debug.WriteLine($"=== MVC AddToPlaylist: playlist {playlistId}, content {contentId} ===");
                 
-                using (var client = new HttpClient())
-                {
-                    var json = System.Text.Json.JsonSerializer.Serialize(contentId);
-                    var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-                    
-                    var apiUrl = $"https://localhost:7120/api/Playlists/{playlistId}/add";
-                    System.Diagnostics.Debug.WriteLine($"Calling API: {apiUrl} with content: {json}");
-                    
-                    var response = await client.PostAsync(apiUrl, content);
-                    System.Diagnostics.Debug.WriteLine($"API Response Status: {response.StatusCode}");
+                var json = JsonSerializer.Serialize(contentId);
+                var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+                
+                var apiUrl = $"https://localhost:7120/api/Playlists/{playlistId}/add";
+                System.Diagnostics.Debug.WriteLine($"Calling API: {apiUrl} with content: {json}");
+                
+                var response = await _httpClient.PostAsync(apiUrl, content);
+                System.Diagnostics.Debug.WriteLine($"API Response Status: {response.StatusCode}");
 
-                    if (response.IsSuccessStatusCode)
-                    {
-                        var responseContent = await response.Content.ReadAsStringAsync();
-                        System.Diagnostics.Debug.WriteLine($"API Response: {responseContent}");
-                        return Json(new { success = true, message = "Contenido agregado a la playlist" });
-                    }
-                    else
-                    {
-                        var errorContent = await response.Content.ReadAsStringAsync();
-                        System.Diagnostics.Debug.WriteLine($"API Error: {errorContent}");
-                        return Json(new { success = false, message = "Error al agregar a playlist: " + errorContent });
-                    }
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    System.Diagnostics.Debug.WriteLine($"API Response: {responseContent}");
+                    return Json(new { success = true, message = "Contenido agregado a la playlist" });
+                }
+                else
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    System.Diagnostics.Debug.WriteLine($"API Error: {errorContent}");
+                    return Json(new { success = false, message = "Error al agregar a playlist: " + errorContent });
                 }
             }
             catch (Exception ex)
@@ -414,7 +335,7 @@ namespace HarmonySound.MVC.Controllers
         {
             try
             {
-                int userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier).Value);
+                int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
                 
                 System.Diagnostics.Debug.WriteLine($"Creating playlist: {name} for user: {userId} with content: {contentId}");
                 
@@ -424,53 +345,50 @@ namespace HarmonySound.MVC.Controllers
                     UserId = userId
                 };
 
-                using (var client = new HttpClient())
-                {
-                    var json = System.Text.Json.JsonSerializer.Serialize(playlistDto);
-                    var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-                    
-                    System.Diagnostics.Debug.WriteLine($"Sending to API: {json}");
-                    
-                    var response = await client.PostAsync("https://localhost:7120/api/Playlists", content);
+                var json = JsonSerializer.Serialize(playlistDto);
+                var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+                
+                System.Diagnostics.Debug.WriteLine($"Sending to API: {json}");
+                
+                var response = await _httpClient.PostAsync("https://localhost:7120/api/Playlists", content);
 
-                    if (response.IsSuccessStatusCode)
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    System.Diagnostics.Debug.WriteLine($"API Response: {responseContent}");
+                    
+                    // Si se creó correctamente y hay un contentId, agregarlo a la playlist
+                    if (contentId.HasValue)
                     {
-                        var responseContent = await response.Content.ReadAsStringAsync();
-                        System.Diagnostics.Debug.WriteLine($"API Response: {responseContent}");
+                        var createdPlaylist = JsonSerializer.Deserialize<JsonElement>(responseContent);
+                        var playlistId = createdPlaylist.GetProperty("id").GetInt32();
+        
+                        System.Diagnostics.Debug.WriteLine($"Adding content {contentId} to playlist {playlistId}");
                         
-                        // Si se creó correctamente y hay un contentId, agregarlo a la playlist
-                        if (contentId.HasValue)
+                        // Agregar el contenido a la playlist recién creada
+                        var contentJson = JsonSerializer.Serialize(contentId.Value);
+                        var contentToAdd = new StringContent(contentJson, System.Text.Encoding.UTF8, "application/json");
+                        var addResponse = await _httpClient.PostAsync($"https://localhost:7120/api/Playlists/{playlistId}/add", contentToAdd);
+                        
+                        if (addResponse.IsSuccessStatusCode)
                         {
-                            var createdPlaylist = System.Text.Json.JsonSerializer.Deserialize<JsonElement>(responseContent);
-                            var playlistId = createdPlaylist.GetProperty("id").GetInt32();
-            
-                            System.Diagnostics.Debug.WriteLine($"Adding content {contentId} to playlist {playlistId}");
-                            
-                            // Agregar el contenido a la playlist recién creada
-                            var contentJson = System.Text.Json.JsonSerializer.Serialize(contentId.Value);
-                            var contentToAdd = new StringContent(contentJson, System.Text.Encoding.UTF8, "application/json");
-                            var addResponse = await client.PostAsync($"https://localhost:7120/api/Playlists/{playlistId}/add", contentToAdd);
-                            
-                            if (addResponse.IsSuccessStatusCode)
-                            {
-                                return Json(new { success = true, message = "Playlist creada y contenido agregado correctamente" });
-                            }
-                            else
-                            {
-                                var addError = await addResponse.Content.ReadAsStringAsync();
-                                System.Diagnostics.Debug.WriteLine($"Error adding content: {addError}");
-                                return Json(new { success = true, message = "Playlist creada, pero no se pudo agregar el contenido" });
-                            }
+                            return Json(new { success = true, message = "Playlist creada y contenido agregado correctamente" });
                         }
-                        
-                        return Json(new { success = true, message = "Playlist creada correctamente" });
+                        else
+                        {
+                            var addError = await addResponse.Content.ReadAsStringAsync();
+                            System.Diagnostics.Debug.WriteLine($"Error adding content: {addError}");
+                            return Json(new { success = true, message = "Playlist creada, pero no se pudo agregar el contenido" });
+                        }
                     }
-                    else
-                    {
-                        var errorContent = await response.Content.ReadAsStringAsync();
-                        System.Diagnostics.Debug.WriteLine($"API Error: {errorContent}");
-                        return Json(new { success = false, message = "Error al crear playlist: " + errorContent });
-                    }
+                    
+                    return Json(new { success = true, message = "Playlist creada correctamente" });
+                }
+                else
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    System.Diagnostics.Debug.WriteLine($"API Error: {errorContent}");
+                    return Json(new { success = false, message = "Error al crear playlist: " + errorContent });
                 }
             }
             catch (Exception ex)
@@ -485,22 +403,19 @@ namespace HarmonySound.MVC.Controllers
         {
             try
             {
-                int userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier).Value);
+                int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
                 
-                using (var client = new HttpClient())
+                var response = await _httpClient.GetAsync($"https://localhost:7120/api/UserPlans/is-premium/{userId}");
+                
+                if (response.IsSuccessStatusCode)
                 {
-                    var response = await client.GetAsync($"https://localhost:7120/api/UserPlans/is-premium/{userId}");
-                    
-                    if (response.IsSuccessStatusCode)
-                    {
-                        var json = await response.Content.ReadAsStringAsync();
-                        var result = System.Text.Json.JsonSerializer.Deserialize<dynamic>(json);
-                        return Json(result);
-                    }
-                    else
-                    {
-                        return Json(new { isPremium = false });
-                    }
+                    var json = await response.Content.ReadAsStringAsync();
+                    var result = JsonSerializer.Deserialize<dynamic>(json);
+                    return Json(result);
+                }
+                else
+                {
+                    return Json(new { isPremium = false });
                 }
             }
             catch (Exception ex)
@@ -514,20 +429,17 @@ namespace HarmonySound.MVC.Controllers
         {
             try
             {
-                using (var client = new HttpClient())
+                var response = await _httpClient.GetAsync("https://localhost:7120/api/Ads/random");
+                
+                if (response.IsSuccessStatusCode)
                 {
-                    var response = await client.GetAsync("https://localhost:7120/api/Ads/random");
-                    
-                    if (response.IsSuccessStatusCode)
-                    {
-                        var json = await response.Content.ReadAsStringAsync();
-                        var result = System.Text.Json.JsonSerializer.Deserialize<dynamic>(json);
-                        return Json(result);
-                    }
-                    else
-                    {
-                        return Json(new { url = "/ads/ad1.mp3", duration = 15, title = "Suscríbete a Premium" });
-                    }
+                    var json = await response.Content.ReadAsStringAsync();
+                    var result = JsonSerializer.Deserialize<dynamic>(json);
+                    return Json(result);
+                }
+                else
+                {
+                    return Json(new { url = "/ads/ad1.mp3", duration = 15, title = "Suscríbete a Premium" });
                 }
             }
             catch (Exception ex)
@@ -536,33 +448,79 @@ namespace HarmonySound.MVC.Controllers
             }
         }
 
+        // ✅ MÉTODOS PARA LIKES CORREGIDOS
         [HttpGet]
         public async Task<IActionResult> GetUserLikes()
         {
             try
             {
-                int userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier).Value);
-                
-                using (var client = new HttpClient())
+                int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+
+                var response = await _httpClient.GetAsync($"https://localhost:7120/api/Likes/user/{userId}");
+                if (response.IsSuccessStatusCode)
                 {
-                    var response = await client.GetAsync($"https://localhost:7120/api/Contents/user-likes/{userId}");
-                    
-                    if (response.IsSuccessStatusCode)
-                    {
-                        var json = await response.Content.ReadAsStringAsync();
-                        var likedContentIds = System.Text.Json.JsonSerializer.Deserialize<List<int>>(json);
-                        return Json(likedContentIds ?? new List<int>());
-                    }
-                    else
-                    {
-                        return Json(new List<int>());
-                    }
+                    var json = await response.Content.ReadAsStringAsync();
+                    var likes = JsonSerializer.Deserialize<List<int>>(json, 
+                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    return Json(likes);
+                }
+
+                return Json(new List<int>());
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error getting user likes: {ex.Message}");
+                return Json(new List<int>());
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> LikeContent(int contentId, int userId)
+        {
+            try
+            {
+                var formData = new MultipartFormDataContent();
+                formData.Add(new StringContent(contentId.ToString()), "contentId");
+                formData.Add(new StringContent(userId.ToString()), "userId");
+
+                var response = await _httpClient.PostAsync("https://localhost:7120/api/Likes", formData);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return Json(new { success = true, message = "Contenido agregado a favoritos" });
+                }
+                else
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+                    return Json(new { success = false, message = $"Error: {error}" });
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error en GetUserLikes: {ex.Message}");
-                return Json(new List<int>());
+                return Json(new { success = false, message = $"Error: {ex.Message}" });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UnlikeContent(int contentId, int userId)
+        {
+            try
+            {
+                var response = await _httpClient.DeleteAsync($"https://localhost:7120/api/Likes/{userId}/{contentId}");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return Json(new { success = true, message = "Contenido removido de favoritos" });
+                }
+                else
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+                    return Json(new { success = false, message = $"Error: {error}" });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error: {ex.Message}" });
             }
         }
     }

@@ -35,14 +35,16 @@
             {
                 <div class="album-card">
                     <div class="album-cover">
-                        <div class="cover-placeholder">
-                            <i class="fas fa-compact-disc"></i>
-                        </div>
-                        <div class="album-overlay">
-                            <button class="play-album-btn" title="Reproducir álbum">
-                                <i class="fas fa-play"></i>
-                            </button>
-                        </div>
+                        <a href="@Url.Action("Details", "Albums", new { id = album.Id })" class="cover-link">
+                            <div class="cover-placeholder">
+                                <i class="fas fa-compact-disc"></i>
+                            </div>
+                            <div class="album-overlay">
+                                <button class="play-album-btn" title="Ir a detalles">
+                                    <i class="fas fa-play"></i>
+                                </button>
+                            </div>
+                        </a>
                     </div>
                     
                     <div class="album-info">
@@ -68,11 +70,9 @@
                             <a asp-action="Edit" asp-route-id="@album.Id" class="btn-action btn-edit" title="Editar">
                                 <i class="fas fa-edit"></i>
                             </a>
-                            <form asp-action="Delete" asp-route-id="@album.Id" method="post" class="d-inline delete-form">
-                                <button type="submit" class="btn-action btn-delete" title="Eliminar" onclick="return confirm('¿Estás seguro de que quieres eliminar este álbum?');">
-                                    <i class="fas fa-trash-alt"></i>
-                                </button>
-                            </form>
+                            <button type="button" class="btn-action btn-delete" title="Eliminar" onclick="showDeleteModal(@album.Id, '@album.Title')">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -93,6 +93,42 @@
             </div>
         }
     </div>
+
+    <!-- Modal de confirmación para eliminar -->
+    <div id="deleteModal" class="modal-overlay d-none">
+        <div class="modal-container">
+            <div class="modal-header">
+                <div class="modal-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <h3 class="modal-title">Confirmar Eliminación</h3>
+            </div>
+
+            <div class="modal-body">
+                <p class="modal-message">¿Estás seguro de que quieres eliminar el álbum <strong id="albumToDelete"></strong>?</p>
+                <div class="modal-warning">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Esta acción no se puede deshacer.</span>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn-modal btn-cancel" onclick="hideDeleteModal()">
+                    <i class="fas fa-times me-2"></i>
+                    Cancelar
+                </button>
+                <button type="button" class="btn-modal btn-confirm" onclick="confirmDelete()">
+                    <i class="fas fa-trash-alt me-2"></i>
+                    Eliminar Álbum
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulario oculto para eliminar -->
+    <form id="deleteForm" asp-action="Delete" asp-controller="Albums" method="post" style="display: none;">
+        <input type="hidden" id="albumIdToDelete" name="id" value="" />
+    </form>
 </div>
 
 <style>
@@ -473,6 +509,127 @@
         font-family: "Font Awesome 5 Free" !important;
         font-weight: 900 !important;
     }
+
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        backdrop-filter: blur(5px);
+    }
+
+    .modal-overlay.d-none {
+        display: none !important;
+    }
+
+    .modal-container {
+        background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+        border: 1px solid #444;
+        border-radius: 16px;
+        padding: 0;
+        max-width: 480px;
+        width: 90%;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        overflow: hidden;
+    }
+
+    .modal-header {
+        background: linear-gradient(135deg, #dc3545, #c82333);
+        padding: 1.5rem;
+        text-align: center;
+        color: #fff;
+    }
+
+    .modal-icon {
+        font-size: 3rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .modal-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .modal-body {
+        padding: 2rem 1.5rem;
+        text-align: center;
+    }
+
+    .modal-message {
+        font-size: 1.1rem;
+        color: #fff;
+        margin-bottom: 1.5rem;
+    }
+
+    .modal-warning {
+        background: rgba(255, 193, 7, 0.1);
+        border: 1px border-radius: 8px;
+        padding: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: #ffc107;
+        font-size: 0.9rem;
+    }
+
+    .modal-actions {
+        padding: 1.5rem;
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-modal {
+        padding: 12px 24px;
+        border-radius: 25px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: none;
+        font-size: 1rem;
+        display: inline-flex;
+        align-items: center;
+        min-width: 140px;
+        justify-content: center;
+    }
+
+    .btn-cancel {
+        background: transparent;
+        color: #b3b3b3;
+        border: 2px solid #666;
+    }
+
+    .btn-cancel:hover {
+        background: #1a1a1a;
+        color: #fff;
+        border-color: #999;
+    }
+
+    .btn-confirm {
+        background: linear-gradient(135deg, #dc3545, #c82333);
+        color: #fff;
+        box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+    }
+
+    .btn-confirm:hover {
+        box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+    }
+
+    .cover-link {
+        text-decoration: none;
+        color: inherit;
+        display: block;
+        width: 100%;
+        height: 100%;
+    }
 </style>
 
 <!-- Asegurar que FontAwesome esté cargado -->
@@ -520,4 +677,31 @@
 
         console.log('Vista de álbumes mejorada cargada correctamente');
     });
+
+    let albumIdToDelete = null;
+
+function showDeleteModal(albumId, albumTitle) {
+    albumIdToDelete = albumId;
+    document.getElementById('albumToDelete').textContent = albumTitle;
+    document.getElementById('albumIdToDelete').value = albumId;
+    document.getElementById('deleteModal').classList.remove('d-none');
+}
+
+function hideDeleteModal() {
+    document.getElementById('deleteModal').classList.add('d-none');
+    albumIdToDelete = null;
+}
+
+function confirmDelete() {
+    if (albumIdToDelete) {
+        document.getElementById('deleteForm').submit();
+    }
+}
+
+// Cerrar modal con Escape
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        hideDeleteModal();
+    }
+});
 </script>

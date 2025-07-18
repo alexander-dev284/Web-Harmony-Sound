@@ -1,0 +1,805 @@
+﻿@model HarmonySound.MVC.Models.PlaylistDto
+
+@{
+    ViewData["Title"] = "Editar Playlist";
+}
+
+<div class="edit-playlist-container">
+    <!-- Header con navegación -->
+    <div class="edit-header">
+        <div class="navigation-bar">
+            <a href="@Url.Action("Details", "Playlists", new { id = Model.Id })" class="btn-back">
+                <i class="fas fa-arrow-left me-2"></i>
+                Volver a Detalles
+            </a>
+        </div>
+
+        <h1 class="edit-title">
+            <i class="fas fa-edit me-3"></i>
+            Editar Playlist
+        </h1>
+        <p class="edit-subtitle">Modifica el nombre de tu playlist</p>
+    </div>
+
+    <div class="edit-content">
+        <form asp-action="Edit" method="post" class="edit-form" id="playlistEditForm">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
+            
+            <!-- Mostrar errores de validación -->
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    @TempData["Error"]
+                </div>
+            }
+
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle me-2"></i>
+                    @TempData["Success"]
+                </div>
+            }
+
+            <!-- Sección de edición del nombre -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-list-music me-2"></i>
+                    Información de la Playlist
+                </h3>
+
+                <div class="form-group">
+                    <label asp-for="Name" class="form-label">
+                        <i class="fas fa-signature me-2"></i>
+                        Nombre de la Playlist
+                    </label>
+                    <input asp-for="Name" 
+                           class="form-control" 
+                           maxlength="50" 
+                           required 
+                           placeholder="Ingresa el nombre de tu playlist"
+                           id="playlist-name-input" />
+                    <span asp-validation-for="Name" class="validation-error"></span>
+                    <small class="form-text">Máximo 50 caracteres. Elige un nombre memorable.</small>
+                </div>
+
+                <!-- Contador de caracteres -->
+                <div class="character-counter">
+                    <span id="char-count">@(Model.Name?.Length ?? 0)</span> / 50 caracteres
+                </div>
+            </div>
+
+            <!-- Vista previa -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-eye me-2"></i>
+                    Vista Previa
+                </h3>
+
+                <div class="preview-card">
+                    <div class="preview-cover">
+                        <div class="cover-placeholder">
+                            <i class="fas fa-list-music"></i>
+                        </div>
+                    </div>
+                    <div class="preview-info">
+                        <h4 class="preview-title" id="preview-title">@Model.Name</h4>
+                        <p class="preview-creator">Mi Playlist</p>
+                        <div class="preview-metadata">
+                            <span class="preview-type">
+                                <i class="fas fa-list-music me-1"></i>
+                                Playlist
+                            </span>
+                            <span class="preview-count">@(Model.Songs?.Count ?? 0) canción(es)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Información de las canciones -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-music me-2"></i>
+                    Canciones en la Playlist
+                </h3>
+
+                @if (Model.Songs?.Any() == true)
+                {
+                    <div class="songs-info">
+                        <div class="songs-count-badge">
+                            <i class="fas fa-music me-2"></i>
+                            @Model.Songs.Count canción(es) en esta playlist
+                        </div>
+                        
+                        <div class="songs-list-preview">
+                            @foreach (var song in Model.Songs.Take(3))
+                            {
+                                <div class="song-preview-item">
+                                    <div class="song-icon">
+                                        <i class="fas fa-music"></i>
+                                    </div>
+                                    <div class="song-details">
+                                        <span class="song-title">@song.Title</span>
+                                        <span class="song-artist">@song.ArtistName</span>
+                                    </div>
+                                </div>
+                            }
+                            
+                            @if (Model.Songs.Count > 3)
+                            {
+                                <div class="song-preview-item more-songs">
+                                    <div class="song-icon">
+                                        <i class="fas fa-ellipsis-h"></i>
+                                    </div>
+                                    <div class="song-details">
+                                        <span class="song-title">Y @(Model.Songs.Count - 3) canción(es) más</span>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        
+                        <div class="songs-note">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Para agregar o eliminar canciones, ve a la vista de detalles de la playlist.
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="empty-songs">
+                        <div class="empty-icon">
+                            <i class="fas fa-list-music"></i>
+                        </div>
+                        <h4>Esta playlist está vacía</h4>
+                        <p>Añade canciones desde la vista de detalles o explora música nueva.</p>
+                        <a href="@Url.Action("Index", "Clients")" class="btn-explore">
+                            <i class="fas fa-search me-2"></i>
+                            Explorar Música
+                        </a>
+                    </div>
+                }
+            </div>
+
+            <!-- Acciones del formulario -->
+            <div class="form-actions">
+                <button type="submit" class="btn-save">
+                    <i class="fas fa-save me-2"></i>
+                    Guardar Cambios
+                </button>
+                <a href="@Url.Action("Details", "Playlists", new { id = Model.Id })" class="btn-details">
+                    <i class="fas fa-eye me-2"></i>
+                    Ver Detalles
+                </a>
+                <a href="@Url.Action("Index", "Playlists")" class="btn-cancel">
+                    <i class="fas fa-times me-2"></i>
+                    Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    /* Reset base */
+    .container {
+        max-width: none !important;
+        padding: 0 !important;
+    }
+
+    body {
+        background: #000 !important;
+        color: #fff !important;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+    }
+
+    /* Contenedor principal */
+    .edit-playlist-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 2rem;
+        min-height: 100vh;
+        position: relative;
+    }
+
+    /* Header */
+    .edit-header {
+        margin-bottom: 3rem;
+        position: relative;
+        padding-top: 3rem;
+        text-align: center;
+    }
+
+    .navigation-bar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 10;
+    }
+
+    .btn-back {
+        background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+        color: #fff !important;
+        border: 1px solid #333;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        font-size: 0.9rem;
+    }
+
+    .btn-back:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        color: #000 !important;
+        border-color: #1db954;
+        background: linear-gradient(135deg, #1db954, #1ed760);
+    }
+
+    .edit-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: #fff !important;
+        background: linear-gradient(135deg, #ffc107, #ff8f00);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .edit-subtitle {
+        color: #b3b3b3;
+        font-size: 1.1rem;
+        margin-bottom: 0;
+    }
+
+    /* Contenido */
+    .edit-content {
+        background: linear-gradient(135deg, #121212, #1a1a1a);
+        border-radius: 16px;
+        padding: 2rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .edit-form {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    /* Secciones del formulario */
+    .form-section {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 1.5rem;
+    }
+
+    .section-title {
+        color: #fff;
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* Grupos de formulario */
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: flex;
+        align-items: center;
+        font-weight: 600;
+        color: #fff;
+        margin-bottom: 0.5rem;
+        font-size: 1rem;
+    }
+
+    .form-control {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 8px;
+        color: #fff;
+        padding: 12px 16px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .form-control:focus {
+        background: rgba(255, 255, 255, 0.15);
+        border-color: #1db954;
+        box-shadow: 0 0 0 0.2rem rgba(29, 185, 84, 0.25);
+        color: #fff;
+        outline: none;
+    }
+
+    .form-control::placeholder {
+        color: #888;
+    }
+
+    .validation-error {
+        color: #ff6b6b;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        display: block;
+    }
+
+    .form-text {
+        color: #b3b3b3;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        display: block;
+        line-height: 1.4;
+    }
+
+    /* Contador de caracteres */
+    .character-counter {
+        text-align: right;
+        font-size: 0.8rem;
+        color: #888;
+        margin-top: 0.5rem;
+    }
+
+    .character-counter.warning {
+        color: #ffc107;
+    }
+
+    .character-counter.danger {
+        color: #dc3545;
+    }
+
+    /* Alertas */
+    .alert {
+        border-radius: 8px;
+        border: none;
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .alert-success {
+        background: rgba(29, 185, 84, 0.1);
+        color: #1db954;
+        border: 1px solid rgba(29, 185, 84, 0.3);
+    }
+
+    .alert-danger {
+        background: rgba(220, 53, 69, 0.1);
+        color: #dc3545;
+        border: 1px solid rgba(220, 53, 69, 0.3);
+    }
+
+    /* Vista previa */
+    .preview-card {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .preview-card:hover {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(29, 185, 84, 0.3);
+    }
+
+    .preview-cover {
+        width: 80px;
+        height: 80px;
+        flex-shrink: 0;
+    }
+
+    .cover-placeholder {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #282828, #404040);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #b3b3b3;
+        font-size: 2rem;
+        border-radius: 6px;
+    }
+
+    .preview-info {
+        flex-grow: 1;
+        min-width: 0;
+    }
+
+    .preview-title {
+        color: #fff;
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .preview-creator {
+        color: #b3b3b3;
+        font-size: 1rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .preview-metadata {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .preview-type {
+        background: #1db954;
+        color: #000;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+    }
+
+    .preview-count {
+        color: #b3b3b3;
+        font-size: 0.9rem;
+    }
+
+    /* Información de canciones */
+    .songs-info {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .songs-count-badge {
+        background: rgba(29, 185, 84, 0.1);
+        border: 1px solid rgba(29, 185, 84, 0.3);
+        color: #1db954;
+        padding: 1rem;
+        border-radius: 8px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+    }
+
+    .songs-list-preview {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .song-preview-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.75rem;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 6px;
+        transition: background 0.3s ease;
+    }
+
+    .song-preview-item:hover {
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    .song-preview-item.more-songs {
+        opacity: 0.7;
+        font-style: italic;
+    }
+
+    .song-icon {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, #333, #555);
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #888;
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+
+    .song-details {
+        flex-grow: 1;
+        min-width: 0;
+    }
+
+    .song-title {
+        display: block;
+        color: #fff;
+        font-weight: 500;
+        font-size: 0.95rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-bottom: 0.25rem;
+    }
+
+    .song-artist {
+        display: block;
+        color: #b3b3b3;
+        font-size: 0.85rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .songs-note {
+        background: rgba(255, 193, 7, 0.1);
+        border: 1px solid rgba(255, 193, 7, 0.3);
+        color: #ffc107;
+        padding: 1rem;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: flex-start;
+        line-height: 1.4;
+    }
+
+    /* Estado vacío */
+    .empty-songs {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 3rem 1rem;
+    }
+
+    .empty-icon {
+        font-size: 4rem;
+        color: #404040;
+        margin-bottom: 1.5rem;
+    }
+
+    .empty-songs h4 {
+        color: #fff;
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+    }
+
+    .empty-songs p {
+        color: #b3b3b3;
+        font-size: 1rem;
+        margin-bottom: 2rem;
+        max-width: 300px;
+        line-height: 1.5;
+    }
+
+    .btn-explore {
+        background: linear-gradient(135deg, #17a2b8, #117a8b);
+        color: #fff !important;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 20px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3);
+    }
+
+    .btn-explore:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(23, 162, 184, 0.4);
+        color: #fff !important;
+    }
+
+    /* Acciones del formulario */
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-save, .btn-details, .btn-cancel {
+        padding: 12px 24px;
+        border-radius: 25px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        border: none;
+        font-size: 1rem;
+        display: inline-flex;
+        align-items: center;
+        min-width: 140px;
+        justify-content: center;
+    }
+
+    .btn-save {
+        background: linear-gradient(135deg, #1db954, #1ed760);
+        color: #000;
+        box-shadow: 0 4px 15px rgba(29, 185, 84, 0.3);
+    }
+
+    .btn-save:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(29, 185, 84, 0.4);
+        color: #000;
+    }
+
+    .btn-details {
+        background: linear-gradient(135deg, #17a2b8, #117a8b);
+        color: #fff;
+        box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3);
+    }
+
+    .btn-details:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(23, 162, 184, 0.4);
+        color: #fff;
+    }
+
+    .btn-cancel {
+        background: transparent;
+        color: #b3b3b3;
+        border: 2px solid #666;
+    }
+
+    .btn-cancel:hover {
+        background: #1a1a1a;
+        color: #fff;
+        border-color: #999;
+        transform: translateY(-2px);
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .edit-playlist-container {
+            padding: 1rem;
+        }
+
+        .edit-title {
+            font-size: 2rem;
+        }
+
+        .preview-card {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .form-actions {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .btn-save, .btn-details, .btn-cancel {
+            width: 100%;
+            max-width: 280px;
+        }
+    }
+
+    /* Ocultar elementos del layout */
+    header, footer {
+        display: none !important;
+    }
+
+    /* FontAwesome */
+    .fas {
+        font-family: "Font Awesome 5 Free" !important;
+        font-weight: 900 !important;
+    }
+</style>
+
+<!-- FontAwesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const nameInput = document.getElementById('playlist-name-input');
+    const previewTitle = document.getElementById('preview-title');
+    const charCount = document.getElementById('char-count');
+    const characterCounter = document.querySelector('.character-counter');
+    
+    // Actualizar vista previa en tiempo real
+    function updatePreview() {
+        const name = nameInput.value.trim();
+        const displayName = name || 'Playlist sin nombre';
+        
+        if (previewTitle) {
+            previewTitle.textContent = displayName;
+        }
+        
+        // Actualizar contador de caracteres
+        if (charCount) {
+            charCount.textContent = name.length;
+        }
+        
+        // Cambiar color del contador según la longitud
+        if (characterCounter) {
+            characterCounter.classList.remove('warning', 'danger');
+            
+            if (name.length >= 45) {
+                characterCounter.classList.add('danger');
+            } else if (name.length >= 40) {
+                characterCounter.classList.add('warning');
+            }
+        }
+    }
+    
+    // Event listeners
+    if (nameInput) {
+        nameInput.addEventListener('input', updatePreview);
+        nameInput.addEventListener('keyup', updatePreview);
+        nameInput.addEventListener('paste', () => {
+            setTimeout(updatePreview, 10);
+        });
+        
+        // Inicializar contador
+        updatePreview();
+    }
+    
+    // Validación del formulario
+    const form = document.getElementById('playlistEditForm');
+    if (form) {
+        form.addEventListener('submit', (e) => {
+            const name = nameInput.value.trim();
+            
+            if (!name) {
+                e.preventDefault();
+                alert('El nombre de la playlist es obligatorio.');
+                nameInput.focus();
+                return false;
+            }
+            
+            if (name.length > 50) {
+                e.preventDefault();
+                alert('El nombre de la playlist no puede exceder los 50 caracteres.');
+                nameInput.focus();
+                return false;
+            }
+            
+            console.log('Guardando playlist:', name);
+        });
+    }
+    
+    // Animaciones de entrada
+    const sections = document.querySelectorAll('.form-section');
+    sections.forEach((section, index) => {
+        section.style.opacity = '0';
+        section.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            section.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            section.style.opacity = '1';
+            section.style.transform = 'translateY(0)';
+        }, index * 200);
+    });
+    
+    console.log('Vista de edición de playlist inicializada');
+});
+</script>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

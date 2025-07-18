@@ -141,10 +141,56 @@ namespace HarmonySound.MVC.Controllers
             return View(playlist);
         }
 
-        // GET: PlaylistsController/Details/5
-        public ActionResult Details(int id)
+        // GET: Playlists/Details/5
+        public async Task<IActionResult> Details(int id)
         {
-            return View();
+            try
+            {
+                int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                
+                // Obtener playlist específica
+                var response = await _httpClient.GetAsync($"https://localhost:7120/api/Playlists/user/{userId}");
+                
+                if (response.IsSuccessStatusCode)
+                {
+                    var playlistsJson = await response.Content.ReadAsStringAsync();
+                    var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                    var playlistsData = JsonSerializer.Deserialize<JsonElement[]>(playlistsJson, options);
+                    
+                    var playlist = playlistsData.FirstOrDefault(p => p.GetProperty("id").GetInt32() == id);
+                    
+                    if (playlist.ValueKind == JsonValueKind.Undefined)
+                    {
+                        return NotFound();
+                    }
+                    
+                    var playlistDto = new PlaylistDto
+                    {
+                        Id = playlist.GetProperty("id").GetInt32(),
+                        Name = playlist.GetProperty("name").GetString() ?? "",
+                        Songs = playlist.TryGetProperty("songs", out var songs) 
+                            ? songs.EnumerateArray().Select(s => new PlaylistSongDto
+                            {
+                                ContentId = s.GetProperty("contentId").GetInt32(),
+                                Title = s.GetProperty("title").GetString() ?? "",
+                                UrlMedia = s.GetProperty("urlMedia").GetString() ?? "",
+                                ArtistName = s.TryGetProperty("artistName", out var artistName) 
+                                    ? artistName.GetString() ?? "Artista desconocido"
+                                    : "Artista desconocido"
+                            }).ToList() 
+                            : new List<PlaylistSongDto>()
+                    };
+                    
+                    return View(playlistDto);
+                }
+                
+                return NotFound();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error in PlaylistsController.Details: {ex.Message}");
+                return NotFound();
+            }
         }
 
         // GET: PlaylistsController/Edit/5
@@ -168,25 +214,57 @@ namespace HarmonySound.MVC.Controllers
             }
         }
 
-        // GET: PlaylistsController/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
-
         // POST: PlaylistsController/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public async Task<IActionResult> Delete(int id)
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                var response = await _httpClient.DeleteAsync($"https://localhost:7120/api/Playlists/{id}");
+                
+                if (response.IsSuccessStatusCode)
+                {
+                    TempData["Success"] = "Playlist eliminada exitosamente.";
+                }
+                else
+                {
+                    TempData["Error"] = "No se pudo eliminar la playlist.";
+                }
             }
-            catch
+            catch (Exception ex)
             {
-                return View();
+                TempData["Error"] = $"Error al eliminar la playlist: {ex.Message}";
             }
+            
+            return RedirectToAction("Index");
+        }
+
+        // POST: Playlists/RemoveTrackFromPlaylist
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RemoveTrackFromPlaylist(int playlistId, int trackId)
+        {
+            try
+            {
+                // Crear endpoint para remover canción de playlist en la API
+                var response = await _httpClient.DeleteAsync($"https://localhost:7120/api/Playlists/{playlistId}/remove/{trackId}");
+                
+                if (response.IsSuccessStatusCode)
+                {
+                    TempData["Success"] = "Canción eliminada de la playlist exitosamente.";
+                }
+                else
+                {
+                    TempData["Error"] = "No se pudo eliminar la canción de la playlist.";
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Error al eliminar la canción: {ex.Message}";
+            }
+            
+            return RedirectToAction("Details", new { id = playlistId });
         }
     }
 }

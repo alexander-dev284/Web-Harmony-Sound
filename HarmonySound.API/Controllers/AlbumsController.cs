@@ -43,6 +43,7 @@ namespace HarmonySound.API.Controllers
                     Id = ca.Content.Id,
                     Title = ca.Content.Title,
                     Type = ca.Content.Type,
+                    UrlMedia = ca.Content.UrlMedia, // ✅ AGREGADO: Incluir UrlMedia
                     Duration = ca.Content.Duration,
                     UploadDate = ca.Content.UploadDate,
                     ArtistName = ca.Content.Artist?.Name,
@@ -86,6 +87,7 @@ namespace HarmonySound.API.Controllers
                     Id = ca.Content.Id,
                     Title = ca.Content.Title,
                     Type = ca.Content.Type,
+                    UrlMedia = ca.Content.UrlMedia, // ✅ CORREGIDO: Incluir UrlMedia
                     Duration = ca.Content.Duration,
                     UploadDate = ca.Content.UploadDate,
                     ArtistName = ca.Content.Artist?.Name,
@@ -146,6 +148,10 @@ namespace HarmonySound.API.Controllers
             if (album == null)
                 return NotFound();
 
+            // ✅ DEBUGGING: Verificar qué canciones están llegando
+            System.Diagnostics.Debug.WriteLine($"=== UpdateSongs para álbum {id} ===");
+            System.Diagnostics.Debug.WriteLine($"Canciones recibidas: [{string.Join(", ", songIds ?? new List<int>())}]");
+
             // Elimina relaciones actuales
             _context.ContentsAlbums.RemoveRange(album.ContentAlbums);
 
@@ -154,11 +160,28 @@ namespace HarmonySound.API.Controllers
             {
                 foreach (var songId in songIds)
                 {
+                    System.Diagnostics.Debug.WriteLine($"Agregando canción {songId} al álbum {id}");
                     _context.ContentsAlbums.Add(new ContentAlbum { AlbumId = id, ContentId = songId });
                 }
             }
 
             await _context.SaveChangesAsync();
+            
+            // ✅ DEBUGGING: Verificar el estado final
+            var finalAlbum = await _context.Albums
+                .Include(a => a.ContentAlbums)
+                    .ThenInclude(ca => ca.Content)
+                .FirstOrDefaultAsync(a => a.Id == id);
+            
+            System.Diagnostics.Debug.WriteLine($"Álbum final tiene {finalAlbum?.ContentAlbums?.Count ?? 0} canciones:");
+            if (finalAlbum?.ContentAlbums != null)
+            {
+                foreach (var ca in finalAlbum.ContentAlbums)
+                {
+                    System.Diagnostics.Debug.WriteLine($"  - {ca.Content?.Title} (ID: {ca.Content?.Id}) - URL: {ca.Content?.UrlMedia}");
+                }
+            }
+            
             return NoContent();
         }
 
@@ -187,7 +210,5 @@ namespace HarmonySound.API.Controllers
             }
             return NoContent();
         }
-
-        
     }
 }

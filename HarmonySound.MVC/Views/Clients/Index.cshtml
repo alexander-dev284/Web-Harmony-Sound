@@ -1,7 +1,7 @@
 ﻿@model IEnumerable<HarmonySound.MVC.Models.ContentWithArtistDto>
 
 @{
-    ViewData["Title"] = "Contenido de Audio";
+    ViewData["Title"] = "Contenido de Audio";// Después de obtener userId
 }
 
 <div class="music-library-container">
@@ -61,7 +61,7 @@
                                 data-content-id="@content.Id" 
                                 data-user-id="@ViewBag.UserId"
                                 title="Me gusta">
-                            <i class="fas fa-heart"></i>
+                            <i class="far fa-heart"></i> <!-- Corazón vacío por defecto -->
                         </button>
                         
                         <button class="btn btn-playlist" 
@@ -111,7 +111,7 @@
                 <div id="track-artist" class="track-artist">Artista</div>
             </div>
             <button class="btn-heart" id="like-current-btn" title="Me gusta">
-                <i class="fas fa-heart"></i>
+                <i class="far fa-heart"></i>
             </button>
         </div>
 
@@ -318,7 +318,17 @@
     }
     .song-actions .btn:hover { background: #1a1a1a !important; color: #fff !important; transform: scale(1.1); }
     .btn-like:hover, .btn-playlist:hover, .btn-play:hover { color: #1db954 !important; }
-    .song-actions .btn-like.liked { color: #1db954 !important; }
+    .song-actions .btn-like.liked { 
+        color: #1db954 !important; 
+        background: rgba(29, 185, 84, 0.1) !important;
+        border-color: rgba(29, 185, 84, 0.3) !important;
+    }
+
+    .song-actions .btn-like.liked:hover {
+        color: #1ed760 !important;
+        background: rgba(29, 185, 84, 0.2) !important;
+        transform: scale(1.15) !important;
+    }
 
     .song-duration { 
         grid-area: duration; font-size: 14px; color: #b3b3b3 !important; 
@@ -364,7 +374,15 @@
         cursor: pointer; border-radius: 50%; transition: color 0.3s ease; 
     }
     .btn-heart:hover { color: #1db954; }
-    .btn-heart.liked { color: #1db954 !important; }
+    .btn-heart.liked { 
+        color: #1db954 !important;
+        background: rgba(29, 185, 84, 0.1) !important;
+    }
+
+    .btn-heart.liked:hover {
+        color: #1ed760 !important;
+        background: rgba(29, 185, 84, 0.2) !important;
+    }
     
     /* Controles centrales */
     .player-controls { display: flex; flex-direction: column; align-items: center; gap: 8px; }
@@ -504,622 +522,919 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
 <script>
-// ===== REPRODUCTOR DE AUDIO 100% PERSONALIZADO PARA INDEX =====
+    // ===== REPRODUCTOR DE AUDIO 100% PERSONALIZADO PARA INDEX CON NAVEGACIÓN =====
 
-class IndexAudioPlayer {
-    constructor() {
-        this.audio = null;
-        this.currentTrack = null;
-        this.isPlaying = false;
-        this.volume = 0.5;
-        this.currentTime = 0;
-        this.duration = 0;
-        this.isPremiumUser = false;
-        
-        // Estados de interacción
-        this.isProgressDragging = false;
-        this.isVolumeDragging = false;
-        
-        // Set para almacenar IDs de contenido con like
-        this.likedContentIds = new Set();
-        
-        // Referencias a elementos DOM
-        this.playerElement = null;
-        this.playPauseBtn = null;
-        this.trackTitle = null;
-        this.trackArtist = null;
-        this.currentTimeElement = null;
-        this.totalTimeElement = null;
-        this.progressBar = null;
-        this.progressFill = null;
-        this.progressHandle = null;
-        this.volumeControl = null;
-        this.volumeFill = null;
-        this.volumeHandle = null;
-        
-        this.init();
-    }
-    
-    init() {
-        console.log('Inicializando reproductor personalizado para Index...');
-        
-        // Crear elemento de audio oculto
-        this.audio = document.getElementById('hidden-audio');
-        if (!this.audio) {
-            this.audio = document.createElement('audio');
-            this.audio.id = 'hidden-audio';
-            this.audio.style.display = 'none';
-            this.audio.preload = 'metadata';
-            document.body.appendChild(this.audio);
-        }
-        
-        // Obtener referencias a elementos
-        this.getElementReferences();
-        
-        // Configurar event listeners
-        this.setupEventListeners();
-        
-        // Verificar estado premium
-        this.checkPremiumStatus();
-        
-        // Cargar estados de likes
-        this.loadLikeStates();
-        
-        // Configurar volumen inicial
-        this.setVolume(this.volume);
-        
-        console.log('Reproductor personalizado para Index inicializado');
-    }
-    
-    getElementReferences() {
-        this.playerElement = document.getElementById('custom-player');
-        this.playPauseBtn = document.getElementById('play-pause-btn');
-        this.trackTitle = document.getElementById('track-title');
-        this.trackArtist = document.getElementById('track-artist');
-        this.currentTimeElement = document.getElementById('current-time');
-        this.totalTimeElement = document.getElementById('total-time');
-        this.progressBar = document.getElementById('custom-progress-bar');
-        this.progressFill = document.getElementById('progress-fill');
-        this.progressHandle = document.getElementById('progress-handle');
-        this.volumeControl = document.getElementById('custom-volume-slider');
-        this.volumeFill = document.getElementById('volume-fill');
-        this.volumeHandle = document.getElementById('volume-handle');
-    }
-    
-    setupEventListeners() {
-        // Eventos del audio
-        if (this.audio) {
-            this.audio.addEventListener('loadedmetadata', () => this.onLoadedMetadata());
-            this.audio.addEventListener('timeupdate', () => this.onTimeUpdate());
-            this.audio.addEventListener('ended', () => this.onTrackEnded());
-            this.audio.addEventListener('error', (e) => this.onError(e));
-            this.audio.addEventListener('canplay', () => console.log('Audio listo para reproducir'));
-        }
-        
-        // Botón play/pause
-        if (this.playPauseBtn) {
-            this.playPauseBtn.addEventListener('click', () => this.togglePlayPause());
-        }
-        
-        // Barra de progreso
-        if (this.progressBar) {
-            this.setupProgressBar();
-        }
-        
-        // Control de volumen
-        if (this.volumeControl) {
-            this.setupVolumeControl();
-        }
-        
-        // Botones de las canciones
-        document.querySelectorAll('.play-in-player-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.preventDefault();
-                const track = this.extractTrackData(btn);
-                this.playTrackAndStart(track);
-            });
-        });
-        
-        // Botones de like
-        document.querySelectorAll('.like-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.preventDefault();
-                this.toggleLike(btn);
-            });
-        });
-        
-        // Botón de like en el reproductor
-        const heartBtn = document.getElementById('like-current-btn');
-        if (heartBtn) {
-            heartBtn.addEventListener('click', () => {
-                if (this.currentTrack) {
-                    const correspondingBtn = document.querySelector(`[data-content-id="${this.currentTrack.id}"]`)?.querySelector('.like-btn');
-                    if (correspondingBtn) {
-                        this.toggleLike(correspondingBtn);
-                    }
-                }
-            });
-        }
-    }
-    
-    setupProgressBar() {
-        this.progressBar.addEventListener('mousedown', (e) => {
-            this.isProgressDragging = true;
-            this.progressBar.classList.add('dragging');
-            document.body.classList.add('noselect');
-            this.seekToPosition(e);
-        });
-        
-        this.progressHandle.addEventListener('mousedown', (e) => {
-            e.stopPropagation();
-            this.isProgressDragging = true;
-            this.progressBar.classList.add('dragging');
-            document.body.classList.add('noselect');
-        });
-        
-        document.addEventListener('mousemove', (e) => {
-            if (this.isProgressDragging) {
-                this.seekToPosition(e);
-            }
-        });
-        
-        document.addEventListener('mouseup', () => {
-            if (this.isProgressDragging) {
-                this.isProgressDragging = false;
-                this.progressBar.classList.remove('dragging');
-                document.body.classList.remove('noselect');
-            }
-        });
-    }
-    
-    setupVolumeControl() {
-        this.volumeControl.addEventListener('mousedown', (e) => {
-            this.isVolumeDragging = true;
-            this.setVolumeFromPosition(e);
-        });
-        
-        this.volumeHandle.addEventListener('mousedown', (e) => {
-            e.stopPropagation();
-            this.isVolumeDragging = true;
-        });
-        
-        document.addEventListener('mousemove', (e) => {
-            if (this.isVolumeDragging) {
-                this.setVolumeFromPosition(e);
-            }
-        });
-        
-        document.addEventListener('mouseup', () => {
-            this.isVolumeDragging = false;
-        });
-    }
-    
-    extractTrackData(button) {
-        return {
-            id: button.getAttribute('data-content-id'),
-            title: button.getAttribute('data-title'),
-            artist: button.getAttribute('data-artist'),
-            url: button.getAttribute('data-url')
-        };
-    }
-    
-    // Cargar y reproducir automáticamente
-    async playTrackAndStart(track) {
-        if (!track || !track.url) {
-            console.error('Track inválido');
-            return;
-        }
-        
-        console.log('Reproduciendo automáticamente:', track.title);
-        
-        this.currentTrack = track;
-        
-        // Actualizar información
-        if (this.trackTitle) this.trackTitle.textContent = track.title || 'Canción desconocida';
-        if (this.trackArtist) this.trackArtist.textContent = track.artist || 'Artista desconocido';
-        
-        // Actualizar estado del corazón en el reproductor
-        this.updatePlayerHeartButton();
-        
-        // Mostrar reproductor
-        if (this.playerElement) {
-            this.playerElement.classList.remove('d-none');
-        }
-        
-        // Actualizar UI de canciones
-        document.querySelectorAll('.song-item').forEach(item => {
-            item.classList.remove('playing');
-        });
-        
-        const songItem = document.querySelector(`[data-content-id="${track.id}"]`);
-        if (songItem) {
-            songItem.classList.add('playing');
-        }
-        
-        try {
-            // Configurar y cargar audio
-            this.audio.src = track.url;
-            await this.audio.load();
-            
-            // REPRODUCIR AUTOMÁTICAMENTE (para usuarios premium)
-            if (this.isPremiumUser) {
-                await this.audio.play();
-                this.isPlaying = true;
-                this.updatePlayPauseButton();
-                console.log('Reproduciendo automáticamente (usuario premium):', track.title);
-            } else {
-                // Para usuarios no premium, iniciar con anuncios
-                await this.playWithAds(track);
-            }
-        } catch (error) {
-            console.error('Error al reproducir automáticamente:', error);
-            console.log('Fallback: Audio cargado, esperando interacción del usuario');
-        }
-    }
-    
-    async playWithAds(track) {
-        try {
-            const response = await fetch('@Url.Action("GetRandomAd", "Clients")');
-            const adData = await response.json();
-            
-            this.showAdNotification(adData.duration);
-            
-            // Reproducir anuncio
-            this.audio.src = adData.url;
-            await this.audio.load();
-            
-            // Evento para cuando termine el anuncio
-            const adEndedHandler = () => {
-                this.audio.removeEventListener('ended', adEndedHandler);
-                this.playDirectly(track);
-                this.showToast('¡Ahora reproduciendo tu música!', 'success');
-            };
-            
-            this.audio.addEventListener('ended', adEndedHandler);
-            await this.audio.play();
-            this.isPlaying = true;
-            this.updatePlayPauseButton();
-            
-        } catch (error) {
-            console.error('Error con anuncio:', error);
-            await this.playDirectly(track);
-        }
-    }
-    
-    async playDirectly(track = this.currentTrack) {
-        try {
-            this.audio.src = track.url;
-            await this.audio.load();
-            await this.audio.play();
-            
-            this.isPlaying = true;
-            this.updatePlayPauseButton();
-            console.log('Reproduciendo exitosamente:', track.title);
-        } catch (error) {
-            console.error('Error al reproducir:', error);
-            this.showToast('Error al reproducir el audio', 'error');
-        }
-    }
-    
-    async togglePlayPause() {
-        if (!this.audio || !this.currentTrack) return;
-        
-        try {
-            if (this.audio.paused) {
-                if (this.audio.currentTime === 0 && !this.isPremiumUser) {
-                    await this.playWithAds(this.currentTrack);
-                } else {
-                    await this.audio.play();
-                    this.isPlaying = true;
-                }
-            } else {
-                this.audio.pause();
-                this.isPlaying = false;
-            }
-            this.updatePlayPauseButton();
-        } catch (error) {
-            console.error('Error al cambiar estado de reproducción:', error);
-        }
-    }
-    
-    updatePlayPauseButton() {
-        if (!this.playPauseBtn) return;
-        
-        const icon = this.playPauseBtn.querySelector('i');
-        if (icon) {
-            icon.className = this.isPlaying ? 'fas fa-pause' : 'fas fa-play';
-        }
-    }
-    
-    seekToPosition(e) {
-        if (!this.audio || !this.audio.duration || !this.progressBar) return;
-        
-        const rect = this.progressBar.getBoundingClientRect();
-        const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
-        const percent = x / rect.width;
-        
-        this.audio.currentTime = percent * this.audio.duration;
-        this.updateProgressDisplay();
-    }
-    
-    setVolumeFromPosition(e) {
-        if (!this.volumeControl) return;
-        
-        const rect = this.volumeControl.getBoundingClientRect();
-        const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
-        const volume = x / rect.width;
-        
-        this.setVolume(volume);
-    }
-    
-    setVolume(volume) {
-        this.volume = Math.max(0, Math.min(1, volume));
-        
-        if (this.audio) {
-            this.audio.volume = this.volume;
-        }
-        
-        if (this.volumeFill) {
-            this.volumeFill.style.width = (this.volume * 100) + '%';
-        }
-        
-        if (this.volumeHandle) {
-            this.volumeHandle.style.left = (this.volume * 100) + '%';
-        }
-        
-        const volumeBtn = document.getElementById('volume-btn');
-        if (volumeBtn) {
-            const icon = volumeBtn.querySelector('i');
-            if (icon) {
-                if (this.volume === 0) {
-                    icon.className = 'fas fa-volume-mute';
-                } else if (this.volume < 0.5) {
-                    icon.className = 'fas fa-volume-down';
-                } else {
-                    icon.className = 'fas fa-volume-up';
-                }
-            }
-        }
-    }
-    
-    onLoadedMetadata() {
-        this.duration = this.audio.duration;
-        this.updateTimeDisplay();
-    }
-    
-    onTimeUpdate() {
-        if (!this.isProgressDragging) {
-            this.currentTime = this.audio.currentTime;
-            this.updateProgressDisplay();
-            this.updateTimeDisplay();
-        }
-    }
-    
-    updateProgressDisplay() {
-        if (!this.audio || !this.audio.duration) return;
-        
-        const percent = (this.audio.currentTime / this.audio.duration) * 100;
-        
-        if (this.progressFill) {
-            this.progressFill.style.width = percent + '%';
-        }
-        
-        if (this.progressHandle) {
-            this.progressHandle.style.left = percent + '%';
-        }
-    }
-    
-    updateTimeDisplay() {
-        if (this.currentTimeElement) {
-            this.currentTimeElement.textContent = this.formatTime(this.audio.currentTime);
-        }
-        
-        if (this.totalTimeElement) {
-            this.totalTimeElement.textContent = this.formatTime(this.audio.duration);
-        }
-    }
-    
-    formatTime(seconds) {
-        if (!seconds || isNaN(seconds)) return '0:00';
-        
-        const mins = Math.floor(seconds / 60);
-        const secs = Math.floor(seconds % 60);
-        return `${mins}:${secs.toString().padStart(2, '0')}`;
-    }
-    
-    onTrackEnded() {
-        this.isPlaying = false;
-        this.updatePlayPauseButton();
-        console.log('Canción terminada');
-    }
-    
-    onError(e) {
-        console.error('Error en audio:', e);
-        this.showToast('Error al cargar el audio', 'error');
-    }
-    
-    async checkPremiumStatus() {
-        try {
-            const response = await fetch('@Url.Action("CheckPremiumStatus", "Clients")');
-            const data = await response.json();
-            this.isPremiumUser = data.isPremium;
-            console.log('Usuario premium:', this.isPremiumUser);
-        } catch (error) {
-            console.error('Error al verificar estado premium:', error);
+    class IndexAudioPlayer {
+        constructor() {
+            this.audio = null;
+            this.currentTrack = null;
+            this.isPlaying = false;
+            this.volume = 0.5;
+            this.currentTime = 0;
+            this.duration = 0;
             this.isPremiumUser = false;
+
+            // ✅ Variables para navegación y controles
+            this.playlist = [];
+            this.currentTrackIndex = 0;
+            this.isLooping = false;
+            this.isShuffling = false;
+            this.shuffledPlaylist = [];
+
+            // Estados de interacción
+            this.isProgressDragging = false;
+            this.isVolumeDragging = false;
+
+            // ✅ IMPORTANTE: Set para almacenar IDs de contenido con like
+            this.likedContentIds = new Set();
+
+            // Referencias a elementos DOM
+            this.playerElement = null;
+            this.playPauseBtn = null;
+            this.trackTitle = null;
+            this.trackArtist = null;
+            this.currentTimeElement = null;
+            this.totalTimeElement = null;
+            this.progressBar = null;
+            this.progressFill = null;
+            this.progressHandle = null;
+            this.volumeControl = null;
+            this.volumeFill = null;
+            this.volumeHandle = null;
+
+            // Referencias a botones de navegación
+            this.prevBtn = null;
+            this.nextBtn = null;
+            this.repeatBtn = null;
+            this.shuffleBtn = null;
+
+            this.init();
         }
-    }
-    
-    async loadLikeStates() {
-        try {
-            const response = await fetch('@Url.Action("GetUserLikes", "Clients")');
-            if (response.ok) {
-                const likedContentIds = await response.json();
-                this.likedContentIds = new Set(likedContentIds.map(id => id.toString()));
-                this.updateAllLikeButtons();
+
+        init() {
+            console.log('🎵 Inicializando reproductor personalizado para Index con navegación...');
+
+            // Crear elemento de audio oculto
+            this.audio = document.getElementById('hidden-audio');
+            if (!this.audio) {
+                this.audio = document.createElement('audio');
+                this.audio.id = 'hidden-audio';
+                this.audio.style.display = 'none';
+                this.audio.preload = 'metadata';
+                document.body.appendChild(this.audio);
             }
-        } catch (error) {
-            console.error('Error al cargar estados de likes:', error);
+
+            // Obtener referencias a elementos
+            this.getElementReferences();
+
+            // Construir playlist
+            this.buildPlaylist();
+
+            // Configurar event listeners
+            this.setupEventListeners();
+
+            // Verificar estado premium
+            this.checkPremiumStatus();
+
+            // ✅ IMPORTANTE: Cargar estados de likes al inicializar
+            this.loadLikeStates();
+
+            // Configurar volumen inicial
+            this.setVolume(this.volume);
+
+            console.log('✅ Reproductor personalizado para Index inicializado');
         }
-    }
-    
+
+        // ✅ NUEVO: Cargar estados de likes del servidor
+        async loadLikeStates() {
+            try {
+                const response = await fetch('@Url.Action("GetUserLikes", "Clients")');
+                if (response.ok) {
+                    const likedContentIds = await response.json();
+                    this.likedContentIds = new Set(likedContentIds.map(id => id.toString()));
+                    this.updateAllLikeButtons();
+                    console.log('✅ Estados de likes cargados:', this.likedContentIds);
+                    
+                    // ✅ NUEVO: Debug para verificar el estado
+                    this.debugLikeStates();
+                }
+            } catch (error) {
+                console.error('Error al cargar estados de likes:', error);
+            }
+        }
+
+        // ✅ NUEVO: Método de debug
+        debugLikeStates() {
+            console.log('🔍 Debug de estados de likes:');
+            console.log('Likes cargados:', Array.from(this.likedContentIds));
+            
+            document.querySelectorAll('.like-btn').forEach(btn => {
+                const contentId = btn.getAttribute('data-content-id');
+                const isLiked = this.likedContentIds.has(contentId);
+                const hasClass = btn.classList.contains('liked');
+                
+                console.log(`ID: ${contentId} - Liked: ${isLiked} - HasClass: ${hasClass}`);
+            });
+        }
+
+        // ✅ NUEVO: Actualizar todos los botones de like
+            // ✅ MEJORAR: Función más robusta
     updateAllLikeButtons() {
+        console.log('🔄 Actualizando botones de like...');
+
         document.querySelectorAll('.like-btn').forEach(btn => {
             const contentId = btn.getAttribute('data-content-id');
-            if (this.likedContentIds.has(contentId)) {
+            const isLiked = this.likedContentIds.has(contentId);
+
+            console.log(`Canción ID ${contentId}: ${isLiked ? 'LIKED ❤️' : 'NOT LIKED 🤍'}`);
+
+            if (isLiked) {
+                // ✅ ESTADO LIKED (Corazón lleno)
                 btn.classList.add('liked');
                 btn.style.color = '#1db954';
+                btn.style.background = 'rgba(29, 185, 84, 0.1)';
+                btn.title = 'Quitar de favoritos';
+
+                const icon = btn.querySelector('i');
+                if (icon) {
+                    icon.className = 'fas fa-heart'; // Corazón SÓLIDO
+                }
             } else {
+                // ✅ ESTADO NOT LIKED (Corazón vacío)
                 btn.classList.remove('liked');
                 btn.style.color = '#b3b3b3';
+                btn.style.background = 'transparent';
+                btn.title = 'Agregar a favoritos';
+
+                const icon = btn.querySelector('i');
+                if (icon) {
+                    icon.className = 'far fa-heart'; // Corazón VACÍO
+                }
             }
         });
+
+        console.log(`✅ ${this.likedContentIds.size} canciones marcadas como favoritas`);
     }
-    
-    updatePlayerHeartButton() {
-        const heartBtn = document.getElementById('like-current-btn');
-        if (heartBtn && this.currentTrack) {
-            if (this.likedContentIds.has(this.currentTrack.id)) {
-                heartBtn.classList.add('liked');
-            } else {
-                heartBtn.classList.remove('liked');
+
+        // ✅ NUEVO: Actualizar botón de corazón en el reproductor
+        updatePlayerHeartButton() {
+            const heartBtn = document.getElementById('like-current-btn');
+            if (heartBtn && this.currentTrack) {
+                if (this.likedContentIds.has(this.currentTrack.id)) {
+                    heartBtn.classList.add('liked');
+                } else {
+                    heartBtn.classList.remove('liked');
+                }
             }
         }
-    }
-    
+
+            // ✅ MEJORAR: Toggle más visual y claro
     async toggleLike(button) {
         const contentId = button.getAttribute('data-content-id');
         const userId = button.getAttribute('data-user-id');
-        
-        if (!contentId || !userId) return;
-        
+
+        if (!contentId || !userId) {
+            console.error('❌ Missing contentId or userId');
+            return;
+        }
+
+        // ✅ Feedback visual inmediato
+        button.style.transform = 'scale(1.3)';
+        button.style.filter = 'brightness(1.5)';
+        setTimeout(() => {
+            button.style.transform = 'scale(1)';
+            button.style.filter = 'brightness(1)';
+        }, 200);
+
         button.disabled = true;
-        
+
         try {
             const formData = new FormData();
             formData.append('contentId', contentId);
             formData.append('userId', userId);
-            
+
             const isCurrentlyLiked = this.likedContentIds.has(contentId);
-            
+            console.log(`🔄 Toggling like for ID ${contentId}: Currently ${isCurrentlyLiked ? 'LIKED' : 'NOT LIKED'}`);
+
             if (isCurrentlyLiked) {
+                // ✅ QUITAR LIKE (Corazón lleno → vacío)
                 const response = await fetch('@Url.Action("UnlikeContent", "Clients")', {
                     method: 'POST',
                     body: formData
                 });
-                
+
                 const data = await response.json();
                 if (data.success) {
                     this.likedContentIds.delete(contentId);
+
+                    // Actualización visual inmediata
                     button.classList.remove('liked');
                     button.style.color = '#b3b3b3';
-                    this.showToast('Contenido removido de favoritos', 'info');
+                    button.style.background = 'transparent';
+                    button.title = 'Agregar a favoritos';
+
+                    const icon = button.querySelector('i');
+                    if (icon) icon.className = 'far fa-heart'; // VACÍO
+
+                    this.showToast('💔 Removido de favoritos', 'info');
+                    console.log('✅ Removido de favoritos:', contentId);
                 }
             } else {
+                // ✅ AGREGAR LIKE (Corazón vacío → lleno)
                 const response = await fetch('@Url.Action("LikeContent", "Clients")', {
                     method: 'POST',
                     body: formData
                 });
-                
+
                 const data = await response.json();
                 if (data.success) {
                     this.likedContentIds.add(contentId);
+
+                    // Actualización visual inmediata
                     button.classList.add('liked');
                     button.style.color = '#1db954';
-                    this.showToast('¡Contenido agregado a favoritos!', 'success');
+                    button.style.background = 'rgba(29, 185, 84, 0.1)';
+                    button.title = 'Quitar de favoritos';
+
+                    const icon = button.querySelector('i');
+                    if (icon) icon.className = 'fas fa-heart'; // LLENO
+
+                    this.showToast('💚 ¡Agregado a favoritos!', 'success');
+                    console.log('✅ Agregado a favoritos:', contentId);
                 }
             }
-            
+
+            // Sincronizar con reproductor
             if (this.currentTrack && this.currentTrack.id === contentId) {
                 this.updatePlayerHeartButton();
             }
-            
+
         } catch (error) {
-            console.error('Error al procesar like:', error);
+            console.error('❌ Error al procesar like:', error);
             this.showToast('Error al procesar la solicitud', 'error');
         } finally {
             button.disabled = false;
         }
     }
-    
-    showAdNotification(duration) {
-        const notification = document.createElement('div');
-        notification.className = 'ad-notification';
-        notification.style.cssText = `
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: rgba(255, 152, 0, 0.95); color: #000; padding: 16px 24px;
-            border-radius: 8px; font-size: 14px; z-index: 1001;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3); text-align: center;
-        `;
-        notification.innerHTML = `
-            <i class="fas fa-ad" style="margin-right: 8px;"></i>
-            <strong>Reproduciendo anuncio...</strong>
-            <div id="ad-countdown" style="margin-top: 8px;">${duration}s</div>
-        `;
-        document.body.appendChild(notification);
-        
-        let countdown = duration;
-        const interval = setInterval(() => {
-            countdown--;
-            const countdownEl = document.getElementById('ad-countdown');
-            if (countdownEl) {
-                countdownEl.textContent = countdown + 's';
+
+        // Resto de métodos existentes...
+        buildPlaylist() {
+            this.playlist = [];
+            const songItems = document.querySelectorAll('.song-item');
+
+            console.log(`🎵 Construyendo playlist con ${songItems.length} canciones`);
+
+            songItems.forEach((item, index) => {
+                const playBtn = item.querySelector('.play-in-player-btn');
+                if (playBtn) {
+                    const trackData = {
+                        id: playBtn.getAttribute('data-content-id'),
+                        title: playBtn.getAttribute('data-title'),
+                        artist: playBtn.getAttribute('data-artist'),
+                        url: playBtn.getAttribute('data-url'),
+                        index: index
+                    };
+
+                    this.playlist.push(trackData);
+                }
+            });
+
+            console.log(`✅ Playlist construida con ${this.playlist.length} canciones`);
+        }
+
+        getElementReferences() {
+            this.playerElement = document.getElementById('custom-player');
+            this.playPauseBtn = document.getElementById('play-pause-btn');
+            this.trackTitle = document.getElementById('track-title');
+            this.trackArtist = document.getElementById('track-artist');
+            this.currentTimeElement = document.getElementById('current-time');
+            this.totalTimeElement = document.getElementById('total-time');
+            this.progressBar = document.getElementById('custom-progress-bar');
+            this.progressFill = document.getElementById('progress-fill');
+            this.progressHandle = document.getElementById('progress-handle');
+            this.volumeControl = document.getElementById('custom-volume-slider');
+            this.volumeFill = document.getElementById('volume-fill');
+            this.volumeHandle = document.getElementById('volume-handle');
+
+            // Referencias a controles de navegación
+            this.prevBtn = document.getElementById('prev-btn');
+            this.nextBtn = document.getElementById('next-btn');
+            this.repeatBtn = document.getElementById('repeat-btn');
+            this.shuffleBtn = document.getElementById('shuffle-btn');
+
+            console.log('🔗 Referencias obtenidas:', {
+                playerElement: !!this.playerElement,
+                playPauseBtn: !!this.playPauseBtn,
+                prevBtn: !!this.prevBtn,
+                nextBtn: !!this.nextBtn,
+                repeatBtn: !!this.repeatBtn,
+                shuffleBtn: !!this.shuffleBtn
+            });
+        }
+
+        setupEventListeners() {
+            // Eventos del audio
+            if (this.audio) {
+                this.audio.addEventListener('loadedmetadata', () => this.onLoadedMetadata());
+                this.audio.addEventListener('timeupdate', () => this.onTimeUpdate());
+                this.audio.addEventListener('ended', () => this.onTrackEnded());
+                this.audio.addEventListener('error', (e) => this.onError(e));
+                this.audio.addEventListener('canplay', () => console.log('Audio listo para reproducir'));
             }
-            
-            if (countdown <= 0) {
-                clearInterval(interval);
-                if (notification.parentNode) {
-                    notification.parentNode.removeChild(notification);
+
+            // Botón play/pause
+            if (this.playPauseBtn) {
+                this.playPauseBtn.addEventListener('click', () => this.togglePlayPause());
+            }
+
+            // Controles de navegación
+            if (this.prevBtn) {
+                this.prevBtn.addEventListener('click', () => this.playPrevious());
+            }
+
+            if (this.nextBtn) {
+                this.nextBtn.addEventListener('click', () => this.playNext());
+            }
+
+            if (this.repeatBtn) {
+                this.repeatBtn.addEventListener('click', () => this.toggleRepeat());
+            }
+
+            if (this.shuffleBtn) {
+                this.shuffleBtn.addEventListener('click', () => this.toggleShuffle());
+            }
+
+            // Barra de progreso
+            if (this.progressBar) {
+                this.setupProgressBar();
+            }
+
+            // Control de volumen
+            if (this.volumeControl) {
+                this.setupVolumeControl();
+            }
+
+            // Botones de las canciones
+            document.querySelectorAll('.play-in-player-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const track = this.extractTrackData(btn);
+                    this.playTrackAndStart(track);
+                });
+            });
+
+            // ✅ IMPORTANTE: Botones de like
+            document.querySelectorAll('.like-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.toggleLike(btn);
+                });
+            });
+
+            // ✅ IMPORTANTE: Botón de like en el reproductor
+            const heartBtn = document.getElementById('like-current-btn');
+            if (heartBtn) {
+                heartBtn.addEventListener('click', () => {
+                    if (this.currentTrack) {
+                        const correspondingBtn = document.querySelector(`[data-content-id="${this.currentTrack.id}"]`)?.querySelector('.like-btn');
+                        if (correspondingBtn) {
+                            this.toggleLike(correspondingBtn);
+                        }
+                    }
+                });
+            }
+        }
+
+        // Encontrar índice de canción en playlist
+        findTrackInPlaylist(trackId) {
+            return this.playlist.findIndex(track => track.id === trackId);
+        }
+
+        // Reproducir canción anterior
+        playPrevious() {
+            if (this.playlist.length === 0) {
+                console.warn('⚠️ No hay playlist');
+                return;
+            }
+
+            let prevIndex;
+            if (this.isShuffling) {
+                prevIndex = Math.floor(Math.random() * this.playlist.length);
+            } else {
+                prevIndex = this.currentTrackIndex > 0 ? this.currentTrackIndex - 1 : this.playlist.length - 1;
+            }
+
+            const prevTrack = this.playlist[prevIndex];
+            if (prevTrack && prevTrack.url) {
+                console.log('⏮️ Reproduciendo canción anterior:', prevTrack.title);
+                this.currentTrackIndex = prevIndex;
+                this.playTrackAndStart(prevTrack);
+            } else {
+                console.warn('⚠️ Canción anterior no válida');
+            }
+        }
+
+        // Reproducir canción siguiente
+        playNext() {
+            if (this.playlist.length === 0) {
+                console.warn('⚠️ No hay playlist');
+                return;
+            }
+
+            let nextIndex;
+            if (this.isShuffling) {
+                nextIndex = Math.floor(Math.random() * this.playlist.length);
+            } else {
+                nextIndex = (this.currentTrackIndex + 1) % this.playlist.length;
+            }
+
+            const nextTrack = this.playlist[nextIndex];
+            if (nextTrack && nextTrack.url) {
+                console.log('⏭️ Reproduciendo canción siguiente:', nextTrack.title);
+                this.currentTrackIndex = nextIndex;
+                this.playTrackAndStart(nextTrack);
+            } else {
+                console.warn('⚠️ Canción siguiente no válida');
+            }
+        }
+
+        // Toggle modo repetir
+        toggleRepeat() {
+            this.isLooping = !this.isLooping;
+
+            if (this.repeatBtn) {
+                if (this.isLooping) {
+                    this.repeatBtn.classList.add('active');
+                    console.log('🔄 Modo bucle activado');
+                } else {
+                    this.repeatBtn.classList.remove('active');
+                    console.log('🔄 Modo bucle desactivado');
                 }
             }
-        }, 1000);
+        }
+
+        // Toggle modo aleatorio
+        toggleShuffle() {
+            this.isShuffling = !this.isShuffling;
+
+            if (this.shuffleBtn) {
+                if (this.isShuffling) {
+                    this.shuffleBtn.classList.add('active');
+                    console.log('🔀 Modo aleatorio activado');
+                } else {
+                    this.shuffleBtn.classList.remove('active');
+                    console.log('🔀 Modo aleatorio desactivado');
+                }
+            }
+        }
+
+        // Actualizar UI de lista de canciones
+        updateTrackListUI(currentTrackId) {
+            // Remover estado playing de todas las canciones
+            document.querySelectorAll('.song-item').forEach(item => {
+                item.classList.remove('playing');
+            });
+
+            // Añadir estado playing a la canción actual
+            const currentItem = document.querySelector(`[data-content-id="${currentTrackId}"]`);
+            if (currentItem) {
+                currentItem.classList.add('playing');
+                console.log('🎯 UI actualizada para canción:', currentTrackId);
+            }
+        }
+
+        setupProgressBar() {
+            this.progressBar.addEventListener('mousedown', (e) => {
+                this.isProgressDragging = true;
+                this.progressBar.classList.add('dragging');
+                document.body.classList.add('noselect');
+                this.seekToPosition(e);
+            });
+
+            this.progressHandle.addEventListener('mousedown', (e) => {
+                e.stopPropagation();
+                this.isProgressDragging = true;
+                this.progressBar.classList.add('dragging');
+                document.body.classList.add('noselect');
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (this.isProgressDragging) {
+                    this.seekToPosition(e);
+                }
+            });
+
+            document.addEventListener('mouseup', () => {
+                if (this.isProgressDragging) {
+                    this.isProgressDragging = false;
+                    this.progressBar.classList.remove('dragging');
+                    document.body.classList.remove('noselect');
+                }
+            });
+        }
+
+        setupVolumeControl() {
+            this.volumeControl.addEventListener('mousedown', (e) => {
+                this.isVolumeDragging = true;
+                this.setVolumeFromPosition(e);
+            });
+
+            this.volumeHandle.addEventListener('mousedown', (e) => {
+                e.stopPropagation();
+                this.isVolumeDragging = true;
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (this.isVolumeDragging) {
+                    this.setVolumeFromPosition(e);
+                }
+            });
+
+            document.addEventListener('mouseup', () => {
+                this.isVolumeDragging = false;
+            });
+        }
+
+        extractTrackData(button) {
+            return {
+                id: button.getAttribute('data-content-id'),
+                title: button.getAttribute('data-title'),
+                artist: button.getAttribute('data-artist'),
+                url: button.getAttribute('data-url')
+            };
+        }
+
+        // Cargar y reproducir automáticamente con navegación
+        async playTrackAndStart(track) {
+            if (!track || !track.url) {
+                console.error('Track inválido');
+                return;
+            }
+
+            console.log('🎵 Reproduciendo automáticamente:', track.title);
+
+            this.currentTrack = track;
+
+            // Actualizar índice actual
+            this.currentTrackIndex = this.findTrackInPlaylist(track.id);
+            console.log('📍 Índice de canción actual:', this.currentTrackIndex);
+
+            // Actualizar información
+            if (this.trackTitle) this.trackTitle.textContent = track.title || 'Canción desconocida';
+            if (this.trackArtist) this.trackArtist.textContent = track.artist || 'Artista desconocido';
+
+            // ✅ IMPORTANTE: Actualizar estado del corazón en el reproductor
+            this.updatePlayerHeartButton();
+
+            // Mostrar reproductor
+            if (this.playerElement) {
+                this.playerElement.classList.remove('d-none');
+            }
+
+            // Actualizar UI de canciones
+            this.updateTrackListUI(track.id);
+
+            try {
+                // Configurar y cargar audio
+                this.audio.src = track.url;
+                await this.audio.load();
+
+                // REPRODUCIR AUTOMÁTICAMENTE (para usuarios premium)
+                if (this.isPremiumUser) {
+                    await this.audio.play();
+                    this.isPlaying = true;
+                    this.updatePlayPauseButton();
+                    console.log('🎉 Reproduciendo automáticamente (usuario premium):', track.title);
+                } else {
+                    // Para usuarios no premium, iniciar con anuncios
+                    await this.playWithAds(track);
+                }
+            } catch (error) {
+                console.error('❌ Error al reproducir automáticamente:', error);
+                console.log('🔄 Fallback: Audio cargado, esperando interacción del usuario');
+            }
+        }
+
+        async playWithAds(track) {
+            try {
+                const response = await fetch('@Url.Action("GetRandomAd", "Clients")');
+                const adData = await response.json();
+
+                this.showAdNotification(adData.duration);
+
+                // Reproducir anuncio
+                this.audio.src = adData.url;
+                await this.audio.load();
+
+                // Evento para cuando termine el anuncio
+                const adEndedHandler = () => {
+                    this.audio.removeEventListener('ended', adEndedHandler);
+                    this.playDirectly(track);
+                    this.showToast('¡Ahora reproduciendo tu música!', 'success');
+                };
+
+                this.audio.addEventListener('ended', adEndedHandler);
+                await this.audio.play();
+                this.isPlaying = true;
+                this.updatePlayPauseButton();
+
+            } catch (error) {
+                console.error('Error con anuncio:', error);
+                await this.playDirectly(track);
+            }
+        }
+
+        async playDirectly(track = this.currentTrack) {
+            try {
+                this.audio.src = track.url;
+                await this.audio.load();
+                await this.audio.play();
+
+                this.isPlaying = true;
+                this.updatePlayPauseButton();
+                console.log('Reproduciendo exitosamente:', track.title);
+            } catch (error) {
+                console.error('Error al reproducir:', error);
+                this.showToast('Error al reproducir el audio', 'error');
+            }
+        }
+
+        async togglePlayPause() {
+            if (!this.audio || !this.currentTrack) return;
+
+            try {
+                if (this.audio.paused) {
+                    if (this.audio.currentTime === 0 && !this.isPremiumUser) {
+                        await this.playWithAds(this.currentTrack);
+                    } else {
+                        await this.audio.play();
+                        this.isPlaying = true;
+                    }
+                } else {
+                    this.audio.pause();
+                    this.isPlaying = false;
+                }
+                this.updatePlayPauseButton();
+            } catch (error) {
+                console.error('Error al cambiar estado de reproducción:', error);
+            }
+        }
+
+        updatePlayPauseButton() {
+            if (!this.playPauseBtn) return;
+
+            const icon = this.playPauseBtn.querySelector('i');
+            if (icon) {
+                icon.className = this.isPlaying ? 'fas fa-pause' : 'fas fa-play';
+            }
+        }
+
+        seekToPosition(e) {
+            if (!this.audio || !this.audio.duration || !this.progressBar) return;
+
+            const rect = this.progressBar.getBoundingClientRect();
+            const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+            const percent = x / rect.width;
+
+            this.audio.currentTime = percent * this.audio.duration;
+            this.updateProgressDisplay();
+        }
+
+        setVolumeFromPosition(e) {
+            if (!this.volumeControl) return;
+
+            const rect = this.volumeControl.getBoundingClientRect();
+            const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+            const volume = x / rect.width;
+
+            this.setVolume(volume);
+        }
+
+        setVolume(volume) {
+            this.volume = Math.max(0, Math.min(1, volume));
+
+            if (this.audio) {
+                this.audio.volume = this.volume;
+            }
+
+            if (this.volumeFill) {
+                this.volumeFill.style.width = (this.volume * 100) + '%';
+            }
+
+            if (this.volumeHandle) {
+                this.volumeHandle.style.left = (this.volume * 100) + '%';
+            }
+
+            const volumeBtn = document.getElementById('volume-btn');
+            if (volumeBtn) {
+                const icon = volumeBtn.querySelector('i');
+                if (icon) {
+                    if (this.volume === 0) {
+                        icon.className = 'fas fa-volume-mute';
+                    } else if (this.volume < 0.5) {
+                        icon.className = 'fas fa-volume-down';
+                    } else {
+                        icon.className = 'fas fa-volume-up';
+                    }
+                }
+            }
+        }
+
+        onLoadedMetadata() {
+            this.duration = this.audio.duration;
+            this.updateTimeDisplay();
+        }
+
+        onTimeUpdate() {
+            if (!this.isProgressDragging) {
+                this.currentTime = this.audio.currentTime;
+                this.updateProgressDisplay();
+                this.updateTimeDisplay();
+            }
+        }
+
+        updateProgressDisplay() {
+            if (!this.audio || !this.audio.duration) return;
+
+            const percent = (this.audio.currentTime / this.audio.duration) * 100;
+
+            if (this.progressFill) {
+                this.progressFill.style.width = percent + '%';
+            }
+
+            if (this.progressHandle) {
+                this.progressHandle.style.left = percent + '%';
+            }
+        }
+
+        updateTimeDisplay() {
+            if (this.currentTimeElement) {
+                this.currentTimeElement.textContent = this.formatTime(this.audio.currentTime);
+            }
+
+            if (this.totalTimeElement) {
+                this.totalTimeElement.textContent = this.formatTime(this.audio.duration);
+            }
+        }
+
+        formatTime(seconds) {
+            if (!seconds || isNaN(seconds)) return '0:00';
+
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // Manejar fin de canción con bucle y navegación
+        onTrackEnded() {
+            console.log('🏁 Canción terminada');
+            this.isPlaying = false;
+            this.updatePlayPauseButton();
+
+            if (this.isLooping) {
+                // Si está en modo bucle, repetir la misma canción
+                console.log('🔄 Repitiendo canción en bucle');
+                setTimeout(() => {
+                    this.playTrackAndStart(this.currentTrack);
+                }, 500);
+            } else {
+                // Si no está en bucle, reproducir la siguiente canción
+                console.log('⏭️ Reproduciendo siguiente canción automáticamente');
+                setTimeout(() => {
+                    this.playNext();
+                }, 1000);
+            }
+        }
+
+        onError(e) {
+            console.error('Error en audio:', e);
+            this.showToast('Error al cargar el audio', 'error');
+        }
+
+        async checkPremiumStatus() {
+            try {
+                const response = await fetch('@Url.Action("CheckPremiumStatus", "Clients")');
+                const data = await response.json();
+                this.isPremiumUser = data.isPremium;
+                console.log('Usuario premium:', this.isPremiumUser);
+            } catch (error) {
+                console.error('Error al verificar estado premium:', error);
+                this.isPremiumUser = false;
+            }
+        }
+
+        showAdNotification(duration) {
+            const notification = document.createElement('div');
+            notification.className = 'ad-notification';
+            notification.style.cssText = `
+                position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+                background: rgba(255, 152, 0, 0.95); color: #000; padding: 16px 24px;
+                border-radius: 8px; font-size: 14px; z-index: 1001;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.3); text-align: center;
+            `;
+            notification.innerHTML = `
+                <i class="fas fa-ad" style="margin-right: 8px;"></i>
+                <strong>Reproduciendo anuncio...</strong>
+                <div id="ad-countdown" style="margin-top: 8px;">${duration}s</div>
+            `;
+            document.body.appendChild(notification);
+
+            let countdown = duration;
+            const interval = setInterval(() => {
+                countdown--;
+                const countdownEl = document.getElementById('ad-countdown');
+                if (countdownEl) {
+                    countdownEl.textContent = countdown + 's';
+                }
+
+                if (countdown <= 0) {
+                    clearInterval(interval);
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }
+            }, 1000);
+        }
+
+        showToast(message, type = 'info') {
+            const toastElement = document.getElementById('liveToast');
+            const messageElement = document.getElementById('toast-message');
+
+            if (!toastElement || !messageElement) return;
+
+            toastElement.className = 'toast';
+            if (type === 'success') {
+                toastElement.classList.add('bg-success', 'text-white');
+            } else if (type === 'error') {
+                toastElement.classList.add('bg-danger', 'text-white');
+            } else {
+                toastElement.classList.add('bg-info', 'text-white');
+            }
+
+            messageElement.textContent = message;
+
+            if (typeof bootstrap !== 'undefined') {
+                const toast = new bootstrap.Toast(toastElement);
+                toast.show();
+            }
+        }
     }
-    
-    showToast(message, type = 'info') {
-        const toastElement = document.getElementById('liveToast');
-        const messageElement = document.getElementById('toast-message');
-        
-        if (!toastElement || !messageElement) return;
-        
-        toastElement.className = 'toast';
-        if (type === 'success') {
-            toastElement.classList.add('bg-success', 'text-white');
-        } else if (type === 'error') {
-            toastElement.classList.add('bg-danger', 'text-white');
+
+    // Función global para redirección a playlists
+    function redirectToPlaylistsWithContent(contentId) {
+        if (!contentId) {
+            console.error('ContentId no válido');
+            return;
+        }
+        window.location.href = '@Url.Action("Index", "Playlists")?contentId=' + contentId;
+    }
+
+    // Inicializar reproductor cuando se carga el DOM
+    document.addEventListener('DOMContentLoaded', () => {
+        window.indexPlayer = new IndexAudioPlayer();
+
+        // Función de debugging
+        window.testControls = function() {
+            console.log('🧪 Testing controles del reproductor...');
+            console.log('Playlist:', window.indexPlayer.playlist.length, 'canciones');
+            console.log('Índice actual:', window.indexPlayer.currentTrackIndex);
+            console.log('Modo bucle:', window.indexPlayer.isLooping);
+            console.log('Modo aleatorio:', window.indexPlayer.isShuffling);
+        };
+    });
+
+    // Funciones de debug
+    window.testPlayButton = function(index = 0) {
+        const btn = document.querySelectorAll('.play-in-player-btn')[index];
+        if (btn) {
+            btn.click();
         } else {
-            toastElement.classList.add('bg-info', 'text-white');
+            console.warn('Botón no encontrado en el índice:', index);
         }
-        
-        messageElement.textContent = message;
-        
-        if (typeof bootstrap !== 'undefined') {
-            const toast = new bootstrap.Toast(toastElement);
-            toast.show();
+    };
+
+    // Funciones de prueba para controles
+    window.testPrevious = function() {
+        if (window.indexPlayer) {
+            window.indexPlayer.playPrevious();
         }
-    }
-}
+    };
 
-// Función global para redirección a playlists
-function redirectToPlaylistsWithContent(contentId) {
-    if (!contentId) {
-        console.error('ContentId no válido');
-        return;
-    }
-    window.location.href = '@Url.Action("Index", "Playlists")?contentId=' + contentId;
-}
+    window.testNext = function() {
+        if (window.indexPlayer) {
+            window.indexPlayer.playNext();
+        }
+    };
 
-// Inicializar reproductor cuando se carga el DOM
-document.addEventListener('DOMContentLoaded', () => {
-    window.indexPlayer = new IndexAudioPlayer();
-});
+    window.testShuffle = function() {
+        if (window.indexPlayer) {
+            window.indexPlayer.toggleShuffle();
+        }
+    };
 
-// Funciones de debug
-window.testPlayButton = function(index = 0) {
-    const btn = document.querySelectorAll('.play-in-player-btn')[index];
-    if (btn) {
-        btn.click();
-    } else {
-        console.warn('Botón no encontrado en el índice:', index);
-    }
-};
+    window.testRepeat = function() {
+        if (window.indexPlayer) {
+            window.indexPlayer.toggleRepeat();
+        }
+    };
 </script>

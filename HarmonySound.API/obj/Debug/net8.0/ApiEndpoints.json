@@ -679,6 +679,74 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "HarmonySound.API.Controllers.ContentsController",
+    "Method": "GetContentsWithArtists",
+    "RelativePath": "api/Contents/with-artists",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "HarmonySound.API.Controllers.LikesController",
+    "Method": "LikeContent",
+    "RelativePath": "api/Likes",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "contentId",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "userId",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "HarmonySound.API.Controllers.LikesController",
+    "Method": "UnlikeContent",
+    "RelativePath": "api/Likes/{userId}/{contentId}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "contentId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "HarmonySound.API.Controllers.LikesController",
+    "Method": "GetUserLikes",
+    "RelativePath": "api/Likes/user/{userId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "HarmonySound.API.Controllers.PayPalController",
     "Method": "CreatePayment",
     "RelativePath": "api/PayPal/create-payment",
@@ -1022,6 +1090,27 @@
     "Method": "AddContentToPlaylist",
     "RelativePath": "api/Playlists/{playlistId}/add",
     "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "playlistId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "contentId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "HarmonySound.API.Controllers.PlaylistsController",
+    "Method": "RemoveContentFromPlaylist",
+    "RelativePath": "api/Playlists/{playlistId}/remove/{contentId}",
+    "HttpMethod": "DELETE",
     "IsController": true,
     "Order": 0,
     "Parameters": [

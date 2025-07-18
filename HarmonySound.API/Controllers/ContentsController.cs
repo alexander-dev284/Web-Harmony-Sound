@@ -440,6 +440,38 @@ namespace HarmonySound.API.Controllers
             }
         }
 
+        // ✅ AGREGAR este método al ContentsController existente
+        [HttpGet("with-artists")]
+        public async Task<IActionResult> GetContentsWithArtists()
+        {
+            try
+            {
+                var contents = await _context.Contents
+                    .Include(c => c.Artist) // Incluir información del artista
+                    .Where(c => !string.IsNullOrEmpty(c.UrlMedia)) // Solo contenido con URL válida
+                    .Select(c => new
+                    {
+                        Id = c.Id,
+                        Title = c.Title,
+                        Type = c.Type,
+                        UrlMedia = c.UrlMedia,
+                        Duration = c.Duration,
+                        UploadDate = c.UploadDate,
+                        ArtistId = c.ArtistId,
+                        ArtistName = c.Artist != null ? c.Artist.Name : "Artista desconocido",
+                        FormattedDuration = c.Duration.ToString(@"mm\:ss")
+                    })
+                    .ToListAsync();
+
+                return Ok(contents);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener contenidos con artistas");
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+
         private bool ContentExists(int id)
         {
             return _context.Contents.Any(e => e.Id == id);
