@@ -21,6 +21,98 @@ namespace HarmonySound.MVC.Controllers
             _httpClient.Timeout = TimeSpan.FromMinutes(10);
         }
 
+        // ✅ CORREGIDO: Método para obtener estadísticas del artista
+        [HttpGet]
+        public async Task<IActionResult> GetArtistStats()
+        {
+            try
+            {
+                int artistId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+
+                // 1. Obtener total de canciones del artista
+                var songsResponse = await _httpClient.GetAsync("https://localhost:7120/api/Contents");
+                var songsJson = await songsResponse.Content.ReadAsStringAsync();
+                var allSongs = JsonSerializer.Deserialize<List<Content>>(songsJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                var artistSongs = allSongs?.Where(c => c.ArtistId == artistId).ToList() ?? new List<Content>();
+                var totalSongs = artistSongs.Count;
+
+                // 2. ✅ CORREGIDO: Obtener total de álbumes del artista usando JsonElement
+                var albumsResponse = await _httpClient.GetAsync("https://localhost:7120/api/Albums");
+                var albumsJson = await albumsResponse.Content.ReadAsStringAsync();
+                var albumsDocument = JsonDocument.Parse(albumsJson);
+                var albumsArray = albumsDocument.RootElement.EnumerateArray();
+                
+                var totalAlbums = 0;
+                foreach (var albumElement in albumsArray)
+                {
+                    if (albumElement.TryGetProperty("artistId", out var artistIdProp))
+                    {
+                        if (artistIdProp.GetInt32() == artistId)
+                        {
+                            totalAlbums++;
+                        }
+                    }
+                }
+
+                // 3. ✅ CORREGIDO: Obtener total de likes usando JsonElement
+                var totalLikes = 0;
+                foreach (var song in artistSongs)
+                {
+                    try
+                    {
+                        var likesResponse = await _httpClient.GetAsync($"https://localhost:7120/api/Contents/{song.Id}/likes");
+                        if (likesResponse.IsSuccessStatusCode)
+                        {
+                            var likesJson = await likesResponse.Content.ReadAsStringAsync();
+                            var likesDocument = JsonDocument.Parse(likesJson);
+                            var likesElement = likesDocument.RootElement;
+                            
+                            if (likesElement.TryGetProperty("likes", out var likesCount))
+                            {
+                                totalLikes += likesCount.GetInt32();
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        // Si hay error obteniendo likes de una canción, continuar con las demás
+                        continue;
+                    }
+                }
+
+                // 4. Obtener la última canción subida
+                var lastUpload = artistSongs
+                    .OrderByDescending(c => c.UploadDate)
+                    .FirstOrDefault();
+
+                var lastUploadTitle = lastUpload?.Title ?? "Sin subidas";
+
+                // Retornar las estadísticas como JSON
+                var stats = new
+                {
+                    totalSongs = totalSongs,
+                    totalAlbums = totalAlbums,
+                    totalLikes = totalLikes,
+                    lastUpload = lastUploadTitle
+                };
+
+                return Json(stats);
+            }
+            catch (Exception ex)
+            {
+                // En caso de error, retornar valores por defecto
+                var errorStats = new
+                {
+                    totalSongs = 0,
+                    totalAlbums = 0,
+                    totalLikes = 0,
+                    lastUpload = "Error al cargar"
+                };
+
+                return Json(errorStats);
+            }
+        }
+
         // Vista Home del artista
         public async Task<IActionResult> Home()
         {

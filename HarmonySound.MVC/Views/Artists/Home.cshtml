@@ -168,7 +168,7 @@
                     </div>
                     <div class="stat-info">
                         <h4>Total Canciones</h4>
-                        <span class="stat-number">--</span>
+                        <span class="stat-number" id="total-songs">--</span>
                     </div>
                 </div>
                 
@@ -178,7 +178,7 @@
                     </div>
                     <div class="stat-info">
                         <h4>Álbumes</h4>
-                        <span class="stat-number">--</span>
+                        <span class="stat-number" id="total-albums">--</span>
                     </div>
                 </div>
                 
@@ -188,7 +188,17 @@
                     </div>
                     <div class="stat-info">
                         <h4>Última Subida</h4>
-                        <span class="stat-text">--</span>
+                        <span class="stat-text" id="last-upload">--</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h4>Likes Totales</h4>
+                        <span class="stat-number" id="total-likes">--</span>
                     </div>
                 </div>
             </div>
@@ -438,18 +448,19 @@
         transform: translateY(-5px);
         box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
         border-color: rgba(29, 185, 84, 0.5);
+        color: #fff;
     }
 
     .card-icon {
-        background: linear-gradient(135deg, #1db954, #1ed760);
-        color: #000;
         width: 60px;
         height: 60px;
+        background: linear-gradient(135deg, #1db954, #1ed760);
         border-radius: 12px;
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 1.5rem;
+        color: #000;
         flex-shrink: 0;
     }
 
@@ -471,15 +482,14 @@
     }
 
     .card-arrow {
-        color: #1db954;
         font-size: 1.2rem;
-        opacity: 0.7;
-        transition: all 0.3s ease;
+        color: #b3b3b3;
+        transition: transform 0.3s ease;
     }
 
     .action-card:hover .card-arrow {
-        opacity: 1;
         transform: translateX(5px);
+        color: #1db954;
     }
 
     /* Gestión de contenido */
@@ -489,7 +499,7 @@
 
     .management-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
         gap: 2rem;
     }
 
@@ -499,9 +509,13 @@
         border-radius: 16px;
         overflow: hidden;
         text-decoration: none;
-        color: #fff;
         transition: all 0.3s ease;
         background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+    }
+
+    .management-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
     }
 
     .card-background {
@@ -513,7 +527,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 6rem;
+        font-size: 4rem;
         color: rgba(255, 255, 255, 0.1);
         transition: all 0.3s ease;
     }
@@ -524,64 +538,58 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background: linear-gradient(135deg, rgba(29, 185, 84, 0.9), rgba(30, 215, 96, 0.8));
-        padding: 2rem;
+        background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.4));
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        opacity: 0;
-        transition: all 0.3s ease;
-    }
-
-    .management-card:hover .card-overlay {
-        opacity: 1;
-    }
-
-    .management-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-    }
-
-    .management-card:hover .card-background {
-        transform: scale(1.1);
-        color: rgba(255, 255, 255, 0.2);
+        padding: 1.5rem;
+        color: #fff;
     }
 
     .card-info h3 {
-        font-size: 1.5rem;
+        font-size: 1.4rem;
         font-weight: 700;
         margin-bottom: 0.5rem;
-        color: #000;
+        color: #fff;
     }
 
     .card-info p {
-        color: rgba(0, 0, 0, 0.8);
-        font-size: 1rem;
+        color: #b3b3b3;
         margin-bottom: 1rem;
+        font-size: 0.95rem;
     }
 
     .card-badge {
         display: inline-flex;
         align-items: center;
-        background: rgba(0, 0, 0, 0.2);
-        color: #000;
+        background: rgba(29, 185, 84, 0.2);
+        color: #1db954;
         padding: 4px 12px;
         border-radius: 12px;
         font-size: 0.8rem;
         font-weight: 600;
+        border: 1px solid rgba(29, 185, 84, 0.3);
     }
 
     .card-action {
         align-self: flex-end;
-        background: rgba(0, 0, 0, 0.2);
-        color: #000;
         width: 50px;
         height: 50px;
+        background: rgba(29, 185, 84, 0.2);
+        border: 1px solid rgba(29, 185, 84, 0.3);
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
+        color: #1db954;
         font-size: 1.2rem;
+        transition: all 0.3s ease;
+    }
+
+    .management-card:hover .card-action {
+        background: #1db954;
+        color: #000;
+        transform: scale(1.1);
     }
 
     /* Estadísticas */
@@ -591,18 +599,16 @@
 
     .stats-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
         gap: 1.5rem;
     }
 
     .stat-card {
-        background: linear-gradient(135deg, #1a1a1a, #252525);
+        background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 12px;
         padding: 1.5rem;
-        display: flex;
-        align-items: center;
-        gap: 1rem;
+        text-align: center;
         transition: all 0.3s ease;
     }
 
@@ -613,59 +619,58 @@
     }
 
     .stat-icon {
-        background: linear-gradient(135deg, #333, #444);
-        color: #1db954;
         width: 50px;
         height: 50px;
+        background: linear-gradient(135deg, #1db954, #1ed760);
         border-radius: 10px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.2rem;
-        flex-shrink: 0;
+        font-size: 1.3rem;
+        color: #000;
+        margin: 0 auto 1rem;
     }
 
     .stat-info h4 {
-        color: #b3b3b3;
         font-size: 0.9rem;
-        font-weight: 500;
-        margin-bottom: 0.25rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #b3b3b3;
         text-transform: uppercase;
         letter-spacing: 0.5px;
     }
 
     .stat-number {
-        color: #fff;
-        font-size: 1.8rem;
+        font-size: 2rem;
         font-weight: 700;
+        color: #fff;
+        font-variant-numeric: tabular-nums;
     }
 
     .stat-text {
-        color: #fff;
         font-size: 1rem;
-        font-weight: 500;
+        font-weight: 600;
+        color: #fff;
     }
 
     /* Alertas */
     .alert {
-        max-width: 1200px;
-        margin: 0 auto 2rem;
-        padding: 1rem 2rem;
-        border-radius: 12px;
+        border-radius: 8px;
         border: none;
+        margin-bottom: 1.5rem;
+        padding: 1rem;
         display: flex;
         align-items: center;
-        font-weight: 500;
     }
 
     .alert-success {
-        background: linear-gradient(135deg, rgba(29, 185, 84, 0.15), rgba(30, 215, 96, 0.1));
+        background: rgba(29, 185, 84, 0.1);
         color: #1db954;
         border: 1px solid rgba(29, 185, 84, 0.3);
     }
 
     .alert-danger {
-        background: linear-gradient(135deg, rgba(220, 53, 69, 0.15), rgba(239, 68, 68, 0.1));
+        background: rgba(220, 53, 69, 0.1);
         color: #dc3545;
         border: 1px solid rgba(220, 53, 69, 0.3);
     }
@@ -682,25 +687,43 @@
             gap: 2rem;
         }
 
-        .profile-image {
-            width: 150px;
-            height: 150px;
-        }
-
         .artist-name {
-            font-size: 2rem;
+            font-size: 2.5rem;
         }
 
         .dashboard-content {
             padding: 0 1rem 4rem;
         }
 
-        .section-title {
-            font-size: 1.5rem;
+        .quick-actions-grid {
+            grid-template-columns: 1fr;
         }
 
-        .quick-actions-grid,
         .management-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .action-card {
+            padding: 1.5rem;
+        }
+
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            font-size: 1.3rem;
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .artist-name {
+            font-size: 2rem;
+        }
+
+        .stats-grid {
             grid-template-columns: 1fr;
         }
 
@@ -713,31 +736,7 @@
         }
     }
 
-    @@media (max-width: 480px) {
-        .action-card {
-            flex-direction: column;
-            text-align: center;
-            padding: 1.5rem;
-        }
-
-        .card-content h3 {
-            font-size: 1.1rem;
-        }
-
-        .management-card {
-            height: 150px;
-        }
-
-        .card-info h3 {
-            font-size: 1.2rem;
-        }
-
-        .stats-grid {
-            grid-template-columns: 1fr;
-        }
-    }
-
-    /* Ocultar elementos del layout */
+    /* Ocultar elementos del layout principal */
     header, footer {
         display: none !important;
     }
@@ -753,39 +752,141 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Animación de entrada para las tarjetas
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
+    // ===== ARTIST DASHBOARD FUNCTIONALITY =====
 
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
+    class ArtistDashboard {
+        constructor() {
+            this.init();
+        }
+
+        init() {
+            console.log('🎨 Inicializando Dashboard del Artista...');
+            
+            this.setupAnimations();
+            this.loadArtistStats();
+            this.setupEventListeners();
+            
+            console.log('✅ Dashboard del artista inicializado correctamente');
+        }
+
+        setupAnimations() {
+            // Animación de entrada para las tarjetas
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+
+            // Aplicar animaciones a las tarjetas
+            document.querySelectorAll('.action-card, .management-card, .stat-card').forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(30px)';
+                card.style.transition = `opacity 0.6s ease ${index * 0.1}s, transform 0.6s ease ${index * 0.1}s`;
+                observer.observe(card);
+            });
+        }
+
+        setupEventListeners() {
+            // Efecto parallax sutil en el hero
+            window.addEventListener('scroll', () => {
+                const scrolled = window.pageYOffset;
+                const hero = document.querySelector('.hero-section');
+                if (hero) {
+                    hero.style.transform = `translateY(${scrolled * 0.3}px)`;
                 }
             });
-        }, observerOptions);
+        }
 
-        // Aplicar animaciones a las tarjetas
-        document.querySelectorAll('.action-card, .management-card, .stat-card').forEach((card, index) => {
-            card.style.opacity = '0';
-            card.style.transform = 'translateY(30px)';
-            card.style.transition = `opacity 0.6s ease ${index * 0.1}s, transform 0.6s ease ${index * 0.1}s`;
-            observer.observe(card);
-        });
-
-        // Efecto parallax sutil en el hero
-        window.addEventListener('scroll', () => {
-            const scrolled = window.pageYOffset;
-            const hero = document.querySelector('.hero-section');
-            if (hero) {
-                hero.style.transform = `translateY(${scrolled * 0.3}px)`;
+        // Función para cargar estadísticas del artista
+        async loadArtistStats() {
+            try {
+                console.log('🔄 Cargando estadísticas del artista...');
+                
+                const response = await fetch('/Artists/GetArtistStats');
+                if (response.ok) {
+                    const stats = await response.json();
+                    
+                    console.log('📊 Estadísticas recibidas:', stats);
+                    
+                    // Actualizar los elementos con animación
+                    this.updateStatWithAnimation('total-songs', stats.totalSongs);
+                    this.updateStatWithAnimation('total-albums', stats.totalAlbums);
+                    this.updateStatWithAnimation('total-likes', stats.totalLikes);
+                    this.updateStatText('last-upload', stats.lastUpload);
+                    
+                    console.log('✅ Estadísticas actualizadas correctamente');
+                } else {
+                    console.error('❌ Error al cargar estadísticas:', response.status);
+                    this.showErrorStats();
+                }
+            } catch (error) {
+                console.error('❌ Error al cargar estadísticas:', error);
+                this.showErrorStats();
             }
-        });
+        }
 
-        console.log('Dashboard del artista mejorado cargado correctamente');
+        // Función para actualizar estadística con animación
+        updateStatWithAnimation(elementId, value) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+            
+            // Animación de contador
+            let current = 0;
+            const increment = value / 30; // 30 frames de animación
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= value) {
+                    current = value;
+                    clearInterval(timer);
+                }
+                element.textContent = Math.floor(current).toLocaleString();
+            }, 50);
+        }
+
+        // Función para actualizar texto simple
+        updateStatText(elementId, text) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+            
+            // Efecto de fade
+            element.style.opacity = '0.5';
+            setTimeout(() => {
+                element.textContent = text;
+                element.style.opacity = '1';
+            }, 200);
+        }
+
+        // Función para mostrar error en estadísticas
+        showErrorStats() {
+            this.updateStatText('total-songs', 'Error');
+            this.updateStatText('total-albums', 'Error');
+            this.updateStatText('total-likes', 'Error');
+            this.updateStatText('last-upload', 'Error');
+        }
+
+        // Función para recargar estadísticas (útil después de subir contenido)
+        refreshStats() {
+            this.loadArtistStats();
+        }
+    }
+
+    // Función global para recargar estadísticas
+    window.refreshArtistStats = function() {
+        if (window.artistDashboard) {
+            window.artistDashboard.refreshStats();
+        }
+    };
+
+    // Inicializar cuando se carga el DOM
+    document.addEventListener('DOMContentLoaded', () => {
+        window.artistDashboard = new ArtistDashboard();
     });
 </script>

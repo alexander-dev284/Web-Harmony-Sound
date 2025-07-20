@@ -1,0 +1,539 @@
+/* Reset base */
+.container {
+    max-width: none !important;
+    padding: 0 !important;
+}
+
+body {
+    background: linear-gradient(135deg, #000000, #121212) !important;
+    color: #fff !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+}
+
+/* Dashboard principal */
+.artist-dashboard {
+    min-height: 100vh;
+    position: relative;
+}
+
+/* Header del dashboard */
+.dashboard-header {
+    position: relative;
+    background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 50%, #1a1a1a 100%);
+    padding: 2rem 0;
+    margin-bottom: 3rem;
+}
+
+.dashboard-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="%23ffffff" opacity="0.02"/><circle cx="75" cy="75" r="1" fill="%23ffffff" opacity="0.02"/><circle cx="50" cy="10" r="1" fill="%23ffffff" opacity="0.02"/><circle cx="10" cy="60" r="1" fill="%23ffffff" opacity="0.02"/><circle cx="90" cy="40" r="1" fill="%23ffffff" opacity="0.02"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+    opacity: 0.3;
+    z-index: 1;
+}
+
+/* Botón de logout elegante */
+.logout-section {
+    position: absolute;
+    top: 2rem;
+    right: 2rem;
+    z-index: 10;
+}
+
+.logout-form {
+    margin: 0;
+    padding: 0;
+}
+
+.btn-logout {
+    background: linear-gradient(135deg, #dc2626, #ef4444);
+    color: #fff !important;
+    border: 1px solid rgba(220, 38, 38, 0.5);
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
+    font-size: 0.9rem;
+    text-decoration: none;
+    backdrop-filter: blur(10px);
+}
+
+.btn-logout:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(220, 38, 38, 0.5);
+    background: linear-gradient(135deg, #ef4444, #f87171);
+    border-color: #ef4444;
+    color: #fff !important;
+}
+
+/* Hero section */
+.hero-section {
+    position: relative;
+    z-index: 2;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 4rem 2rem;
+}
+
+.artist-profile {
+    display: flex;
+    align-items: center;
+    gap: 3rem;
+    flex-wrap: wrap;
+}
+
+.profile-image-container {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.profile-image {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #1db954;
+    box-shadow: 0 8px 32px rgba(29, 185, 84, 0.3);
+    transition: all 0.3s ease;
+}
+
+.profile-image:hover {
+    transform: scale(1.05);
+    box-shadow: 0 12px 40px rgba(29, 185, 84, 0.4);
+}
+
+.profile-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    color: #1db954;
+    font-size: 2rem;
+}
+
+.profile-image-container:hover .profile-overlay {
+    opacity: 1;
+}
+
+.artist-info {
+    flex: 1;
+    min-width: 300px;
+}
+
+.artist-badge {
+    display: inline-flex;
+    align-items: center;
+    background: linear-gradient(135deg, #1db954, #1ed760);
+    color: #000;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 1rem;
+}
+
+.artist-name {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #fff, #b3b3b3);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.2;
+}
+
+.artist-bio {
+    font-size: 1.2rem;
+    color: #b3b3b3;
+    margin-bottom: 1rem;
+    line-height: 1.6;
+    max-width: 600px;
+}
+
+.artist-email {
+    color: #777;
+    font-size: 1rem;
+    font-style: italic;
+}
+
+/* Contenido del dashboard */
+.dashboard-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem 4rem;
+}
+
+.section-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    color: #fff;
+    display: flex;
+    align-items: center;
+}
+
+/* Acciones rápidas */
+.quick-actions-section {
+    margin-bottom: 4rem;
+}
+
+.quick-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.action-card {
+    background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    text-decoration: none;
+    color: #fff;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.action-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(29, 185, 84, 0.1), transparent);
+    transition: left 0.5s ease;
+}
+
+.action-card:hover::before {
+    left: 100%;
+}
+
+.action-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+    border-color: rgba(29, 185, 84, 0.5);
+    color: #fff;
+}
+
+.card-icon {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #1db954, #1ed760);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: #000;
+    flex-shrink: 0;
+}
+
+.card-content {
+    flex: 1;
+}
+
+.card-content h3 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #fff;
+}
+
+.card-content p {
+    color: #b3b3b3;
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+.card-arrow {
+    font-size: 1.2rem;
+    color: #b3b3b3;
+    transition: transform 0.3s ease;
+}
+
+.action-card:hover .card-arrow {
+    transform: translateX(5px);
+    color: #1db954;
+}
+
+/* Gestión de contenido */
+.content-management-section {
+    margin-bottom: 4rem;
+}
+
+.management-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+}
+
+.management-card {
+    position: relative;
+    height: 200px;
+    border-radius: 16px;
+    overflow: hidden;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+}
+
+.management-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+}
+
+.card-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 4rem;
+    color: rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.card-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.4));
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 1.5rem;
+    color: #fff;
+}
+
+.card-info h3 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: #fff;
+}
+
+.card-info p {
+    color: #b3b3b3;
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+}
+
+.card-badge {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(29, 185, 84, 0.2);
+    color: #1db954;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border: 1px solid rgba(29, 185, 84, 0.3);
+}
+
+.card-action {
+    align-self: flex-end;
+    width: 50px;
+    height: 50px;
+    background: rgba(29, 185, 84, 0.2);
+    border: 1px solid rgba(29, 185, 84, 0.3);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1db954;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+}
+
+.management-card:hover .card-action {
+    background: #1db954;
+    color: #000;
+    transform: scale(1.1);
+}
+
+/* Estadísticas */
+.stats-section {
+    margin-bottom: 4rem;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+}
+
+.stat-card {
+    background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    border-color: rgba(29, 185, 84, 0.3);
+}
+
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #1db954, #1ed760);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    color: #000;
+    margin: 0 auto 1rem;
+}
+
+.stat-info h4 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #b3b3b3;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #fff;
+    font-variant-numeric: tabular-nums;
+}
+
+.stat-text {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #fff;
+}
+
+/* Alertas */
+.alert {
+    border-radius: 8px;
+    border: none;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+}
+
+.alert-success {
+    background: rgba(29, 185, 84, 0.1);
+    color: #1db954;
+    border: 1px solid rgba(29, 185, 84, 0.3);
+}
+
+.alert-danger {
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+    border: 1px solid rgba(220, 53, 69, 0.3);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .hero-section {
+        padding: 2rem 1rem;
+    }
+
+    .artist-profile {
+        flex-direction: column;
+        text-align: center;
+        gap: 2rem;
+    }
+
+    .artist-name {
+        font-size: 2.5rem;
+    }
+
+    .dashboard-content {
+        padding: 0 1rem 4rem;
+    }
+
+    .quick-actions-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .management-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .action-card {
+        padding: 1.5rem;
+    }
+
+    .card-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 1.3rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .artist-name {
+        font-size: 2rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .logout-section {
+        position: relative;
+        top: auto;
+        right: auto;
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+}
+
+/* Ocultar elementos del layout principal */
+header, footer {
+    display: none !important;
+}
+
+/* FontAwesome */
+.fas {
+    font-family: "Font Awesome 5 Free" !important;
+    font-weight: 900 !important;
+}
