@@ -5,7 +5,7 @@
         public int Id { get; set; }
         public string Title { get; set; }
         public DateTimeOffset CreationDate { get; set; }
-
+        public string? ImageUrl { get; set; } // ✅ AGREGAR ESTA LÍNEA
         public string ArtistName { get; set; }
         public List<ContentDto> Contents { get; set; }
     }

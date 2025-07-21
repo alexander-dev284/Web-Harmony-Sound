@@ -1,4 +1,4 @@
-using HarmonySound.API.Data;
+﻿using HarmonySound.API.Data;
 using HarmonySound.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -62,6 +62,10 @@ namespace HarmonySound.API.Controllers
                 };
 
                 _context.UserLikes.Add(userLike);
+
+                // ✅ AGREGAR: Añadir a playlist de favoritos automáticamente
+                await AddToFavoritesPlaylist(userId, contentId);
+
                 await _context.SaveChangesAsync();
 
                 return Ok(new { success = true, message = "Like agregado correctamente" });
@@ -88,6 +92,10 @@ namespace HarmonySound.API.Controllers
                 }
 
                 _context.UserLikes.Remove(userLike);
+
+                // ✅ AGREGAR: Remover de playlist de favoritos automáticamente
+                await RemoveFromFavoritesPlaylist(userId, contentId);
+
                 await _context.SaveChangesAsync();
 
                 return Ok(new { success = true, message = "Like removido correctamente" });
@@ -96,6 +104,76 @@ namespace HarmonySound.API.Controllers
             {
                 _logger.LogError(ex, "Error al remover like");
                 return StatusCode(500, "Error interno del servidor");
+            }
+        }
+
+        // ✅ NUEVO: Método privado para agregar a playlist de favoritos
+        private async Task AddToFavoritesPlaylist(int userId, int contentId)
+        {
+            try
+            {
+                // Buscar o crear playlist de favoritos
+                var favoritesPlaylist = await _context.Playlist
+                    .FirstOrDefaultAsync(p => p.UserId == userId && p.Name == "Favoritos");
+
+                if (favoritesPlaylist == null)
+                {
+                    favoritesPlaylist = new Playlist
+                    {
+                        Name = "Favoritos",
+                        UserId = userId,
+                        ImageUrl = null // Se puede agregar una imagen predeterminada si se desea
+                    };
+                    _context.Playlist.Add(favoritesPlaylist);
+                    await _context.SaveChangesAsync(); // Guardar para obtener el ID
+                }
+
+                // Verificar si ya está en la playlist
+                var exists = await _context.PlaylistContents
+                    .AnyAsync(pc => pc.PlaylistId == favoritesPlaylist.Id && pc.ContentId == contentId);
+
+                if (!exists)
+                {
+                    var playlistContent = new PlaylistContent
+                    {
+                        PlaylistId = favoritesPlaylist.Id,
+                        ContentId = contentId
+                    };
+                    _context.PlaylistContents.Add(playlistContent);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error al agregar contenido {contentId} a playlist de favoritos del usuario {userId}");
+                // No lanzamos la excepción para que el like siga funcionando aunque falle la playlist
+            }
+        }
+
+        // ✅ NUEVO: Método privado para remover de playlist de favoritos
+        private async Task RemoveFromFavoritesPlaylist(int userId, int contentId)
+        {
+            try
+            {
+                // Buscar playlist de favoritos
+                var favoritesPlaylist = await _context.Playlist
+                    .FirstOrDefaultAsync(p => p.UserId == userId && p.Name == "Favoritos");
+
+                if (favoritesPlaylist != null)
+                {
+                    // Remover de la playlist
+                    var playlistContent = await _context.PlaylistContents
+                        .FirstOrDefaultAsync(pc => pc.PlaylistId == favoritesPlaylist.Id && pc.ContentId == contentId);
+
+                    if (playlistContent != null)
+                    {
+                        _context.PlaylistContents.Remove(playlistContent);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error al remover contenido {contentId} de playlist de favoritos del usuario {userId}");
+                // No lanzamos la excepción para que el unlike siga funcionando aunque falle la playlist
             }
         }
     }

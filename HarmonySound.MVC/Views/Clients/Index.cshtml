@@ -517,12 +517,15 @@
     .fade-in {
         animation: fadeIn 0.5s ease forwards;
     }
+
 </style>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
 <script>
     // ===== REPRODUCTOR DE AUDIO 100% PERSONALIZADO PARA INDEX CON NAVEGACIÓN =====
+
+        // ===== REPRODUCTOR DE AUDIO 100% PERSONALIZADO PARA INDEX CON NAVEGACIÓN =====
 
     class IndexAudioPlayer {
         constructor() {
@@ -547,6 +550,11 @@
 
             // ✅ IMPORTANTE: Set para almacenar IDs de contenido con like
             this.likedContentIds = new Set();
+
+            // ✅ NUEVO: Variables para control de anuncios
+            this.isPlayingAd = false;
+            this.adEndedHandler = null;
+            this.originalTrackToPlay = null;
 
             // Referencias a elementos DOM
             this.playerElement = null;
@@ -614,7 +622,7 @@
                     this.likedContentIds = new Set(likedContentIds.map(id => id.toString()));
                     this.updateAllLikeButtons();
                     console.log('✅ Estados de likes cargados:', this.likedContentIds);
-                    
+
                     // ✅ NUEVO: Debug para verificar el estado
                     this.debugLikeStates();
                 }
@@ -627,54 +635,53 @@
         debugLikeStates() {
             console.log('🔍 Debug de estados de likes:');
             console.log('Likes cargados:', Array.from(this.likedContentIds));
-            
+
             document.querySelectorAll('.like-btn').forEach(btn => {
                 const contentId = btn.getAttribute('data-content-id');
                 const isLiked = this.likedContentIds.has(contentId);
                 const hasClass = btn.classList.contains('liked');
-                
+
                 console.log(`ID: ${contentId} - Liked: ${isLiked} - HasClass: ${hasClass}`);
             });
         }
 
         // ✅ NUEVO: Actualizar todos los botones de like
-            // ✅ MEJORAR: Función más robusta
-    updateAllLikeButtons() {
-        console.log('🔄 Actualizando botones de like...');
+        updateAllLikeButtons() {
+            console.log('🔄 Actualizando botones de like...');
 
-        document.querySelectorAll('.like-btn').forEach(btn => {
-            const contentId = btn.getAttribute('data-content-id');
-            const isLiked = this.likedContentIds.has(contentId);
+            document.querySelectorAll('.like-btn').forEach(btn => {
+                const contentId = btn.getAttribute('data-content-id');
+                const isLiked = this.likedContentIds.has(contentId);
 
-            console.log(`Canción ID ${contentId}: ${isLiked ? 'LIKED ❤️' : 'NOT LIKED 🤍'}`);
+                console.log(`Canción ID ${contentId}: ${isLiked ? 'LIKED ❤️' : 'NOT LIKED 🤍'}`);
 
-            if (isLiked) {
-                // ✅ ESTADO LIKED (Corazón lleno)
-                btn.classList.add('liked');
-                btn.style.color = '#1db954';
-                btn.style.background = 'rgba(29, 185, 84, 0.1)';
-                btn.title = 'Quitar de favoritos';
+                if (isLiked) {
+                    // ✅ ESTADO LIKED (Corazón lleno)
+                    btn.classList.add('liked');
+                    btn.style.color = '#1db954';
+                    btn.style.background = 'rgba(29, 185, 84, 0.1)';
+                    btn.title = 'Quitar de favoritos';
 
-                const icon = btn.querySelector('i');
-                if (icon) {
-                    icon.className = 'fas fa-heart'; // Corazón SÓLIDO
+                    const icon = btn.querySelector('i');
+                    if (icon) {
+                        icon.className = 'fas fa-heart'; // Corazón SÓLIDO
+                    }
+                } else {
+                    // ✅ ESTADO NOT LIKED (Corazón vacío)
+                    btn.classList.remove('liked');
+                    btn.style.color = '#b3b3b3';
+                    btn.style.background = 'transparent';
+                    btn.title = 'Agregar a favoritos';
+
+                    const icon = btn.querySelector('i');
+                    if (icon) {
+                        icon.className = 'far fa-heart'; // Corazón VACÍO
+                    }
                 }
-            } else {
-                // ✅ ESTADO NOT LIKED (Corazón vacío)
-                btn.classList.remove('liked');
-                btn.style.color = '#b3b3b3';
-                btn.style.background = 'transparent';
-                btn.title = 'Agregar a favoritos';
+            });
 
-                const icon = btn.querySelector('i');
-                if (icon) {
-                    icon.className = 'far fa-heart'; // Corazón VACÍO
-                }
-            }
-        });
-
-        console.log(`✅ ${this.likedContentIds.size} canciones marcadas como favoritas`);
-    }
+            console.log(`✅ ${this.likedContentIds.size} canciones marcadas como favoritas`);
+        }
 
         // ✅ NUEVO: Actualizar botón de corazón en el reproductor
         updatePlayerHeartButton() {
@@ -688,94 +695,94 @@
             }
         }
 
-            // ✅ MEJORAR: Toggle más visual y claro
-    async toggleLike(button) {
-        const contentId = button.getAttribute('data-content-id');
-        const userId = button.getAttribute('data-user-id');
+        // ✅ MEJORAR: Toggle más visual y claro
+        async toggleLike(button) {
+            const contentId = button.getAttribute('data-content-id');
+            const userId = button.getAttribute('data-user-id');
 
-        if (!contentId || !userId) {
-            console.error('❌ Missing contentId or userId');
-            return;
-        }
-
-        // ✅ Feedback visual inmediato
-        button.style.transform = 'scale(1.3)';
-        button.style.filter = 'brightness(1.5)';
-        setTimeout(() => {
-            button.style.transform = 'scale(1)';
-            button.style.filter = 'brightness(1)';
-        }, 200);
-
-        button.disabled = true;
-
-        try {
-            const formData = new FormData();
-            formData.append('contentId', contentId);
-            formData.append('userId', userId);
-
-            const isCurrentlyLiked = this.likedContentIds.has(contentId);
-            console.log(`🔄 Toggling like for ID ${contentId}: Currently ${isCurrentlyLiked ? 'LIKED' : 'NOT LIKED'}`);
-
-            if (isCurrentlyLiked) {
-                // ✅ QUITAR LIKE (Corazón lleno → vacío)
-                const response = await fetch('@Url.Action("UnlikeContent", "Clients")', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                const data = await response.json();
-                if (data.success) {
-                    this.likedContentIds.delete(contentId);
-
-                    // Actualización visual inmediata
-                    button.classList.remove('liked');
-                    button.style.color = '#b3b3b3';
-                    button.style.background = 'transparent';
-                    button.title = 'Agregar a favoritos';
-
-                    const icon = button.querySelector('i');
-                    if (icon) icon.className = 'far fa-heart'; // VACÍO
-
-                    this.showToast('💔 Removido de favoritos', 'info');
-                    console.log('✅ Removido de favoritos:', contentId);
-                }
-            } else {
-                // ✅ AGREGAR LIKE (Corazón vacío → lleno)
-                const response = await fetch('@Url.Action("LikeContent", "Clients")', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                const data = await response.json();
-                if (data.success) {
-                    this.likedContentIds.add(contentId);
-
-                    // Actualización visual inmediata
-                    button.classList.add('liked');
-                    button.style.color = '#1db954';
-                    button.style.background = 'rgba(29, 185, 84, 0.1)';
-                    button.title = 'Quitar de favoritos';
-
-                    const icon = button.querySelector('i');
-                    if (icon) icon.className = 'fas fa-heart'; // LLENO
-
-                    this.showToast('💚 ¡Agregado a favoritos!', 'success');
-                    console.log('✅ Agregado a favoritos:', contentId);
-                }
+            if (!contentId || !userId) {
+                console.error('❌ Missing contentId or userId');
+                return;
             }
 
-            // Sincronizar con reproductor
-            if (this.currentTrack && this.currentTrack.id === contentId) {
-                this.updatePlayerHeartButton();
-            }
+            // ✅ Feedback visual inmediato
+            button.style.transform = 'scale(1.3)';
+            button.style.filter = 'brightness(1.5)';
+            setTimeout(() => {
+                button.style.transform = 'scale(1)';
+                button.style.filter = 'brightness(1)';
+            }, 200);
 
-        } catch (error) {
-            console.error('❌ Error al procesar like:', error);
-            this.showToast('Error al procesar la solicitud', 'error');
-        } finally {
-            button.disabled = false;
+            button.disabled = true;
+
+            try {
+                const formData = new FormData();
+                formData.append('contentId', contentId);
+                formData.append('userId', userId);
+
+                const isCurrentlyLiked = this.likedContentIds.has(contentId);
+                console.log(`🔄 Toggling like for ID ${contentId}: Currently ${isCurrentlyLiked ? 'LIKED' : 'NOT LIKED'}`);
+
+                if (isCurrentlyLiked) {
+                    // ✅ QUITAR LIKE (Corazón lleno → vacío)
+                    const response = await fetch('@Url.Action("UnlikeContent", "Clients")', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const data = await response.json();
+                    if (data.success) {
+                        this.likedContentIds.delete(contentId);
+
+                        // Actualización visual inmediata
+                        button.classList.remove('liked');
+                        button.style.color = '#b3b3b3';
+                        button.style.background = 'transparent';
+                        button.title = 'Agregar a favoritos';
+
+                        const icon = button.querySelector('i');
+                        if (icon) icon.className = 'far fa-heart'; // VACÍO
+
+                        this.showToast('💔 Removido de favoritos', 'info');
+                        console.log('✅ Removido de favoritos:', contentId);
+                    }
+                } else {
+                    // ✅ AGREGAR LIKE (Corazón vacío → lleno)
+                    const response = await fetch('@Url.Action("LikeContent", "Clients")', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const data = await response.json();
+                    if (data.success) {
+                        this.likedContentIds.add(contentId);
+
+                        // Actualización visual inmediata
+                        button.classList.add('liked');
+                        button.style.color = '#1db954';
+                        button.style.background = 'rgba(29, 185, 84, 0.1)';
+                        button.title = 'Quitar de favoritos';
+
+                        const icon = button.querySelector('i');
+                        if (icon) icon.className = 'fas fa-heart'; // LLENO
+
+                        this.showToast('💚 ¡Agregado a favoritos!', 'success');
+                        console.log('✅ Agregado a favoritos:', contentId);
+                    }
+                }
+
+                // Sincronizar con reproductor
+                if (this.currentTrack && this.currentTrack.id === contentId) {
+                    this.updatePlayerHeartButton();
+                }
+
+            } catch (error) {
+                console.error('❌ Error al procesar like:', error);
+                this.showToast('Error al procesar la solicitud', 'error');
+            } finally {
+                button.disabled = false;
+            }
         }
-    }
 
         // Resto de métodos existentes...
         buildPlaylist() {
@@ -1005,6 +1012,12 @@
 
         setupProgressBar() {
             this.progressBar.addEventListener('mousedown', (e) => {
+                // ✅ CORREGIDO: Prevenir adelantar anuncios
+                if (this.isPlayingAd) {
+                    console.log('🚫 No se puede adelantar durante un anuncio');
+                    return;
+                }
+
                 this.isProgressDragging = true;
                 this.progressBar.classList.add('dragging');
                 document.body.classList.add('noselect');
@@ -1012,6 +1025,12 @@
             });
 
             this.progressHandle.addEventListener('mousedown', (e) => {
+                // ✅ CORREGIDO: Prevenir adelantar anuncios
+                if (this.isPlayingAd) {
+                    console.log('🚫 No se puede adelantar durante un anuncio');
+                    return;
+                }
+
                 e.stopPropagation();
                 this.isProgressDragging = true;
                 this.progressBar.classList.add('dragging');
@@ -1019,7 +1038,7 @@
             });
 
             document.addEventListener('mousemove', (e) => {
-                if (this.isProgressDragging) {
+                if (this.isProgressDragging && !this.isPlayingAd) {
                     this.seekToPosition(e);
                 }
             });
@@ -1064,7 +1083,7 @@
             };
         }
 
-        // Cargar y reproducir automáticamente con navegación
+        // ✅ CORREGIDO: Cargar y reproducir automáticamente con navegación
         async playTrackAndStart(track) {
             if (!track || !track.url) {
                 console.error('Track inválido');
@@ -1095,12 +1114,10 @@
             this.updateTrackListUI(track.id);
 
             try {
-                // Configurar y cargar audio
-                this.audio.src = track.url;
-                await this.audio.load();
-
                 // REPRODUCIR AUTOMÁTICAMENTE (para usuarios premium)
                 if (this.isPremiumUser) {
+                    this.audio.src = track.url;
+                    await this.audio.load();
                     await this.audio.play();
                     this.isPlaying = true;
                     this.updatePlayPauseButton();
@@ -1115,56 +1132,101 @@
             }
         }
 
+        // ✅ CORREGIDO: Sistema de anuncios mejorado
         async playWithAds(track) {
             try {
+                console.log('🎬 Iniciando reproducción con anuncio para usuario gratuito');
+
+                // ✅ Marcar que estamos reproduciendo un anuncio
+                this.isPlayingAd = true;
+                this.originalTrackToPlay = track;
+
+                // Obtener anuncio aleatorio
                 const response = await fetch('@Url.Action("GetRandomAd", "Clients")');
                 const adData = await response.json();
 
+                console.log('📢 Anuncio obtenido:', adData);
+
+                // Actualizar UI para mostrar que es un anuncio
+                if (this.trackTitle) this.trackTitle.textContent = 'Reproduciendo anuncio...';
+                if (this.trackArtist) this.trackArtist.textContent = 'Anuncio publicitario';
+
+                // Mostrar notificación de anuncio
                 this.showAdNotification(adData.duration);
 
-                // Reproducir anuncio
-                this.audio.src = adData.url;
-                await this.audio.load();
+                // Limpiar cualquier listener anterior
+                if (this.adEndedHandler) {
+                    this.audio.removeEventListener('ended', this.adEndedHandler);
+                }
 
-                // Evento para cuando termine el anuncio
-                const adEndedHandler = () => {
-                    this.audio.removeEventListener('ended', adEndedHandler);
-                    this.playDirectly(track);
-                    this.showToast('¡Ahora reproduciendo tu música!', 'success');
+                // Configurar nuevo listener para el final del anuncio
+                this.adEndedHandler = () => {
+                    console.log('📢 Anuncio terminado, cambiando a música');
+                    this.audio.removeEventListener('ended', this.adEndedHandler);
+                    this.isPlayingAd = false;
+                    this.adEndedHandler = null;
+
+                    // Reproducir la canción original después del anuncio
+                    setTimeout(() => {
+                        this.playDirectly(this.originalTrackToPlay);
+                        this.showToast('¡Ahora reproduciendo tu música!', 'success');
+                    }, 500);
                 };
 
-                this.audio.addEventListener('ended', adEndedHandler);
+                // Configurar y reproducir anuncio
+                this.audio.addEventListener('ended', this.adEndedHandler);
+                this.audio.src = adData.url;
+                await this.audio.load();
                 await this.audio.play();
+
                 this.isPlaying = true;
                 this.updatePlayPauseButton();
 
+                console.log('📢 Anuncio iniciado correctamente');
+
             } catch (error) {
-                console.error('Error con anuncio:', error);
+                console.error('❌ Error con anuncio:', error);
+                this.isPlayingAd = false;
+                this.adEndedHandler = null;
+                // Si hay error con el anuncio, reproducir directamente la música
                 await this.playDirectly(track);
             }
         }
 
+        // ✅ CORREGIDO: Reproducir directamente sin anuncios
         async playDirectly(track = this.currentTrack) {
             try {
+                console.log('🎵 Reproduciendo directamente:', track.title);
+
+                // ✅ Asegurar que no estamos en modo anuncio
+                this.isPlayingAd = false;
+
+                // Actualizar información de la canción
+                if (this.trackTitle) this.trackTitle.textContent = track.title || 'Canción desconocida';
+                if (this.trackArtist) this.trackArtist.textContent = track.artist || 'Artista desconocido';
+
+                // Configurar y reproducir música
                 this.audio.src = track.url;
                 await this.audio.load();
                 await this.audio.play();
 
                 this.isPlaying = true;
                 this.updatePlayPauseButton();
-                console.log('Reproduciendo exitosamente:', track.title);
+                console.log('✅ Música reproduciendo exitosamente:', track.title);
             } catch (error) {
-                console.error('Error al reproducir:', error);
+                console.error('❌ Error al reproducir música:', error);
                 this.showToast('Error al reproducir el audio', 'error');
             }
         }
 
+        // ✅ CORREGIDO: Control de play/pause mejorado
         async togglePlayPause() {
             if (!this.audio || !this.currentTrack) return;
 
             try {
                 if (this.audio.paused) {
-                    if (this.audio.currentTime === 0 && !this.isPremiumUser) {
+                    // ✅ CORREGIDO: Solo reproducir anuncios si es el inicio de una nueva canción
+                    if (this.audio.currentTime === 0 && !this.isPremiumUser && !this.isPlayingAd) {
                         await this.playWithAds(this.currentTrack);
                     } else {
                         await this.audio.play();
@@ -1176,7 +1238,7 @@
                 }
                 this.updatePlayPauseButton();
             } catch (error) {
-                console.error('Error al cambiar estado de reproducción:', error);
+                console.error('❌ Error al cambiar estado de reproducción:', error);
             }
         }
 
@@ -1189,8 +1251,15 @@
             }
         }
 
+        // ✅ CORREGIDO: Prevenir adelantar durante anuncios
         seekToPosition(e) {
             if (!this.audio || !this.audio.duration || !this.progressBar) return;
+
+            // ✅ IMPORTANTE: Bloquear adelantar durante anuncios
+            if (this.isPlayingAd) {
+                console.log('🚫 No se puede adelantar durante un anuncio');
+                return;
+            }
 
             const rect = this.progressBar.getBoundingClientRect();
             const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
@@ -1285,12 +1354,19 @@
             return `${mins}:${secs.toString().padStart(2, '0')}`;
         }
 
-        // Manejar fin de canción con bucle y navegación
+        // ✅ CORREGIDO: Manejar fin de canción con control de anuncios
         onTrackEnded() {
-            console.log('🏁 Canción terminada');
+            console.log('🏁 Audio terminado');
             this.isPlaying = false;
             this.updatePlayPauseButton();
 
+            // ✅ IMPORTANTE: Si era un anuncio, el listener adEndedHandler ya se encarga
+            if (this.isPlayingAd) {
+                console.log('📢 Anuncio terminó, el listener adEndedHandler se encargará');
+                return;
+            }
+
+            // Solo manejar fin de música real (no anuncios)
             if (this.isLooping) {
                 // Si está en modo bucle, repetir la misma canción
                 console.log('🔄 Repitiendo canción en bucle');
@@ -1307,7 +1383,7 @@
         }
 
         onError(e) {
-            console.error('Error en audio:', e);
+            console.error('❌ Error en audio:', e);
             this.showToast('Error al cargar el audio', 'error');
         }
 
@@ -1316,26 +1392,31 @@
                 const response = await fetch('@Url.Action("CheckPremiumStatus", "Clients")');
                 const data = await response.json();
                 this.isPremiumUser = data.isPremium;
-                console.log('Usuario premium:', this.isPremiumUser);
+                console.log('👑 Usuario premium:', this.isPremiumUser);
             } catch (error) {
-                console.error('Error al verificar estado premium:', error);
+                console.error('❌ Error al verificar estado premium:', error);
                 this.isPremiumUser = false;
             }
         }
 
+        // ✅ MEJORADO: Notificación de anuncio con información adicional
         showAdNotification(duration) {
             const notification = document.createElement('div');
             notification.className = 'ad-notification';
             notification.style.cssText = `
                 position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-                background: rgba(255, 152, 0, 0.95); color: #000; padding: 16px 24px;
-                border-radius: 8px; font-size: 14px; z-index: 1001;
-                box-shadow: 0 4px 20px rgba(0,0,0,0.3); text-align: center;
+                background: rgba(255, 152, 0, 0.95); color: #000; padding: 20px 28px;
+                border-radius: 12px; font-size: 14px; z-index: 1001;
+                box-shadow: 0 8px 32px rgba(0,0,0,0.4); text-align: center;
+                font-weight: 600; border: 2px solid #ff8f00;
             `;
             notification.innerHTML = `
-                <i class="fas fa-ad" style="margin-right: 8px;"></i>
+                <i class="fas fa-ad" style="margin-right: 8px; font-size: 18px;"></i>
                 <strong>Reproduciendo anuncio...</strong>
-                <div id="ad-countdown" style="margin-top: 8px;">${duration}s</div>
+                <div style="margin-top: 8px; font-size: 12px; opacity: 0.8;">
+                    No se puede adelantar
+                </div>
+                <div id="ad-countdown" style="margin-top: 8px; font-size: 16px; font-weight: bold;">${duration}s</div>
             `;
             document.body.appendChild(notification);
 
@@ -1400,6 +1481,8 @@
             console.log('Índice actual:', window.indexPlayer.currentTrackIndex);
             console.log('Modo bucle:', window.indexPlayer.isLooping);
             console.log('Modo aleatorio:', window.indexPlayer.isShuffling);
+            console.log('Es premium:', window.indexPlayer.isPremiumUser);
+            console.log('Reproduciendo anuncio:', window.indexPlayer.isPlayingAd);
         };
     });
 

@@ -28,7 +28,7 @@ namespace HarmonySound.API.Controllers
             _env = env;
             _logger = logger;
             _blobConnectionString = configuration["AzureBlobStorage:ConnectionString"];
-            _blobContainerName = configuration["AzureBlobStorage:ContainerName"];
+            _blobContainerName = configuration["AzureBlobStorage:MediaContainer"]; // ✅ CAMBIADO
             
             // Inicializar MediaFoundation para soporte de archivos de audio avanzados
             MediaFoundationApi.Startup();
@@ -238,12 +238,34 @@ namespace HarmonySound.API.Controllers
             }
         }
 
-        // DELETE: api/Contents/5
+        // DELETE: api/Contents/5 - MEJORADO
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteContent(int id)
         {
             var content = await _context.Contents.FindAsync(id);
             if (content == null) return NotFound();
+
+            // ✅ OPCIONAL: Eliminar archivo de Azure Blob Storage
+            if (!string.IsNullOrEmpty(content.UrlMedia))
+            {
+                try
+                {
+                    var blobServiceClient = new BlobServiceClient(_blobConnectionString);
+                    var containerClient = blobServiceClient.GetBlobContainerClient(_blobContainerName);
+                    
+                    // Extraer nombre del blob de la URL
+                    var fileName = Path.GetFileName(new Uri(content.UrlMedia).LocalPath);
+                    var blobClient = containerClient.GetBlobClient(fileName);
+                    
+                    await blobClient.DeleteIfExistsAsync();
+                    _logger.LogInformation($"Archivo eliminado de Azure: {fileName}");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning($"Error al eliminar archivo de Azure: {ex.Message}");
+                    // No fallar la operación por esto
+                }
+            }
 
             _context.Contents.Remove(content);
             await _context.SaveChangesAsync();

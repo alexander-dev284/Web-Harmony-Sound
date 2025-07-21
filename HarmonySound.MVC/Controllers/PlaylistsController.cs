@@ -51,6 +51,10 @@ namespace HarmonySound.MVC.Controllers
                     {
                         Id = p.GetProperty("id").GetInt32(),
                         Name = p.GetProperty("name").GetString() ?? "",
+                        // ✅ AGREGAR ESTA LÍNEA:
+                        ImageUrl = p.TryGetProperty("imageUrl", out var imageUrl) 
+                            ? imageUrl.GetString() 
+                            : null,
                         Songs = p.TryGetProperty("songs", out var songs) 
                             ? songs.EnumerateArray().Select(s => new PlaylistSongDto
                             {
@@ -59,7 +63,11 @@ namespace HarmonySound.MVC.Controllers
                                 UrlMedia = s.GetProperty("urlMedia").GetString() ?? "",
                                 ArtistName = s.TryGetProperty("artistName", out var artistName) 
                                     ? artistName.GetString() ?? "Artista desconocido"
-                                    : "Artista desconocido"
+                                    : "Artista desconocido",
+                                // ✅ AGREGAR: Mapear Duration
+                                Duration = s.TryGetProperty("duration", out var duration) 
+                                    ? TimeSpan.Parse(duration.GetString() ?? "00:00:00")
+                                    : TimeSpan.Zero
                             }).ToList() 
                             : new List<PlaylistSongDto>()
                     }).ToList();
@@ -117,36 +125,55 @@ namespace HarmonySound.MVC.Controllers
         // POST: Playlists/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Playlist playlist)
+        public async Task<IActionResult> Create(Playlist playlist, IFormFile? imageFile)
         {
-            if (!ModelState.IsValid)
-                return View(playlist);
-
-            // Asigna el UserId antes de enviar a la API
-            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
-            playlist.UserId = userId;
-
-            var json = JsonSerializer.Serialize(playlist);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
-            var response = await _httpClient.PostAsync("https://localhost:7120/api/Playlists", content);
-
-            if (response.IsSuccessStatusCode)
+            try
             {
-                TempData["Success"] = "Playlist creada correctamente.";
-                return RedirectToAction("Index");
-            }
+                int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                
+                // Crear formulario multipart
+                using var content = new MultipartFormDataContent();
+                content.Add(new StringContent(playlist.Name), "Name");
+                content.Add(new StringContent(userId.ToString()), "UserId");
+                
+                // ✅ NUEVO: Agregar imagen si existe
+                if (imageFile != null && imageFile.Length > 0)
+                {
+                    var fileContent = new StreamContent(imageFile.OpenReadStream());
+                    fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(imageFile.ContentType);
+                    content.Add(fileContent, "ImageFile", imageFile.FileName);
+                }
 
-            var errorMsg = await response.Content.ReadAsStringAsync();
-            TempData["Error"] = $"Error al crear la playlist: {errorMsg}";
+                var response = await _httpClient.PostAsync("https://localhost:7120/api/Playlists", content);
+                
+                if (response.IsSuccessStatusCode)
+                {
+                    TempData["Success"] = "Playlist creada exitosamente.";
+                    return RedirectToAction(nameof(Index));
+                }
+                else
+                {
+                    TempData["Error"] = "Error al crear la playlist.";
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Error: {ex.Message}";
+            }
+            
             return View(playlist);
         }
 
         // GET: Playlists/Details/5
+        // ✅ ACTUALIZADO: GET Details - Incluir ImageUrl
         public async Task<IActionResult> Details(int id)
         {
             try
             {
                 int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                
+                // ✅ IMPORTANTE: Pasar UserId a la vista
+                ViewBag.UserId = userId;
                 
                 // Obtener playlist específica
                 var response = await _httpClient.GetAsync($"https://localhost:7120/api/Playlists/user/{userId}");
@@ -168,6 +195,9 @@ namespace HarmonySound.MVC.Controllers
                     {
                         Id = playlist.GetProperty("id").GetInt32(),
                         Name = playlist.GetProperty("name").GetString() ?? "",
+                        ImageUrl = playlist.TryGetProperty("imageUrl", out var imageUrl) 
+                            ? imageUrl.GetString() 
+                            : null,
                         Songs = playlist.TryGetProperty("songs", out var songs) 
                             ? songs.EnumerateArray().Select(s => new PlaylistSongDto
                             {
@@ -176,7 +206,75 @@ namespace HarmonySound.MVC.Controllers
                                 UrlMedia = s.GetProperty("urlMedia").GetString() ?? "",
                                 ArtistName = s.TryGetProperty("artistName", out var artistName) 
                                     ? artistName.GetString() ?? "Artista desconocido"
-                                    : "Artista desconocido"
+                                    : "Artista desconocido",
+                                Duration = TimeSpan.TryParse(s.TryGetProperty("duration", out var duration) 
+                                    ? duration.GetString() 
+                                    : "00:00:00", out var parsedDuration) 
+                                    ? parsedDuration 
+                                    : TimeSpan.Zero
+                            }).ToList()
+                            : new List<PlaylistSongDto>()
+                    };
+                    
+                    return View(playlistDto);
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error en Details: {ex.Message}");
+                return View("Error");
+            }
+        }
+
+        // GET: PlaylistsController/Edit/5
+        public async Task<ActionResult> Edit(int id)
+        {
+            try
+            {
+                int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                
+                // Obtener playlist específica
+                var response = await _httpClient.GetAsync($"https://localhost:7120/api/Playlists/user/{userId}");
+                
+                if (response.IsSuccessStatusCode)
+                {
+                    var playlistsJson = await response.Content.ReadAsStringAsync();
+                    var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                    var playlistsData = JsonSerializer.Deserialize<JsonElement[]>(playlistsJson, options);
+                    
+                    var playlist = playlistsData.FirstOrDefault(p => p.GetProperty("id").GetInt32() == id);
+                    
+                    if (playlist.ValueKind == JsonValueKind.Undefined)
+                    {
+                        TempData["Error"] = "Playlist no encontrada.";
+                        return RedirectToAction("Index");
+                    }
+                    
+                    var playlistDto = new PlaylistDto
+                    {
+                        Id = playlist.GetProperty("id").GetInt32(),
+                        Name = playlist.GetProperty("name").GetString() ?? "",
+                        // ✅ AGREGAR: ImageUrl para mostrar imagen actual
+                        ImageUrl = playlist.TryGetProperty("imageUrl", out var imageUrl) 
+                            ? imageUrl.GetString() 
+                            : null,
+                        Songs = playlist.TryGetProperty("songs", out var songs) 
+                            ? songs.EnumerateArray().Select(s => new PlaylistSongDto
+                            {
+                                ContentId = s.GetProperty("contentId").GetInt32(),
+                                Title = s.GetProperty("title").GetString() ?? "",
+                                UrlMedia = s.GetProperty("urlMedia").GetString() ?? "",
+                                ArtistName = s.TryGetProperty("artistName", out var artistName) 
+                                    ? artistName.GetString() ?? "Artista desconocido"
+                                    : "Artista desconocido",
+                                // ✅ AGREGAR: Mapear Duration
+                                Duration = s.TryGetProperty("duration", out var duration) 
+                                    ? TimeSpan.Parse(duration.GetString() ?? "00:00:00")
+                                    : TimeSpan.Zero
                             }).ToList() 
                             : new List<PlaylistSongDto>()
                     };
@@ -184,33 +282,71 @@ namespace HarmonySound.MVC.Controllers
                     return View(playlistDto);
                 }
                 
-                return NotFound();
+                TempData["Error"] = "No se pudo cargar la playlist.";
+                return RedirectToAction("Index");
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error in PlaylistsController.Details: {ex.Message}");
-                return NotFound();
+                System.Diagnostics.Debug.WriteLine($"Error in PlaylistsController.Edit: {ex.Message}");
+                TempData["Error"] = $"Error al cargar la playlist: {ex.Message}";
+                return RedirectToAction("Index");
             }
         }
 
-        // GET: PlaylistsController/Edit/5
-        public ActionResult Edit(int id)
-        {
-            return View();
-        }
-
-        // POST: PlaylistsController/Edit/5
+        // ✅ CORREGIDO: POST PlaylistsController/Edit/5 - Actualizar playlist
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public async Task<ActionResult> Edit(int id, PlaylistDto playlistDto, IFormFile? imageFile)
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                // Verificar que el ID coincida
+                if (id != playlistDto.Id)
+                {
+                    TempData["Error"] = "ID de playlist inválido.";
+                    return RedirectToAction("Index");
+                }
+
+                // Validar modelo
+                if (string.IsNullOrWhiteSpace(playlistDto.Name))
+                {
+                    TempData["Error"] = "El nombre de la playlist es obligatorio.";
+                    return View(playlistDto);
+                }
+
+                // ✅ NUEVO: Crear formulario multipart para manejar imagen
+                using var content = new MultipartFormDataContent();
+                content.Add(new StringContent(playlistDto.Id.ToString()), "Id");
+                content.Add(new StringContent(playlistDto.Name), "Name");
+                content.Add(new StringContent(User.FindFirst(ClaimTypes.NameIdentifier).Value), "UserId");
+                
+                // ✅ AGREGAR imagen si se proporciona
+                if (imageFile != null && imageFile.Length > 0)
+                {
+                    var fileContent = new StreamContent(imageFile.OpenReadStream());
+                    fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(imageFile.ContentType);
+                    content.Add(fileContent, "ImageFile", imageFile.FileName);
+                }
+
+                var response = await _httpClient.PutAsync($"https://localhost:7120/api/Playlists/{id}", content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    TempData["Success"] = "Playlist actualizada correctamente.";
+                    return RedirectToAction("Details", new { id = id });
+                }
+                else
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    TempData["Error"] = $"No se pudo actualizar la playlist: {errorContent}";
+                    return View(playlistDto);
+                }
             }
-            catch
+            catch (Exception ex)
             {
-                return View();
+                System.Diagnostics.Debug.WriteLine($"Error in PlaylistsController.Edit POST: {ex.Message}");
+                TempData["Error"] = $"Error al actualizar la playlist: {ex.Message}";
+                return View(playlistDto);
             }
         }
 
@@ -240,15 +376,15 @@ namespace HarmonySound.MVC.Controllers
             return RedirectToAction("Index");
         }
 
-        // POST: Playlists/RemoveTrackFromPlaylist
+        // POST: Playlists/RemoveFromPlaylist
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> RemoveTrackFromPlaylist(int playlistId, int trackId)
+        public async Task<IActionResult> RemoveFromPlaylist(int playlistId, int contentId)
         {
             try
             {
                 // Crear endpoint para remover canción de playlist en la API
-                var response = await _httpClient.DeleteAsync($"https://localhost:7120/api/Playlists/{playlistId}/remove/{trackId}");
+                var response = await _httpClient.DeleteAsync($"https://localhost:7120/api/Playlists/{playlistId}/remove/{contentId}");
                 
                 if (response.IsSuccessStatusCode)
                 {
@@ -256,7 +392,8 @@ namespace HarmonySound.MVC.Controllers
                 }
                 else
                 {
-                    TempData["Error"] = "No se pudo eliminar la canción de la playlist.";
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    TempData["Error"] = $"No se pudo eliminar la canción de la playlist: {errorContent}";
                 }
             }
             catch (Exception ex)

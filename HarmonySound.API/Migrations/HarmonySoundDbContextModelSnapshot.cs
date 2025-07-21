@@ -36,6 +36,9 @@ namespace HarmonySound.API.Migrations
                     b.Property<DateTimeOffset>("CreationDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("text");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -143,6 +146,9 @@ namespace HarmonySound.API.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -681,7 +687,7 @@ namespace HarmonySound.API.Migrations
                         .IsRequired();
 
                     b.HasOne("HarmonySound.Models.User", "User")
-                        .WithMany()
+                        .WithMany("UserLikes")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -792,6 +798,8 @@ namespace HarmonySound.API.Migrations
                     b.Navigation("Reports");
 
                     b.Navigation("SubscriptionHistory");
+
+                    b.Navigation("UserLikes");
 
                     b.Navigation("UserPlans");
 

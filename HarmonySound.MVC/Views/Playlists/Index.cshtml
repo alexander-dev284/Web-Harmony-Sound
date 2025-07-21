@@ -32,13 +32,13 @@
 
     @if (selectedContent != null)
     {
-        <div class="selected-content-alert">
+        <div class="song-selection-notice">
             <div class="alert-content">
                 <div class="alert-icon">
                     <i class="fas fa-music"></i>
                 </div>
-                <div class="alert-info">
-                    <h5>Agregando canción a playlist</h5>
+                <div class="message-info"> <!-- ✅ CAMBIAR: de "alert-info" a "message-info" -->
+                    <h5>Agregando canción a playlist:</h5>
                     <p><strong>Canción:</strong> @selectedContent.Title</p>
                     <p><strong>Tipo:</strong> @selectedContent.Type</p>
                     <p>Selecciona la playlist donde quieres agregar esta canción:</p>
@@ -72,7 +72,14 @@
                     <div class="playlist-cover">
                         <a href="@Url.Action("Details", "Playlists", new { id = playlist.Id })" class="cover-link">
                             <div class="cover-placeholder">
-                                <i class="fas fa-list-music"></i>
+                                @if (!string.IsNullOrEmpty(playlist.ImageUrl))
+                                {
+                                    <img src="@playlist.ImageUrl" alt="@playlist.Name" style="width: 100%; height: 100%; object-fit: cover; border-radius: 6px;" />
+                                }
+                                else
+                                {
+                                    <i class="fas fa-list-music"></i>
+                                }
                             </div>
                             <div class="playlist-overlay">
                                 <button class="play-playlist-btn" title="Ir a detalles">
@@ -284,12 +291,21 @@
         }
 
     .selected-content-alert {
-        background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
-        border: 1px solid #1db954;
+        background: linear-gradient(135deg, #1a1a1a, #2a2a2a) !important;
+        border: 1px solid #333 !important;
         border-radius: 12px;
         padding: 1.5rem;
         margin-bottom: 2rem;
-        box-shadow: 0 4px 15px rgba(29, 185, 84, 0.2);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
+    }
+
+    .song-selection-notice {
+        background: linear-gradient(135deg, #1a1a1a, #2a2a2a) !important;
+        border: 1px solid #333 !important;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
     }
 
     .alert-content {
@@ -300,18 +316,18 @@
 
     .alert-icon {
         font-size: 2rem;
-        color: #1db954;
+        color: #b3b3b3 !important;
         flex-shrink: 0;
     }
 
-    .alert-info h5 {
-        color: #1db954;
+    .message-info h5 { /* ✅ CAMBIAR: de ".alert-info h5" a ".message-info h5" */
+        color: #fff !important;
         margin-bottom: 0.5rem;
         font-weight: 600;
     }
 
-    .alert-info p {
-        color: #b3b3b3;
+    .message-info p { /* ✅ CAMBIAR: de ".alert-info p" a ".message-info p" */
+        color: #b3b3b3 !important;
         margin-bottom: 0.5rem;
     }
 

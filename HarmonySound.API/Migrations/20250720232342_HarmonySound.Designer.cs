@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace HarmonySound.API.Migrations
 {
     [DbContext(typeof(HarmonySoundDbContext))]
-    [Migration("20250715021120_LikesMigration")]
-    partial class LikesMigration
+    [Migration("20250720232342_HarmonySound")]
+    partial class HarmonySound
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -38,6 +38,9 @@ namespace HarmonySound.API.Migrations
 
                     b.Property<DateTimeOffset>("CreationDate")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("text");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -146,6 +149,9 @@ namespace HarmonySound.API.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -684,7 +690,7 @@ namespace HarmonySound.API.Migrations
                         .IsRequired();
 
                     b.HasOne("HarmonySound.Models.User", "User")
-                        .WithMany()
+                        .WithMany("UserLikes")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -795,6 +801,8 @@ namespace HarmonySound.API.Migrations
                     b.Navigation("Reports");
 
                     b.Navigation("SubscriptionHistory");
+
+                    b.Navigation("UserLikes");
 
                     b.Navigation("UserPlans");
 

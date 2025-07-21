@@ -18,7 +18,15 @@
         <div class="album-hero">
             <div class="album-artwork">
                 <div class="artwork-placeholder">
-                    <i class="fas fa-compact-disc"></i>
+                    <!-- ✅ ACTUALIZADO: Mostrar imagen si existe -->
+                    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                    {
+                        <img src="@Model.ImageUrl" alt="@Model.Title" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;" />
+                    }
+                    else
+                    {
+                        <i class="fas fa-compact-disc"></i>
+                    }
                 </div>
                 <div class="artwork-overlay">
                     <button class="play-all-btn" title="Reproducir álbum completo">

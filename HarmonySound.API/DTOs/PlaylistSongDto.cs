@@ -6,5 +6,7 @@
         public string Title { get; set; } = string.Empty;
         public string UrlMedia { get; set; } = string.Empty;
         public string ArtistName { get; set; } = string.Empty;
+        public TimeSpan Duration { get; set; } = TimeSpan.Zero;
+        public string FormattedDuration => Duration.ToString(@"mm\:ss");
     }
 }

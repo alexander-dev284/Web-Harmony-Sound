@@ -37,7 +37,15 @@
                     <div class="album-cover">
                         <a href="@Url.Action("Details", "Albums", new { id = album.Id })" class="cover-link">
                             <div class="cover-placeholder">
-                                <i class="fas fa-compact-disc"></i>
+                                <!-- ✅ ACTUALIZADO: Mostrar imagen si existe -->
+                                @if (!string.IsNullOrEmpty(album.ImageUrl))
+                                {
+                                    <img src="@album.ImageUrl" alt="@album.Title" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;" />
+                                }
+                                else
+                                {
+                                    <i class="fas fa-compact-disc"></i>
+                                }
                             </div>
                             <div class="album-overlay">
                                 <button class="play-album-btn" title="Ir a detalles">
@@ -570,7 +578,8 @@
 
     .modal-warning {
         background: rgba(255, 193, 7, 0.1);
-        border: 1px border-radius: 8px;
+        border: 1px solid rgba(255, 193, 7, 0.3); /* ✅ CORREGIDO */
+        border-radius: 8px;
         padding: 1rem;
         display: flex;
         align-items: center;

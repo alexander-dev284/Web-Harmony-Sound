@@ -23,7 +23,7 @@
     </div>
 
     <div class="edit-content">
-        <form asp-action="Edit" method="post" class="edit-form" id="albumEditForm">
+        <form asp-action="Edit" method="post" class="edit-form" id="albumEditForm" enctype="multipart/form-data">
             <input type="hidden" asp-for="Id" />
             
             <!-- Sección de información básica -->
@@ -1104,7 +1104,7 @@ function selectAllSongs() {
 function clearAllSongs() {
     document.querySelectorAll('.song-selection-checkbox').forEach(checkbox => {
         checkbox.checked = false;
-        updateSong_selection(checkbox);
+        updateSongSelection(checkbox); // ✅ CORREGIR: quitar el guión bajo
     });
 }
 

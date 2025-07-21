@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using HarmonySound.Models;
@@ -15,10 +17,13 @@ namespace HarmonySound.API.Controllers
     public class PlaylistsController : ControllerBase
     {
         private readonly HarmonySoundDbContext _context;
+        // Agrega el campo privado para IConfiguration
+        private readonly IConfiguration _configuration;
 
-        public PlaylistsController(HarmonySoundDbContext context)
+        public PlaylistsController(HarmonySoundDbContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
 
         // GET: api/Playlists
@@ -52,63 +57,87 @@ namespace HarmonySound.API.Controllers
 
         // GET: api/Playlists/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Playlist>> GetPlaylist(int id)
+        public async Task<ActionResult<object>> GetPlaylist(int id)
         {
-            var playlist = await _context.Playlist.FindAsync(id);
+            var playlist = await _context.Playlist
+                .Include(p => p.PlaylistContents)
+                .ThenInclude(pc => pc.Content)
+                .ThenInclude(c => c.Artist)
+                .FirstOrDefaultAsync(p => p.Id == id);
 
             if (playlist == null)
-            {
                 return NotFound();
-            }
 
-            return playlist;
+            var result = new {
+                id = playlist.Id,
+                name = playlist.Name,
+                userId = playlist.UserId,
+                imageUrl = playlist.ImageUrl, // ✅ INCLUIR IMAGEN
+                songs = playlist.PlaylistContents.Select(pc => new PlaylistSongDto
+                {
+                    ContentId = pc.ContentId,
+                    Title = pc.Content?.Title ?? "Sin título",
+                    UrlMedia = pc.Content?.UrlMedia ?? "",
+                    ArtistName = pc.Content?.Artist?.Name ?? "Artista desconocido",
+                    Duration = pc.Content?.Duration ?? TimeSpan.Zero
+                }).ToList()
+            };
+
+            return Ok(result);
         }
 
-        // PUT: api/Playlists/5
+        // PUT: api/Playlists/5 - ✅ CORREGIDO USANDO PlaylistCreateDto
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutPlaylist(int id, Playlist playlist)
+        public async Task<IActionResult> PutPlaylist(int id, [FromForm] PlaylistCreateDto dto)
         {
-            if (id != playlist.Id)
-            {
-                return BadRequest();
-            }
+            var playlist = await _context.Playlist.FindAsync(id);
+            if (playlist == null) return NotFound();
 
-            _context.Entry(playlist).State = EntityState.Modified;
+            // Validar que el usuario sea el propietario (opcional)
+            if (playlist.UserId != dto.UserId)
+                return BadRequest("No tienes permisos para editar esta playlist.");
 
-            try
+            // Guardar URL de imagen anterior
+            string? oldImageUrl = playlist.ImageUrl;
+
+            // Actualizar nombre
+            playlist.Name = dto.Name;
+
+            // ✅ NUEVO: Manejar nueva imagen si se proporciona
+            if (dto.ImageFile != null && dto.ImageFile.Length > 0)
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!PlaylistExists(id))
+                // Subir nueva imagen
+                string newImageUrl = await UploadImageToAzure(dto.ImageFile, "playlists");
+                playlist.ImageUrl = newImageUrl;
+
+                // ✅ ELIMINAR imagen anterior de Azure
+                if (!string.IsNullOrEmpty(oldImageUrl))
                 {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
+                    await DeleteImageFromAzure(oldImageUrl);
                 }
             }
 
+            await _context.SaveChangesAsync();
             return NoContent();
         }
 
 
-        // DELETE: api/Playlists/5
+        // DELETE: api/Playlists/5 - ✅ CON ELIMINACIÓN DE IMAGEN
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePlaylist(int id)
         {
             var playlist = await _context.Playlist.FindAsync(id);
-            if (playlist == null)
+            if (playlist == null) return NotFound();
+
+            // ✅ ELIMINAR imagen de Azure antes de eliminar la playlist
+            if (!string.IsNullOrEmpty(playlist.ImageUrl))
             {
-                return NotFound();
+                await DeleteImageFromAzure(playlist.ImageUrl);
             }
 
             _context.Playlist.Remove(playlist);
             await _context.SaveChangesAsync();
-
             return NoContent();
         }
 
@@ -152,6 +181,7 @@ namespace HarmonySound.API.Controllers
                         .Include(pc => pc.Content)
                         .ThenInclude(c => c.Artist)
                         .Where(pc => pc.PlaylistId == playlist.Id)
+                        // Se elimina el OrderBy para evitar carga innecesaria
                         .ToListAsync();
                     
                     System.Diagnostics.Debug.WriteLine($"Found {playlistContents.Count} contents for playlist {playlist.Id}");
@@ -161,13 +191,15 @@ namespace HarmonySound.API.Controllers
                         ContentId = pc.ContentId,
                         Title = pc.Content?.Title ?? "Sin título",
                         UrlMedia = pc.Content?.UrlMedia ?? "",
-                        ArtistName = pc.Content?.Artist?.Name ?? "Artista desconocido"
+                        ArtistName = pc.Content?.Artist?.Name ?? "Artista desconocido",
+                        Duration = pc.Content?.Duration ?? TimeSpan.Zero // ✅ AGREGAR ESTA LÍNEA
                     }).ToList();
                     
                     result.Add(new {
                         id = playlist.Id,
                         name = playlist.Name,
                         userId = playlist.UserId,
+                        imageUrl = playlist.ImageUrl, // ✅ AGREGAR ESTA LÍNEA
                         songs = songs
                     });
                 }
@@ -272,7 +304,7 @@ namespace HarmonySound.API.Controllers
 
         // Método para crear playlist con debugging
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] PlaylistCreateDto dto)
+        public async Task<IActionResult> Create([FromForm] PlaylistCreateDto dto)
         {
             try
             {
@@ -292,10 +324,19 @@ namespace HarmonySound.API.Controllers
                     return BadRequest($"Usuario con id {dto.UserId} no encontrado.");
                 }
 
+                string? imageUrl = null;
+
+                // ✅ NUEVO: Subir imagen si se proporciona
+                if (dto.ImageFile != null && dto.ImageFile.Length > 0)
+                {
+                    imageUrl = await UploadImageToAzure(dto.ImageFile, "playlists");
+                }
+
                 var playlist = new Playlist
                 {
                     Name = dto.Name,
-                    UserId = dto.UserId
+                    UserId = dto.UserId,
+                    ImageUrl = imageUrl // ✅ ASIGNAR URL DE IMAGEN
                 };
 
                 _context.Playlist.Add(playlist);
@@ -306,7 +347,8 @@ namespace HarmonySound.API.Controllers
                 return Ok(new { 
                     id = playlist.Id, 
                     name = playlist.Name, 
-                    userId = playlist.UserId 
+                    userId = playlist.UserId,
+                    imageUrl = playlist.ImageUrl
                 });
             }
             catch (Exception ex)
@@ -352,6 +394,78 @@ namespace HarmonySound.API.Controllers
                     error = "Error al eliminar contenido de la playlist", 
                     details = ex.Message 
                 });
+            }
+        }
+
+        // ✅ ACTUALIZAR: Método para subir imágenes al contenedor compartido
+        private async Task<string> UploadImageToAzure(IFormFile imageFile, string containerFolder)
+        {
+            try
+            {
+                const long maxFileSize = 5 * 1024 * 1024; // 5 MB
+                if (imageFile.Length > maxFileSize)
+                    throw new Exception("La imagen es demasiado grande. Máximo 5 MB.");
+
+                var extension = Path.GetExtension(imageFile.FileName).ToLower();
+                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+                if (!allowedExtensions.Contains(extension))
+                    throw new Exception("Solo se permiten imágenes: .jpg, .jpeg, .png, .gif, .webp");
+
+                // ✅ USAR CONTENEDOR COMPARTIDO PARA IMÁGENES DE CONTENIDO
+                var blobConnectionString = _configuration["AzureBlobStorage:ConnectionString"];
+                var blobContainerName = _configuration["AzureBlobStorage:ContentImagesContainer"];
+
+                var blobServiceClient = new BlobServiceClient(blobConnectionString);
+                var containerClient = blobServiceClient.GetBlobContainerClient(blobContainerName);
+                await containerClient.CreateIfNotExistsAsync(PublicAccessType.Blob);
+
+                // ✅ MANTENER CARPETAS PARA ORGANIZACIÓN: playlists/ y albums/
+                var uniqueFileName = $"{containerFolder}/{Guid.NewGuid()}{extension}";
+                var blobClient = containerClient.GetBlobClient(uniqueFileName);
+
+                // Configurar tipo MIME correcto
+                string contentType = imageFile.ContentType;
+                if (extension == ".jpg" || extension == ".jpeg") contentType = "image/jpeg";
+                else if (extension == ".png") contentType = "image/png";
+                else if (extension == ".gif") contentType = "image/gif";
+                else if (extension == ".webp") contentType = "image/webp";
+
+                using (var stream = imageFile.OpenReadStream())
+                {
+                    await blobClient.UploadAsync(stream, new BlobHttpHeaders { ContentType = contentType });
+                }
+
+                return blobClient.Uri.ToString();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error al subir imagen: {ex.Message}");
+            }
+        }
+
+        // ✅ ACTUALIZAR: Método para eliminar imágenes del contenedor compartido
+        private async Task DeleteImageFromAzure(string imageUrl)
+        {
+            try
+            {
+                // Extraer nombre del archivo de la URL
+                var fileName = Path.GetFileName(imageUrl);
+
+                // ✅ USAR CONTENEDOR COMPARTIDO PARA IMÁGENES DE CONTENIDO
+                var blobConnectionString = _configuration["AzureBlobStorage:ConnectionString"];
+                var blobContainerName = _configuration["AzureBlobStorage:ContentImagesContainer"];
+
+                var blobServiceClient = new BlobServiceClient(blobConnectionString);
+                var containerClient = blobServiceClient.GetBlobContainerClient(blobContainerName);
+
+                var blobClient = containerClient.GetBlobClient($"playlists/{fileName}");
+
+                // Eliminar blob
+                await blobClient.DeleteIfExistsAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error al eliminar imagen de Azure: {ex.Message}");
             }
         }
     }

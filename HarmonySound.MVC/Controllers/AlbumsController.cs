@@ -67,7 +67,7 @@ namespace HarmonySound.MVC.Controllers
         // POST: Albums/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(CreateAlbumDto model)
+        public async Task<IActionResult> Create(CreateAlbumDto model, IFormFile? imageFile)
         {
             if (!ModelState.IsValid)
                 return View(model);
@@ -75,15 +75,27 @@ namespace HarmonySound.MVC.Controllers
             // Asigna el ArtistId del usuario autenticado
             model.ArtistId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
 
-            // Serializa y envía el DTO a la API
-            var json = System.Text.Json.JsonSerializer.Serialize(model);
-            var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+            // ✅ CORRECCIÓN: No necesitas asignar imageFile al modelo
+            // La línea model.ImageFile = imageFile; debe eliminarse
+
+            // ✅ CREAR formulario multipart
+            using var content = new MultipartFormDataContent();
+            content.Add(new StringContent(model.Title), "Title");
+            content.Add(new StringContent(model.ArtistId.ToString()), "ArtistId");
+
+            // ✅ USAR el parámetro imageFile directamente
+            if (imageFile != null && imageFile.Length > 0)
+            {
+                var fileContent = new StreamContent(imageFile.OpenReadStream());
+                fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(imageFile.ContentType);
+                content.Add(fileContent, "ImageFile", imageFile.FileName);
+            }
+
             var response = await _httpClient.PostAsync("https://localhost:7120/api/Albums", content);
 
             if (response.IsSuccessStatusCode)
                 return RedirectToAction(nameof(Index));
 
-            // Si hay error, muestra el modelo con los errores
             ModelState.AddModelError("", "Could not create album.");
             return View(model);
         }
@@ -112,35 +124,46 @@ namespace HarmonySound.MVC.Controllers
         {
             try
             {
-                // Actualiza el título del álbum
-                var updateDto = new CreateAlbumDto
-                {
-                    Title = model.Title,
-                    ArtistId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value)
-                };
+                // ✅ CORREGIDO: Usar MultipartFormDataContent para el PUT
+                using var content = new MultipartFormDataContent();
+                content.Add(new StringContent(model.Title), "Title");
+                content.Add(new StringContent(int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value).ToString()), "ArtistId");
 
-                var json = System.Text.Json.JsonSerializer.Serialize(updateDto);
-                var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
                 var response = await _httpClient.PutAsync($"https://localhost:7120/api/Albums/{id}", content);
 
                 if (!response.IsSuccessStatusCode)
-                    throw new Exception("No se pudo actualizar el álbum.");
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"❌ Error en PUT álbum: {response.StatusCode} - {errorContent}");
+                    throw new Exception($"No se pudo actualizar el álbum: {response.StatusCode}");
+                }
 
-                // Actualiza las canciones del álbum usando la API
+                // ✅ DEPURACIÓN: Verificar qué canciones se están enviando
+                Console.WriteLine($"🎵 Canciones seleccionadas: [{string.Join(", ", selectedSongIds ?? new List<int>())}]");
+
+                // Actualizar las canciones del álbum usando la API
                 var songsJson = System.Text.Json.JsonSerializer.Serialize(selectedSongIds ?? new List<int>());
                 var songsContent = new StringContent(songsJson, System.Text.Encoding.UTF8, "application/json");
                 var songsResponse = await _httpClient.PostAsync($"https://localhost:7120/api/Albums/{id}/UpdateSongs", songsContent);
 
                 if (!songsResponse.IsSuccessStatusCode)
-                    throw new Exception("No se pudo actualizar las canciones del álbum.");
+                {
+                    var songErrorContent = await songsResponse.Content.ReadAsStringAsync();
+                    Console.WriteLine($"❌ Error en UpdateSongs: {songsResponse.StatusCode} - {songErrorContent}");
+                    throw new Exception($"No se pudo actualizar las canciones del álbum: {songsResponse.StatusCode}");
+                }
 
+                Console.WriteLine("✅ Álbum actualizado correctamente");
                 return RedirectToAction(nameof(Index));
             }
-            catch
+            catch (Exception ex)
             {
+                Console.WriteLine($"❌ Excepción en Edit: {ex.Message}");
+                
+                // Recargar datos para mostrar la vista con error
                 int artistId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
                 var allSongs = await GetAllSongsForArtist(artistId);
-                ViewBag.AllSongs = allSongs; // ✅ También aquí
+                ViewBag.AllSongs = allSongs;
 
                 var response = await _httpClient.GetAsync($"https://localhost:7120/api/Albums/{id}");
                 AlbumDto album = null;
@@ -149,7 +172,8 @@ namespace HarmonySound.MVC.Controllers
                     var json = await response.Content.ReadAsStringAsync();
                     album = System.Text.Json.JsonSerializer.Deserialize<AlbumDto>(json, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                 }
-                ModelState.AddModelError("", "Error al guardar los cambios.");
+                
+                ModelState.AddModelError("", $"Error al guardar los cambios: {ex.Message}");
                 return View(album ?? model);
             }
         }
@@ -206,7 +230,30 @@ namespace HarmonySound.MVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
-            var response = await _httpClient.DeleteAsync($"https://localhost:7120/api/Albums/{id}");
+            try
+            {
+                Console.WriteLine($"🗑️ Intentando eliminar álbum ID: {id}");
+                
+                var response = await _httpClient.DeleteAsync($"https://localhost:7120/api/Albums/{id}");
+                
+                if (response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"✅ Álbum {id} eliminado correctamente");
+                    TempData["Success"] = "Álbum eliminado correctamente.";
+                }
+                else
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"❌ Error al eliminar álbum: {response.StatusCode} - {error}");
+                    TempData["Error"] = "Error al eliminar el álbum.";
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Excepción al eliminar álbum: {ex.Message}");
+                TempData["Error"] = $"Error al eliminar el álbum: {ex.Message}";
+            }
+            
             return RedirectToAction(nameof(Index));
         }
 

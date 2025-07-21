@@ -1,13 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
+using HarmonySound.API.Data;
+using HarmonySound.API.DTOs;
+using HarmonySound.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using HarmonySound.Models;
-using HarmonySound.API.Data;
-using HarmonySound.API.DTOs;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace HarmonySound.API.Controllers
 {
@@ -16,10 +18,13 @@ namespace HarmonySound.API.Controllers
     public class AlbumsController : ControllerBase
     {
         private readonly HarmonySoundDbContext _context;
+        // 1. Agrega el campo privado para IConfiguration
+        private readonly IConfiguration _configuration;
 
-        public AlbumsController(HarmonySoundDbContext context)
+        public AlbumsController(HarmonySoundDbContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
 
         // GET: api/Albums
@@ -38,12 +43,13 @@ namespace HarmonySound.API.Controllers
                 Title = a.Title,
                 CreationDate = a.CreationDate,
                 ArtistName = a.Artist?.Name,
+                ImageUrl = a.ImageUrl, // ✅ INCLUIR IMAGEN
                 Contents = a.ContentAlbums?.Select(ca => new ContentDto
                 {
                     Id = ca.Content.Id,
                     Title = ca.Content.Title,
                     Type = ca.Content.Type,
-                    UrlMedia = ca.Content.UrlMedia, // ✅ AGREGADO: Incluir UrlMedia
+                    UrlMedia = ca.Content.UrlMedia,
                     Duration = ca.Content.Duration,
                     UploadDate = ca.Content.UploadDate,
                     ArtistName = ca.Content.Artist?.Name,
@@ -56,12 +62,52 @@ namespace HarmonySound.API.Controllers
 
         // GET: api/Albums/ByArtist/5
         [HttpGet("ByArtist/{artistId}")]
-        public async Task<ActionResult<IEnumerable<Album>>> GetAlbumsByArtist(int artistId)
+        public async Task<ActionResult<IEnumerable<AlbumDto>>> GetAlbumsByArtist(int artistId)
         {
-            return await _context.Albums
-                .Where(a => a.ArtistId == artistId)
-                .Include(a => a.ContentAlbums).ThenInclude(ca => ca.Content)
-                .ToListAsync();
+            try
+            {
+                Console.WriteLine($"🔍 Buscando álbumes para artista ID: {artistId}");
+
+                var albums = await _context.Albums
+                    .Where(a => a.ArtistId == artistId)
+                    .Include(a => a.ContentAlbums)
+                        .ThenInclude(ca => ca.Content)
+                    .Include(a => a.Artist)
+                    .ToListAsync();
+
+                Console.WriteLine($"📊 Encontrados {albums.Count} álbumes para artista {artistId}");
+
+                // ✅ CONVERTIR A DTOs para evitar referencias circulares
+                var result = albums.Select(a => new AlbumDto
+                {
+                    Id = a.Id,
+                    Title = a.Title,
+                    CreationDate = a.CreationDate,
+                    ArtistName = a.Artist?.Name,
+                    ImageUrl = a.ImageUrl,
+                    Contents = a.ContentAlbums?.Select(ca => new ContentDto
+                    {
+                        Id = ca.Content.Id,
+                        Title = ca.Content.Title,
+                        Type = ca.Content.Type,
+                        UrlMedia = ca.Content.UrlMedia,
+                        Duration = ca.Content.Duration,
+                        UploadDate = ca.Content.UploadDate,
+                        ArtistName = ca.Content.Artist?.Name,
+                        AlbumTitle = a.Title
+                    }).ToList() ?? new List<ContentDto>()
+                }).ToList();
+
+                Console.WriteLine($"✅ DTOs generados correctamente");
+                
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Error en GetAlbumsByArtist: {ex.Message}");
+                Console.WriteLine($"❌ Stack trace: {ex.StackTrace}");
+                return StatusCode(500, $"Error interno del servidor: {ex.Message}");
+            }
         }
 
         // GET: api/Albums/5
@@ -82,12 +128,13 @@ namespace HarmonySound.API.Controllers
                 Title = album.Title,
                 CreationDate = album.CreationDate,
                 ArtistName = album.Artist?.Name,
+                ImageUrl = album.ImageUrl, // ✅ AGREGAR ESTA LÍNEA QUE FALTA
                 Contents = album.ContentAlbums?.Select(ca => new ContentDto
                 {
                     Id = ca.Content.Id,
                     Title = ca.Content.Title,
                     Type = ca.Content.Type,
-                    UrlMedia = ca.Content.UrlMedia, // ✅ CORREGIDO: Incluir UrlMedia
+                    UrlMedia = ca.Content.UrlMedia,
                     Duration = ca.Content.Duration,
                     UploadDate = ca.Content.UploadDate,
                     ArtistName = ca.Content.Artist?.Name,
@@ -100,37 +147,72 @@ namespace HarmonySound.API.Controllers
 
         // POST: api/Albums
         [HttpPost]
-        public async Task<ActionResult<Album>> PostAlbum(CreateAlbumDto dto)
+        public async Task<ActionResult<Album>> PostAlbum([FromForm] CreateAlbumDto dto)
         {
+            string? imageUrl = null;
+
+            // ✅ NUEVO: Subir imagen si se proporciona
+            if (dto.ImageFile != null && dto.ImageFile.Length > 0)
+            {
+                imageUrl = await UploadImageToAzure(dto.ImageFile, "albums");
+            }
+
             var album = new Album
             {
                 Title = dto.Title,
                 ArtistId = dto.ArtistId,
-                CreationDate = DateTimeOffset.UtcNow
+                CreationDate = DateTimeOffset.UtcNow,
+                ImageUrl = imageUrl // ✅ ASIGNAR URL DE IMAGEN
             };
+
             _context.Albums.Add(album);
             await _context.SaveChangesAsync();
             return CreatedAtAction(nameof(GetAlbum), new { id = album.Id }, album);
         }
 
-        // PUT: api/Albums/5
+        // PUT: api/Albums/5 - ✅ CORREGIDO CON ELIMINACIÓN DE IMAGEN
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutAlbum(int id, CreateAlbumDto dto)
+        public async Task<IActionResult> PutAlbum(int id, [FromForm] CreateAlbumDto dto)
         {
             var album = await _context.Albums.FindAsync(id);
             if (album == null) return NotFound();
 
+            // Guardar URL de imagen anterior
+            string? oldImageUrl = album.ImageUrl;
+
+            // Actualizar título
             album.Title = dto.Title;
+
+            // ✅ NUEVO: Manejar nueva imagen si se proporciona
+            if (dto.ImageFile != null && dto.ImageFile.Length > 0)
+            {
+                // Subir nueva imagen
+                string newImageUrl = await UploadImageToAzure(dto.ImageFile, "albums");
+                album.ImageUrl = newImageUrl;
+
+                // ✅ ELIMINAR imagen anterior de Azure
+                if (!string.IsNullOrEmpty(oldImageUrl))
+                {
+                    await DeleteImageFromAzure(oldImageUrl);
+                }
+            }
+
             await _context.SaveChangesAsync();
             return NoContent();
         }
 
-        // DELETE: api/Albums/5
+        // DELETE: api/Albums/5 - ✅ CON ELIMINACIÓN DE IMAGEN
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAlbum(int id)
         {
             var album = await _context.Albums.FindAsync(id);
             if (album == null) return NotFound();
+
+            // ✅ ELIMINAR imagen de Azure antes de eliminar el álbum
+            if (!string.IsNullOrEmpty(album.ImageUrl))
+            {
+                await DeleteImageFromAzure(album.ImageUrl);
+            }
 
             _context.Albums.Remove(album);
             await _context.SaveChangesAsync();
@@ -209,6 +291,86 @@ namespace HarmonySound.API.Controllers
                 await _context.SaveChangesAsync();
             }
             return NoContent();
+        }
+
+        // ✅ ACTUALIZAR: Método para subir imágenes al contenedor compartido
+        private async Task<string> UploadImageToAzure(IFormFile imageFile, string containerFolder)
+        {
+            try
+            {
+                const long maxFileSize = 5 * 1024 * 1024; // 5 MB
+                if (imageFile.Length > maxFileSize)
+                    throw new Exception("La imagen es demasiado grande. Máximo 5 MB.");
+
+                var extension = Path.GetExtension(imageFile.FileName).ToLower();
+                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+                if (!allowedExtensions.Contains(extension))
+                    throw new Exception("Solo se permiten imágenes: .jpg, .jpeg, .png, .gif, .webp");
+
+                // ✅ USAR CONTENEDOR COMPARTIDO PARA IMÁGENES DE CONTENIDO
+                var blobConnectionString = _configuration["AzureBlobStorage:ConnectionString"];
+                var blobContainerName = _configuration["AzureBlobStorage:ContentImagesContainer"];
+
+                var blobServiceClient = new BlobServiceClient(blobConnectionString);
+                var containerClient = blobServiceClient.GetBlobContainerClient(blobContainerName);
+                await containerClient.CreateIfNotExistsAsync(PublicAccessType.Blob);
+
+                // ✅ MANTENER CARPETAS PARA ORGANIZACIÓN: playlists/ y albums/
+                var uniqueFileName = $"{containerFolder}/{Guid.NewGuid()}{extension}";
+                var blobClient = containerClient.GetBlobClient(uniqueFileName);
+
+                // Configurar tipo MIME correcto
+                string contentType = imageFile.ContentType;
+                if (extension == ".jpg" || extension == ".jpeg") contentType = "image/jpeg";
+                else if (extension == ".png") contentType = "image/png";
+                else if (extension == ".gif") contentType = "image/gif";
+                else if (extension == ".webp") contentType = "image/webp";
+
+                using (var stream = imageFile.OpenReadStream())
+                {
+                    await blobClient.UploadAsync(stream, new BlobHttpHeaders { ContentType = contentType });
+                }
+
+                return blobClient.Uri.ToString();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error al subir imagen: {ex.Message}");
+            }
+        }
+
+        // ✅ ACTUALIZAR: Método para eliminar imagen del contenedor compartido
+        private async Task<bool> DeleteImageFromAzure(string imageUrl)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(imageUrl)) return true;
+
+                var blobConnectionString = _configuration["AzureBlobStorage:ConnectionString"];
+                var blobContainerName = _configuration["AzureBlobStorage:ContentImagesContainer"];
+
+                var blobServiceClient = new BlobServiceClient(blobConnectionString);
+                var containerClient = blobServiceClient.GetBlobContainerClient(blobContainerName);
+
+                // Extraer el nombre del blob desde la URL
+                var uri = new Uri(imageUrl);
+                var blobName = uri.AbsolutePath.Substring(1); // Quitar el '/' inicial
+                if (blobName.StartsWith(blobContainerName + "/"))
+                {
+                    blobName = blobName.Substring(blobContainerName.Length + 1);
+                }
+
+                var blobClient = containerClient.GetBlobClient(blobName);
+                await blobClient.DeleteIfExistsAsync();
+
+                Console.WriteLine($"✅ Imagen eliminada de Azure: {blobName}");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Error al eliminar imagen de Azure: {ex.Message}");
+                return false;
+            }
         }
     }
 }

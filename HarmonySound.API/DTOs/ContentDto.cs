@@ -5,12 +5,15 @@
         public int Id { get; set; }
         public string Title { get; set; }
         public string Type { get; set; } // "Canción", "Podcast"
-        public string UrlMedia { get; set; } = ""; // ✅ AGREGAR ESTA LÍNEA
+        public string UrlMedia { get; set; } = ""; // ✅ SOLO UNA VEZ
         public TimeSpan Duration { get; set; }
         public DateTimeOffset UploadDate { get; set; }
         public int ArtistId { get; set; } 
 
         public string? ArtistName { get; set; } 
         public string? AlbumTitle { get; set; }   
+
+        // ✅ AGREGAR ESTA PROPIEDAD
+        public string FormattedDuration => Duration.ToString(@"mm\:ss");
     }
 }

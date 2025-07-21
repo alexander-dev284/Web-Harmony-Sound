@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
+using HarmonySound.API.DTOs;
 
 namespace HarmonySound.MVC.Controllers
 {
@@ -28,6 +29,7 @@ namespace HarmonySound.MVC.Controllers
             try
             {
                 int artistId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                Console.WriteLine($"🔍 Obteniendo estadísticas para artista ID: {artistId}");
 
                 // 1. Obtener total de canciones del artista
                 var songsResponse = await _httpClient.GetAsync("https://localhost:7120/api/Contents");
@@ -36,22 +38,27 @@ namespace HarmonySound.MVC.Controllers
                 var artistSongs = allSongs?.Where(c => c.ArtistId == artistId).ToList() ?? new List<Content>();
                 var totalSongs = artistSongs.Count;
 
-                // 2. ✅ CORREGIDO: Obtener total de álbumes del artista usando JsonElement
-                var albumsResponse = await _httpClient.GetAsync("https://localhost:7120/api/Albums");
-                var albumsJson = await albumsResponse.Content.ReadAsStringAsync();
-                var albumsDocument = JsonDocument.Parse(albumsJson);
-                var albumsArray = albumsDocument.RootElement.EnumerateArray();
-                
+                // 2. ✅ CORREGIDO: Usar el endpoint específico para álbumes del artista que ahora devuelve DTOs
+                var albumsResponse = await _httpClient.GetAsync($"https://localhost:7120/api/Albums/ByArtist/{artistId}");
                 var totalAlbums = 0;
-                foreach (var albumElement in albumsArray)
+                
+                Console.WriteLine($"🔍 Respuesta de álbumes: {albumsResponse.StatusCode}");
+                
+                if (albumsResponse.IsSuccessStatusCode)
                 {
-                    if (albumElement.TryGetProperty("artistId", out var artistIdProp))
-                    {
-                        if (artistIdProp.GetInt32() == artistId)
-                        {
-                            totalAlbums++;
-                        }
-                    }
+                    var albumsJson = await albumsResponse.Content.ReadAsStringAsync();
+                    Console.WriteLine($"🔍 JSON de álbumes: {albumsJson}");
+                    
+                    // ✅ CORREGIDO: Ahora esperamos una lista de AlbumDto
+                    var albums = JsonSerializer.Deserialize<List<AlbumDto>>(albumsJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    totalAlbums = albums?.Count ?? 0;
+                    
+                    Console.WriteLine($"📊 Total álbumes encontrados: {totalAlbums}");
+                }
+                else
+                {
+                    var errorContent = await albumsResponse.Content.ReadAsStringAsync();
+                    Console.WriteLine($"❌ Error al obtener álbumes: {albumsResponse.StatusCode} - {errorContent}");
                 }
 
                 // 3. ✅ CORREGIDO: Obtener total de likes usando JsonElement
@@ -87,6 +94,13 @@ namespace HarmonySound.MVC.Controllers
 
                 var lastUploadTitle = lastUpload?.Title ?? "Sin subidas";
 
+                // ✅ AGREGAR LOGS PARA DEPURACIÓN
+                Console.WriteLine($"📊 Estadísticas finales:");
+                Console.WriteLine($"   - Canciones: {totalSongs}");
+                Console.WriteLine($"   - Álbumes: {totalAlbums}");
+                Console.WriteLine($"   - Likes: {totalLikes}");
+                Console.WriteLine($"   - Última subida: {lastUploadTitle}");
+
                 // Retornar las estadísticas como JSON
                 var stats = new
                 {
@@ -100,6 +114,9 @@ namespace HarmonySound.MVC.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"❌ Error en GetArtistStats: {ex.Message}");
+                Console.WriteLine($"❌ Stack trace: {ex.StackTrace}");
+                
                 // En caso de error, retornar valores por defecto
                 var errorStats = new
                 {

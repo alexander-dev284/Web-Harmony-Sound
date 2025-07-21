@@ -149,6 +149,10 @@ namespace HarmonySound.MVC.Controllers
         public async Task<IActionResult> Home(string query)
         {
             int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+            
+            // ✅ AGREGAR ESTA LÍNEA IMPORTANTE
+            ViewBag.UserId = userId;
+            
             var model = new SearchResultsViewModel { Query = query };
 
             // Obtén el perfil del usuario
@@ -521,6 +525,54 @@ namespace HarmonySound.MVC.Controllers
             catch (Exception ex)
             {
                 return Json(new { success = false, message = $"Error: {ex.Message}" });
+            }
+        }
+
+        // ✅ AGREGAR: Método para crear playlist de favoritos si no existe
+        [HttpPost]
+        public async Task<IActionResult> EnsureFavoritesPlaylist()
+        {
+            try
+            {
+                int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                
+                // Verificar si ya existe
+                var response = await _httpClient.GetAsync($"https://localhost:7120/api/Playlists/user/{userId}");
+                if (response.IsSuccessStatusCode)
+                {
+                    var json = await response.Content.ReadAsStringAsync();
+                    var playlists = JsonSerializer.Deserialize<JsonElement[]>(json);
+                    
+                    // Buscar playlist de favoritos
+                    var favoritesExists = playlists.Any(p => 
+                        p.GetProperty("name").GetString()?.Equals("Favoritos", StringComparison.OrdinalIgnoreCase) == true);
+                    
+                    if (!favoritesExists)
+                    {
+                        // Crear playlist de favoritos
+                        var playlistDto = new
+                        {
+                            Name = "Favoritos",
+                            UserId = userId
+                        };
+
+                        var playlistJson = JsonSerializer.Serialize(playlistDto);
+                        var content = new StringContent(playlistJson, System.Text.Encoding.UTF8, "application/json");
+                        
+                        var createResponse = await _httpClient.PostAsync("https://localhost:7120/api/Playlists", content);
+                        
+                        if (createResponse.IsSuccessStatusCode)
+                        {
+                            return Json(new { success = true, message = "Playlist de favoritos creada" });
+                        }
+                    }
+                }
+                
+                return Json(new { success = true, message = "Playlist de favoritos verificada" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
             }
         }
     }

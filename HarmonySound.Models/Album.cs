@@ -12,6 +12,7 @@ namespace HarmonySound.Models
         public DateTimeOffset CreationDate { get; set; }
 
         public int ArtistId { get; set; }
+        public string? ImageUrl { get; set; } // ✅ NUEVA PROPIEDAD
         public User? Artist { get; set; }
 
         public List<ContentAlbum>? ContentAlbums { get; set; }

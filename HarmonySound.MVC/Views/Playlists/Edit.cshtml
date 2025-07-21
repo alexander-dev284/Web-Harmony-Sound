@@ -22,7 +22,7 @@
     </div>
 
     <div class="edit-content">
-        <form asp-action="Edit" method="post" class="edit-form" id="playlistEditForm">
+        <form asp-action="Edit" method="post" class="edit-form" id="playlistEditForm" enctype="multipart/form-data">
             @Html.AntiForgeryToken()
             <input type="hidden" asp-for="Id" />
             
@@ -142,7 +142,7 @@
                         
                         <div class="songs-note">
                             <i class="fas fa-info-circle me-2"></i>
-                            Para agregar o eliminar canciones, ve a la vista de detalles de la playlist.
+                            Para agregar canciones, debes hacerlo desde la misma canción que quieres agregar.
                         </div>
                     </div>
                 }
@@ -160,6 +160,24 @@
                         </a>
                     </div>
                 }
+            </div>
+
+            <!-- ✅ NUEVO: Campo para subir imagen -->
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-image me-2"></i>
+                    Imagen de la Playlist (Opcional)
+                </label>
+                <!-- Mostrar imagen actual si existe -->
+                @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                {
+                    <div class="current-image-preview">
+                        <img src="@Model.ImageUrl" alt="Imagen actual" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px; margin-bottom: 1rem;" />
+                        <p style="color: #b3b3b3; font-size: 0.9rem;">Imagen actual</p>
+                    </div>
+                }
+                <input type="file" name="imageFile" accept="image/*" class="form-control" />
+                <small class="form-text">Sube una nueva imagen para cambiar la actual. Formatos soportados: JPG, PNG, GIF, WebP (máx. 5MB)</small>
             </div>
 
             <!-- Acciones del formulario -->
