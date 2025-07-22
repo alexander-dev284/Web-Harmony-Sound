@@ -1,0 +1,596 @@
+﻿@{
+    ViewData["Title"] = "Gestionar Invitaciones";
+    var userPlan = ViewBag.UserPlan as HarmonySound.Models.UserPlan;
+    var invitations = ViewBag.Invitations as List<HarmonySound.MVC.Models.InvitationDto>;
+    var activeInvitationsCount = ViewBag.ActiveInvitationsCount as int? ?? 0;
+    var canSendMore = ViewBag.CanSendMoreInvitations as bool? ?? false;
+    var isPlanOwner = ViewBag.IsPlanOwner as bool? ?? false;
+}
+
+<div class="invitations-container">
+    <div class="invitations-header">
+        <!-- ✅ MEJORADO: Navegación con mejor posicionamiento -->
+        <div class="navigation-bar">
+            <a href="@Url.Action("Index")" class="btn-back">
+                <i class="fas fa-arrow-left me-2"></i>
+                Volver a Planes
+            </a>
+        </div>
+        
+        <!-- ✅ MEJORADO: Header con mejor espaciado -->
+        <div class="header-content">
+            <h1 class="invitations-title">
+                <i class="fas fa-users me-3"></i>
+                Gestionar Invitaciones
+            </h1>
+            <p class="invitations-subtitle">
+                Plan: <span class="plan-name">@userPlan?.Plan?.PlanName</span> - Límite: <span class="plan-limit">@userPlan?.Plan?.AccountLimit cuentas</span>
+            </p>
+        </div>
+    </div>
+
+    @if (!isPlanOwner)
+    {
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            Solo el propietario del plan puede gestionar invitaciones. Tienes acceso premium a través de una invitación.
+        </div>
+        
+        <div class="text-center">
+            <a href="@Url.Action("Index")" class="btn btn-primary">
+                <i class="fas fa-arrow-left me-2"></i>
+                Volver a Planes
+            </a>
+        </div>
+    }
+    else
+    {
+        <!-- ✅ MEJORAR: Información del límite de cuentas -->
+        <div class="account-limit-info">
+            <h4>
+                <i class="fas fa-users me-2"></i>
+                Cuentas Utilizadas: @activeInvitationsCount / @userPlan?.Plan?.AccountLimit
+            </h4>
+            @if (!canSendMore)
+            {
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Has alcanzado el límite de cuentas para tu plan. Cancela alguna invitación para enviar nuevas.
+                </div>
+            }
+        </div>
+
+        <!-- Formulario para enviar invitación -->
+        <div class="send-invitation-card">
+            <div class="card-header">
+                <h3>
+                    <i class="fas fa-envelope me-2"></i>
+                    Enviar Nueva Invitación
+                </h3>
+            </div>
+            
+            <form asp-action="SendInvitation" method="post" class="invitation-form">
+                <div class="form-group">
+                    <label for="inviteeEmail">Email del invitado:</label>
+                    <input type="email" id="inviteeEmail" name="inviteeEmail" 
+                           class="form-control" placeholder="correo@ejemplo.com" 
+                           required @(canSendMore ? "" : "disabled")>
+                </div>
+                
+                <div class="form-group">
+                    <label for="message">Mensaje personal (opcional):</label>
+                    <textarea id="message" name="message" class="form-control" 
+                              rows="3" placeholder="Escribe un mensaje personalizado..."
+                              @(canSendMore ? "" : "disabled")></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-send-invitation" @(canSendMore ? "" : "disabled")>
+                    <i class="fas fa-paper-plane me-2"></i>
+                    @(canSendMore ? "Enviar Invitación" : "Límite Alcanzado")
+                </button>
+            </form>
+        </div>
+
+        <!-- ✅ MEJORAR: Lista de invitaciones con mejor información -->
+        @if (invitations != null && invitations.Any())
+        {
+            <div class="invitations-table">
+                <!-- Encabezados mejorados -->
+                <div class="table-header">
+                    <div>Email / Usuario</div>
+                    <div>Estado</div>
+                    <div>Enviado</div>
+                    <div>Respuesta</div>
+                    <div>Acciones</div>
+                </div>
+                
+                @foreach (var invitation in invitations)
+                {
+                    <div class="table-row">
+                        <div class="invitation-email">
+                            <div class="email-info">
+                                <strong>@invitation.InviteeEmail</strong>
+                                @if (!string.IsNullOrEmpty(invitation.InviteeName))
+                                {
+                                    <small class="text-muted d-block">@invitation.InviteeName</small>
+                                }
+                            </div>
+                        </div>
+                        
+                        <div class="invitation-status">
+                            <span class="status-badge status-@invitation.Status.ToLower()">
+                                @GetStatusText(invitation.Status)
+                            </span>
+                        </div>
+                        
+                        <div class="invitation-date">
+                            <div class="date-info">
+                                @invitation.InvitedDate.ToString("dd/MM/yyyy")
+                                <small class="text-muted d-block">@invitation.InvitedDate.ToString("HH:mm")</small>
+                            </div>
+                        </div>
+                        
+                        <div class="invitation-accepted">
+                            @if (invitation.AcceptedDate.HasValue)
+                            {
+                                <div class="date-info">
+                                    @invitation.AcceptedDate.Value.ToString("dd/MM/yyyy")
+                                    <small class="text-muted d-block">@invitation.AcceptedDate.Value.ToString("HH:mm")</small>
+                                </div>
+                            }
+                            else if (invitation.Status == "Expired")
+                            {
+                                <span class="text-muted">
+                                    <i class="fas fa-clock me-1"></i>
+                                    Expiró: @invitation.ExpirationDate.ToString("dd/MM/yyyy")
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">Pendiente</span>
+                            }
+                        </div>
+                        
+                        <div class="invitation-actions">
+                            @if (invitation.Status == "Pending")
+                            {
+                                <form asp-action="CancelInvitation" method="post" style="display: inline;">
+                                    <input type="hidden" name="invitationId" value="@invitation.Id" />
+                                    <button type="submit" class="btn-cancel-invitation" 
+                                            onclick="return confirm('¿Estás seguro de cancelar esta invitación?')"
+                                            title="Cancelar invitación">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </form>
+                            }
+                            else
+                            {
+                                <span class="text-muted">-</span>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    }
+
+    <!-- ✅ NUEVO: Banner de estado de suscripción cancelada -->
+    @if (userPlan?.IsCancelled == true)
+    {
+        <div class="subscription-status-banner">
+            <div class="banner-content">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div class="banner-text">
+                    <strong>Plan cancelado:</strong> 
+                    Las invitaciones se desactivarán cuando expire el plan el @userPlan.EndDate.ToString("dd/MM/yyyy")
+                </div>
+            </div>
+        </div>
+    }
+
+    @functions {
+        private string GetStatusText(string status)
+        {
+            return status switch
+            {
+                "Pending" => "Pendiente",
+                "Accepted" => "Aceptada",
+                "Declined" => "Rechazada",
+                "Expired" => "Expirada",
+                "Cancelled" => "Cancelada",
+                _ => status
+            };
+        }
+    }
+</div>
+
+<!-- Agregar estilos CSS aquí -->
+<style>
+    /* ✅ MEJORADO: Contenedor principal */
+    .invitations-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 2rem;
+        background: #000;
+        color: #fff;
+        min-height: 100vh;
+        position: relative;
+    }
+
+    /* ✅ MEJORADO: Header con mejor layout */
+    .invitations-header {
+        margin-bottom: 3rem;
+        position: relative;
+        padding-top: 4rem; /* ✅ AUMENTADO: Más espacio arriba */
+    }
+
+    /* ✅ MEJORADO: Navegación reposicionada */
+    .navigation-bar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 10;
+    }
+
+    .btn-back {
+        background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+        color: #fff !important;
+        padding: 10px 20px; /* ✅ AUMENTADO: Más padding */
+        border-radius: 25px; /* ✅ MEJORADO: Más redondeado */
+        font-weight: 600;
+        text-decoration: none;
+        border: 1px solid #333;
+        display: inline-flex;
+        align-items: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        font-size: 0.95rem; /* ✅ AUMENTADO: Texto más grande */
+    }
+
+    .btn-back:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        color: #000 !important;
+        border-color: #1db954;
+        background: linear-gradient(135deg, #1db954, #1ed760);
+    }
+
+    /* ✅ NUEVO: Contenido del header separado */
+    .header-content {
+        text-align: center;
+        margin-top: 1rem; /* ✅ NUEVO: Separación del botón */
+    }
+
+    /* ✅ MEJORADO: Título con mejor espaciado */
+    .invitations-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem; /* ✅ AUMENTADO: Más espacio debajo */
+        color: #fff !important;
+        background: linear-gradient(135deg, #1db954, #1ed760);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        line-height: 1.2; /* ✅ NUEVO: Mejor altura de línea */
+    }
+
+    /* ✅ MEJORADO: Subtítulo con mejor formato */
+    .invitations-subtitle {
+        color: #b3b3b3 !important;
+        font-size: 1.1rem;
+        margin-bottom: 0;
+        line-height: 1.4; /* ✅ NUEVO: Mejor espaciado de líneas */
+    }
+
+    /* ✅ NUEVO: Resaltado para elementos del plan */
+    .plan-name {
+        color: #1db954;
+        font-weight: 600;
+    }
+
+    .plan-limit {
+        color: #ffc107;
+        font-weight: 600;
+    }
+
+    /* ✅ RESTO DE ESTILOS EXISTENTES MEJORADOS */
+    .send-invitation-card,
+    .invitations-list-card {
+        background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+        border: 1px solid #333;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .card-header {
+        background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
+        padding: 1.5rem;
+        border-bottom: 1px solid #333;
+    }
+
+    .card-header h3 {
+        margin: 0;
+        color: #fff;
+        font-size: 1.3rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+    }
+
+    .invitation-form {
+        padding: 2rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #fff;
+        font-weight: 600;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 12px 16px; /* ✅ AUMENTADO: Más padding */
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid #444;
+        border-radius: 8px;
+        color: #fff;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        background: rgba(255, 255, 255, 0.15);
+        border-color: #1db954;
+        box-shadow: 0 0 0 0.2rem rgba(29, 185, 84, 0.25);
+        outline: none;
+    }
+
+    .form-control::placeholder {
+        color: #888;
+    }
+
+    .btn-send-invitation {
+        background: linear-gradient(135deg, #1db954, #1ed760);
+        color: #000;
+        padding: 12px 24px; /* ✅ AUMENTADO: Más padding */
+        border: none;
+        border-radius: 25px; /* ✅ MEJORADO: Más redondeado */
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        font-size: 1rem;
+        box-shadow: 0 4px 15px rgba(29, 185, 84, 0.3);
+    }
+
+    .btn-send-invitation:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(29, 185, 84, 0.4);
+    }
+
+    .btn-send-invitation:disabled {
+        background: #666;
+        color: #999;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+
+    .btn-manage-invitations {
+        background: linear-gradient(135deg, #1db954, #1ed760);
+        color: #000;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .invitation-section {
+        background: #1a1a1a;
+        border: 1px solid #333;
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 3rem;
+        text-align: center;
+    }
+
+    /* Nuevos estilos mejorados */
+    .account-limit-info {
+        background: linear-gradient(135deg, #2b2b2b, #3b3b3b);
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        border: 1px solid #444;
+    }
+
+    .account-limit-info h4 {
+        margin: 0;
+        color: #fff;
+        font-size: 1.2rem;
+        display: flex;
+        align-items: center;
+    }
+
+    /* ✅ MEJORADO: Tabla de invitaciones */
+    .invitations-table {
+        background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid #333;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .table-header {
+        background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 1fr 80px;
+        gap: 1rem;
+        padding: 1rem 1.5rem;
+        font-weight: 600;
+        color: #fff;
+        border-bottom: 1px solid #444;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .table-row {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 1fr 80px;
+        gap: 1rem;
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid #333;
+        transition: background 0.3s ease;
+        align-items: center;
+    }
+
+    .table-row:hover {
+        background: rgba(29, 185, 84, 0.05);
+    }
+
+    .table-row:last-child {
+        border-bottom: none;
+    }
+
+    .email-info strong {
+        color: #fff;
+        font-size: 1rem;
+    }
+
+    .text-muted {
+        color: #888 !important;
+        font-size: 0.9rem;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .status-pending {
+        background: #ffc107;
+        color: #000;
+    }
+
+    .status-accepted {
+        background: #28a745;
+        color: #fff;
+    }
+
+    .status-declined {
+        background: #dc3545;
+        color: #fff;
+    }
+
+    .status-expired {
+        background: #6c757d;
+        color: #fff;
+    }
+
+    .status-cancelled {
+        background: #fd7e14;
+        color: #000;
+    }
+
+    .btn-cancel-invitation {
+        background: #dc3545;
+        color: #fff;
+        padding: 0.5rem;
+        border: none;
+        border-radius: 50%;
+        cursor: pointer;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+
+    .btn-cancel-invitation:hover {
+        background: #c82333;
+        transform: scale(1.1);
+    }
+
+    /* Alertas */
+    .alert {
+        border-radius: 8px;
+        border: none;
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .alert-info {
+        background: rgba(23, 162, 184, 0.1);
+        color: #17a2b8;
+        border: 1px solid rgba(23, 162, 184, 0.3);
+    }
+
+    .alert-warning {
+        background: rgba(255, 193, 7, 0.1);
+        color: #ffc107;
+        border: 1px solid rgba(255, 193, 7, 0.3);
+    }
+
+    /* Banner de suscripción cancelada */
+    .subscription-status-banner {
+        background: linear-gradient(135deg, #dc3545, #c82333);
+        color: #fff;
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+    }
+
+    .banner-content {
+        display: flex;
+        align-items: center;
+        width: 100%;
+    }
+
+    .banner-text {
+        margin-left: 1rem;
+        flex: 1;
+    }
+
+    .fas.fa-exclamation-triangle {
+        font-size: 1.5rem;
+        flex-shrink: 0;
+    }
+
+    /* Ocultar elementos del layout */
+    header, footer {
+        display: none !important;
+    }
+
+    /* FontAwesome */
+    .fas {
+        font-family: "Font Awesome 5 Free" !important;
+        font-weight: 900 !important;
+    }
+
+    /* Importar estilos de suscripción */
+    @@import url('/css/subscription-ui.css');
+</style>
+
+
+
+
+

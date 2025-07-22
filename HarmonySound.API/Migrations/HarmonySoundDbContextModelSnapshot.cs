@@ -139,6 +139,61 @@ namespace HarmonySound.API.Migrations
                     b.ToTable("Plans");
                 });
 
+            modelBuilder.Entity("HarmonySound.Models.PlanInvitation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTimeOffset?>("AcceptedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("ExpirationDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("InvitationMessage")
+                        .HasColumnType("text");
+
+                    b.Property<string>("InvitationToken")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset>("InvitedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("InviteeEmail")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int?>("InviteeId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("InviterId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("PlanId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InvitationToken")
+                        .IsUnique();
+
+                    b.HasIndex("InviteeId");
+
+                    b.HasIndex("InviterId");
+
+                    b.HasIndex("PlanId");
+
+                    b.ToTable("PlanInvitations");
+                });
+
             modelBuilder.Entity("HarmonySound.Models.Playlist", b =>
                 {
                     b.Property<int>("Id")
@@ -442,8 +497,14 @@ namespace HarmonySound.API.Migrations
                     b.Property<bool>("Active")
                         .HasColumnType("boolean");
 
+                    b.Property<DateTimeOffset?>("CancelledDate")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<DateTimeOffset>("EndDate")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsCancelled")
+                        .HasColumnType("boolean");
 
                     b.Property<int>("PlanId")
                         .HasColumnType("integer");
@@ -605,6 +666,32 @@ namespace HarmonySound.API.Migrations
                     b.Navigation("Album");
 
                     b.Navigation("Content");
+                });
+
+            modelBuilder.Entity("HarmonySound.Models.PlanInvitation", b =>
+                {
+                    b.HasOne("HarmonySound.Models.User", "Invitee")
+                        .WithMany()
+                        .HasForeignKey("InviteeId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("HarmonySound.Models.User", "Inviter")
+                        .WithMany()
+                        .HasForeignKey("InviterId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("HarmonySound.Models.Plan", "Plan")
+                        .WithMany()
+                        .HasForeignKey("PlanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Invitee");
+
+                    b.Navigation("Inviter");
+
+                    b.Navigation("Plan");
                 });
 
             modelBuilder.Entity("HarmonySound.Models.Playlist", b =>

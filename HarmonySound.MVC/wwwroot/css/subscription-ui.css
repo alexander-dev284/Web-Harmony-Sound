@@ -1,0 +1,152 @@
+/* ===== ESTILOS PARA ESTADO DE SUSCRIPCIÓN ===== */
+
+/* Badge de plan cancelado */
+.cancelled-badge {
+    background: linear-gradient(135deg, #ff6b6b, #ff5252);
+    color: #fff;
+    padding: 4px 12px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-left: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+/* Información de cancelación */
+.cancellation-info {
+    margin-top: 1.5rem;
+    padding: 1.5rem;
+    background: rgba(255, 193, 7, 0.1);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+.cancellation-info .alert {
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin-bottom: 1rem;
+}
+
+/* Botón de reactivar */
+.btn-reactivate {
+    background: linear-gradient(135deg, #28a745, #34ce57);
+    color: #fff;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+}
+
+.btn-reactivate:hover {
+    background: linear-gradient(135deg, #218838, #28a745);
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+}
+
+/* Banner de estado de suscripción */
+.subscription-status-banner {
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(255, 152, 0, 0.1));
+    border: 1px solid rgba(255, 193, 7, 0.3);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 2rem;
+    animation: slideInDown 0.5s ease-out;
+}
+
+@keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.banner-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.banner-content i {
+    color: #ffc107;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.banner-text {
+    flex-grow: 1;
+    color: #fff;
+}
+
+.banner-action {
+    background: #ffc107;
+    color: #000;
+    padding: 8px 16px;
+    border-radius: 20px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.banner-action:hover {
+    background: #ffcd39;
+    color: #000;
+    transform: scale(1.05);
+}
+
+/* Indicador de expiración próxima */
+.expiration-warning {
+    background: rgba(220, 53, 69, 0.1);
+    border: 1px solid rgba(220, 53, 69, 0.3);
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+    color: #dc3545;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.expiration-warning i {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .banner-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.75rem;
+    }
+    
+    .banner-action {
+        width: 100%;
+        max-width: 200px;
+    }
+    
+    .cancelled-badge {
+        margin-left: 0;
+        margin-top: 0.5rem;
+    }
+}

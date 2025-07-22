@@ -1,0 +1,41 @@
+<nav class="admin-sidebar">
+    <div class="sidebar-header">
+        <div class="logo">
+            <i class="fas fa-shield-alt"></i>
+            <h2>HarmonySound</h2>
+            <span>Admin Panel</span>
+        </div>
+    </div>
+
+    <div class="sidebar-menu">
+        <a href="@Url.Action("Dashboard", "Admin")" class="menu-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Dashboard" ? "active" : "")">
+            <i class="fas fa-tachometer-alt"></i>
+            <span>Dashboard</span>
+        </a>
+        <a href="@Url.Action("Users", "Admin")" class="menu-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Users" ? "active" : "")">
+            <i class="fas fa-users"></i>
+            <span>Usuarios</span>
+        </a>
+        <a href="@Url.Action("Content", "Admin")" class="menu-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Content" ? "active" : "")">
+            <i class="fas fa-music"></i>
+            <span>Contenido</span>
+        </a>
+        <a href="@Url.Action("Reports", "Admin")" class="menu-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Reports" ? "active" : "")">
+            <i class="fas fa-flag"></i>
+            <span>Reportes</span>
+        </a>
+        <a href="@Url.Action("Plans", "Admin")" class="menu-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Plans" ? "active" : "")">
+            <i class="fas fa-crown"></i>
+            <span>Planes</span>
+        </a>
+    </div>
+
+    <div class="sidebar-footer">
+        <form asp-action="Logout" asp-controller="Account" method="post">
+            <button type="submit" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Cerrar Sesión</span>
+            </button>
+        </form>
+    </div>
+</nav>

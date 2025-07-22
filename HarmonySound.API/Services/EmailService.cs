@@ -21,6 +21,15 @@ namespace HarmonySound.API.Services
             {
                 var smtpSettings = _configuration.GetSection("SmtpSettings");
 
+                // ✅ VALIDAR configuración
+                if (string.IsNullOrEmpty(smtpSettings["Server"]) || 
+                    string.IsNullOrEmpty(smtpSettings["Username"]) || 
+                    string.IsNullOrEmpty(smtpSettings["Password"]))
+                {
+                    _logger.LogError("SMTP configuration is incomplete");
+                    throw new InvalidOperationException("SMTP configuration is incomplete");
+                }
+
                 using var client = new SmtpClient(smtpSettings["Server"], int.Parse(smtpSettings["Port"]))
                 {
                     EnableSsl = bool.Parse(smtpSettings["EnableSsl"]),
@@ -32,17 +41,25 @@ namespace HarmonySound.API.Services
                     From = new MailAddress(smtpSettings["FromEmail"], smtpSettings["FromName"]),
                     Subject = subject,
                     Body = htmlMessage,
-                    IsBodyHtml = false // Cambiar a false para texto plano
+                    IsBodyHtml = true // ✅ CAMBIAR: Para soportar HTML en invitaciones
                 };
 
                 mailMessage.To.Add(email);
 
                 await client.SendMailAsync(mailMessage);
-                _logger.LogInformation($"Email sent successfully to {email}");
+                _logger.LogInformation($"✅ Email sent successfully to {email}");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Failed to send email to {email}");
+                _logger.LogError(ex, $"❌ Failed to send email to {email}");
+                
+                // ✅ OPCIONAL: En desarrollo, no fallar por errores de email
+                if (_configuration.GetValue<string>("ASPNETCORE_ENVIRONMENT") == "Development")
+                {
+                    _logger.LogWarning("⚠️ Email sending failed in development mode - continuing...");
+                    return;
+                }
+                
                 throw;
             }
         }

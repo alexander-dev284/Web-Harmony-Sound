@@ -606,6 +606,55 @@
         box-shadow: 0 2px 10px rgba(220, 38, 38, 0.3);
     }
 
+    /* Nueva sección - Banner de estado de suscripción */
+    .subscription-status-banner {
+        background: #1e1e2e; 
+        color: #fff; 
+        padding: 12px 24px; 
+        border-radius: 8px; 
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid #2a2a3d;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .subscription-status-banner i {
+        font-size: 24px;
+        color: #ffcc00;
+        margin-right: 12px;
+    }
+
+    .banner-content {
+        display: flex;
+        align-items: center;
+        flex-grow: 1;
+    }
+
+    .banner-text {
+        flex-grow: 1;
+        font-size: 14px;
+        line-height: 1.4;
+    }
+
+    .banner-action {
+        background: #ffcc00;
+        color: #000;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-block;
+        transition: background 0.3s ease;
+    }
+
+    .banner-action:hover {
+        background: #ffc700;
+    }
+
     /* Responsive */
     @@media (max-width: 768px) {
         .header-actions { flex-direction: column; gap: 1rem; }
@@ -638,6 +687,9 @@
     /* Clases de utilidad */
     .noselect { user-select: none !important; }
     .dragging { cursor: grabbing !important; }
+
+    /* Importar estilos de suscripción */
+    @@import url('/css/subscription-ui.css');
 </style>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">

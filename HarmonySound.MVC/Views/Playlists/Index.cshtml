@@ -63,6 +63,23 @@
         </div>
     }
 
+    <!-- ✅ NUEVO: Banner de estado de suscripción -->
+    @{
+        var subscriptionStatus = ViewBag.SubscriptionStatus as dynamic;
+    }
+
+    @if (subscriptionStatus?.IsCancelled == true && subscriptionStatus?.IsActive == true)
+    {
+        <div class="expiration-warning">
+            <i class="fas fa-exclamation-triangle"></i>
+            <div>
+                <strong>Atención:</strong> Tu plan premium expirará el @subscriptionStatus.EndDate.ToString("dd/MM/yyyy"). 
+                Después de esa fecha, tus playlists seguirán disponibles, pero con limitaciones.
+                <a href="@Url.Action("Index", "Plans")" style="color: #ffc107; text-decoration: underline;">Reactivar plan</a>
+            </div>
+        </div>
+    }
+
     <div class="playlists-grid">
         @if (Model != null && Model.Any())
         {
@@ -851,4 +868,7 @@
             hideDeleteModal();
         }
     });
+        /* Importar estilos de suscripción */
+    @@import url('/css/subscription-ui.css');
 </script>
+

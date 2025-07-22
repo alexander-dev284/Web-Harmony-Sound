@@ -1,69 +1,50 @@
 ﻿@{
-    ViewData["Title"] = "Pago Exitoso";
+    ViewData["Title"] = "Pago Cancelado";
 }
 
-<div class="payment-success-container">
-    <div class="payment-success-card">
-        <div class="success-header">
-            <div class="success-icon">
-                <i class="fas fa-check-circle"></i>
+<div class="payment-cancel-container">
+    <div class="payment-cancel-card">
+        <div class="cancel-header">
+            <div class="cancel-icon">
+                <i class="fas fa-times-circle"></i>
             </div>
-            <h1 class="success-title">¡Pago Exitoso!</h1>
+            <h1 class="cancel-title">Pago Cancelado</h1>
         </div>
         
-        <div class="success-content">
-            <div class="success-message">
-                <h2 class="activation-title">Tu suscripción ha sido activada</h2>
-                <p class="success-description">
-                    ¡Felicidades! Ahora puedes disfrutar de todas las características premium de HarmonySound.
+        <div class="cancel-content">
+            <div class="cancel-message">
+                <h2 class="message-title">No se procesó el pago</h2>
+                <p class="cancel-description">
+                    Has cancelado el proceso de pago. No se ha realizado ningún cargo a tu cuenta.
                 </p>
                 
-                <div class="premium-features">
-                    <h3 class="features-title">Ahora tienes acceso a:</h3>
-                    <div class="features-grid">
-                        <div class="feature-item">
-                            <i class="fas fa-check feature-check"></i>
-                            <span>Sin anuncios</span>
+                <!-- ✅ NUEVO: Opciones después de cancelar -->
+                <div class="next-steps">
+                    <h3 class="steps-title">¿Qué puedes hacer ahora?</h3>
+                    <div class="options-list">
+                        <div class="option-item">
+                            <i class="fas fa-arrow-left"></i>
+                            <span>Volver e intentar el pago nuevamente</span>
                         </div>
-                        <div class="feature-item">
-                            <i class="fas fa-check feature-check"></i>
-                            <span>Audio HD</span>
+                        <div class="option-item">
+                            <i class="fas fa-music"></i>
+                            <span>Continuar usando la versión gratuita</span>
                         </div>
-                        <div class="feature-item">
-                            <i class="fas fa-check feature-check"></i>
-                            <span>Descargas offline</span>
+                        <div class="option-item">
+                            <i class="fas fa-question-circle"></i>
+                            <span>Contactar soporte si tienes dudas</span>
                         </div>
-                        <div class="feature-item">
-                            <i class="fas fa-check feature-check"></i>
-                            <span>Soporte prioritario</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- ✅ NUEVO: Información de duración y expiración -->
-                <div class="subscription-details">
-                    <div class="detail-item">
-                        <i class="fas fa-calendar-alt"></i>
-                        <span>Duración: 30 días</span>
-                    </div>
-                    <div class="detail-item">
-                        <i class="fas fa-clock"></i>
-                        <span>Expira: @DateTime.Now.AddDays(30).ToString("dd/MM/yyyy")</span>
-                    </div>
-                    <div class="detail-item">
-                        <i class="fas fa-sync-alt"></i>
-                        <span>Renovación automática activada</span>
                     </div>
                 </div>
                 
                 <div class="action-buttons">
-                    <a href="@Url.Action("Index", "Plans")" class="btn btn-secondary">
+                    <a href="@Url.Action("Index", "Plans")" class="btn btn-primary">
                         <i class="fas fa-arrow-left me-2"></i>
                         Volver a Planes
                     </a>
-                    <a href="@Url.Action("Home", "Clients")" class="btn btn-primary">
+                    <a href="@Url.Action("Home", "Clients")" class="btn btn-secondary">
                         <i class="fas fa-music me-2"></i>
-                        Explorar Música
+                        Continuar Gratis
                     </a>
                 </div>
             </div>
@@ -72,7 +53,7 @@
 </div>
 
 <style>
-    /* CSS Base - Mantener consistencia con la app */
+    /* CSS Base */
     body { 
         background: #000 !important; 
         color: #fff !important; 
@@ -85,8 +66,7 @@
         justify-content: center;
     }
 
-    /* Contenedor principal */
-    .payment-success-container {
+    .payment-cancel-container {
         width: 100%;
         max-width: 600px;
         margin: 0 auto;
@@ -97,8 +77,7 @@
         min-height: 100vh;
     }
 
-    /* Tarjeta de éxito */
-    .payment-success-card {
+    .payment-cancel-card {
         background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
         border: 1px solid #333;
         border-radius: 20px;
@@ -108,22 +87,20 @@
         animation: slideInUp 0.6s ease-out;
     }
 
-    /* Header con ícono de éxito */
-    .success-header {
-        background: linear-gradient(135deg, #1db954, #1ed760);
+    .cancel-header {
+        background: linear-gradient(135deg, #ff6b6b, #ff5252);
         text-align: center;
         padding: 3rem 2rem 2rem;
-        position: relative;
     }
 
-    .success-icon {
+    .cancel-icon {
         font-size: 4rem;
         color: #fff;
         margin-bottom: 1rem;
         animation: bounceIn 0.8s ease-out 0.2s both;
     }
 
-    .success-title {
+    .cancel-title {
         font-size: 2.5rem;
         font-weight: 700;
         color: #fff;
@@ -131,24 +108,23 @@
         text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
     }
 
-    /* Contenido principal */
-    .success-content {
+    .cancel-content {
         padding: 2.5rem;
     }
 
-    .success-message {
+    .cancel-message {
         text-align: center;
         animation: fadeInUp 0.6s ease-out 0.4s both;
     }
 
-    .activation-title {
+    .message-title {
         font-size: 1.5rem;
         font-weight: 600;
-        color: #1db954;
+        color: #ff6b6b;
         margin-bottom: 1rem;
     }
 
-    .success-description {
+    .cancel-description {
         font-size: 1.1rem;
         color: #b3b3b3;
         line-height: 1.6;
@@ -158,81 +134,48 @@
         margin-right: auto;
     }
 
-    /* Características premium */
-    .premium-features {
-        background: #1a1a1a;
-        border: 1px solid #333;
+    /* ✅ NUEVO: Estilos para próximos pasos */
+    .next-steps {
+        background: rgba(255, 193, 7, 0.1);
+        border: 1px solid rgba(255, 193, 7, 0.3);
         border-radius: 15px;
         padding: 2rem;
         margin: 2rem 0;
-        animation: fadeInUp 0.6s ease-out 0.6s both;
+        text-align: left;
     }
 
-    .features-title {
+    .steps-title {
         font-size: 1.2rem;
         font-weight: 600;
-        color: #fff;
+        color: #ffc107;
         margin-bottom: 1.5rem;
         text-align: center;
     }
 
-    .features-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
+    .options-list {
+        display: flex;
+        flex-direction: column;
         gap: 1rem;
     }
 
-    .feature-item {
+    .option-item {
         display: flex;
         align-items: center;
-        gap: 0.75rem;
-        padding: 0.75rem;
-        background: #121212;
+        gap: 1rem;
+        padding: 1rem;
+        background: rgba(0, 0, 0, 0.2);
         border-radius: 10px;
-        border: 1px solid #282828;
-        transition: all 0.3s ease;
-    }
-
-    .feature-item:hover {
-        border-color: #1db954;
-        transform: translateY(-2px);
-    }
-
-    .feature-check {
-        color: #1db954;
-        font-size: 1rem;
-        flex-shrink: 0;
-    }
-
-    .feature-item span {
-        color: #fff;
-        font-weight: 500;
-        font-size: 0.95rem;
-    }
-
-    /* Detalles de la suscripción */
-    .subscription-details {
-        background: #1a1a1a;
         border: 1px solid #333;
-        border-radius: 15px;
-        padding: 1.5rem;
-        margin: 2rem 0;
-        animation: fadeInUp 0.6s ease-out 0.6s both;
+        color: #fff;
     }
 
-    .detail-item {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.5rem 0;
-        border-bottom: 1px solid #282828;
+    .option-item i {
+        color: #ffc107;
+        font-size: 1.2rem;
+        width: 24px;
+        text-align: center;
     }
 
-    .detail-item:last-child {
-        border-bottom: none;
-    }
-
-    /* Botones de acción */
     .action-buttons {
         display: flex;
         gap: 1rem;
@@ -277,7 +220,7 @@
     .btn-secondary:hover {
         background: #1a1a1a;
         color: #fff;
-        border-color: #1db954;
+        border-color: #ffc107;
         transform: translateY(-2px);
     }
 
@@ -321,28 +264,24 @@
 
     /* Responsive */
     @@media (max-width: 768px) {
-        .payment-success-container {
+        .payment-cancel-container {
             padding: 1rem;
         }
 
-        .success-header {
+        .cancel-header {
             padding: 2rem 1.5rem 1.5rem;
         }
 
-        .success-icon {
+        .cancel-icon {
             font-size: 3rem;
         }
 
-        .success-title {
+        .cancel-title {
             font-size: 2rem;
         }
 
-        .success-content {
+        .cancel-content {
             padding: 2rem 1.5rem;
-        }
-
-        .features-grid {
-            grid-template-columns: 1fr;
         }
 
         .action-buttons {
@@ -356,21 +295,7 @@
         }
     }
 
-    @@media (max-width: 480px) {
-        .success-title {
-            font-size: 1.75rem;
-        }
-
-        .activation-title {
-            font-size: 1.25rem;
-        }
-
-        .success-description {
-            font-size: 1rem;
-        }
-    }
-
-    /* Ocultar elementos del layout si es necesario */
+    /* Ocultar elementos del layout */
     header, footer { display: none !important; }
     
     /* FontAwesome */

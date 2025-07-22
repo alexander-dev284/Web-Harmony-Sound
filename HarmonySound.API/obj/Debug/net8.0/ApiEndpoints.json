@@ -239,6 +239,22 @@
   },
   {
     "ContainingType": "HarmonySound.API.Controllers.AuthController",
+    "Method": "AdminLogin",
+    "RelativePath": "api/Auth/admin-login",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "model",
+        "Type": "HarmonySound.API.DTOs.LoginModel",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "HarmonySound.API.Controllers.AuthController",
     "Method": "ConfirmEmail",
     "RelativePath": "api/Auth/confirm-email",
     "HttpMethod": "GET",
@@ -793,6 +809,86 @@
       {
         "Name": "request",
         "Type": "HarmonySound.API.Controllers.ExecutePaymentRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "HarmonySound.API.Controllers.PlanInvitationsController",
+    "Method": "AcceptInvitation",
+    "RelativePath": "api/PlanInvitations/accept",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "HarmonySound.API.Controllers.AcceptInvitationRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "HarmonySound.API.Controllers.PlanInvitationsController",
+    "Method": "CancelInvitation",
+    "RelativePath": "api/PlanInvitations/cancel/{invitationId}",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "invitationId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "HarmonySound.API.Controllers.PlanInvitationsController",
+    "Method": "DeclineInvitation",
+    "RelativePath": "api/PlanInvitations/decline/{token}",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "token",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "HarmonySound.API.Controllers.PlanInvitationsController",
+    "Method": "SendInvitation",
+    "RelativePath": "api/PlanInvitations/send",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "HarmonySound.API.Controllers.SendInvitationRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "HarmonySound.API.Controllers.PlanInvitationsController",
+    "Method": "GetSentInvitations",
+    "RelativePath": "api/PlanInvitations/sent/{userId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.Int32",
         "IsRequired": true
       }
     ],
@@ -1738,6 +1834,22 @@
     "ContainingType": "HarmonySound.API.Controllers.UserPlansController",
     "Method": "GetSubscriptionHistory",
     "RelativePath": "api/UserPlans/history/{userId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "HarmonySound.API.Controllers.UserPlansController",
+    "Method": "IsPlanOwner",
+    "RelativePath": "api/UserPlans/is-plan-owner/{userId}",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,

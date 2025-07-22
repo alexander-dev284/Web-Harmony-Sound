@@ -1,0 +1,464 @@
+@model HarmonySound.MVC.Models.AdminDashboardViewModel
+
+@{
+    ViewData["Title"] = "Dashboard Administrativo";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - HarmonySound Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="admin-body">
+    <div class="admin-dashboard">
+        <!-- Sidebar -->
+        <nav class="admin-sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-shield-alt"></i>
+                    <h2>HarmonySound</h2>
+                    <span>Admin Panel</span>
+                </div>
+            </div>
+
+            <div class="sidebar-menu">
+                <a href="@Url.Action("Dashboard", "Admin")" class="menu-item active">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="@Url.Action("Users", "Admin")" class="menu-item">
+                    <i class="fas fa-users"></i>
+                    <span>Usuarios</span>
+                </a>
+                <a href="@Url.Action("Content", "Admin")" class="menu-item">
+                    <i class="fas fa-music"></i>
+                    <span>Contenido</span>
+                </a>
+                <a href="@Url.Action("Reports", "Admin")" class="menu-item">
+                    <i class="fas fa-flag"></i>
+                    <span>Reportes</span>
+                </a>
+                <a href="@Url.Action("Plans", "Admin")" class="menu-item">
+                    <i class="fas fa-crown"></i>
+                    <span>Planes</span>
+                </a>
+            </div>
+
+            <div class="sidebar-footer">
+                <form asp-action="Logout" asp-controller="Account" method="post">
+                    <button type="submit" class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Cerrar Sesión</span>
+                    </button>
+                </form>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="admin-main">
+            <div class="admin-header">
+                <h1>
+                    <i class="fas fa-tachometer-alt me-3"></i>
+                    Dashboard Administrativo
+                </h1>
+                <p>Panel de control principal</p>
+            </div>
+
+            <!-- Mensajes -->
+            @if (ViewBag.Success != null)
+            {
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle me-2"></i>
+                    @ViewBag.Success
+                </div>
+            }
+            @if (ViewBag.Error != null)
+            {
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    @ViewBag.Error
+                </div>
+            }
+
+            <!-- Estadísticas principales -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon users">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Total Usuarios</h3>
+                        <div class="stat-number">@Model.TotalUsers</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon content">
+                        <i class="fas fa-music"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Canciones</h3>
+                        <div class="stat-number">@Model.TotalSongs</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon albums">
+                        <i class="fas fa-compact-disc"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Álbumes</h3>
+                        <div class="stat-number">@Model.TotalAlbums</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon reports">
+                        <i class="fas fa-flag"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Reportes Pendientes</h3>
+                        <div class="stat-number">@Model.PendingReports</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Acciones rápidas -->
+            <div class="quick-actions">
+                <h2>Acciones Rápidas</h2>
+                <div class="actions-grid">
+                    <a href="@Url.Action("Users", "Admin")" class="action-card">
+                        <i class="fas fa-user-cog"></i>
+                        <h3>Gestionar Usuarios</h3>
+                        <p>Administrar cuentas de usuarios</p>
+                    </a>
+                    <a href="@Url.Action("Content", "Admin")" class="action-card">
+                        <i class="fas fa-music"></i>
+                        <h3>Moderar Contenido</h3>
+                        <p>Revisar y gestionar contenido</p>
+                    </a>
+                    <a href="@Url.Action("Reports", "Admin")" class="action-card">
+                        <i class="fas fa-flag"></i>
+                        <h3>Revisar Reportes</h3>
+                        <p>Atender reportes de usuarios</p>
+                    </a>
+                    <a href="@Url.Action("Plans", "Admin")" class="action-card">
+                        <i class="fas fa-crown"></i>
+                        <h3>Gestionar Planes</h3>
+                        <p>Administrar planes de suscripción</p>
+                    </a>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <style>
+        /* Estilos del dashboard admin */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .admin-body {
+            background: #0f172a;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            overflow-x: hidden;
+        }
+
+        .admin-dashboard {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .admin-sidebar {
+            width: 280px;
+            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+            border-right: 1px solid #334155;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            z-index: 1000;
+        }
+
+        .sidebar-header {
+            padding: 2rem 1.5rem;
+            border-bottom: 1px solid #334155;
+        }
+
+        .logo {
+            text-align: center;
+        }
+
+        .logo i {
+            font-size: 3rem;
+            color: #ef4444;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .logo h2 {
+            font-size: 1.5rem;
+            color: #fff;
+            margin-bottom: 0.5rem;
+        }
+
+        .logo span {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-menu {
+            flex: 1;
+            padding: 1rem 0;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            color: #94a3b8;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .menu-item:hover {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border-left-color: #ef4444;
+        }
+
+        .menu-item.active {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border-left-color: #ef4444;
+        }
+
+        .menu-item i {
+            width: 20px;
+            margin-right: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .sidebar-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #334155;
+        }
+
+        .logout-btn {
+            width: 100%;
+            background: none;
+            border: 1px solid #ef4444;
+            color: #ef4444;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logout-btn:hover {
+            background: #ef4444;
+            color: #fff;
+        }
+
+        .logout-btn i {
+            margin-right: 0.5rem;
+        }
+
+        /* Main Content */
+        .admin-main {
+            flex: 1;
+            margin-left: 280px;
+            padding: 2rem;
+            background: #0f172a;
+        }
+
+        .admin-header {
+            margin-bottom: 3rem;
+        }
+
+        .admin-header h1 {
+            font-size: 2.5rem;
+            color: #fff;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .admin-header p {
+            color: #94a3b8;
+            font-size: 1.1rem;
+        }
+
+        /* Estadísticas */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #1e293b, #334155);
+            border: 1px solid #475569;
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .stat-icon.users { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: #fff; }
+        .stat-icon.content { background: linear-gradient(135deg, #10b981, #047857); color: #fff; }
+        .stat-icon.albums { background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; }
+        .stat-icon.reports { background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; }
+
+        .stat-content h3 {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-number {
+            color: #fff;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        /* Acciones rápidas */
+        .quick-actions {
+            margin-bottom: 3rem;
+        }
+
+        .quick-actions h2 {
+            color: #fff;
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .action-card {
+            background: linear-gradient(135deg, #1e293b, #334155);
+            border: 1px solid #475569;
+            border-radius: 12px;
+            padding: 2rem;
+            text-decoration: none;
+            color: #fff;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .action-card:hover {
+            transform: translateY(-5px);
+            border-color: #ef4444;
+            color: #fff;
+        }
+
+        .action-card i {
+            font-size: 3rem;
+            color: #ef4444;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .action-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .action-card p {
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        /* Alertas */
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #10b981;
+        }
+
+        .alert-danger {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+        }
+
+        /* FontAwesome */
+        .fas {
+            font-family: "Font Awesome 6 Free" !important;
+            font-weight: 900 !important;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .admin-sidebar {
+                width: 60px;
+            }
+
+            .admin-main {
+                margin-left: 60px;
+                padding: 1rem;
+            }
+
+            .sidebar-header .logo h2,
+            .sidebar-header .logo span,
+            .menu-item span,
+            .logout-btn span {
+                display: none;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .actions-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</body>
+</html>

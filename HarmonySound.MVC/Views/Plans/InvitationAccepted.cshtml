@@ -1,0 +1,101 @@
+@{
+    ViewData["Title"] = "Invitación Aceptada";
+}
+
+<div class="acceptance-container">
+    <div class="acceptance-card">
+        <div class="success-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        
+        <h1>¡Invitación Aceptada!</h1>
+        
+        <p>Has aceptado exitosamente la invitación de <strong>@ViewBag.InviterName</strong> 
+           para unirte al plan <strong>@ViewBag.PlanName</strong>.</p>
+        
+        <p>Ya puedes disfrutar de todos los beneficios premium:</p>
+        
+        <ul class="benefits-list">
+            <li><i class="fas fa-check text-success me-2"></i>Reproducción sin anuncios</li>
+            <li><i class="fas fa-check text-success me-2"></i>Calidad de audio superior</li>
+            <li><i class="fas fa-check text-success me-2"></i>Descargas offline</li>
+            <li><i class="fas fa-check text-success me-2"></i>Soporte prioritario</li>
+        </ul>
+        
+        <div class="action-buttons">
+            <a href="@Url.Action("Home", "Clients")" class="btn btn-primary">
+                <i class="fas fa-home me-2"></i>
+                Ir al Inicio
+            </a>
+            
+            <a href="@Url.Action("Index", "Clients")" class="btn btn-secondary">
+                <i class="fas fa-music me-2"></i>
+                Explorar Música
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .acceptance-container {
+        min-height: 100vh;
+        background: #000;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+    }
+
+    .acceptance-card {
+        background: #1a1a1a;
+        border: 1px solid #1db954;
+        border-radius: 20px;
+        padding: 3rem;
+        text-align: center;
+        max-width: 500px;
+        box-shadow: 0 20px 60px rgba(29, 185, 84, 0.2);
+    }
+
+    .success-icon {
+        font-size: 4rem;
+        color: #1db954;
+        margin-bottom: 2rem;
+    }
+
+    .benefits-list {
+        text-align: left;
+        margin: 2rem 0;
+        list-style: none;
+        padding: 0;
+    }
+
+    .benefits-list li {
+        padding: 0.5rem 0;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2rem;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #1db954, #1ed760);
+        color: #000;
+    }
+
+    .btn-secondary {
+        background: #333;
+        color: #fff;
+        border: 1px solid #555;
+    }
+</style>

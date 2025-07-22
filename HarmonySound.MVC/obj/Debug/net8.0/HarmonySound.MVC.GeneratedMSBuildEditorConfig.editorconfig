@@ -36,6 +36,14 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFxBY2Nlc3NEZW5pZWQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/Victus/Desktop/Web-Harmony-Sound/HarmonySound.MVC/Views/Account/AdminLogin.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFxBZG1pbkxvZ2luLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Victus/Desktop/Web-Harmony-Sound/HarmonySound.MVC/Views/Account/AdminVerify2FA.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFxBZG1pblZlcmlmeTJGQS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/Victus/Desktop/Web-Harmony-Sound/HarmonySound.MVC/Views/Account/Login.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFxMb2dpbi5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
@@ -176,8 +184,24 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGxhbnNcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/Victus/Desktop/Web-Harmony-Sound/HarmonySound.MVC/Views/Plans/InvitationAccepted.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGxhbnNcSW52aXRhdGlvbkFjY2VwdGVkLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Victus/Desktop/Web-Harmony-Sound/HarmonySound.MVC/Views/Plans/ManageInvitations.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGxhbnNcTWFuYWdlSW52aXRhdGlvbnMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Victus/Desktop/Web-Harmony-Sound/HarmonySound.MVC/Views/Plans/PaymentCancel.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGxhbnNcUGF5bWVudENhbmNlbC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/Victus/Desktop/Web-Harmony-Sound/HarmonySound.MVC/Views/Plans/PaymentSuccess.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGxhbnNcUGF5bWVudFN1Y2Nlc3MuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Victus/Desktop/Web-Harmony-Sound/HarmonySound.MVC/Views/Plans/ReactivationSuccess.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGxhbnNcUmVhY3RpdmF0aW9uU3VjY2Vzcy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/Victus/Desktop/Web-Harmony-Sound/HarmonySound.MVC/Views/Playlists/Create.cshtml]

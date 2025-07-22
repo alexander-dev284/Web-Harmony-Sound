@@ -12,10 +12,10 @@ namespace HarmonySound.MVC.Controllers
     [Authorize(Roles = "client")]
     public class ClientsController : Controller
     {
-        // ✅ AGREGADO: Campo HttpClient requerido
+        // ✅ AGREGAR: Campo para la URL base de la API
+        private readonly string _apiBaseUrl = "https://localhost:7120";
         private readonly HttpClient _httpClient;
 
-        // ✅ AGREGADO: Constructor con inyección de dependencias
         public ClientsController(HttpClient httpClient)
         {
             _httpClient = httpClient;
@@ -26,9 +26,22 @@ namespace HarmonySound.MVC.Controllers
         {
             try
             {
-                // ✅ IMPORTANTE: Agregar esta línea
                 int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
-                ViewBag.UserId = userId; // 👈 ESTO ES CRUCIAL
+                ViewBag.UserId = userId;
+
+                // ✅ AGREGAR: Verificar estado de suscripción
+                var userPlanResponse = await _httpClient.GetAsync($"https://localhost:7120/api/UserPlans/user/{userId}");
+                if (userPlanResponse.IsSuccessStatusCode)
+                {
+                    var userPlanJson = await userPlanResponse.Content.ReadAsStringAsync();
+                    var userPlan = JsonSerializer.Deserialize<UserPlan>(userPlanJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    
+                    ViewBag.SubscriptionStatus = new {
+                        IsCancelled = userPlan?.IsCancelled ?? false,
+                        IsActive = userPlan?.Active ?? false,
+                        EndDate = userPlan?.EndDate
+                    };
+                }
 
                 var response = await _httpClient.GetAsync("https://localhost:7120/api/Contents/with-artists");
                 
@@ -149,11 +162,23 @@ namespace HarmonySound.MVC.Controllers
         public async Task<IActionResult> Home(string query)
         {
             int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
-            
-            // ✅ AGREGAR ESTA LÍNEA IMPORTANTE
             ViewBag.UserId = userId;
             
             var model = new SearchResultsViewModel { Query = query };
+
+            // ✅ AGREGAR: Verificar estado de suscripción
+            var userPlanResponse = await _httpClient.GetAsync($"https://localhost:7120/api/UserPlans/user/{userId}");
+            if (userPlanResponse.IsSuccessStatusCode)
+            {
+                var userPlanJson = await userPlanResponse.Content.ReadAsStringAsync();
+                var userPlan = JsonSerializer.Deserialize<UserPlan>(userPlanJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                
+                ViewBag.SubscriptionStatus = new {
+                    IsCancelled = userPlan?.IsCancelled ?? false,
+                    IsActive = userPlan?.Active ?? false,
+                    EndDate = userPlan?.EndDate
+                };
+            }
 
             // Obtén el perfil del usuario
             var response = await _httpClient.GetAsync($"https://localhost:7120/api/Users/profile/{userId}");
@@ -408,19 +433,17 @@ namespace HarmonySound.MVC.Controllers
             try
             {
                 int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
-                
-                var response = await _httpClient.GetAsync($"https://localhost:7120/api/UserPlans/is-premium/{userId}");
+                var response = await _httpClient.GetAsync($"{_apiBaseUrl}/api/UserPlans/user/{userId}");
                 
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();
-                    var result = JsonSerializer.Deserialize<dynamic>(json);
-                    return Json(result);
+                    var userPlan = JsonSerializer.Deserialize<UserPlan>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    
+                    return Json(new { isPremium = userPlan?.Active == true && userPlan?.IsCancelled != true });
                 }
-                else
-                {
-                    return Json(new { isPremium = false });
-                }
+                
+                return Json(new { isPremium = false });
             }
             catch (Exception ex)
             {
@@ -431,25 +454,49 @@ namespace HarmonySound.MVC.Controllers
         [HttpGet]
         public async Task<IActionResult> GetRandomAd()
         {
+            // Simular anuncios aleatorios para usuarios gratuitos
+            var ads = new[]
+            {
+                new { url = "https://www2.cs.uic.edu/~i101/SoundFiles/BabyElephantWalk60.wav", duration = 30 },
+                new { url = "https://www2.cs.uic.edu/~i101/SoundFiles/CantinaBand60.wav", duration = 25 },
+                new { url = "https://www2.cs.uic.edu/~i101/SoundFiles/ImperialMarch60.wav", duration = 20 }
+            };
+            
+            var random = new Random();
+            var selectedAd = ads[random.Next(ads.Length)];
+            
+            return Json(selectedAd);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ReactivateSubscription()
+        {
             try
             {
-                var response = await _httpClient.GetAsync("https://localhost:7120/api/Ads/random");
+                int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+
+                var payload = new { UserId = userId };
+                var content = new StringContent(JsonSerializer.Serialize(payload), System.Text.Encoding.UTF8, "application/json");
                 
+                var response = await _httpClient.PostAsync("https://localhost:7120/api/UserPlans/reactivate", content);
+
                 if (response.IsSuccessStatusCode)
                 {
-                    var json = await response.Content.ReadAsStringAsync();
-                    var result = JsonSerializer.Deserialize<dynamic>(json);
-                    return Json(result);
+                    TempData["Success"] = "¡Suscripción reactivada exitosamente!";
+                    return RedirectToAction("ReactivationSuccess", "Plans");
                 }
                 else
                 {
-                    return Json(new { url = "/ads/ad1.mp3", duration = 15, title = "Suscríbete a Premium" });
+                    var error = await response.Content.ReadAsStringAsync();
+                    TempData["Error"] = $"Error al reactivar la suscripción: {error}";
                 }
             }
             catch (Exception ex)
             {
-                return Json(new { url = "/ads/ad1.mp3", duration = 15, title = "Suscríbete a Premium" });
+                TempData["Error"] = $"Error al reactivar la suscripción: {ex.Message}";
             }
+
+            return RedirectToAction("Index", "Plans");
         }
 
         // ✅ MÉTODOS PARA LIKES CORREGIDOS
@@ -459,21 +506,19 @@ namespace HarmonySound.MVC.Controllers
             try
             {
                 int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
-
-                var response = await _httpClient.GetAsync($"https://localhost:7120/api/Likes/user/{userId}");
+                var response = await _httpClient.GetAsync($"{_apiBaseUrl}/api/Likes/user/{userId}");
+                
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();
-                    var likes = JsonSerializer.Deserialize<List<int>>(json, 
-                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    var likes = JsonSerializer.Deserialize<List<int>>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                     return Json(likes);
                 }
-
+                
                 return Json(new List<int>());
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error getting user likes: {ex.Message}");
                 return Json(new List<int>());
             }
         }
@@ -487,8 +532,8 @@ namespace HarmonySound.MVC.Controllers
                 formData.Add(new StringContent(contentId.ToString()), "contentId");
                 formData.Add(new StringContent(userId.ToString()), "userId");
 
-                var response = await _httpClient.PostAsync("https://localhost:7120/api/Likes", formData);
-
+                var response = await _httpClient.PostAsync($"{_apiBaseUrl}/api/Likes", formData);
+                
                 if (response.IsSuccessStatusCode)
                 {
                     return Json(new { success = true, message = "Contenido agregado a favoritos" });
@@ -496,12 +541,12 @@ namespace HarmonySound.MVC.Controllers
                 else
                 {
                     var error = await response.Content.ReadAsStringAsync();
-                    return Json(new { success = false, message = $"Error: {error}" });
+                    return Json(new { success = false, message = "Error al agregar a favoritos: " + error });
                 }
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = $"Error: {ex.Message}" });
+                return Json(new { success = false, message = "Error: " + ex.Message });
             }
         }
 
@@ -510,8 +555,8 @@ namespace HarmonySound.MVC.Controllers
         {
             try
             {
-                var response = await _httpClient.DeleteAsync($"https://localhost:7120/api/Likes/{userId}/{contentId}");
-
+                var response = await _httpClient.DeleteAsync($"{_apiBaseUrl}/api/Likes?contentId={contentId}&userId={userId}");
+                
                 if (response.IsSuccessStatusCode)
                 {
                     return Json(new { success = true, message = "Contenido removido de favoritos" });
@@ -519,60 +564,12 @@ namespace HarmonySound.MVC.Controllers
                 else
                 {
                     var error = await response.Content.ReadAsStringAsync();
-                    return Json(new { success = false, message = $"Error: {error}" });
+                    return Json(new { success = false, message = "Error al remover de favoritos: " + error });
                 }
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = $"Error: {ex.Message}" });
-            }
-        }
-
-        // ✅ AGREGAR: Método para crear playlist de favoritos si no existe
-        [HttpPost]
-        public async Task<IActionResult> EnsureFavoritesPlaylist()
-        {
-            try
-            {
-                int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
-                
-                // Verificar si ya existe
-                var response = await _httpClient.GetAsync($"https://localhost:7120/api/Playlists/user/{userId}");
-                if (response.IsSuccessStatusCode)
-                {
-                    var json = await response.Content.ReadAsStringAsync();
-                    var playlists = JsonSerializer.Deserialize<JsonElement[]>(json);
-                    
-                    // Buscar playlist de favoritos
-                    var favoritesExists = playlists.Any(p => 
-                        p.GetProperty("name").GetString()?.Equals("Favoritos", StringComparison.OrdinalIgnoreCase) == true);
-                    
-                    if (!favoritesExists)
-                    {
-                        // Crear playlist de favoritos
-                        var playlistDto = new
-                        {
-                            Name = "Favoritos",
-                            UserId = userId
-                        };
-
-                        var playlistJson = JsonSerializer.Serialize(playlistDto);
-                        var content = new StringContent(playlistJson, System.Text.Encoding.UTF8, "application/json");
-                        
-                        var createResponse = await _httpClient.PostAsync("https://localhost:7120/api/Playlists", content);
-                        
-                        if (createResponse.IsSuccessStatusCode)
-                        {
-                            return Json(new { success = true, message = "Playlist de favoritos creada" });
-                        }
-                    }
-                }
-                
-                return Json(new { success = true, message = "Playlist de favoritos verificada" });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = ex.Message });
+                return Json(new { success = false, message = "Error: " + ex.Message });
             }
         }
     }

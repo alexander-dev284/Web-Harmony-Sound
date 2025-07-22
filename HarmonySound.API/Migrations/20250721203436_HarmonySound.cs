@@ -272,6 +272,46 @@ namespace HarmonySound.API.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "PlanInvitations",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    InviterId = table.Column<int>(type: "integer", nullable: false),
+                    InviteeEmail = table.Column<string>(type: "text", nullable: false),
+                    InviteeId = table.Column<int>(type: "integer", nullable: true),
+                    PlanId = table.Column<int>(type: "integer", nullable: false),
+                    InvitationToken = table.Column<string>(type: "text", nullable: false),
+                    InvitedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    AcceptedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    ExpirationDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    Status = table.Column<string>(type: "text", nullable: false),
+                    InvitationMessage = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PlanInvitations", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_PlanInvitations_AspNetUsers_InviteeId",
+                        column: x => x.InviteeId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
+                    table.ForeignKey(
+                        name: "FK_PlanInvitations_AspNetUsers_InviterId",
+                        column: x => x.InviterId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_PlanInvitations_Plans_PlanId",
+                        column: x => x.PlanId,
+                        principalTable: "Plans",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "SubscriptionsHistories",
                 columns: table => new
                 {
@@ -313,7 +353,9 @@ namespace HarmonySound.API.Migrations
                     PlanId = table.Column<int>(type: "integer", nullable: false),
                     StartDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     EndDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Active = table.Column<bool>(type: "boolean", nullable: false)
+                    Active = table.Column<bool>(type: "boolean", nullable: false),
+                    IsCancelled = table.Column<bool>(type: "boolean", nullable: false),
+                    CancelledDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -490,6 +532,27 @@ namespace HarmonySound.API.Migrations
                 column: "ContentId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_PlanInvitations_InvitationToken",
+                table: "PlanInvitations",
+                column: "InvitationToken",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlanInvitations_InviteeId",
+                table: "PlanInvitations",
+                column: "InviteeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlanInvitations_InviterId",
+                table: "PlanInvitations",
+                column: "InviterId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlanInvitations_PlanId",
+                table: "PlanInvitations",
+                column: "PlanId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Playlist_UserId",
                 table: "Playlist",
                 column: "UserId");
@@ -560,6 +623,9 @@ namespace HarmonySound.API.Migrations
 
             migrationBuilder.DropTable(
                 name: "ContentsAlbums");
+
+            migrationBuilder.DropTable(
+                name: "PlanInvitations");
 
             migrationBuilder.DropTable(
                 name: "PlaylistContents");

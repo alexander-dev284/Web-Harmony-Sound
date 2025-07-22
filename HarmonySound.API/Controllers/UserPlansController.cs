@@ -1,4 +1,4 @@
-using HarmonySound.Models;
+ï»¿using HarmonySound.Models;
 using HarmonySound.API.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -31,7 +31,7 @@ namespace HarmonySound.API.Controllers
             return Ok(userPlan);
         }
 
-        // MÉTODO ORIGINAL: Mantenido para compatibilidad (modo prueba)
+        // MÃ‰TODO ORIGINAL: Mantenido para compatibilidad (modo prueba)
         [HttpPost("subscribe")]
         public async Task<IActionResult> Subscribe([FromBody] SubscribeRequest request)
         {
@@ -48,24 +48,24 @@ namespace HarmonySound.API.Controllers
                     _context.UsersPlans.Update(existingPlan);
                 }
 
-                // Obtener información del plan
+                // Obtener informaciÃ³n del plan
                 var plan = await _context.Plans.FindAsync(request.PlanId);
                 if (plan == null)
                     return BadRequest("Plan not found");
 
-                // Crear nueva suscripción (temporal sin pago)
+                // Crear nueva suscripciÃ³n (temporal sin pago)
                 var newUserPlan = new UserPlan
                 {
                     UserId = request.UserId,
                     PlanId = request.PlanId,
                     StartDate = DateTimeOffset.UtcNow,
-                    EndDate = DateTimeOffset.UtcNow.AddDays(30), // 30 días de prueba
+                    EndDate = DateTimeOffset.UtcNow.AddDays(30), // 30 dÃ­as de prueba
                     Active = true
                 };
 
                 _context.UsersPlans.Add(newUserPlan);
 
-                // Crear historial de suscripción
+                // Crear historial de suscripciÃ³n
                 var subscriptionHistory = new SubscriptionHistory
                 {
                     UserId = request.UserId,
@@ -81,7 +81,7 @@ namespace HarmonySound.API.Controllers
                 _context.SubscriptionsHistories.Add(subscriptionHistory);
                 await _context.SaveChangesAsync();
 
-                return Ok(new { message = "Suscripción exitosa (modo prueba)" });
+                return Ok(new { message = "SuscripciÃ³n exitosa (modo prueba)" });
             }
             catch (Exception ex)
             {
@@ -89,7 +89,7 @@ namespace HarmonySound.API.Controllers
             }
         }
 
-        // NUEVO: Método para procesar suscripción después del pago con PayPal
+        // NUEVO: MÃ©todo para procesar suscripciÃ³n despuÃ©s del pago con PayPal
         [HttpPost("process-subscription")]
         public async Task<IActionResult> ProcessSubscription([FromBody] ProcessSubscriptionRequest request)
         {
@@ -128,10 +128,10 @@ namespace HarmonySound.API.Controllers
                     _context.UsersPlans.Update(existingPlan);
                 }
 
-                // Calcular fecha de expiración
+                // Calcular fecha de expiraciÃ³n
                 var expirationDate = DateTimeOffset.UtcNow.AddDays(30);
-                
-                // Crear nueva suscripción
+
+                // Crear nueva suscripciÃ³n
                 var newUserPlan = new UserPlan
                 {
                     UserId = request.UserId,
@@ -143,7 +143,7 @@ namespace HarmonySound.API.Controllers
 
                 _context.UsersPlans.Add(newUserPlan);
 
-                // Crear historial de suscripción
+                // Crear historial de suscripciÃ³n
                 var subscriptionHistory = new SubscriptionHistory
                 {
                     UserId = request.UserId,
@@ -159,12 +159,12 @@ namespace HarmonySound.API.Controllers
                 _context.SubscriptionsHistories.Add(subscriptionHistory);
                 await _context.SaveChangesAsync();
 
-                System.Diagnostics.Debug.WriteLine("Suscripción procesada exitosamente");
+                System.Diagnostics.Debug.WriteLine("SuscripciÃ³n procesada exitosamente");
 
-                // **SOLUCIÓN: Devolver solo datos simples sin relaciones circulares**
+                // **SOLUCIÃ“N: Devolver solo datos simples sin relaciones circulares**
                 var result = new
                 {
-                    message = "Suscripción procesada exitosamente",
+                    message = "SuscripciÃ³n procesada exitosamente",
                     userPlan = new
                     {
                         id = newUserPlan.Id,
@@ -192,7 +192,7 @@ namespace HarmonySound.API.Controllers
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error en ProcessSubscription: {ex.Message}");
-                return StatusCode(500, new { error = "Error al procesar suscripción", details = ex.Message });
+                return StatusCode(500, new { error = "Error al procesar suscripciÃ³n", details = ex.Message });
             }
         }
 
@@ -202,17 +202,46 @@ namespace HarmonySound.API.Controllers
             try
             {
                 var userPlan = await _context.UsersPlans
+                    .Include(up => up.Plan)
                     .FirstOrDefaultAsync(up => up.UserId == request.UserId && up.Active);
 
                 if (userPlan == null)
                     return NotFound("No active subscription found");
 
-                userPlan.Active = false;
-                userPlan.EndDate = DateTimeOffset.UtcNow;
+                // âœ… CAMBIO PRINCIPAL: No desactivar inmediatamente, solo marcar como cancelado
+                userPlan.IsCancelled = true;
+                userPlan.CancelledDate = DateTimeOffset.UtcNow;
+                // NO cambiar userPlan.Active = false aquÃ­
+                // NO cambiar userPlan.EndDate aquÃ­
 
                 _context.UsersPlans.Update(userPlan);
 
-                // Registrar cancelación en historial
+                // âœ… NUEVO: Cancelar todas las invitaciones pendientes del usuario
+                var pendingInvitations = await _context.PlanInvitations
+                    .Where(pi => pi.InviterId == request.UserId && pi.Status == "Pending")
+                    .ToListAsync();
+
+                foreach (var invitation in pendingInvitations)
+                {
+                    invitation.Status = "Cancelled";
+                }
+
+                _context.PlanInvitations.UpdateRange(pendingInvitations);
+
+                // âœ… NUEVO: Marcar como canceladas las invitaciones aceptadas (pero no desactivar planes inmediatamente)
+                var acceptedInvitations = await _context.PlanInvitations
+                    .Where(pi => pi.InviterId == request.UserId && pi.Status == "Accepted")
+                    .ToListAsync();
+
+                foreach (var invitation in acceptedInvitations)
+                {
+                    // Solo marcar las invitaciones como "WillExpire" en lugar de expirarlas inmediatamente
+                    invitation.Status = "WillExpire";
+                }
+
+                _context.PlanInvitations.UpdateRange(acceptedInvitations);
+
+                // Registrar cancelaciÃ³n en historial
                 var cancelationHistory = new SubscriptionHistory
                 {
                     UserId = request.UserId,
@@ -222,20 +251,30 @@ namespace HarmonySound.API.Controllers
                     State = "Cancelled",
                     PaymentMethod = "System",
                     PayReference = "CANCEL-" + Guid.NewGuid().ToString()[..8],
-                    ExpirationDate = DateTimeOffset.UtcNow
+                    ExpirationDate = userPlan.EndDate // âœ… MANTENER la fecha original de expiraciÃ³n
                 };
 
                 _context.SubscriptionsHistories.Add(cancelationHistory);
                 await _context.SaveChangesAsync();
 
-                return Ok(new { 
-                    message = "Suscripción cancelada exitosamente",
-                    cancelationHistory = cancelationHistory
+                return Ok(new
+                {
+                    message = "SuscripciÃ³n cancelada exitosamente. MantendrÃ¡s acceso premium hasta el final del perÃ­odo pagado.",
+                    willExpireOn = userPlan.EndDate,
+                    cancelledInvitations = pendingInvitations.Count,
+                    affectedInvitations = acceptedInvitations.Count,
+                    cancelationHistory = new
+                    {
+                        id = cancelationHistory.Id,
+                        payReference = cancelationHistory.PayReference,
+                        transactionDate = cancelationHistory.TransactionDate,
+                        expirationDate = cancelationHistory.ExpirationDate
+                    }
                 });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { error = "Error al cancelar suscripción", details = ex.Message });
+                return StatusCode(500, new { error = "Error al cancelar suscripciÃ³n", details = ex.Message });
             }
         }
 
@@ -244,16 +283,22 @@ namespace HarmonySound.API.Controllers
         {
             try
             {
+                // âœ… CAMBIO: Verificar que estÃ© activo Y que no haya expirado, independientemente de si estÃ¡ cancelado
                 var userPlan = await _context.UsersPlans
                     .Include(up => up.Plan)
-                    .FirstOrDefaultAsync(up => up.UserId == userId && up.Active && up.EndDate > DateTimeOffset.UtcNow);
+                    .FirstOrDefaultAsync(up => up.UserId == userId &&
+                                     up.Active &&
+                                     up.EndDate > DateTimeOffset.UtcNow);
 
                 var isPremium = userPlan?.Plan?.Price > 0;
-                
-                return Ok(new { 
+
+                return Ok(new
+                {
                     isPremium = isPremium,
                     planName = userPlan?.Plan?.PlanName,
-                    expirationDate = userPlan?.EndDate
+                    expirationDate = userPlan?.EndDate,
+                    isCancelled = userPlan?.IsCancelled ?? false,
+                    willAutoRenew = userPlan != null && !userPlan.IsCancelled
                 });
             }
             catch (Exception ex)
@@ -262,12 +307,47 @@ namespace HarmonySound.API.Controllers
             }
         }
 
-        // NUEVO: Método para verificar suscripciones vencidas
+        [HttpGet("is-plan-owner/{userId}")]
+        public async Task<IActionResult> IsPlanOwner(int userId)
+        {
+            try
+            {
+                // Verificar si el usuario tiene un plan activo donde Ã©l es el propietario
+                var userPlan = await _context.UsersPlans
+                    .FirstOrDefaultAsync(up => up.UserId == userId && up.Active);
+
+                if (userPlan == null)
+                {
+                    return Ok(new { isOwner = false });
+                }
+
+                // Verificar si este usuario pagÃ³ por el plan (no fue invitado)
+                // Un usuario es propietario si no hay invitaciones aceptadas con su email como invitado
+                var wasInvited = await _context.PlanInvitations
+                    .AnyAsync(pi => pi.InviteeId == userId && pi.Status == "Accepted");
+
+                var isOwner = !wasInvited;
+
+                return Ok(new
+                {
+                    isOwner = isOwner,
+                    userPlanId = userPlan.Id,
+                    planId = userPlan.PlanId
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = "Error al verificar propietario del plan", details = ex.Message });
+            }
+        }
+
+        // NUEVO: MÃ©todo para verificar suscripciones vencidas
         [HttpPost("check-expired")]
         public async Task<IActionResult> CheckExpiredSubscriptions()
         {
             try
             {
+                // âœ… CAMBIO: Ahora sÃ­ desactivar las suscripciones que han expirado
                 var expiredPlans = await _context.UsersPlans
                     .Where(up => up.Active && up.EndDate <= DateTimeOffset.UtcNow)
                     .ToListAsync();
@@ -276,11 +356,39 @@ namespace HarmonySound.API.Controllers
                 {
                     plan.Active = false;
                     _context.UsersPlans.Update(plan);
+
+                    // âœ… NUEVO: Desactivar planes de usuarios invitados cuando expira el plan principal
+                    if (plan.IsCancelled)
+                    {
+                        var relatedInvitations = await _context.PlanInvitations
+                            .Where(pi => pi.InviterId == plan.UserId &&
+                                        (pi.Status == "Accepted" || pi.Status == "WillExpire"))
+                            .ToListAsync();
+
+                        foreach (var invitation in relatedInvitations)
+                        {
+                            if (invitation.InviteeId.HasValue)
+                            {
+                                var inviteeUserPlan = await _context.UsersPlans
+                                    .FirstOrDefaultAsync(up => up.UserId == invitation.InviteeId.Value && up.Active);
+
+                                if (inviteeUserPlan != null)
+                                {
+                                    inviteeUserPlan.Active = false;
+                                    _context.UsersPlans.Update(inviteeUserPlan);
+                                }
+                            }
+                            invitation.Status = "Expired";
+                        }
+
+                        _context.PlanInvitations.UpdateRange(relatedInvitations);
+                    }
                 }
 
                 await _context.SaveChangesAsync();
 
-                return Ok(new { 
+                return Ok(new
+                {
                     message = $"Se desactivaron {expiredPlans.Count} suscripciones vencidas",
                     expiredCount = expiredPlans.Count
                 });
@@ -291,7 +399,7 @@ namespace HarmonySound.API.Controllers
             }
         }
 
-        // NUEVO: Método para obtener historial de suscripciones de un usuario
+        // NUEVO: MÃ©todo para obtener historial de suscripciones de un usuario
         [HttpGet("history/{userId}")]
         public async Task<IActionResult> GetSubscriptionHistory(int userId)
         {
@@ -415,7 +523,7 @@ namespace HarmonySound.API.Controllers
         public int UserId { get; set; }
     }
 
-    // NUEVA: Request para procesar suscripción después del pago
+    // NUEVA: Request para procesar suscripciÃ³n despuÃ©s del pago
     public class ProcessSubscriptionRequest
     {
         public int UserId { get; set; }

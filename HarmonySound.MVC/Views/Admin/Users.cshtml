@@ -1,0 +1,129 @@
+@model List<HarmonySound.MVC.Models.AdminUserViewModel>
+
+@{
+    ViewData["Title"] = "Gestión de Usuarios";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - HarmonySound Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="admin-body">
+    <div class="admin-dashboard">
+        <!-- Incluir sidebar -->
+        @await Html.PartialAsync("_AdminSidebar")
+
+        <!-- Main Content -->
+        <main class="admin-main">
+            <div class="admin-header">
+                <h1>
+                    <i class="fas fa-users me-3"></i>
+                    Gestión de Usuarios
+                </h1>
+                <p>Administrar cuentas de usuarios del sistema</p>
+            </div>
+
+            <!-- Filtros -->
+            <div class="filters-section">
+                <div class="filters-row">
+                    <input type="text" id="search-users" placeholder="Buscar usuarios..." class="search-input">
+                    <select id="role-filter" class="filter-select">
+                        <option value="">Todos los roles</option>
+                        <option value="Admin">Administradores</option>
+                        <option value="Artist">Artistas</option>
+                        <option value="Client">Clientes</option>
+                    </select>
+                    <select id="status-filter" class="filter-select">
+                        <option value="">Todos los estados</option>
+                        <option value="Active">Activos</option>
+                        <option value="Suspended">Suspendidos</option>
+                        <option value="Inactive">Inactivos</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Tabla de usuarios -->
+            <div class="users-table-container">
+                <table class="users-table">
+                    <thead>
+                        <tr>
+                            <th>Usuario</th>
+                            <th>Email</th>
+                            <th>Rol</th>
+                            <th>Estado</th>
+                            <th>Registro</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var user in Model)
+                        {
+                            <tr class="user-row" data-role="@user.Role" data-status="@user.State">
+                                <td>
+                                    <div class="user-info">
+                                        <div class="user-avatar">
+                                            @if (!string.IsNullOrEmpty(user.ProfileImageUrl))
+                                            {
+                                                <img src="@user.ProfileImageUrl" alt="@user.Name" />
+                                            }
+                                            else
+                                            {
+                                                <i class="fas fa-user"></i>
+                                            }
+                                        </div>
+                                        <div class="user-details">
+                                            <div class="user-name">@user.Name</div>
+                                            <div class="user-id">#@user.Id</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>@user.Email</td>
+                                <td>
+                                    <span class="role-badge role-@user.Role.ToLower()">
+                                        @user.Role
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="status-badge status-@user.State.ToLower()">
+                                        @user.State
+                                    </span>
+                                </td>
+                                <td>@user.RegisterDate.ToString("dd/MM/yyyy")</td>
+                                <td>
+                                    <div class="action-buttons">
+                                        @if (user.State == "Active")
+                                        {
+                                            <form asp-action="SuspendUser" method="post" style="display: inline;">
+                                                <input type="hidden" name="userId" value="@user.Id" />
+                                                <button type="submit" class="btn-action btn-suspend" 
+                                                        onclick="return confirm('¿Suspender este usuario?')"
+                                                        title="Suspender usuario">
+                                                    <i class="fas fa-ban"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                        <button class="btn-action btn-view" 
+                                                onclick="viewUserDetails(@user.Id)"
+                                                title="Ver detalles">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- Estilos y scripts aquí -->
+    <link rel="stylesheet" href="~/css/admin-common.css">
+    <script src="~/js/admin-users.js"></script>
+</body>
+</html>

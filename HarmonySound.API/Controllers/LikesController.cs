@@ -24,12 +24,32 @@ namespace HarmonySound.API.Controllers
         {
             try
             {
-                var likedContentIds = await _context.UserLikes
+                // Obtener likes directos de UserLikes
+                var directLikes = await _context.UserLikes
                     .Where(ul => ul.UserId == userId)
                     .Select(ul => ul.ContentId)
                     .ToListAsync();
 
-                return Ok(likedContentIds);
+                // ✅ NUEVO: También obtener canciones de playlist "Favoritos"
+                var favoritesPlaylist = await _context.Playlist
+                    .Include(p => p.PlaylistContents)
+                    .FirstOrDefaultAsync(p => p.UserId == userId && p.Name == "Favoritos");
+
+                var favoritesLikes = new List<int>();
+                if (favoritesPlaylist != null)
+                {
+                    favoritesLikes = favoritesPlaylist.PlaylistContents
+                        .Select(pc => pc.ContentId)
+                        .ToList();
+                }
+
+                // Combinar y eliminar duplicados
+                var allLikedContentIds = directLikes
+                    .Union(favoritesLikes)
+                    .Distinct()
+                    .ToList();
+
+                return Ok(allLikedContentIds);
             }
             catch (Exception ex)
             {
@@ -48,7 +68,15 @@ namespace HarmonySound.API.Controllers
                 var existingLike = await _context.UserLikes
                     .FirstOrDefaultAsync(ul => ul.UserId == userId && ul.ContentId == contentId);
 
-                if (existingLike != null)
+                // ✅ NUEVO: También verificar si está en playlist Favoritos
+                var favoritesPlaylist = await _context.Playlist
+                    .Include(p => p.PlaylistContents)
+                    .FirstOrDefaultAsync(p => p.UserId == userId && p.Name == "Favoritos");
+
+                var isInFavorites = favoritesPlaylist?.PlaylistContents
+                    ?.Any(pc => pc.ContentId == contentId) ?? false;
+
+                if (existingLike != null || isInFavorites)
                 {
                     return BadRequest("Ya has dado like a este contenido");
                 }
@@ -63,7 +91,7 @@ namespace HarmonySound.API.Controllers
 
                 _context.UserLikes.Add(userLike);
 
-                // ✅ AGREGAR: Añadir a playlist de favoritos automáticamente
+                // Añadir a playlist de favoritos automáticamente
                 await AddToFavoritesPlaylist(userId, contentId);
 
                 await _context.SaveChangesAsync();

@@ -45,6 +45,7 @@ namespace HarmonySound.MVC.Controllers
                 var viewModel = new SubscriptionViewModel
                 {
                     CurrentPlan = userPlan?.Plan,
+                    CurrentUserPlan = userPlan, // ✅ NUEVO
                     PremiumPlans = premiumPlans
                 };
 
@@ -268,6 +269,204 @@ namespace HarmonySound.MVC.Controllers
             }
 
             return RedirectToAction("Index");
+        }
+
+        [Authorize(Roles = "client")]
+        public async Task<IActionResult> ManageInvitations()
+        {
+            try
+            {
+                int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                
+                // Obtener plan actual del usuario
+                var userPlanResponse = await _httpClient.GetAsync($"https://localhost:7120/api/UserPlans/user/{userId}");
+                
+                if (!userPlanResponse.IsSuccessStatusCode)
+                {
+                    TempData["Error"] = "No tienes un plan activo";
+                    return RedirectToAction("Index");
+                }
+
+                var userPlanJson = await userPlanResponse.Content.ReadAsStringAsync();
+                var userPlan = JsonSerializer.Deserialize<UserPlan>(userPlanJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                // ✅ VERIFICAR: Solo el propietario del plan puede gestionar invitaciones
+                // Verificar si el usuario actual pagó por el plan o solo fue invitado
+                var isOwnerResponse = await _httpClient.GetAsync($"https://localhost:7120/api/UserPlans/is-plan-owner/{userId}");
+                bool isPlanOwner = false;
+                
+                if (isOwnerResponse.IsSuccessStatusCode)
+                {
+                    var isOwnerJson = await isOwnerResponse.Content.ReadAsStringAsync();
+                    var result = JsonSerializer.Deserialize<JsonElement>(isOwnerJson);
+                    isPlanOwner = result.GetProperty("isOwner").GetBoolean();
+                }
+
+                if (!isPlanOwner)
+                {
+                    TempData["Error"] = "Solo el propietario del plan puede gestionar invitaciones";
+                    return RedirectToAction("Index");
+                }
+
+                // ✅ CORREGIR: Obtener invitaciones con deserialización correcta
+                List<InvitationDto> invitations = new List<InvitationDto>();
+                
+                var invitationsResponse = await _httpClient.GetAsync($"https://localhost:7120/api/PlanInvitations/sent/{userId}");
+                
+                if (invitationsResponse.IsSuccessStatusCode)
+                {
+                    var invitationsJson = await invitationsResponse.Content.ReadAsStringAsync();
+                    invitations = JsonSerializer.Deserialize<List<InvitationDto>>(invitationsJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new List<InvitationDto>();
+                }
+
+                // ✅ CORREGIR: Contar correctamente las cuentas activas
+                var activeInvitationsCount = invitations.Count(i => i.Status == "Accepted") + 1; // +1 por el propietario del plan
+                ViewBag.ActiveInvitationsCount = activeInvitationsCount;
+                ViewBag.CanSendMoreInvitations = activeInvitationsCount < userPlan.Plan.AccountLimit;
+                ViewBag.IsPlanOwner = isPlanOwner;
+
+                ViewBag.UserPlan = userPlan;
+                ViewBag.Invitations = invitations;
+                
+                return View();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading invitations");
+                TempData["Error"] = "Error al cargar las invitaciones";
+                return RedirectToAction("Index");
+            }
+        }
+
+        [Authorize(Roles = "client")]
+        [HttpPost]
+        public async Task<IActionResult> SendInvitation(string inviteeEmail, string message)
+        {
+            try
+            {
+                int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+
+                // ✅ VERIFICAR: Solo el propietario del plan puede enviar invitaciones
+                var isOwnerResponse = await _httpClient.GetAsync($"https://localhost:7120/api/UserPlans/is-plan-owner/{userId}");
+                
+                if (!isOwnerResponse.IsSuccessStatusCode)
+                {
+                    TempData["Error"] = "Error al verificar permisos";
+                    return RedirectToAction("ManageInvitations");
+                }
+
+                var isOwnerJson = await isOwnerResponse.Content.ReadAsStringAsync();
+                var ownerResult = JsonSerializer.Deserialize<JsonElement>(isOwnerJson);
+                bool isPlanOwner = ownerResult.GetProperty("isOwner").GetBoolean();
+
+                if (!isPlanOwner)
+                {
+                    TempData["Error"] = "Solo el propietario del plan puede enviar invitaciones";
+                    return RedirectToAction("Index");
+                }
+
+                var payload = new
+                {
+                    InviterId = userId,
+                    InviteeEmail = inviteeEmail,
+                    Message = message
+                };
+
+                var content = new StringContent(
+                    JsonSerializer.Serialize(payload),
+                    Encoding.UTF8,
+                    "application/json"
+                );
+
+                var response = await _httpClient.PostAsync("https://localhost:7120/api/PlanInvitations/send", content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    TempData["Success"] = "Invitación enviada exitosamente";
+                }
+                else
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    var errorObj = JsonSerializer.Deserialize<JsonElement>(errorContent);
+                    TempData["Error"] = errorObj.TryGetProperty("message", out var msg) ? msg.GetString() : "Error al enviar invitación";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error sending invitation");
+                TempData["Error"] = "Error al enviar la invitación";
+            }
+
+            return RedirectToAction("ManageInvitations");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> AcceptInvitation(string token)
+        {
+            try
+            {
+                var payload = new { Token = token };
+                var content = new StringContent(
+                    JsonSerializer.Serialize(payload),
+                    Encoding.UTF8,
+                    "application/json"
+                );
+
+                var response = await _httpClient.PostAsync("https://localhost:7120/api/PlanInvitations/accept", content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseJson = await response.Content.ReadAsStringAsync();
+                    var result = JsonSerializer.Deserialize<JsonElement>(responseJson);
+                    
+                    TempData["Success"] = "¡Invitación aceptada exitosamente! Ya tienes acceso premium.";
+                    ViewBag.PlanName = result.GetProperty("planName").GetString();
+                    ViewBag.InviterName = result.GetProperty("inviterName").GetString();
+                    
+                    return View("InvitationAccepted");
+                }
+                else
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    var errorObj = JsonSerializer.Deserialize<JsonElement>(errorContent);
+                    TempData["Error"] = errorObj.TryGetProperty("message", out var msg) ? msg.GetString() : "Error al aceptar invitación";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error accepting invitation");
+                TempData["Error"] = "Error al procesar la invitación";
+            }
+
+            return RedirectToAction("Index");
+        }
+
+        [Authorize(Roles = "client")]
+        [HttpPost]
+        public async Task<IActionResult> CancelInvitation(int invitationId)
+        {
+            try
+            {
+                var response = await _httpClient.PostAsync($"https://localhost:7120/api/PlanInvitations/cancel/{invitationId}", null);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    TempData["Success"] = "Invitación cancelada exitosamente";
+                }
+                else
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    var errorObj = JsonSerializer.Deserialize<JsonElement>(errorContent);
+                    TempData["Error"] = errorObj.TryGetProperty("message", out var msg) ? msg.GetString() : "Error al cancelar invitación";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error canceling invitation");
+                TempData["Error"] = "Error al cancelar la invitación";
+            }
+
+            return RedirectToAction("ManageInvitations");
         }
 
         // Métodos CRUD existentes...

@@ -71,10 +71,13 @@ namespace HarmonySound.API.Controllers
             if (!roleResult.Succeeded)
                 return BadRequest(roleResult.Errors);
 
-            // Genera el token de confirmación de email
+            // ✅ MEJORAR: Usar ApiUrl en lugar de AppUrl para endpoints de API
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             var tokenEncoded = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
-            var confirmationLink = $"{_configuration["AppUrl"]}/api/Auth/confirm-email?userId={user.Id}&token={tokenEncoded}";
+            
+            // ✅ USAR: ApiUrl para endpoints de la API
+            var apiUrl = _configuration["ApiUrl"] ?? "https://localhost:7120";
+            var confirmationLink = $"{apiUrl}/api/Auth/confirm-email?userId={user.Id}&token={tokenEncoded}";
 
             await _emailSender.SendEmailAsync(user.Email, "Confirma tu email", $"Confirma tu cuenta aquí: {confirmationLink}");
 
@@ -196,11 +199,99 @@ namespace HarmonySound.API.Controllers
 
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             var tokenEncoded = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
-            var confirmationLink = $"{_configuration["AppUrl"]}/api/Auth/confirm-email?userId={user.Id}&token={tokenEncoded}";
+            
+            // ✅ USAR: ApiUrl para endpoints de la API
+            var apiUrl = _configuration["ApiUrl"] ?? "https://localhost:7120";
+            var confirmationLink = $"{apiUrl}/api/Auth/confirm-email?userId={user.Id}&token={tokenEncoded}";
 
             await _emailSender.SendEmailAsync(user.Email, "Confirma tu email", $"Confirma tu cuenta aquí: {confirmationLink}");
 
             return Ok(new { Message = "Correo de confirmación reenviado. Revisa tu bandeja de entrada." });
+        }
+
+        // ✅ AGREGAR: Endpoint específico para login de admin
+        [HttpPost("admin-login")]
+        public async Task<IActionResult> AdminLogin([FromBody] LoginModel model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null || !await _userManager.CheckPasswordAsync(user, model.Password))
+                return Unauthorized(new { Message = "Credenciales inválidas" });
+
+            // ✅ VERIFICAR: Solo admins pueden usar este endpoint
+            var roles = await _userManager.GetRolesAsync(user);
+            if (!roles.Contains("Admin"))
+                return Unauthorized(new { Message = "Acceso denegado. Solo administradores." });
+
+            // ✅ VERIFICAR: Cuenta activa
+            if (user.State != "Active")
+                return Unauthorized(new { Message = "Cuenta de administrador desactivada" });
+
+            var token = await _jwtService.GenerateTokenAsync(user);
+
+            return Ok(new
+            {
+                Token = token,
+                RequiresTwoFactor = true
+            });
+        }
+
+        // ✅ AGREGAR: Endpoint para generar código 2FA
+        [HttpPost("generate-2fa-code")]
+        public async Task<IActionResult> Generate2FACode([FromBody] TwoFactorRequest request)
+        {
+            try
+            {
+                var user = await _userManager.FindByIdAsync(request.UserId.ToString());
+                if (user == null)
+                    return BadRequest("Usuario no encontrado");
+
+                var roles = await _userManager.GetRolesAsync(user);
+                if (!roles.Contains("Admin"))
+                    return Unauthorized("Solo administradores pueden usar 2FA");
+
+                var code = await _twoFactorAuthService.GenerateCodeAsync(user.Id);
+                await _twoFactorAuthService.SendCodeByEmailAsync(user.Email, code);
+
+                return Ok(new { Message = "Código 2FA enviado al email" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Error = ex.Message });
+            }
+        }
+
+        // ✅ AGREGAR: Endpoint para verificar código 2FA
+        [HttpPost("verify-2fa-code")]
+        public async Task<IActionResult> Verify2FACode([FromBody] VerifyTwoFactorRequest request)
+        {
+            try
+            {
+                var user = await _userManager.FindByIdAsync(request.UserId.ToString());
+                if (user == null)
+                    return BadRequest("Usuario no encontrado");
+
+                var isValid = await _twoFactorAuthService.ValidateCodeAsync(user.Id, request.Code);
+                
+                return Ok(new { IsValid = isValid });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Error = ex.Message });
+            }
+        }
+
+        public class TwoFactorRequest
+        {
+            public int UserId { get; set; }
+        }
+
+        public class VerifyTwoFactorRequest
+        {
+            public int UserId { get; set; }
+            public string Code { get; set; } = "";
         }
     }
 }

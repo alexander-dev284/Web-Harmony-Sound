@@ -44,4 +44,10 @@
     <Folder Include="wwwroot\ads\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="Views\Admin\Dashboard.cshtml" />
+    <None Include="Views\Admin\Users.cshtml" />
+    <None Include="Views\Admin\_AdminSidebar.cshtml" />
+  </ItemGroup>
+
 </Project>

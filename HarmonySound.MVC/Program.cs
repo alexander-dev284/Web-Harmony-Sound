@@ -1,4 +1,4 @@
-using HarmonySound.API.Consumer;
+Ôªøusing HarmonySound.API.Consumer;
 using HarmonySound.Models;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
@@ -11,7 +11,7 @@ namespace HarmonySound.MVC
     {
         public static void Main(string[] args)
         {
-            // ConfiguraciÛn de los endpoints de la API
+            // Configuraci√≥n de los endpoints de la API
             Crud<Album>.EndPoint = "https://localhost:7120/api/Albums";
             Crud<ContentAlbum>.EndPoint = "https://localhost:7120/api/ContentAlbums";
             Crud<Content>.EndPoint = "https://localhost:7120/api/Contents";
@@ -24,7 +24,7 @@ namespace HarmonySound.MVC
             Crud<User>.EndPoint = "https://localhost:7120/api/Users";
             Crud<UserPlan>.EndPoint = "https://localhost:7120/api/UsersPlans";
 
-            // ConfiguraciÛn de Serilog para registrar en la consola y en un archivo
+            // Configuraci√≥n de Serilog para registrar en la consola y en un archivo
             Log.Logger = new LoggerConfiguration()
                 .WriteTo.Console() // Imprime en la consola
                 .WriteTo.File("logs/myapp.txt", rollingInterval: RollingInterval.Day) // Guarda los logs en un archivo
@@ -32,7 +32,7 @@ namespace HarmonySound.MVC
 
             var builder = WebApplication.CreateBuilder(args);
 
-            // ConfiguraciÛn de los lÌmites de tamaÒo de solicitud
+            // Configuraci√≥n de los l√≠mites de tama√±o de solicitud
             builder.Services.Configure<IISServerOptions>(options =>
             {
                 options.MaxRequestBodySize = 104857600; // 100 MB
@@ -43,11 +43,11 @@ namespace HarmonySound.MVC
                 options.Limits.MaxRequestBodySize = 104857600; // 100 MB
             });
 
-            // ConfiguraciÛn de logging (se usa Serilog)
+            // Configuraci√≥n de logging (se usa Serilog)
             builder.Logging.ClearProviders();  // Limpiar proveedores de logs predeterminados
             builder.Logging.AddSerilog();  // Usar Serilog para los logs
 
-            // ConfiguraciÛn de autenticaciÛn por cookies
+            // Configuraci√≥n de autenticaci√≥n por cookies
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
                 {
@@ -72,7 +72,7 @@ namespace HarmonySound.MVC
                     {
                         identity.AddClaim(new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, rc.Value));
                     }
-                    // Mapea tambiÈn el claim de rol con el namespace largo (el que realmente llega en tu JWT)
+                    // Mapea tambi√©n el claim de rol con el namespace largo (el que realmente llega en tu JWT)
                     var msRoleClaims = identity.FindAll("http://schemas.microsoft.com/ws/2008/06/identity/claims/role").ToList();
                     foreach (var rc in msRoleClaims)
                     {
@@ -82,11 +82,11 @@ namespace HarmonySound.MVC
                 };
             });
 
-            // ConfiguraciÛn de sesiones en memoria (sin DbContext en MVC)
+            // Configuraci√≥n de sesiones en memoria (sin DbContext en MVC)
             builder.Services.AddDistributedMemoryCache();
             builder.Services.AddSession(options =>
             {
-                options.IdleTimeout = TimeSpan.FromMinutes(30); // Tiempo m·ximo de inactividad
+                options.IdleTimeout = TimeSpan.FromMinutes(30); // Tiempo m√°ximo de inactividad
                 options.Cookie.HttpOnly = true; // Hace que la cookie no sea accesible por JS
                 options.Cookie.IsEssential = true; // Hace la cookie esencial
             });
@@ -96,30 +96,33 @@ namespace HarmonySound.MVC
                 .AddJsonOptions(options =>
                 {
                     options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
-                    options.JsonSerializerOptions.MaxDepth = 64; // Opcional: aumenta la profundidad m·xima si es necesario
+                    options.JsonSerializerOptions.MaxDepth = 64; // Opcional: aumenta la profundidad m√°xima si es necesario
                 });
             builder.Services.AddControllersWithViews();
-            builder.Services.AddSession();  // Asegura que la sesiÛn estÈ disponible
+            builder.Services.AddSession();  // Asegura que la sesi√≥n est√© disponible
 
             // Inyectar HttpClient para hacer solicitudes a la API
             builder.Services.AddHttpClient(); // Esto permite usar HttpClient en tus controladores
 
+            // ‚úÖ AGREGAR: MemoryCache para 2FA
+            builder.Services.AddMemoryCache();
+
             var app = builder.Build();
 
-            // ConfiguraciÛn de la tuberÌa HTTP
+            // Configuraci√≥n de la tuber√≠a HTTP
             if (!app.Environment.IsDevelopment())
             {
-                app.UseExceptionHandler("/Home/Error"); // P·gina de error para producciÛn
-                app.UseHsts();  // HSTS para seguridad adicional en producciÛn
+                app.UseExceptionHandler("/Home/Error"); // P√°gina de error para producci√≥n
+                app.UseHsts();  // HSTS para seguridad adicional en producci√≥n
             }
 
-            app.UseHttpsRedirection();  // RedirecciÛn a HTTPS
-            app.UseStaticFiles();  // Permite archivos est·ticos
+            app.UseHttpsRedirection();  // Redirecci√≥n a HTTPS
+            app.UseStaticFiles();  // Permite archivos est√°ticos
 
             app.UseRouting();  // Usar el enrutamiento
             app.UseSession();  // Usar sesiones
 
-            // AutenticaciÛn y autorizaciÛn
+            // Autenticaci√≥n y autorizaci√≥n
             app.UseAuthentication();
             app.UseAuthorization();
 
@@ -145,7 +148,7 @@ namespace HarmonySound.MVC
                 });
             });
 
-            // Ejecutar la aplicaciÛn
+            // Ejecutar la aplicaci√≥n
             app.Run();
         }
     }

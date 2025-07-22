@@ -12,9 +12,13 @@ namespace HarmonySound.Models
         public User? User { get; set; }
         public Plan? Plan { get; set; }
 
-        public DateTimeOffset  StartDate { get; set; }
+        public DateTimeOffset StartDate { get; set; }
         public DateTimeOffset EndDate { get; set; }
 
         public bool Active { get; set; }
+        
+        // ✅ ESTAS PROPIEDADES DEBEN EXISTIR
+        public bool IsCancelled { get; set; } = false;
+        public DateTimeOffset? CancelledDate { get; set; }
     }
 }

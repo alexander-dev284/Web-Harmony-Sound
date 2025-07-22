@@ -10,11 +10,22 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Security.Claims;
 using HarmonySound.API.Consumer;
 using HarmonySound.Models;
+using System.Text; // ✅ AGREGADO
+using System.Text.Json; // ✅ AGREGADO
 
 namespace HarmonySound.MVC.Controllers
 {
     public class AccountController : Controller
     {
+        private readonly IConfiguration _configuration;
+        private readonly HttpClient _httpClient;
+
+        public AccountController(IConfiguration configuration, HttpClient httpClient)
+        {
+            _configuration = configuration;
+            _httpClient = httpClient;
+        }
+
         // GET: /Account/Login
         public ActionResult Login()
         {
@@ -89,7 +100,7 @@ namespace HarmonySound.MVC.Controllers
                         authProperties
                     );
 
-                    // Buscar el rol del usuario (ahora solo ClaimTypes.Role si el mapeo está bien)
+                    // Buscar el rol del usuario
                     var roleClaim = claimsList.FirstOrDefault(c =>
                         c.Type == ClaimTypes.Role ||
                         c.Type == "role" ||
@@ -110,6 +121,8 @@ namespace HarmonySound.MVC.Controllers
                         return RedirectToAction("Home", "Clients");
                     else if (role.Equals("Artist", System.StringComparison.OrdinalIgnoreCase))
                         return RedirectToAction("Home", "Artists");
+                    else if (role.Equals("Admin", System.StringComparison.OrdinalIgnoreCase))
+                        return RedirectToAction("Dashboard", "Admin");
                     else
                     {
                         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
@@ -258,10 +271,18 @@ namespace HarmonySound.MVC.Controllers
             }
             return base64.Replace('-', '+').Replace('_', '/');
         }
-    }
 
-    public class LoginResult
-    {
-        public string Token { get; set; }
+        // ✅ SIMPLIFICADO: Login específico para admin usando AP
+
+        public class LoginResult
+        {
+            public string Token { get; set; } = "";
+        }
+
+        public class AdminLoginResult
+        {
+            public string Token { get; set; } = "";
+        }
+
     }
 }

@@ -30,6 +30,7 @@ namespace HarmonySound.API.Data
         public DbSet<SubscriptionHistory> SubscriptionsHistories { get; set; } = default!;
         public DbSet<UserPlan> UsersPlans { get; set; } = default!;
         public DbSet<UserLike> UserLikes { get; set; } = default!;
+        public DbSet<PlanInvitation> PlanInvitations { get; set; } = default!;
 
         // No agregues DbSet<Role> ni DbSet<UserRole> aquí
 
@@ -75,6 +76,28 @@ namespace HarmonySound.API.Data
                 .WithMany()
                 .HasForeignKey(p => p.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // Configuración para PlanInvitation
+            builder.Entity<PlanInvitation>(entity =>
+            {
+                entity.HasOne(pi => pi.Inviter)
+                    .WithMany()
+                    .HasForeignKey(pi => pi.InviterId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                    
+                entity.HasOne(pi => pi.Invitee)
+                    .WithMany()
+                    .HasForeignKey(pi => pi.InviteeId)
+                    .OnDelete(DeleteBehavior.SetNull);
+                    
+                entity.HasOne(pi => pi.Plan)
+                    .WithMany()
+                    .HasForeignKey(pi => pi.PlanId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                    
+                entity.HasIndex(pi => pi.InvitationToken)
+                    .IsUnique();
+            });
         }
 
         public DbSet<HarmonySound.Models.Playlist> Playlist { get; set; } = default!;

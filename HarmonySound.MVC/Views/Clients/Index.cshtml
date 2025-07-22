@@ -182,6 +182,27 @@
     </div>
 </div>
 
+<!-- ✅ NUEVO: Banner de estado de suscripción -->
+@{
+    var subscriptionStatus = ViewBag.SubscriptionStatus as dynamic;
+}
+
+@if (subscriptionStatus?.IsCancelled == true && subscriptionStatus?.IsActive == true)
+{
+    <div class="subscription-status-banner">
+        <div class="banner-content">
+            <i class="fas fa-info-circle"></i>
+            <div class="banner-text">
+                <strong>Plan cancelado:</strong> 
+                Tienes acceso premium hasta el @subscriptionStatus.EndDate.ToString("dd/MM/yyyy")
+            </div>
+            <a href="@Url.Action("Index", "Plans")" class="banner-action">
+                Reactivar
+            </a>
+        </div>
+    </div>
+}
+
 <style>
     /* CSS Base y Responsive */
     .container { max-width: none !important; padding: 0 !important; }
@@ -518,14 +539,58 @@
         animation: fadeIn 0.5s ease forwards;
     }
 
+    /* ✅ NUEVO: Estilos para el banner de estado de suscripción */
+    .subscription-status-banner {
+        background: rgba(255, 152, 0, 0.95);
+        color: #000;
+        padding: 12px 16px;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+    }
+
+    .banner-content {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-grow: 1;
+    }
+
+    .banner-action {
+        background: #fff;
+        color: #000;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        font-size: 0.9rem;
+    }
+
+    .banner-action:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        color: #000 !important;
+        background: #1db954;
+    }
+
+    .banner-action i {
+        margin-right: 4px;
+    }
+    @@import url('/css/subscription-ui.css');
 </style>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
+
 <script>
     // ===== REPRODUCTOR DE AUDIO 100% PERSONALIZADO PARA INDEX CON NAVEGACIÓN =====
-
-        // ===== REPRODUCTOR DE AUDIO 100% PERSONALIZADO PARA INDEX CON NAVEGACIÓN =====
 
     class IndexAudioPlayer {
         constructor() {
@@ -582,6 +647,9 @@
         init() {
             console.log('🎵 Inicializando reproductor personalizado para Index con navegación...');
 
+            // ✅ NUEVO: Verificar soporte de audio
+            this.checkAudioSupport();
+
             // Crear elemento de audio oculto
             this.audio = document.getElementById('hidden-audio');
             if (!this.audio) {
@@ -605,12 +673,37 @@
             this.checkPremiumStatus();
 
             // ✅ IMPORTANTE: Cargar estados de likes al inicializar
-            this.loadLikeStates();
+            this.loadLikeStates().then(() => {
+                this.debugSyncronization(); // Verificar sincronización
+            });
 
             // Configurar volumen inicial
             this.setVolume(this.volume);
 
             console.log('✅ Reproductor personalizado para Index inicializado');
+        }
+
+        // ✅ NUEVO: Verificar soporte de audio
+        checkAudioSupport() {
+            if (!window.HTMLAudioElement) {
+                console.error('❌ El navegador no soporta HTML5 Audio');
+                this.showToast('Tu navegador no soporta reproducción de audio', 'error');
+                return false;
+            }
+
+            // Verificar formatos soportados
+            const audio = new Audio();
+            const mp3Support = audio.canPlayType('audio/mpeg');
+            const m4aSupport = audio.canPlayType('audio/mp4');
+
+            console.log('🎵 Soporte de audio:', { mp3: mp3Support, m4a: m4aSupport });
+
+            if (!mp3Support && !m4aSupport) {
+                console.warn('⚠️ Soporte de audio limitado');
+                this.showToast('Soporte de audio limitado en tu navegador', 'warning');
+            }
+
+            return true;
         }
 
         // ✅ NUEVO: Cargar estados de likes del servidor
@@ -643,6 +736,10 @@
 
                 console.log(`ID: ${contentId} - Liked: ${isLiked} - HasClass: ${hasClass}`);
             });
+        }
+
+        debugSyncronization() {
+            // Solo debug, función vacía por ahora
         }
 
         // ✅ NUEVO: Actualizar todos los botones de like
@@ -724,7 +821,7 @@
                 console.log(`🔄 Toggling like for ID ${contentId}: Currently ${isCurrentlyLiked ? 'LIKED' : 'NOT LIKED'}`);
 
                 if (isCurrentlyLiked) {
-                    // ✅ QUITAR LIKE (Corazón lleno → vacío)
+                    // ✅ QUITAR LIKE
                     const response = await fetch('@Url.Action("UnlikeContent", "Clients")', {
                         method: 'POST',
                         body: formData
@@ -733,21 +830,12 @@
                     const data = await response.json();
                     if (data.success) {
                         this.likedContentIds.delete(contentId);
-
-                        // Actualización visual inmediata
-                        button.classList.remove('liked');
-                        button.style.color = '#b3b3b3';
-                        button.style.background = 'transparent';
-                        button.title = 'Agregar a favoritos';
-
-                        const icon = button.querySelector('i');
-                        if (icon) icon.className = 'far fa-heart'; // VACÍO
-
+                        this.updateButtonState(button, false);
                         this.showToast('💔 Removido de favoritos', 'info');
                         console.log('✅ Removido de favoritos:', contentId);
                     }
                 } else {
-                    // ✅ AGREGAR LIKE (Corazón vacío → lleno)
+                    // ✅ AGREGAR LIKE
                     const response = await fetch('@Url.Action("LikeContent", "Clients")', {
                         method: 'POST',
                         body: formData
@@ -756,22 +844,13 @@
                     const data = await response.json();
                     if (data.success) {
                         this.likedContentIds.add(contentId);
-
-                        // Actualización visual inmediata
-                        button.classList.add('liked');
-                        button.style.color = '#1db954';
-                        button.style.background = 'rgba(29, 185, 84, 0.1)';
-                        button.title = 'Quitar de favoritos';
-
-                        const icon = button.querySelector('i');
-                        if (icon) icon.className = 'fas fa-heart'; // LLENO
-
+                        this.updateButtonState(button, true);
                         this.showToast('💚 ¡Agregado a favoritos!', 'success');
                         console.log('✅ Agregado a favoritos:', contentId);
                     }
                 }
 
-                // Sincronizar con reproductor
+                // ✅ IMPORTANTE: Sincronizar con reproductor si es la canción actual
                 if (this.currentTrack && this.currentTrack.id === contentId) {
                     this.updatePlayerHeartButton();
                 }
@@ -784,7 +863,27 @@
             }
         }
 
-        // Resto de métodos existentes...
+        // ✅ NUEVO: Método para actualizar estado visual de botón
+        updateButtonState(button, isLiked) {
+            if (isLiked) {
+                button.classList.add('liked');
+                button.style.color = '#1db954';
+                button.style.background = 'rgba(29, 185, 84, 0.1)';
+                button.title = 'Quitar de favoritos';
+
+                const icon = button.querySelector('i');
+                if (icon) icon.className = 'fas fa-heart'; // SÓLIDO
+            } else {
+                button.classList.remove('liked');
+                button.style.color = '#b3b3b3';
+                button.style.background = 'transparent';
+                button.title = 'Agregar a favoritos';
+
+                const icon = button.querySelector('i');
+                if (icon) icon.className = 'far fa-heart'; // VACÍO
+            }
+        }
+
         buildPlaylist() {
             this.playlist = [];
             const songItems = document.querySelectorAll('.song-item');
@@ -1086,23 +1185,20 @@
         // ✅ CORREGIDO: Cargar y reproducir automáticamente con navegación
         async playTrackAndStart(track) {
             if (!track || !track.url) {
-                console.error('Track inválido');
+                console.error('❌ Track inválido');
                 return;
             }
 
-            console.log('🎵 Reproduciendo automáticamente:', track.title);
+            console.log('🎵 Reproduciendo:', track.title);
 
             this.currentTrack = track;
-
-            // Actualizar índice actual
             this.currentTrackIndex = this.findTrackInPlaylist(track.id);
-            console.log('📍 Índice de canción actual:', this.currentTrackIndex);
 
             // Actualizar información
             if (this.trackTitle) this.trackTitle.textContent = track.title || 'Canción desconocida';
             if (this.trackArtist) this.trackArtist.textContent = track.artist || 'Artista desconocido';
 
-            // ✅ IMPORTANTE: Actualizar estado del corazón en el reproductor
+            // Actualizar estado del corazón en el reproductor
             this.updatePlayerHeartButton();
 
             // Mostrar reproductor
@@ -1114,21 +1210,32 @@
             this.updateTrackListUI(track.id);
 
             try {
-                // REPRODUCIR AUTOMÁTICAMENTE (para usuarios premium)
+                // ✅ CORREGIDO: Cargar primero
+                this.audio.src = track.url;
+                await this.audio.load();
+
+                // ✅ CORREGIDO: Manejo robusto de autoplay
                 if (this.isPremiumUser) {
-                    this.audio.src = track.url;
-                    await this.audio.load();
-                    await this.audio.play();
-                    this.isPlaying = true;
-                    this.updatePlayPauseButton();
-                    console.log('🎉 Reproduciendo automáticamente (usuario premium):', track.title);
+                    try {
+                        await this.audio.play();
+                        this.isPlaying = true;
+                        this.updatePlayPauseButton();
+                        console.log('🎉 Reproduciendo automáticamente (usuario premium):', track.title);
+                    } catch (playError) {
+                        console.warn('⚠️ Autoplay bloqueado por el navegador, usuario debe hacer clic en play:', playError);
+                        this.isPlaying = false;
+                        this.updatePlayPauseButton();
+                        this.showToast('Haz clic en ▶️ para reproducir', 'info');
+                    }
                 } else {
                     // Para usuarios no premium, iniciar con anuncios
                     await this.playWithAds(track);
                 }
             } catch (error) {
-                console.error('❌ Error al reproducir automáticamente:', error);
-                console.log('🔄 Fallback: Audio cargado, esperando interacción del usuario');
+                console.error('❌ Error al cargar/reproducir:', error);
+                this.showToast('Error al cargar el audio. Verifica la URL.', 'error');
+                this.isPlaying = false;
+                this.updatePlayPauseButton();
             }
         }
 
@@ -1221,24 +1328,34 @@
 
         // ✅ CORREGIDO: Control de play/pause mejorado
         async togglePlayPause() {
-            if (!this.audio || !this.currentTrack) return;
+            if (!this.audio || !this.currentTrack) {
+                console.warn('⚠️ No hay audio o track cargado');
+                return;
+            }
 
             try {
                 if (this.audio.paused) {
-                    // ✅ CORREGIDO: Solo reproducir anuncios si es el inicio de una nueva canción
+                    // ✅ MEJORADO: Manejar casos especiales
                     if (this.audio.currentTime === 0 && !this.isPremiumUser && !this.isPlayingAd) {
+                        // Primera reproducción para usuario gratuito
                         await this.playWithAds(this.currentTrack);
                     } else {
+                        // Reproducción normal
                         await this.audio.play();
                         this.isPlaying = true;
+                        console.log('▶️ Reproducción iniciada/reanudada');
                     }
                 } else {
                     this.audio.pause();
                     this.isPlaying = false;
+                    console.log('⏸️ Reproducción pausada');
                 }
                 this.updatePlayPauseButton();
             } catch (error) {
                 console.error('❌ Error al cambiar estado de reproducción:', error);
+                this.showToast('No se pudo reproducir. Intenta de nuevo.', 'error');
+                this.isPlaying = false;
+                this.updatePlayPauseButton();
             }
         }
 
@@ -1384,7 +1501,41 @@
 
         onError(e) {
             console.error('❌ Error en audio:', e);
-            this.showToast('Error al cargar el audio', 'error');
+            console.error('🔗 URL que causó el error:', this.audio?.src);
+
+            let errorMessage = 'Error al cargar el audio';
+
+            if (this.audio && this.audio.error) {
+                switch (this.audio.error.code) {
+                    case this.audio.error.MEDIA_ERR_ABORTED:
+                        errorMessage = 'Reproducción cancelada';
+                        break;
+                    case this.audio.error.MEDIA_ERR_NETWORK:
+                        errorMessage = 'Error de red al cargar audio';
+                        break;
+                    case this.audio.error.MEDIA_ERR_DECODE:
+                        errorMessage = 'Error al decodificar el archivo de audio';
+                        break;
+                    case this.audio.error.MEDIA_ERR_SRC_NOT_SUPPORTED:
+                        errorMessage = 'Formato de audio no soportado';
+                        break;
+                    default:
+                        errorMessage = 'Error desconocido de audio';
+                }
+            }
+
+            this.showToast(errorMessage, 'error');
+
+            // Actualizar UI
+            if (this.trackTitle) {
+                this.trackTitle.textContent = 'Error al cargar audio';
+            }
+            if (this.trackArtist) {
+                this.trackArtist.textContent = errorMessage;
+            }
+
+            this.isPlaying = false;
+            this.updatePlayPauseButton();
         }
 
         async checkPremiumStatus() {
@@ -1461,7 +1612,7 @@
         }
     }
 
-    // Función global para redirección a playlists
+    // ✅ FUNCIÓN GLOBAL CORREGIDA para redirección a playlists
     function redirectToPlaylistsWithContent(contentId) {
         if (!contentId) {
             console.error('ContentId no válido');
@@ -1481,43 +1632,6 @@
             console.log('Índice actual:', window.indexPlayer.currentTrackIndex);
             console.log('Modo bucle:', window.indexPlayer.isLooping);
             console.log('Modo aleatorio:', window.indexPlayer.isShuffling);
-            console.log('Es premium:', window.indexPlayer.isPremiumUser);
-            console.log('Reproduciendo anuncio:', window.indexPlayer.isPlayingAd);
         };
     });
-
-    // Funciones de debug
-    window.testPlayButton = function(index = 0) {
-        const btn = document.querySelectorAll('.play-in-player-btn')[index];
-        if (btn) {
-            btn.click();
-        } else {
-            console.warn('Botón no encontrado en el índice:', index);
-        }
-    };
-
-    // Funciones de prueba para controles
-    window.testPrevious = function() {
-        if (window.indexPlayer) {
-            window.indexPlayer.playPrevious();
-        }
-    };
-
-    window.testNext = function() {
-        if (window.indexPlayer) {
-            window.indexPlayer.playNext();
-        }
-    };
-
-    window.testShuffle = function() {
-        if (window.indexPlayer) {
-            window.indexPlayer.toggleShuffle();
-        }
-    };
-
-    window.testRepeat = function() {
-        if (window.indexPlayer) {
-            window.indexPlayer.toggleRepeat();
-        }
-    };
 </script>
