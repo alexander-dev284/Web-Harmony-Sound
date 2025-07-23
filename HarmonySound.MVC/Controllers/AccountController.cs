@@ -116,19 +116,211 @@ namespace HarmonySound.MVC.Controllers
                         return View(model);
                     }
 
-                    // Redirigir según el rol
+                    // Redirigir según el rol (EXCLUYE Admin - deben usar AdminLogin)
                     if (role.Equals("Client", System.StringComparison.OrdinalIgnoreCase))
                         return RedirectToAction("Home", "Clients");
                     else if (role.Equals("Artist", System.StringComparison.OrdinalIgnoreCase))
                         return RedirectToAction("Home", "Artists");
                     else if (role.Equals("Admin", System.StringComparison.OrdinalIgnoreCase))
-                        return RedirectToAction("Dashboard", "Admin");
+                    {
+                        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                        ModelState.AddModelError("", "Los administradores deben usar el acceso administrativo específico.");
+                        return View(model);
+                    }
                     else
                     {
                         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
                         ModelState.AddModelError("", $"No tienes permisos para acceder con el rol '{role}'.");
                         return View(model);
                     }
+                }
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "Error de red o de servidor: " + ex.Message);
+                return View(model);
+            }
+        }
+
+        // ✅ NUEVO: GET AdminLogin - Acceso específico para administradores
+        [HttpGet]
+        public IActionResult AdminLogin()
+        {
+            return View();
+        }
+
+        // ✅ NUEVO: POST AdminLogin - Proceso de login para administradores
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AdminLogin(AdminLoginViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var apiModel = new
+            {
+                Email = model.Email,
+                Password = model.Password
+            };
+
+            var json = JsonConvert.SerializeObject(apiModel);
+
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+                    // Usar el endpoint específico para admin login
+                    var response = await client.PostAsync("https://localhost:7120/api/Auth/admin-login", content);
+
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        var errorContent = await response.Content.ReadAsStringAsync();
+                        ModelState.AddModelError("", "Error: " + errorContent);
+                        return View(model);
+                    }
+
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    var adminLoginResult = JsonConvert.DeserializeObject<AdminLoginResult>(responseContent);
+
+                    if (string.IsNullOrEmpty(adminLoginResult?.Token))
+                    {
+                        ModelState.AddModelError("", "No se pudo iniciar sesión como administrador.");
+                        return View(model);
+                    }
+
+                    // Extraer el ID del usuario del JWT para el 2FA
+                    var handler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+                    var jwt = handler.ReadJwtToken(adminLoginResult.Token);
+                    var userIdClaim = jwt.Claims.FirstOrDefault(c => c.Type == "sub" || c.Type == "nameid");
+                    
+                    if (userIdClaim == null)
+                    {
+                        ModelState.AddModelError("", "Error en la autenticación. Token inválido.");
+                        return View(model);
+                    }
+
+                    // Generar código 2FA
+                    var twoFactorRequest = new
+                    {
+                        UserId = int.Parse(userIdClaim.Value)
+                    };
+
+                    var twoFactorJson = JsonConvert.SerializeObject(twoFactorRequest);
+                    var twoFactorContent = new StringContent(twoFactorJson, System.Text.Encoding.UTF8, "application/json");
+                    var twoFactorResponse = await client.PostAsync("https://localhost:7120/api/Auth/generate-2fa-code", twoFactorContent);
+
+                    if (!twoFactorResponse.IsSuccessStatusCode)
+                    {
+                        ModelState.AddModelError("", "Error al generar código de verificación.");
+                        return View(model);
+                    }
+
+                    // Guardar el token temporalmente y redirigir a verificación 2FA
+                    TempData["AdminToken"] = adminLoginResult.Token;
+                    TempData["AdminUserId"] = userIdClaim.Value;
+                    
+                    return RedirectToAction("AdminVerify2FA", new { secretKey = GenerateSecretKey() });
+                }
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "Error de red o de servidor: " + ex.Message);
+                return View(model);
+            }
+        }
+
+        // ✅ NUEVO: GET AdminVerify2FA - Vista de verificación 2FA
+        [HttpGet]
+        public IActionResult AdminVerify2FA(string secretKey)
+        {
+            if (TempData["AdminToken"] == null || TempData["AdminUserId"] == null)
+            {
+                return RedirectToAction("AdminLogin");
+            }
+
+            var model = new Admin2FAViewModel
+            {
+                SecretKey = secretKey
+            };
+
+            return View(model);
+        }
+
+        // ✅ NUEVO: POST AdminVerify2FA - Verificación del código 2FA
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AdminVerify2FA(Admin2FAViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var adminToken = TempData["AdminToken"]?.ToString();
+            var adminUserId = TempData["AdminUserId"]?.ToString();
+
+            if (string.IsNullOrEmpty(adminToken) || string.IsNullOrEmpty(adminUserId))
+            {
+                ModelState.AddModelError("", "Sesión expirada. Inicia sesión nuevamente.");
+                return RedirectToAction("AdminLogin");
+            }
+
+            try
+            {
+                // Verificar el código 2FA
+                var verifyRequest = new
+                {
+                    UserId = int.Parse(adminUserId),
+                    Code = model.Code
+                };
+
+                var json = JsonConvert.SerializeObject(verifyRequest);
+                var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+
+                using (var client = new HttpClient())
+                {
+                    var response = await client.PostAsync("https://localhost:7120/api/Auth/verify-2fa-code", content);
+
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        ModelState.AddModelError("", "Error al verificar el código.");
+                        return View(model);
+                    }
+
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    var verifyResult = JsonConvert.DeserializeObject<dynamic>(responseContent);
+
+                    bool isValid = verifyResult?.IsValid ?? false;
+
+                    if (!isValid)
+                    {
+                        ModelState.AddModelError("", "Código inválido o expirado.");
+                        return View(model);
+                    }
+
+                    // Código válido, proceder con el login completo
+                    var handler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+                    var jwt = handler.ReadJwtToken(adminToken);
+                    var claimsList = jwt.Claims.ToList();
+
+                    // Asegurarse de que haya un NameIdentifier
+                    if (!claimsList.Any(c => c.Type == ClaimTypes.NameIdentifier))
+                    {
+                        var sub = claimsList.FirstOrDefault(c => c.Type == "sub")?.Value;
+                        if (sub != null)
+                            claimsList.Add(new Claim(ClaimTypes.NameIdentifier, sub));
+                    }
+
+                    var claimsIdentity = new ClaimsIdentity(claimsList, CookieAuthenticationDefaults.AuthenticationScheme);
+                    var authProperties = new AuthenticationProperties { IsPersistent = true };
+
+                    await HttpContext.SignInAsync(
+                        CookieAuthenticationDefaults.AuthenticationScheme,
+                        new ClaimsPrincipal(claimsIdentity),
+                        authProperties
+                    );
+
+                    // Redirigir al dashboard de administrador
+                    return RedirectToAction("Dashboard", "Admin");
                 }
             }
             catch (Exception ex)
@@ -203,7 +395,7 @@ namespace HarmonySound.MVC.Controllers
             }
         }
 
-        // Método auxiliar para obtener los roles desde la API
+        // Método auxiliar para obtener roles públicos (EXCLUYE Admin)
         private async Task<List<string>> GetRolesFromApi()
         {
             try
@@ -214,14 +406,27 @@ namespace HarmonySound.MVC.Controllers
                     if (response.IsSuccessStatusCode)
                     {
                         var content = await response.Content.ReadAsStringAsync();
-                        var roles = JsonConvert.DeserializeObject<List<RoleDto>>(content);
-                        return roles?.Select(r => r.Name).ToList() ?? new List<string>();
+                        
+                        // ✅ MEJOR: Usar un tipo anónimo más específico
+                        var rolesData = JsonConvert.DeserializeAnonymousType(content, new[]
+                        {
+                            new { Id = 0, Name = "", RoleName = "" }
+                        });
+                        
+                        if (rolesData != null)
+                        {
+                            return rolesData
+                                .Where(r => !r.Name.Equals("Admin", StringComparison.OrdinalIgnoreCase))
+                                .Select(r => r.Name)
+                                .ToList();
+                        }
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // Opcional: loguear el error
+                // ✅ OPCIONAL: Log del error para debugging
+                System.Diagnostics.Debug.WriteLine($"Error al obtener roles: {ex.Message}");
             }
             return new List<string>();
         }
@@ -272,7 +477,11 @@ namespace HarmonySound.MVC.Controllers
             return base64.Replace('-', '+').Replace('_', '/');
         }
 
-        // ✅ SIMPLIFICADO: Login específico para admin usando AP
+        // ✅ NUEVO: Método auxiliar para generar clave secreta
+        private string GenerateSecretKey()
+        {
+            return Guid.NewGuid().ToString("N")[..16];
+        }
 
         public class LoginResult
         {
@@ -282,7 +491,7 @@ namespace HarmonySound.MVC.Controllers
         public class AdminLoginResult
         {
             public string Token { get; set; } = "";
+            public bool RequiresTwoFactor { get; set; }
         }
-
     }
 }

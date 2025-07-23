@@ -292,6 +292,22 @@
   },
   {
     "ContainingType": "HarmonySound.API.Controllers.AuthController",
+    "Method": "Generate2FACode",
+    "RelativePath": "api/Auth/generate-2fa-code",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "HarmonySound.API.Controllers.AuthController\u002BTwoFactorRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "HarmonySound.API.Controllers.AuthController",
     "Method": "Login",
     "RelativePath": "api/Auth/login",
     "HttpMethod": "POST",
@@ -349,6 +365,22 @@
       {
         "Name": "model",
         "Type": "HarmonySound.API.Controllers.AuthController\u002BResetPasswordModel",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "HarmonySound.API.Controllers.AuthController",
+    "Method": "Verify2FACode",
+    "RelativePath": "api/Auth/verify-2fa-code",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "HarmonySound.API.Controllers.AuthController\u002BVerifyTwoFactorRequest",
         "IsRequired": true
       }
     ],
@@ -1417,8 +1449,8 @@
     "Order": 0,
     "Parameters": [
       {
-        "Name": "role",
-        "Type": "HarmonySound.Models.Role",
+        "Name": "createRoleDto",
+        "Type": "HarmonySound.API.DTOs.CreateRoleDto",
         "IsRequired": true
       }
     ],
@@ -1454,8 +1486,8 @@
         "IsRequired": true
       },
       {
-        "Name": "updatedRole",
-        "Type": "HarmonySound.Models.Role",
+        "Name": "updateRoleDto",
+        "Type": "HarmonySound.API.DTOs.CreateRoleDto",
         "IsRequired": true
       }
     ],
@@ -1475,6 +1507,16 @@
         "IsRequired": true
       }
     ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "HarmonySound.API.Controllers.RolesController",
+    "Method": "GetPublicRoles",
+    "RelativePath": "api/Roles/public-roles",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
     "ReturnTypes": []
   },
   {
