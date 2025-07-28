@@ -780,20 +780,20 @@
   {
     "ContainingType": "HarmonySound.API.Controllers.LikesController",
     "Method": "UnlikeContent",
-    "RelativePath": "api/Likes/{userId}/{contentId}",
-    "HttpMethod": "DELETE",
+    "RelativePath": "api/Likes/unlike",
+    "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "userId",
-        "Type": "System.Int32",
-        "IsRequired": true
-      },
-      {
         "Name": "contentId",
         "Type": "System.Int32",
-        "IsRequired": true
+        "IsRequired": false
+      },
+      {
+        "Name": "userId",
+        "Type": "System.Int32",
+        "IsRequired": false
       }
     ],
     "ReturnTypes": []

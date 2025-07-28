@@ -792,13 +792,29 @@
             }
         }
 
-        // ✅ MEJORAR: Toggle más visual y claro
+        // ✅ MEJORAR: Toggle más robusto en el JavaScript
         async toggleLike(button) {
+            console.log('🔄 toggleLike llamado', button);
+            
+            if (!button) {
+                console.error('❌ Botón de like no válido');
+                return;
+            }
+            
             const contentId = button.getAttribute('data-content-id');
             const userId = button.getAttribute('data-user-id');
 
+            console.log('📋 Datos del like:', { contentId, userId });
+
             if (!contentId || !userId) {
-                console.error('❌ Missing contentId or userId');
+                console.error('❌ Missing contentId or userId', { contentId, userId });
+                this.showToast('Error: Datos faltantes para procesar like', 'error');
+                return;
+            }
+
+            // ✅ Prevenir múltiples clicks
+            if (button.disabled) {
+                console.log('⚠️ Botón ya está procesando una acción');
                 return;
             }
 
@@ -817,37 +833,39 @@
                 formData.append('contentId', contentId);
                 formData.append('userId', userId);
 
-                const isCurrentlyLiked = this.likedContentIds.has(contentId);
-                console.log(`🔄 Toggling like for ID ${contentId}: Currently ${isCurrentlyLiked ? 'LIKED' : 'NOT LIKED'}`);
+                // ✅ CAMBIAR: Usar solo el endpoint LikeContent para toggle
+                const response = await fetch('@Url.Action("LikeContent", "Clients")', {
+                    method: 'POST',
+                    body: formData
+                });
 
-                if (isCurrentlyLiked) {
-                    // ✅ QUITAR LIKE
-                    const response = await fetch('@Url.Action("UnlikeContent", "Clients")', {
-                        method: 'POST',
-                        body: formData
-                    });
-
+                console.log('📡 Respuesta del servidor:', response.status);
+                
+                if (response.ok) {
                     const data = await response.json();
+                    console.log('📄 Datos de respuesta:', data);
+                    
                     if (data.success) {
-                        this.likedContentIds.delete(contentId);
-                        this.updateButtonState(button, false);
-                        this.showToast('💔 Removido de favoritos', 'info');
-                        console.log('✅ Removido de favoritos:', contentId);
+                        // ✅ NUEVO: Manejar según la acción realizada
+                        if (data.action === 'added') {
+                            this.likedContentIds.add(contentId);
+                            this.updateButtonState(button, true);
+                            this.showToast('💚 ¡Agregado a favoritos!', 'success');
+                            console.log('✅ Agregado a favoritos:', contentId);
+                        } else if (data.action === 'removed') {
+                            this.likedContentIds.delete(contentId);
+                            this.updateButtonState(button, false);
+                            this.showToast('💔 Removido de favoritos', 'info');
+                            console.log('✅ Removido de favoritos:', contentId);
+                        }
+                    } else {
+                        console.error('❌ Error en respuesta del servidor:', data.message);
+                        this.showToast('Error: ' + (data.message || 'No se pudo procesar la acción'), 'error');
                     }
                 } else {
-                    // ✅ AGREGAR LIKE
-                    const response = await fetch('@Url.Action("LikeContent", "Clients")', {
-                        method: 'POST',
-                        body: formData
-                    });
-
-                    const data = await response.json();
-                    if (data.success) {
-                        this.likedContentIds.add(contentId);
-                        this.updateButtonState(button, true);
-                        this.showToast('💚 ¡Agregado a favoritos!', 'success');
-                        console.log('✅ Agregado a favoritos:', contentId);
-                    }
+                    const errorText = await response.text();
+                    console.error('❌ Error HTTP:', response.status, errorText);
+                    this.showToast('Error del servidor al procesar la acción', 'error');
                 }
 
                 // ✅ IMPORTANTE: Sincronizar con reproductor si es la canción actual
@@ -857,7 +875,7 @@
 
             } catch (error) {
                 console.error('❌ Error al procesar like:', error);
-                this.showToast('Error al procesar la solicitud', 'error');
+                this.showToast('Error de conexión al procesar la solicitud', 'error');
             } finally {
                 button.disabled = false;
             }
@@ -984,23 +1002,21 @@
             document.querySelectorAll('.play-in-player-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     e.preventDefault();
+                    e.stopPropagation();
                     const track = this.extractTrackData(btn);
                     this.playTrackAndStart(track);
                 });
             });
 
-            // ✅ IMPORTANTE: Botones de like
-            document.querySelectorAll('.like-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    this.toggleLike(btn);
-                });
-            });
+            // ✅ CORREGIR: Botones de like - configurar event delegation
+            this.setupLikeButtons();
 
             // ✅ IMPORTANTE: Botón de like en el reproductor
             const heartBtn = document.getElementById('like-current-btn');
             if (heartBtn) {
-                heartBtn.addEventListener('click', () => {
+                heartBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
                     if (this.currentTrack) {
                         const correspondingBtn = document.querySelector(`[data-content-id="${this.currentTrack.id}"]`)?.querySelector('.like-btn');
                         if (correspondingBtn) {
@@ -1009,6 +1025,45 @@
                     }
                 });
             }
+        }
+
+        // ✅ NUEVO: Método específico para configurar botones de like
+        setupLikeButtons() {
+            console.log('🔧 Configurando event listeners para botones de like...');
+            
+            // Usar event delegation en el contenedor principal
+            const songsContainer = document.querySelector('.songs-container');
+            if (songsContainer) {
+                songsContainer.addEventListener('click', (e) => {
+                    // Verificar si el click fue en un botón de like o en su icono
+                    const likeBtn = e.target.closest('.like-btn');
+                    if (likeBtn) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('❤️ Click en botón de like detectado');
+                        this.toggleLike(likeBtn);
+                    }
+                });
+                console.log('✅ Event delegation configurado para likes');
+            }
+            
+            // También configurar listeners directos como fallback
+            document.querySelectorAll('.like-btn').forEach((btn, index) => {
+                console.log(`🔧 Configurando listener ${index + 1} para like button ID: ${btn.getAttribute('data-content-id')}`);
+                
+                // Remover listeners existentes para evitar duplicados
+                const newBtn = btn.cloneNode(true);
+                btn.parentNode.replaceChild(newBtn, btn);
+                
+                newBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('❤️ Click directo en botón de like');
+                    this.toggleLike(newBtn);
+                });
+            });
+            
+            console.log(`✅ Configurados ${document.querySelectorAll('.like-btn').length} botones de like`);
         }
 
         // Encontrar índice de canción en playlist
@@ -1173,11 +1228,12 @@
             });
         }
 
+        // ✅ CORREGIR: Agregar coma faltante
         extractTrackData(button) {
             return {
                 id: button.getAttribute('data-content-id'),
                 title: button.getAttribute('data-title'),
-                artist: button.getAttribute('data-artist'),
+                artist: button.getAttribute('data-artist'), // ✅ AGREGADA coma aquí
                 url: button.getAttribute('data-url')
             };
         }

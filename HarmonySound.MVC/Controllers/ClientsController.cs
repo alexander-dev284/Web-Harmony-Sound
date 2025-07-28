@@ -162,7 +162,7 @@ namespace HarmonySound.MVC.Controllers
         public async Task<IActionResult> Home(string query)
         {
             int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
-            ViewBag.UserId = userId;
+            ViewBag.UserId = userId; 
             
             var model = new SearchResultsViewModel { Query = query };
 
@@ -523,6 +523,9 @@ namespace HarmonySound.MVC.Controllers
             }
         }
 
+        // Replace all usages of 'FormData' with 'MultipartFormDataContent' for HTTP form data in C#
+        // Fix in LikeContent and UnlikeContent methods:
+
         [HttpPost]
         public async Task<IActionResult> LikeContent(int contentId, int userId)
         {
@@ -532,21 +535,29 @@ namespace HarmonySound.MVC.Controllers
                 formData.Add(new StringContent(contentId.ToString()), "contentId");
                 formData.Add(new StringContent(userId.ToString()), "userId");
 
-                var response = await _httpClient.PostAsync($"{_apiBaseUrl}/api/Likes", formData);
-                
+                var response = await _httpClient.PostAsync("https://localhost:7120/api/Likes", formData);
+
                 if (response.IsSuccessStatusCode)
                 {
-                    return Json(new { success = true, message = "Contenido agregado a favoritos" });
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    var result = JsonSerializer.Deserialize<JsonElement>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                    return Json(new
+                    {
+                        success = result.GetProperty("success").GetBoolean(),
+                        message = result.GetProperty("message").GetString(),
+                        action = result.TryGetProperty("action", out var actionProp) ? actionProp.GetString() : "unknown"
+                    });
                 }
                 else
                 {
-                    var error = await response.Content.ReadAsStringAsync();
-                    return Json(new { success = false, message = "Error al agregar a favoritos: " + error });
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    return Json(new { success = false, message = errorContent });
                 }
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = "Error: " + ex.Message });
+                return Json(new { success = false, message = $"Error: {ex.Message}" });
             }
         }
 
@@ -555,21 +566,33 @@ namespace HarmonySound.MVC.Controllers
         {
             try
             {
-                var response = await _httpClient.DeleteAsync($"{_apiBaseUrl}/api/Likes?contentId={contentId}&userId={userId}");
-                
+                var formData = new MultipartFormDataContent();
+                formData.Add(new StringContent(contentId.ToString()), "contentId");
+                formData.Add(new StringContent(userId.ToString()), "userId");
+
+                var response = await _httpClient.PostAsync("https://localhost:7120/api/Likes/unlike", formData);
+
                 if (response.IsSuccessStatusCode)
                 {
-                    return Json(new { success = true, message = "Contenido removido de favoritos" });
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    var result = JsonSerializer.Deserialize<JsonElement>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                    return Json(new
+                    {
+                        success = result.GetProperty("success").GetBoolean(),
+                        message = result.GetProperty("message").GetString(),
+                        action = "removed"
+                    });
                 }
                 else
                 {
-                    var error = await response.Content.ReadAsStringAsync();
-                    return Json(new { success = false, message = "Error al remover de favoritos: " + error });
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    return Json(new { success = false, message = errorContent });
                 }
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = "Error: " + ex.Message });
+                return Json(new { success = false, message = $"Error: {ex.Message}" });
             }
         }
     }

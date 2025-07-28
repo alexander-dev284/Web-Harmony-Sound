@@ -76,12 +76,24 @@ namespace HarmonySound.API.Controllers
                 var isInFavorites = favoritesPlaylist?.PlaylistContents
                     ?.Any(pc => pc.ContentId == contentId) ?? false;
 
+                // ✅ CORREGIR: En lugar de retornar error, hacer toggle
                 if (existingLike != null || isInFavorites)
                 {
-                    return BadRequest("Ya has dado like a este contenido");
+                    // Si ya existe, eliminar el like (toggle off)
+                    if (existingLike != null)
+                    {
+                        _context.UserLikes.Remove(existingLike);
+                    }
+
+                    // Remover de playlist de favoritos
+                    await RemoveFromFavoritesPlaylist(userId, contentId);
+
+                    await _context.SaveChangesAsync();
+
+                    return Ok(new { success = true, message = "Like removido correctamente", action = "removed" });
                 }
 
-                // Crear nuevo like
+                // Si no existe, crear nuevo like (toggle on)
                 var userLike = new UserLike
                 {
                     UserId = userId,
@@ -96,32 +108,30 @@ namespace HarmonySound.API.Controllers
 
                 await _context.SaveChangesAsync();
 
-                return Ok(new { success = true, message = "Like agregado correctamente" });
+                return Ok(new { success = true, message = "Like agregado correctamente", action = "added" });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al agregar like");
+                _logger.LogError(ex, "Error al procesar like");
                 return StatusCode(500, "Error interno del servidor");
             }
         }
 
-        // DELETE: api/Likes/{userId}/{contentId}
-        [HttpDelete("{userId}/{contentId}")]
-        public async Task<IActionResult> UnlikeContent(int userId, int contentId)
+        // POST: api/Likes/unlike
+        [HttpPost("unlike")]
+        public async Task<IActionResult> UnlikeContent([FromForm] int contentId, [FromForm] int userId)
         {
             try
             {
                 var userLike = await _context.UserLikes
                     .FirstOrDefaultAsync(ul => ul.UserId == userId && ul.ContentId == contentId);
 
-                if (userLike == null)
+                if (userLike != null)
                 {
-                    return NotFound("Like no encontrado");
+                    _context.UserLikes.Remove(userLike);
                 }
 
-                _context.UserLikes.Remove(userLike);
-
-                // ✅ AGREGAR: Remover de playlist de favoritos automáticamente
+                // ✅ SIEMPRE remover de playlist de favoritos automáticamente
                 await RemoveFromFavoritesPlaylist(userId, contentId);
 
                 await _context.SaveChangesAsync();
