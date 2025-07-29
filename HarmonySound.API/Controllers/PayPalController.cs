@@ -1,6 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using HarmonySound.API.Services;
-using PayPal.Api;
 
 namespace HarmonySound.API.Controllers
 {

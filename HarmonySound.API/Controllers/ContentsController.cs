@@ -1,9 +1,7 @@
 ﻿using HarmonySound.API.DTOs;
 using HarmonySound.Models;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using HarmonySound.API.Data;
@@ -13,8 +11,8 @@ using NAudio.MediaFoundation;
 namespace HarmonySound.API.Controllers
 {
     [Route("api/[controller]")]
-    [ApiController]  // <- ESTO INDICA QUE ES UN API CONTROLLER
-    public class ContentsController : ControllerBase  // <- HEREDA DE ControllerBase, NO de Controller
+    [ApiController]  
+    public class ContentsController : ControllerBase 
     {
         private readonly HarmonySoundDbContext _context;
         private readonly IWebHostEnvironment _env;
@@ -28,7 +26,7 @@ namespace HarmonySound.API.Controllers
             _env = env;
             _logger = logger;
             _blobConnectionString = configuration["AzureBlobStorage:ConnectionString"];
-            _blobContainerName = configuration["AzureBlobStorage:MediaContainer"]; // ✅ CAMBIADO
+            _blobContainerName = configuration["AzureBlobStorage:MediaContainer"];
             
             // Inicializar MediaFoundation para soporte de archivos de audio avanzados
             MediaFoundationApi.Startup();
@@ -132,7 +130,7 @@ namespace HarmonySound.API.Controllers
                             }
                             finally
                             {
-                                // Limpiar archivo temporal - CORRECCIÓN AQUÍ
+                                // Limpiar archivo temporal
                                 if (System.IO.File.Exists(tempFile))
                                 {
                                     System.IO.File.Delete(tempFile);
@@ -184,7 +182,7 @@ namespace HarmonySound.API.Controllers
                 if (!allowedExtensions.Contains(extension))
                     return BadRequest("Solo se permiten archivos de audio: .mp3, .wav, .ogg, .flac, .aac, .m4a");
 
-                // **NUEVO: Calcular duración del archivo**
+                // Calcular duración del archivo**
                 _logger.LogInformation($"Calculando duración para: {model.File.FileName}");
                 var audioDuration = await GetAudioDurationAsync(model.File);
                 _logger.LogInformation($"Duración calculada: {audioDuration}");
@@ -215,7 +213,7 @@ namespace HarmonySound.API.Controllers
                     Type = model.Type,
                     UrlMedia = fileUrl,
                     UploadDate = DateTimeOffset.UtcNow,
-                    Duration = audioDuration, // **CORRECCIÓN: Usar duración calculada**
+                    Duration = audioDuration, 
                     ArtistId = model.ArtistId
                 };
 
@@ -238,14 +236,14 @@ namespace HarmonySound.API.Controllers
             }
         }
 
-        // DELETE: api/Contents/5 - MEJORADO
+        // DELETE: api/Contents/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteContent(int id)
         {
             var content = await _context.Contents.FindAsync(id);
             if (content == null) return NotFound();
 
-            // ✅ OPCIONAL: Eliminar archivo de Azure Blob Storage
+            // Eliminar archivo de Azure Blob Storage
             if (!string.IsNullOrEmpty(content.UrlMedia))
             {
                 try
@@ -273,7 +271,7 @@ namespace HarmonySound.API.Controllers
             return NoContent();
         }
 
-        // GET: api/Contents/search?query=...
+        // GET: api/Contents/
         [HttpGet("search")]
         public async Task<IActionResult> Search(string query)
         {
@@ -411,7 +409,7 @@ namespace HarmonySound.API.Controllers
             }
         }
 
-        // ✅ AGREGAR: Método privado para agregar a playlist de favoritos
+        // Método privado para agregar a playlist de favoritos
         private async Task AddToFavoritesPlaylist(int userId, int contentId)
         {
             // Buscar o crear playlist de favoritos
@@ -444,7 +442,7 @@ namespace HarmonySound.API.Controllers
             }
         }
 
-        // ✅ AGREGAR: Método privado para remover de playlist de favoritos
+        // Método privado para remover de playlist de favoritos
         private async Task RemoveFromFavoritesPlaylist(int userId, int contentId)
         {
             var favoritesPlaylist = await _context.Playlist
@@ -462,7 +460,7 @@ namespace HarmonySound.API.Controllers
             }
         }
 
-        // ✅ AGREGAR este método al ContentsController existente
+
         [HttpGet("with-artists")]
         public async Task<ActionResult<IEnumerable<object>>> GetContentsWithArtists()
         {

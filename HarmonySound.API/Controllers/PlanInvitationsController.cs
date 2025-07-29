@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using System.Security.Cryptography;
-using System.Text;
 
 namespace HarmonySound.API.Controllers
 {
@@ -192,7 +191,7 @@ namespace HarmonySound.API.Controllers
                         UserId = existingUser.Id,
                         PlanId = invitation.PlanId,
                         StartDate = DateTimeOffset.UtcNow,
-                        EndDate = ownerPlan.EndDate, // ✅ Misma fecha de expiración que el plan principal
+                        EndDate = ownerPlan.EndDate, //Misma fecha de expiración que el plan principal
                         Active = true
                     };
 
@@ -201,7 +200,7 @@ namespace HarmonySound.API.Controllers
                 }
                 else
                 {
-                    // ✅ Si el usuario no existe, solo marcar como aceptada pero requerir registro
+                    // Si el usuario no existe, solo marcar como aceptada pero requerir registro
                     return Ok(new { 
                         message = "Para completar la aceptación, necesitas registrarte en HarmonySound",
                         requiresRegistration = true,
@@ -254,7 +253,7 @@ namespace HarmonySound.API.Controllers
             }
         }
 
-        // ✅ AGREGAR método faltante para cancelar invitaciones
+        // Agregar método para cancelar invitaciones
         [HttpPost("cancel/{invitationId}")]
         public async Task<IActionResult> CancelInvitation(int invitationId)
         {
@@ -306,7 +305,6 @@ namespace HarmonySound.API.Controllers
                 <ul>
                     <li>Reproducción sin anuncios</li>
                     <li>Calidad de audio superior</li>
-                    <li>Descargas offline</li>
                     <li>Soporte prioritario</li>
                 </ul>
                 

@@ -3,13 +3,8 @@ using Azure.Storage.Blobs.Models;
 using HarmonySound.API.Data;
 using HarmonySound.API.DTOs;
 using HarmonySound.Models;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace HarmonySound.API.Controllers
 {
@@ -18,7 +13,7 @@ namespace HarmonySound.API.Controllers
     public class AlbumsController : ControllerBase
     {
         private readonly HarmonySoundDbContext _context;
-        // 1. Agrega el campo privado para IConfiguration
+        //Agrega el campo privado para IConfiguration
         private readonly IConfiguration _configuration;
 
         public AlbumsController(HarmonySoundDbContext context, IConfiguration configuration)
@@ -43,7 +38,7 @@ namespace HarmonySound.API.Controllers
                 Title = a.Title,
                 CreationDate = a.CreationDate,
                 ArtistName = a.Artist?.Name,
-                ImageUrl = a.ImageUrl, // ✅ INCLUIR IMAGEN
+                ImageUrl = a.ImageUrl,
                 Contents = a.ContentAlbums?.Select(ca => new ContentDto
                 {
                     Id = ca.Content.Id,
@@ -66,7 +61,7 @@ namespace HarmonySound.API.Controllers
         {
             try
             {
-                Console.WriteLine($"🔍 Buscando álbumes para artista ID: {artistId}");
+                Console.WriteLine($"Buscando álbumes para artista ID: {artistId}");
 
                 var albums = await _context.Albums
                     .Where(a => a.ArtistId == artistId)
@@ -75,9 +70,9 @@ namespace HarmonySound.API.Controllers
                     .Include(a => a.Artist)
                     .ToListAsync();
 
-                Console.WriteLine($"📊 Encontrados {albums.Count} álbumes para artista {artistId}");
+                Console.WriteLine($"Encontrados {albums.Count} álbumes para artista {artistId}");
 
-                // ✅ CONVERTIR A DTOs para evitar referencias circulares
+                //Convertir A DTOs para evitar referencias circulares
                 var result = albums.Select(a => new AlbumDto
                 {
                     Id = a.Id,
@@ -98,14 +93,14 @@ namespace HarmonySound.API.Controllers
                     }).ToList() ?? new List<ContentDto>()
                 }).ToList();
 
-                Console.WriteLine($"✅ DTOs generados correctamente");
+                Console.WriteLine($"DTOs generados correctamente");
                 
                 return Ok(result);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Error en GetAlbumsByArtist: {ex.Message}");
-                Console.WriteLine($"❌ Stack trace: {ex.StackTrace}");
+                Console.WriteLine($"Error en GetAlbumsByArtist: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
                 return StatusCode(500, $"Error interno del servidor: {ex.Message}");
             }
         }
@@ -128,7 +123,7 @@ namespace HarmonySound.API.Controllers
                 Title = album.Title,
                 CreationDate = album.CreationDate,
                 ArtistName = album.Artist?.Name,
-                ImageUrl = album.ImageUrl, // ✅ AGREGAR ESTA LÍNEA QUE FALTA
+                ImageUrl = album.ImageUrl,
                 Contents = album.ContentAlbums?.Select(ca => new ContentDto
                 {
                     Id = ca.Content.Id,
@@ -151,7 +146,7 @@ namespace HarmonySound.API.Controllers
         {
             string? imageUrl = null;
 
-            // ✅ NUEVO: Subir imagen si se proporciona
+            //Subir imagen si se proporciona
             if (dto.ImageFile != null && dto.ImageFile.Length > 0)
             {
                 imageUrl = await UploadImageToAzure(dto.ImageFile, "albums");
@@ -162,7 +157,7 @@ namespace HarmonySound.API.Controllers
                 Title = dto.Title,
                 ArtistId = dto.ArtistId,
                 CreationDate = DateTimeOffset.UtcNow,
-                ImageUrl = imageUrl // ✅ ASIGNAR URL DE IMAGEN
+                ImageUrl = imageUrl 
             };
 
             _context.Albums.Add(album);
@@ -170,7 +165,7 @@ namespace HarmonySound.API.Controllers
             return CreatedAtAction(nameof(GetAlbum), new { id = album.Id }, album);
         }
 
-        // PUT: api/Albums/5 - ✅ CORREGIDO CON ELIMINACIÓN DE IMAGEN
+        // PUT: api/Albums/5 
         [HttpPut("{id}")]
         public async Task<IActionResult> PutAlbum(int id, [FromForm] CreateAlbumDto dto)
         {
@@ -183,14 +178,14 @@ namespace HarmonySound.API.Controllers
             // Actualizar título
             album.Title = dto.Title;
 
-            // ✅ NUEVO: Manejar nueva imagen si se proporciona
+            // Manejar nueva imagen si se proporciona
             if (dto.ImageFile != null && dto.ImageFile.Length > 0)
             {
                 // Subir nueva imagen
                 string newImageUrl = await UploadImageToAzure(dto.ImageFile, "albums");
                 album.ImageUrl = newImageUrl;
 
-                // ✅ ELIMINAR imagen anterior de Azure
+                // Eliminar imagen anterior de Azure
                 if (!string.IsNullOrEmpty(oldImageUrl))
                 {
                     await DeleteImageFromAzure(oldImageUrl);
@@ -201,14 +196,14 @@ namespace HarmonySound.API.Controllers
             return NoContent();
         }
 
-        // DELETE: api/Albums/5 - ✅ CON ELIMINACIÓN DE IMAGEN
+        // DELETE: api/Albums/5 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAlbum(int id)
         {
             var album = await _context.Albums.FindAsync(id);
             if (album == null) return NotFound();
 
-            // ✅ ELIMINAR imagen de Azure antes de eliminar el álbum
+            // Eliminar imagen de Azure antes de eliminar el álbum
             if (!string.IsNullOrEmpty(album.ImageUrl))
             {
                 await DeleteImageFromAzure(album.ImageUrl);
@@ -230,7 +225,7 @@ namespace HarmonySound.API.Controllers
             if (album == null)
                 return NotFound();
 
-            // ✅ DEBUGGING: Verificar qué canciones están llegando
+            // Verificar qué canciones están llegando
             System.Diagnostics.Debug.WriteLine($"=== UpdateSongs para álbum {id} ===");
             System.Diagnostics.Debug.WriteLine($"Canciones recibidas: [{string.Join(", ", songIds ?? new List<int>())}]");
 
@@ -249,7 +244,7 @@ namespace HarmonySound.API.Controllers
 
             await _context.SaveChangesAsync();
             
-            // ✅ DEBUGGING: Verificar el estado final
+            // Verificar el estado final
             var finalAlbum = await _context.Albums
                 .Include(a => a.ContentAlbums)
                     .ThenInclude(ca => ca.Content)
@@ -293,7 +288,7 @@ namespace HarmonySound.API.Controllers
             return NoContent();
         }
 
-        // ✅ ACTUALIZAR: Método para subir imágenes al contenedor compartido
+        // Método para subir imágenes al contenedor compartido
         private async Task<string> UploadImageToAzure(IFormFile imageFile, string containerFolder)
         {
             try
@@ -307,7 +302,7 @@ namespace HarmonySound.API.Controllers
                 if (!allowedExtensions.Contains(extension))
                     throw new Exception("Solo se permiten imágenes: .jpg, .jpeg, .png, .gif, .webp");
 
-                // ✅ USAR CONTENEDOR COMPARTIDO PARA IMÁGENES DE CONTENIDO
+                // USAR CONTENEDOR COMPARTIDO PARA IMÁGENES DE CONTENIDO
                 var blobConnectionString = _configuration["AzureBlobStorage:ConnectionString"];
                 var blobContainerName = _configuration["AzureBlobStorage:ContentImagesContainer"];
 
@@ -315,7 +310,7 @@ namespace HarmonySound.API.Controllers
                 var containerClient = blobServiceClient.GetBlobContainerClient(blobContainerName);
                 await containerClient.CreateIfNotExistsAsync(PublicAccessType.Blob);
 
-                // ✅ MANTENER CARPETAS PARA ORGANIZACIÓN: playlists/ y albums/
+                // MANTENER CARPETAS PARA ORGANIZACIÓN: playlists/ y albums/
                 var uniqueFileName = $"{containerFolder}/{Guid.NewGuid()}{extension}";
                 var blobClient = containerClient.GetBlobClient(uniqueFileName);
 
@@ -339,7 +334,7 @@ namespace HarmonySound.API.Controllers
             }
         }
 
-        // ✅ ACTUALIZAR: Método para eliminar imagen del contenedor compartido
+        //Método para eliminar imagen del contenedor compartido
         private async Task<bool> DeleteImageFromAzure(string imageUrl)
         {
             try
@@ -354,7 +349,7 @@ namespace HarmonySound.API.Controllers
 
                 // Extraer el nombre del blob desde la URL
                 var uri = new Uri(imageUrl);
-                var blobName = uri.AbsolutePath.Substring(1); // Quitar el '/' inicial
+                var blobName = uri.AbsolutePath.Substring(1);
                 if (blobName.StartsWith(blobContainerName + "/"))
                 {
                     blobName = blobName.Substring(blobContainerName.Length + 1);
@@ -363,12 +358,12 @@ namespace HarmonySound.API.Controllers
                 var blobClient = containerClient.GetBlobClient(blobName);
                 await blobClient.DeleteIfExistsAsync();
 
-                Console.WriteLine($"✅ Imagen eliminada de Azure: {blobName}");
+                Console.WriteLine($"Imagen eliminada de Azure: {blobName}");
                 return true;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Error al eliminar imagen de Azure: {ex.Message}");
+                Console.WriteLine($"Error al eliminar imagen de Azure: {ex.Message}");
                 return false;
             }
         }

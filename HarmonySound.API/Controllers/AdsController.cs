@@ -1,7 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using HarmonySound.API.Data;
-using Microsoft.EntityFrameworkCore;
 
 namespace HarmonySound.API.Controllers
 {

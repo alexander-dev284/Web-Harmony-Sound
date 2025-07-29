@@ -67,11 +67,11 @@ namespace HarmonySound.API.Controllers
             if (!roleResult.Succeeded)
                 return BadRequest(roleResult.Errors);
 
-            // ✅ MEJORAR: Usar ApiUrl en lugar de AppUrl para endpoints de API
+            //Usar ApiUrl en lugar de AppUrl para endpoints de API
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             var tokenEncoded = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
             
-            // ✅ USAR: ApiUrl para endpoints de la API
+            //ApiUrl para endpoints de la API
             var apiUrl = _configuration["ApiUrl"] ?? "https://localhost:7120";
             var confirmationLink = $"{apiUrl}/api/Auth/confirm-email?userId={user.Id}&token={tokenEncoded}";
 
@@ -127,7 +127,7 @@ namespace HarmonySound.API.Controllers
             if (user == null || !await _userManager.CheckPasswordAsync(user, model.Password))
                 return Unauthorized(new { Message = "Credenciales inválidas" });
 
-            // ✅ VERIFICAR: Estado del usuario con mensajes específicos
+            // Estado del usuario con mensajes específicos
             if (user.State == "Suspended")
                 return Unauthorized(new { 
                     Message = "Tu cuenta ha sido suspendida. Contacta al administrador para más información.",
@@ -147,7 +147,7 @@ namespace HarmonySound.API.Controllers
                     StatusCode = "ACCOUNT_INVALID_STATE"
                 });
 
-            // Opcional: Verifica si el email está confirmado
+            // Verifica si el email está confirmado
             if (!await _userManager.IsEmailConfirmedAsync(user))
                 return Unauthorized(new { 
                     Message = "Debes confirmar tu email antes de iniciar sesión.",
@@ -178,12 +178,6 @@ namespace HarmonySound.API.Controllers
         }
 
         // Restablecimiento de contraseña usando el código enviado
-        public class ResetPasswordModel
-        {
-            public int UserId { get; set; }
-            public string Code { get; set; }
-            public string NewPassword { get; set; }
-        }
 
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordModel model)
@@ -222,7 +216,7 @@ namespace HarmonySound.API.Controllers
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             var tokenEncoded = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
             
-            // ✅ USAR: ApiUrl para endpoints de la API
+            //ApiUrl para endpoints de la API
             var apiUrl = _configuration["ApiUrl"] ?? "https://localhost:7120";
             var confirmationLink = $"{apiUrl}/api/Auth/confirm-email?userId={user.Id}&token={tokenEncoded}";
 
@@ -231,69 +225,69 @@ namespace HarmonySound.API.Controllers
             return Ok(new { Message = "Correo de confirmación reenviado. Revisa tu bandeja de entrada." });
         }
 
-        // ✅ AGREGAR: Endpoint específico para login de admin
+        //Endpoint específico para login de admin
         [HttpPost("admin-login")]
         public async Task<IActionResult> AdminLogin([FromBody] LoginModel model)
         {
-            Console.WriteLine($"🔐 AdminLogin iniciado para: {model.Email}");
+            Console.WriteLine($"AdminLogin iniciado para: {model.Email}");
             
             if (!ModelState.IsValid)
             {
-                Console.WriteLine("❌ ModelState inválido");
+                Console.WriteLine("ModelState inválido");
                 return BadRequest(ModelState);
             }
 
             var user = await _userManager.FindByEmailAsync(model.Email);
-            Console.WriteLine($"🔍 Usuario encontrado: {user != null}");
+            Console.WriteLine($"Usuario encontrado: {user != null}");
             
             if (user == null)
             {
-                Console.WriteLine("❌ Usuario no encontrado");
+                Console.WriteLine("Usuario no encontrado");
                 return Unauthorized(new { Message = "Credenciales inválidas - Usuario no encontrado" });
             }
 
-            Console.WriteLine($"🔍 Email confirmado: {user.EmailConfirmed}");
-            Console.WriteLine($"🔍 Estado usuario: {user.State}");
+            Console.WriteLine($"Email confirmado: {user.EmailConfirmed}");
+            Console.WriteLine($"Estado usuario: {user.State}");
 
             var passwordValid = await _userManager.CheckPasswordAsync(user, model.Password);
-            Console.WriteLine($"🔍 Contraseña válida: {passwordValid}");
+            Console.WriteLine($"Contraseña válida: {passwordValid}");
             
             if (!passwordValid)
             {
-                Console.WriteLine("❌ Contraseña incorrecta");
+                Console.WriteLine("Contraseña incorrecta");
                 return Unauthorized(new { Message = "Credenciales inválidas - Contraseña incorrecta" });
             }
 
-            // ✅ VERIFICAR: Solo admins pueden usar este endpoint
+            // Solo admins pueden usar este endpoint
             var roles = await _userManager.GetRolesAsync(user);
-            Console.WriteLine($"🔍 Roles del usuario: [{string.Join(", ", roles)}]");
+            Console.WriteLine($"Roles del usuario: [{string.Join(", ", roles)}]");
             
             if (!roles.Contains("Admin"))
             {
-                Console.WriteLine("❌ Usuario no tiene rol Admin");
+                Console.WriteLine("Usuario no tiene rol Admin");
                 return Unauthorized(new { Message = "Acceso denegado. Solo administradores." });
             }
 
-            // ✅ VERIFICAR: Cuenta activa
+            // Cuenta activa
             if (user.State != "Active")
             {
-                Console.WriteLine($"❌ Cuenta no activa: {user.State}");
+                Console.WriteLine($"Cuenta no activa: {user.State}");
                 return Unauthorized(new { Message = "Cuenta de administrador desactivada" });
             }
 
-            Console.WriteLine("✅ Generando token...");
+            Console.WriteLine("Generando token...");
             var token = await _jwtService.GenerateTokenAsync(user);
-            Console.WriteLine("✅ AdminLogin exitoso");
+            Console.WriteLine("AdminLogin exitoso");
 
             return Ok(new
             {
                 Token = token,
                 RequiresTwoFactor = true,
-                Message = "Login exitoso" // ✅ AGREGAR para debugging
+                Message = "Login exitoso"
             });
         }
 
-        // ✅ AGREGAR: Endpoint para generar código 2FA
+        // Endpoint para generar código 2FA
         [HttpPost("generate-2fa-code")]
         public async Task<IActionResult> Generate2FACode([FromBody] TwoFactorRequest request)
         {
@@ -318,7 +312,7 @@ namespace HarmonySound.API.Controllers
             }
         }
 
-        // ✅ AGREGAR: Endpoint para verificar código 2FA
+        // Endpoint para verificar código 2FA
         [HttpPost("verify-2fa-code")]
         public async Task<IActionResult> Verify2FACode([FromBody] VerifyTwoFactorRequest request)
         {
@@ -347,6 +341,12 @@ namespace HarmonySound.API.Controllers
         {
             public int UserId { get; set; }
             public string Code { get; set; } = "";
+        }
+        public class ResetPasswordModel
+        {
+            public int UserId { get; set; }
+            public string Code { get; set; }
+            public string NewPassword { get; set; }
         }
     }
 }

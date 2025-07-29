@@ -30,7 +30,7 @@ namespace HarmonySound.API.Controllers
                     .Select(ul => ul.ContentId)
                     .ToListAsync();
 
-                // ✅ NUEVO: También obtener canciones de playlist "Favoritos"
+                // También obtener canciones de playlist "Favoritos"
                 var favoritesPlaylist = await _context.Playlist
                     .Include(p => p.PlaylistContents)
                     .FirstOrDefaultAsync(p => p.UserId == userId && p.Name == "Favoritos");
@@ -68,7 +68,7 @@ namespace HarmonySound.API.Controllers
                 var existingLike = await _context.UserLikes
                     .FirstOrDefaultAsync(ul => ul.UserId == userId && ul.ContentId == contentId);
 
-                // ✅ NUEVO: También verificar si está en playlist Favoritos
+                // También verificar si está en playlist Favoritos
                 var favoritesPlaylist = await _context.Playlist
                     .Include(p => p.PlaylistContents)
                     .FirstOrDefaultAsync(p => p.UserId == userId && p.Name == "Favoritos");
@@ -76,10 +76,10 @@ namespace HarmonySound.API.Controllers
                 var isInFavorites = favoritesPlaylist?.PlaylistContents
                     ?.Any(pc => pc.ContentId == contentId) ?? false;
 
-                // ✅ CORREGIR: En lugar de retornar error, hacer toggle
+                // En lugar de retornar error, hacer toggle
                 if (existingLike != null || isInFavorites)
                 {
-                    // Si ya existe, eliminar el like (toggle off)
+                    // Si ya existe, eliminar el like 
                     if (existingLike != null)
                     {
                         _context.UserLikes.Remove(existingLike);
@@ -93,7 +93,7 @@ namespace HarmonySound.API.Controllers
                     return Ok(new { success = true, message = "Like removido correctamente", action = "removed" });
                 }
 
-                // Si no existe, crear nuevo like (toggle on)
+                // Si no existe, crear nuevo like 
                 var userLike = new UserLike
                 {
                     UserId = userId,
@@ -131,7 +131,7 @@ namespace HarmonySound.API.Controllers
                     _context.UserLikes.Remove(userLike);
                 }
 
-                // ✅ SIEMPRE remover de playlist de favoritos automáticamente
+                // Remover de playlist de favoritos automáticamente
                 await RemoveFromFavoritesPlaylist(userId, contentId);
 
                 await _context.SaveChangesAsync();
@@ -145,7 +145,7 @@ namespace HarmonySound.API.Controllers
             }
         }
 
-        // ✅ NUEVO: Método privado para agregar a playlist de favoritos
+        // Método privado para agregar a playlist de favoritos
         private async Task AddToFavoritesPlaylist(int userId, int contentId)
         {
             try
@@ -187,7 +187,7 @@ namespace HarmonySound.API.Controllers
             }
         }
 
-        // ✅ NUEVO: Método privado para remover de playlist de favoritos
+        // Método privado para remover de playlist de favoritos
         private async Task RemoveFromFavoritesPlaylist(int userId, int contentId)
         {
             try
