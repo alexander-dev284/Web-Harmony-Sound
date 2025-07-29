@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Authorization; // ✅ AGREGAR
 using HarmonySound.Models;
-using HarmonySound.API.DTOs; // ✅ AGREGAR
+using HarmonySound.API.DTOs; 
 using HarmonySound.API.Data;
 
 namespace HarmonySound.API.Controllers
@@ -37,7 +31,7 @@ namespace HarmonySound.API.Controllers
                 var userRoles = await _context.UserRoles
                     .Include(ur => ur.User)
                     .Include(ur => ur.Role)
-                    .Where(ur => ur.User != null && ur.Role != null) // ✅ FILTRAR nulos
+                    .Where(ur => ur.User != null && ur.Role != null) 
                     .Select(ur => new UserRoleDto
                     {
                         UserId = ur.UserId,
@@ -103,7 +97,7 @@ namespace HarmonySound.API.Controllers
             if (!await _roleManager.RoleExistsAsync(model.RoleName))
                 return NotFound(new { Message = "Rol no encontrado" });
 
-            // ✅ VERIFICAR: Si ya tiene el rol
+            // Si ya tiene el rol
             if (await _userManager.IsInRoleAsync(user, model.RoleName))
                 return BadRequest(new { Message = "El usuario ya tiene este rol asignado" });
 
@@ -129,7 +123,7 @@ namespace HarmonySound.API.Controllers
             if (!await _roleManager.RoleExistsAsync(model.RoleName))
                 return NotFound(new { Message = "Rol no encontrado" });
 
-            // ✅ VERIFICAR: Si tiene el rol
+            // Si tiene el rol
             if (!await _userManager.IsInRoleAsync(user, model.RoleName))
                 return BadRequest(new { Message = "El usuario no tiene este rol asignado" });
 
@@ -159,7 +153,7 @@ namespace HarmonySound.API.Controllers
             return Ok(new { Message = "Relación usuario-rol eliminada correctamente" });
         }
 
-        // ✅ NUEVO: GET: api/UserRoles/users-with-roles - Lista usuarios con sus roles
+        // GET: api/UserRoles/users-with-roles 
         [HttpGet("users-with-roles")]
       
         public async Task<ActionResult<IEnumerable<object>>> GetUsersWithRoles()
@@ -188,7 +182,7 @@ namespace HarmonySound.API.Controllers
             }
         }
 
-        // Helper: Verifica si existe la relación usuario-rol
+        // Verifica si existe la relación usuario-rol
         private bool UserRoleExists(int userId, int roleId)
         {
             return _context.UserRoles.Any(e => e.UserId == userId && e.RoleId == roleId);

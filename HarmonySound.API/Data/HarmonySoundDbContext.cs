@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using HarmonySound.Models;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace HarmonySound.API.Data
@@ -30,8 +25,8 @@ namespace HarmonySound.API.Data
         public DbSet<UserPlan> UsersPlans { get; set; } = default!;
         public DbSet<UserLike> UserLikes { get; set; } = default!;
         public DbSet<PlanInvitation> PlanInvitations { get; set; } = default!;
-
-        // No agregues DbSet<Role> ni DbSet<UserRole> aquí
+        public DbSet<HarmonySound.Models.Playlist> Playlist { get; set; } = default!;
+        public DbSet<HarmonySound.Models.PlaylistContent> PlaylistContents { get; set; } = default!;
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -98,8 +93,5 @@ namespace HarmonySound.API.Data
                     .IsUnique();
             });
         }
-
-        public DbSet<HarmonySound.Models.Playlist> Playlist { get; set; } = default!;
-        public DbSet<HarmonySound.Models.PlaylistContent> PlaylistContents { get; set; } = default!;
     }
 }

@@ -1,17 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
 using HarmonySound.Models;
 using HarmonySound.API.Data;
 using HarmonySound.API.DTOs;
-using Microsoft.AspNetCore.Http;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
-using Microsoft.Extensions.Configuration;
-using System.IO;
 using Microsoft.EntityFrameworkCore;
 
 namespace HarmonySound.API.Controllers
@@ -22,13 +15,13 @@ namespace HarmonySound.API.Controllers
     {
         private readonly UserManager<User> _userManager;
         private readonly IConfiguration _configuration;
-        private readonly HarmonySoundDbContext _context; // ✅ INYECTAR DataContext
+        private readonly HarmonySoundDbContext _context; 
 
         public UsersController(UserManager<User> userManager, IConfiguration configuration, HarmonySoundDbContext context)
         {
             _userManager = userManager;
             _configuration = configuration;
-            _context = context; // ✅ ASIGNAR DataContext
+            _context = context; 
         }
 
         // GET: api/Users
@@ -134,7 +127,7 @@ namespace HarmonySound.API.Controllers
             user.Name = dto.Name;
             user.Biography = dto.Biography;
             user.ProfileImageUrl = dto.ProfileImageUrl;
-            // Email is not editable
+            // Email no es editable
 
             var result = await _userManager.UpdateAsync(user);
             if (!result.Succeeded)
@@ -183,14 +176,14 @@ namespace HarmonySound.API.Controllers
                 var containerClient = blobServiceClient.GetBlobContainerClient(containerName);
                 await containerClient.CreateIfNotExistsAsync(PublicAccessType.Blob);
 
-                // 1. Obtener el usuario y la URL anterior
+                // Obtener el usuario y la URL anterior
                 var user = await _userManager.FindByIdAsync(model.UserId.ToString());
                 if (user == null)
                     return NotFound();
 
                 var previousImageUrl = user.ProfileImageUrl;
 
-                // 2. Eliminar la imagen anterior si existe y es de Azure (no la imagen por defecto)
+                // Eliminar la imagen anterior si existe y es de Azure 
                 if (!string.IsNullOrEmpty(previousImageUrl) && previousImageUrl.Contains(containerName))
                 {
                     try
@@ -205,7 +198,7 @@ namespace HarmonySound.API.Controllers
                     }
                 }
 
-                // 3. Subir la nueva imagen
+                // Subir la nueva imagen
                 var blobClient = containerClient.GetBlobClient(fileName);
                 using (var stream = model.File.OpenReadStream())
                 {
@@ -248,7 +241,6 @@ namespace HarmonySound.API.Controllers
             return Ok(filtered);
         }
 
-        // ✅ AGREGAR este método al UsersController existente
         [HttpGet("with-roles")]
         public async Task<ActionResult<IEnumerable<object>>> GetUsersWithRoles()
         {
@@ -263,7 +255,6 @@ namespace HarmonySound.API.Controllers
                         State = u.State,
                         RegisterDate = u.RegisterDate,
                         ProfileImageUrl = u.ProfileImageUrl,
-                        // ✅ OBTENER EL ROL PRINCIPAL DEL USUARIO
                         Role = _context.UserRoles
                             .Where(ur => ur.UserId == u.Id)
                             .Join(_context.Roles, ur => ur.RoleId, r => r.Id, (ur, r) => r.RoleName)
@@ -279,7 +270,7 @@ namespace HarmonySound.API.Controllers
             }
         }
 
-        // ✅ AGREGAR: Endpoint específico para toggle de estado de usuario
+        // Endpoint específico para toggle de estado de usuario
         [HttpPost("{id}/toggle-status")]
         public async Task<IActionResult> ToggleUserStatus(int id, [FromBody] ToggleUserStatusRequest request)
         {
@@ -293,7 +284,7 @@ namespace HarmonySound.API.Controllers
                     return NotFound(new { message = "Usuario no encontrado" });
                 }
 
-                // ✅ PREVENIR: No permitir suspender administradores
+                // No permitir suspender administradores
                 var userRoles = await _userManager.GetRolesAsync(user);
                 if (userRoles.Contains("Admin") && request.NewState == "Suspended")
                 {
@@ -301,33 +292,22 @@ namespace HarmonySound.API.Controllers
                     return BadRequest(new { message = "No se puede suspender un usuario administrador" });
                 }
 
-                // ✅ VALIDAR: Estados válidos
+                // Estados válidos
                 var validStates = new[] { "Active", "Suspended", "Inactive" };
                 if (!validStates.Contains(request.NewState))
                 {
                     return BadRequest(new { message = $"Estado inválido. Estados válidos: {string.Join(", ", validStates)}" });
                 }
 
-                // ✅ VERIFICAR: Si ya tiene ese estado
+                // Si ya tiene ese estado
                 if (user.State == request.NewState)
                 {
                     return BadRequest(new { message = $"El usuario ya está en estado {request.NewState}" });
                 }
 
-                // ✅ CAMBIAR ESTADO
                 var previousState = user.State;
                 user.State = request.NewState;
 
-                // ✅ OPCIONAL: Agregar timestamp de cambio si tienes estas propiedades
-                if (request.NewState == "Suspended")
-                {
-                    // Puedes agregar campos como SuspendedDate, SuspendedBy si los tienes en tu modelo
-                    
-                }
-                else if (request.NewState == "Active")
-                {
-                
-                }
 
                 var result = await _userManager.UpdateAsync(user);
                 
@@ -339,7 +319,7 @@ namespace HarmonySound.API.Controllers
                     });
                 }
 
-                // ✅ OPCIONAL: Registro de auditoría
+                // Registro de auditoría
                 
                 return Ok(new { 
                     message = $"Usuario {request.Action} correctamente",
@@ -355,7 +335,7 @@ namespace HarmonySound.API.Controllers
             }
         }
 
-        // ✅ NUEVO: Clase para el request de toggle de estado
+        // Clase para el request de estado
         public class ToggleUserStatusRequest
         {
             public int UserId { get; set; }

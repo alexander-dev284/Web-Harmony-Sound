@@ -9,6 +9,6 @@ namespace HarmonySound.API.DTOs
         public string Title { get; set; }
 
         public int ArtistId { get; set; }
-        public IFormFile? ImageFile { get; set; } // ✅ NUEVA PROPIEDAD
+        public IFormFile? ImageFile { get; set; } 
     }
 }

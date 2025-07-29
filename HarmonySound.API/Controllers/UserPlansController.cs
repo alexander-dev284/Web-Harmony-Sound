@@ -16,7 +16,6 @@ namespace HarmonySound.API.Controllers
             _context = context;
         }
 
-        // ============= ENDPOINTS DE NEGOCIO (ORIGINALES) =============
 
         [HttpGet("user/{userId}")]
         public async Task<ActionResult<UserPlan>> GetUserPlan(int userId)
@@ -31,7 +30,7 @@ namespace HarmonySound.API.Controllers
             return Ok(userPlan);
         }
 
-        // MÉTODO ORIGINAL: Mantenido para compatibilidad (modo prueba)
+        // Mantenido para compatibilidad 
         [HttpPost("subscribe")]
         public async Task<IActionResult> Subscribe([FromBody] SubscribeRequest request)
         {
@@ -53,7 +52,7 @@ namespace HarmonySound.API.Controllers
                 if (plan == null)
                     return BadRequest("Plan not found");
 
-                // Crear nueva suscripción (temporal sin pago)
+                // Crear nueva suscripción 
                 var newUserPlan = new UserPlan
                 {
                     UserId = request.UserId,
@@ -89,13 +88,12 @@ namespace HarmonySound.API.Controllers
             }
         }
 
-        // NUEVO: Método para procesar suscripción después del pago con PayPal
+        // Método para procesar suscripción después del pago con PayPal
         [HttpPost("process-subscription")]
         public async Task<IActionResult> ProcessSubscription([FromBody] ProcessSubscriptionRequest request)
         {
             try
             {
-                System.Diagnostics.Debug.WriteLine($"=== ProcessSubscription llamado ===");
                 System.Diagnostics.Debug.WriteLine($"UserId: {request.UserId}, PlanId: {request.PlanId}");
                 System.Diagnostics.Debug.WriteLine($"Amount: {request.Amount}, PaymentMethod: {request.PaymentMethod}");
                 System.Diagnostics.Debug.WriteLine($"PayReference: {request.PayReference}, PaymentState: {request.PaymentState}");
@@ -161,7 +159,7 @@ namespace HarmonySound.API.Controllers
 
                 System.Diagnostics.Debug.WriteLine("Suscripción procesada exitosamente");
 
-                // **SOLUCIÓN: Devolver solo datos simples sin relaciones circulares**
+                // Devolver solo datos simples sin relaciones circulares
                 var result = new
                 {
                     message = "Suscripción procesada exitosamente",
@@ -208,15 +206,13 @@ namespace HarmonySound.API.Controllers
                 if (userPlan == null)
                     return NotFound("No active subscription found");
 
-                // ✅ CAMBIO PRINCIPAL: No desactivar inmediatamente, solo marcar como cancelado
+                // No desactivar inmediatamente, solo marcar como cancelado
                 userPlan.IsCancelled = true;
                 userPlan.CancelledDate = DateTimeOffset.UtcNow;
-                // NO cambiar userPlan.Active = false aquí
-                // NO cambiar userPlan.EndDate aquí
 
                 _context.UsersPlans.Update(userPlan);
 
-                // ✅ NUEVO: Cancelar todas las invitaciones pendientes del usuario
+                // Cancelar todas las invitaciones pendientes del usuario
                 var pendingInvitations = await _context.PlanInvitations
                     .Where(pi => pi.InviterId == request.UserId && pi.Status == "Pending")
                     .ToListAsync();
@@ -228,7 +224,7 @@ namespace HarmonySound.API.Controllers
 
                 _context.PlanInvitations.UpdateRange(pendingInvitations);
 
-                // ✅ NUEVO: Marcar como canceladas las invitaciones aceptadas (pero no desactivar planes inmediatamente)
+                // Marcar como canceladas las invitaciones aceptadas (pero no desactivar planes inmediatamente)
                 var acceptedInvitations = await _context.PlanInvitations
                     .Where(pi => pi.InviterId == request.UserId && pi.Status == "Accepted")
                     .ToListAsync();
@@ -251,7 +247,7 @@ namespace HarmonySound.API.Controllers
                     State = "Cancelled",
                     PaymentMethod = "System",
                     PayReference = "CANCEL-" + Guid.NewGuid().ToString()[..8],
-                    ExpirationDate = userPlan.EndDate // ✅ MANTENER la fecha original de expiración
+                    ExpirationDate = userPlan.EndDate 
                 };
 
                 _context.SubscriptionsHistories.Add(cancelationHistory);
@@ -283,7 +279,7 @@ namespace HarmonySound.API.Controllers
         {
             try
             {
-                // ✅ CAMBIO: Verificar que esté activo Y que no haya expirado, independientemente de si está cancelado
+                //Verificar que esté activo Y que no haya expirado, independientemente de si está cancelado
                 var userPlan = await _context.UsersPlans
                     .Include(up => up.Plan)
                     .FirstOrDefaultAsync(up => up.UserId == userId &&
@@ -341,13 +337,13 @@ namespace HarmonySound.API.Controllers
             }
         }
 
-        // NUEVO: Método para verificar suscripciones vencidas
+        // Método para verificar suscripciones vencidas
         [HttpPost("check-expired")]
         public async Task<IActionResult> CheckExpiredSubscriptions()
         {
             try
             {
-                // ✅ CAMBIO: Ahora sí desactivar las suscripciones que han expirado
+                // Ahora sí desactivar las suscripciones que han expirado
                 var expiredPlans = await _context.UsersPlans
                     .Where(up => up.Active && up.EndDate <= DateTimeOffset.UtcNow)
                     .ToListAsync();
@@ -357,7 +353,7 @@ namespace HarmonySound.API.Controllers
                     plan.Active = false;
                     _context.UsersPlans.Update(plan);
 
-                    // ✅ NUEVO: Desactivar planes de usuarios invitados cuando expira el plan principal
+                    // Desactivar planes de usuarios invitados cuando expira el plan principal
                     if (plan.IsCancelled)
                     {
                         var relatedInvitations = await _context.PlanInvitations
@@ -399,7 +395,7 @@ namespace HarmonySound.API.Controllers
             }
         }
 
-        // NUEVO: Método para obtener historial de suscripciones de un usuario
+        // Método para obtener historial de suscripciones de un usuario
         [HttpGet("history/{userId}")]
         public async Task<IActionResult> GetSubscriptionHistory(int userId)
         {
@@ -418,8 +414,6 @@ namespace HarmonySound.API.Controllers
                 return StatusCode(500, new { error = "Error al obtener historial", details = ex.Message });
             }
         }
-
-        // ============= ENDPOINTS CRUD (DE UsersPlansController) =============
 
         // GET: api/UserPlans
         [HttpGet]
@@ -510,7 +504,7 @@ namespace HarmonySound.API.Controllers
         }
     }
 
-    // ============= CLASES DE REQUEST =============
+    // CLASES DE REQUEST 
 
     public class SubscribeRequest
     {
@@ -523,7 +517,7 @@ namespace HarmonySound.API.Controllers
         public int UserId { get; set; }
     }
 
-    // NUEVA: Request para procesar suscripción después del pago
+    // Request para procesar suscripción después del pago
     public class ProcessSubscriptionRequest
     {
         public int UserId { get; set; }
