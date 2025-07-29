@@ -16,7 +16,6 @@ namespace HarmonySound.MVC
             Crud<ContentAlbum>.EndPoint = "https://localhost:7120/api/ContentAlbums";
             Crud<Content>.EndPoint = "https://localhost:7120/api/Contents";
             Crud<Plan>.EndPoint = "https://localhost:7120/api/Plans";
-            Crud<Report>.EndPoint = "https://localhost:7120/api/Reports";
             Crud<Role>.EndPoint = "https://localhost:7120/api/Roles";
             Crud<Statistic>.EndPoint = "https://localhost:7120/api/Statistics";
             Crud<SubscriptionHistory>.EndPoint = "https://localhost:7120/api/SubscriptionsHistories";

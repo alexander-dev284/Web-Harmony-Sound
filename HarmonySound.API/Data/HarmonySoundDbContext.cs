@@ -25,7 +25,6 @@ namespace HarmonySound.API.Data
         public DbSet<Content> Contents { get; set; } = default!;
         public DbSet<ContentAlbum> ContentsAlbums { get; set; } = default!;
         public DbSet<Plan> Plans { get; set; } = default!;
-        public DbSet<Report> Reports { get; set; } = default!;
         public DbSet<Statistic> Statistics { get; set; } = default!;
         public DbSet<SubscriptionHistory> SubscriptionsHistories { get; set; } = default!;
         public DbSet<UserPlan> UsersPlans { get; set; } = default!;

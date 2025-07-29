@@ -68,7 +68,7 @@ namespace HarmonySound.API.Controllers
             });
         }
 
-        // ✅ MODIFICADO: POST simplificado usando CreateRoleDto
+        // POST simplificado usando CreateRoleDto
         [HttpPost]
         public async Task<ActionResult<object>> PostRole([FromBody] CreateRoleDto createRoleDto)
         {
@@ -78,13 +78,13 @@ namespace HarmonySound.API.Controllers
                 return BadRequest("Name y RoleName son requeridos");
             }
 
-            // ✅ Verificar si el rol ya existe
+            // Verificar si el rol ya existe
             if (await _roleManager.RoleExistsAsync(createRoleDto.Name))
             {
                 return BadRequest($"El rol '{createRoleDto.Name}' ya existe");
             }
 
-            // ✅ Crear el objeto Role con las propiedades necesarias
+            // Crear el objeto Role con las propiedades necesarias
             var role = new Role
             {
                 Name = createRoleDto.Name,
