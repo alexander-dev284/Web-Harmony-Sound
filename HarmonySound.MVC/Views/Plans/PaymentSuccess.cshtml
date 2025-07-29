@@ -36,7 +36,7 @@
                     </div>
                 </div>
                 
-                <!-- ✅ NUEVO: Información de duración y expiración -->
+                <!--  Información de duración y expiración -->
                 <div class="subscription-details">
                     <div class="detail-item">
                         <i class="fas fa-calendar-alt"></i>
@@ -315,56 +315,6 @@
         }
     }
 
-    /* Responsive */
-    @@media (max-width: 768px) {
-        .payment-success-container {
-            padding: 1rem;
-        }
-
-        .success-header {
-            padding: 2rem 1.5rem 1.5rem;
-        }
-
-        .success-icon {
-            font-size: 3rem;
-        }
-
-        .success-title {
-            font-size: 2rem;
-        }
-
-        .success-content {
-            padding: 2rem 1.5rem;
-        }
-
-        .features-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .action-buttons {
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .btn {
-            width: 100%;
-            max-width: 280px;
-        }
-    }
-
-    @@media (max-width: 480px) {
-        .success-title {
-            font-size: 1.75rem;
-        }
-
-        .activation-title {
-            font-size: 1.25rem;
-        }
-
-        .success-description {
-            font-size: 1rem;
-        }
-    }
 
     /* Ocultar elementos del layout si es necesario */
     header, footer { display: none !important; }

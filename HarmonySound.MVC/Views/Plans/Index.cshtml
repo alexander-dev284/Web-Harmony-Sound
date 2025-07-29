@@ -6,7 +6,7 @@
 
 <div class="plans-container">
     <div class="plans-header">
-        <!-- ✅ NUEVO: Botón de navegación que detecta el rol del usuario -->
+        <!--  Botón de navegación que detecta el rol del usuario -->
         <div class="navigation-bar">
             @if (User.IsInRole("artist"))
             {
@@ -61,7 +61,7 @@
     <!-- Plan Actual -->
     @if (Model.CurrentPlan != null)
     {
-        <!-- ✅ MEJORAR: Información del plan actual -->
+        <!--  Información del plan actual -->
         <div class="current-plan-card">
             <div class="current-plan-header">
                 <h3>
@@ -129,7 +129,7 @@
         </div>
     }
 
-    <!-- ✅ MEJORAR: Sección de Gestionar Invitaciones MUY VISIBLE -->
+    <!--  Sección de Gestionar Invitaciones MUY VISIBLE -->
     @if (Model.CurrentPlan != null && Model.CurrentPlan.AccountLimit > 1)
     {
         <div class="invitation-spotlight">
@@ -237,7 +237,7 @@
     </div>
 </div>
 
-<!-- ✅ NUEVO: Modal personalizado para cancelar suscripción -->
+<!--  Modal personalizado para cancelar suscripción -->
 <div id="cancelModal" class="cancel-modal-overlay d-none">
     <div class="cancel-modal-container">
         <div class="cancel-modal-header">
@@ -282,7 +282,7 @@
 <form id="cancelForm" asp-action="Cancel" method="post" style="display: none;"></form>
 
 <style>
-    /* ✅ CORREGIR: CSS COMPLETO Y CORRECTO */
+    /*  CORREGIR: CSS COMPLETO Y CORRECTO */
     .container {
         max-width: none !important;
         padding: 0 !important;
@@ -483,7 +483,7 @@
         color: #000;
     }
 
-    /* ✅ CORREGIR: Grid de Planes - TARJETAS */
+    /* Grid de Planes - TARJETAS */
     .planes-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -630,7 +630,7 @@
         width: 100%;
     }
 
-    /* ✅ NUEVO: Sección de Invitaciones Spotlight - MUY VISIBLE */
+    /* Sección de Invitaciones Spotlight - MUY VISIBLE */
     .invitation-spotlight {
         position: relative;
         background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
@@ -1008,55 +1008,6 @@
         background: linear-gradient(135deg, #c82333, #a71e2a);
     }
 
-    /* Responsive */
-    @@media (max-width: 768px) {
-        .plans-container {
-            padding: 1rem;
-        }
-
-        .plans-title {
-            font-size: 2rem;
-        }
-
-        .planes-grid {
-            grid-template-columns: 1fr;
-            gap: 1.5rem;
-        }
-
-        .current-plan-body {
-            flex-direction: column;
-            gap: 1.5rem;
-            text-align: center;
-        }
-
-        .plan-header {
-            padding: 1.5rem;
-        }
-
-        .plan-features {
-            padding: 1.5rem;
-        }
-
-        .plan-footer {
-            padding: 1.5rem;
-        }
-
-        .invitation-content {
-            grid-template-columns: 1fr;
-            text-align: center;
-            gap: 2rem;
-            padding: 2rem;
-        }
-
-        .invitation-icon {
-            font-size: 4rem;
-            width: auto;
-        }
-
-        .invitation-title {
-            font-size: 1.8rem;
-        }
-    }
 
     /* Ocultar elementos del layout principal */
     header, footer {

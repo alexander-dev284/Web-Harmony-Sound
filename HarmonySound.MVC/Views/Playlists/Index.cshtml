@@ -37,7 +37,7 @@
                 <div class="alert-icon">
                     <i class="fas fa-music"></i>
                 </div>
-                <div class="message-info"> <!-- ✅ CAMBIAR: de "alert-info" a "message-info" -->
+                <div class="message-info"> 
                     <h5>Agregando canción a playlist:</h5>
                     <p><strong>Canción:</strong> @selectedContent.Title</p>
                     <p><strong>Tipo:</strong> @selectedContent.Type</p>
@@ -63,7 +63,6 @@
         </div>
     }
 
-    <!-- ✅ NUEVO: Banner de estado de suscripción -->
     @{
         var subscriptionStatus = ViewBag.SubscriptionStatus as dynamic;
     }
@@ -337,13 +336,13 @@
         flex-shrink: 0;
     }
 
-    .message-info h5 { /* ✅ CAMBIAR: de ".alert-info h5" a ".message-info h5" */
+    .message-info h5 { 
         color: #fff !important;
         margin-bottom: 0.5rem;
         font-weight: 600;
     }
 
-    .message-info p { /* ✅ CAMBIAR: de ".alert-info p" a ".message-info p" */
+    .message-info p { 
         color: #b3b3b3 !important;
         margin-bottom: 0.5rem;
     }
@@ -740,56 +739,7 @@
         height: 100%;
     }
 
-    /* Responsive Design */
-    @@media (max-width: 768px) {
-        .playlists-container
-
-    {
-        padding: 1rem;
-    }
-
-    .playlists-title {
-        font-size: 2rem;
-    }
-
-    .playlists-grid {
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-        gap: 1.5rem;
-    }
-
-    .playlist-card {
-        padding: 1rem;
-    }
-
-    .playlist-title {
-        font-size: 1.2rem;
-    }
-
-    .play-playlist-btn {
-        width: 50px;
-        height: 50px;
-        font-size: 1.2rem;
-    }
-
-    }
-
-    @@media (max-width: 480px) {
-        .playlists-grid
-
-    {
-        grid-template-columns: 1fr;
-    }
-
-    .header-actions {
-        justify-content: center;
-    }
-
-    .btn-create {
-        padding: 10px 20px;
-        font-size: 0.9rem;
-    }
-
-    }
+   
 
     /* Ocultar elementos del layout principal */
     header, footer {

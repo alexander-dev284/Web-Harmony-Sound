@@ -9,7 +9,7 @@
 
 <div class="invitations-container">
     <div class="invitations-header">
-        <!-- ✅ MEJORADO: Navegación con mejor posicionamiento -->
+        <!-- Navegación con mejor posicionamiento -->
         <div class="navigation-bar">
             <a href="@Url.Action("Index")" class="btn-back">
                 <i class="fas fa-arrow-left me-2"></i>
@@ -17,7 +17,7 @@
             </a>
         </div>
         
-        <!-- ✅ MEJORADO: Header con mejor espaciado -->
+        <!-- Header con mejor espaciado -->
         <div class="header-content">
             <h1 class="invitations-title">
                 <i class="fas fa-users me-3"></i>
@@ -45,7 +45,7 @@
     }
     else
     {
-        <!-- ✅ MEJORAR: Información del límite de cuentas -->
+        <!--  Información del límite de cuentas -->
         <div class="account-limit-info">
             <h4>
                 <i class="fas fa-users me-2"></i>
@@ -91,7 +91,7 @@
             </form>
         </div>
 
-        <!-- ✅ MEJORAR: Lista de invitaciones con mejor información -->
+        <!--  Lista de invitaciones con mejor información -->
         @if (invitations != null && invitations.Any())
         {
             <div class="invitations-table">
@@ -174,7 +174,7 @@
         }
     }
 
-    <!-- ✅ NUEVO: Banner de estado de suscripción cancelada -->
+    <!--  Banner de estado de suscripción cancelada -->
     @if (userPlan?.IsCancelled == true)
     {
         <div class="subscription-status-banner">
@@ -206,7 +206,7 @@
 
 <!-- Agregar estilos CSS aquí -->
 <style>
-    /* ✅ MEJORADO: Contenedor principal */
+    /* Contenedor principal */
     .invitations-container {
         max-width: 1000px;
         margin: 0 auto;
@@ -217,14 +217,14 @@
         position: relative;
     }
 
-    /* ✅ MEJORADO: Header con mejor layout */
+    /*  Header con mejor layout */
     .invitations-header {
         margin-bottom: 3rem;
         position: relative;
-        padding-top: 4rem; /* ✅ AUMENTADO: Más espacio arriba */
+        padding-top: 4rem; 
     }
 
-    /* ✅ MEJORADO: Navegación reposicionada */
+    /*  Navegación reposicionada */
     .navigation-bar {
         position: absolute;
         top: 0;
@@ -235,8 +235,8 @@
     .btn-back {
         background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
         color: #fff !important;
-        padding: 10px 20px; /* ✅ AUMENTADO: Más padding */
-        border-radius: 25px; /* ✅ MEJORADO: Más redondeado */
+        padding: 10px 20px;
+        border-radius: 25px;
         font-weight: 600;
         text-decoration: none;
         border: 1px solid #333;
@@ -244,7 +244,7 @@
         align-items: center;
         transition: all 0.3s ease;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-        font-size: 0.95rem; /* ✅ AUMENTADO: Texto más grande */
+        font-size: 0.95rem; 
     }
 
     .btn-back:hover {
@@ -255,34 +255,34 @@
         background: linear-gradient(135deg, #1db954, #1ed760);
     }
 
-    /* ✅ NUEVO: Contenido del header separado */
+   
     .header-content {
         text-align: center;
-        margin-top: 1rem; /* ✅ NUEVO: Separación del botón */
+        margin-top: 1rem; 
     }
 
-    /* ✅ MEJORADO: Título con mejor espaciado */
+ 
     .invitations-title {
         font-size: 2.5rem;
         font-weight: 700;
-        margin-bottom: 1rem; /* ✅ AUMENTADO: Más espacio debajo */
+        margin-bottom: 1rem;
         color: #fff !important;
         background: linear-gradient(135deg, #1db954, #1ed760);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
-        line-height: 1.2; /* ✅ NUEVO: Mejor altura de línea */
+        line-height: 1.2; 
     }
 
-    /* ✅ MEJORADO: Subtítulo con mejor formato */
+    
     .invitations-subtitle {
         color: #b3b3b3 !important;
         font-size: 1.1rem;
         margin-bottom: 0;
-        line-height: 1.4; /* ✅ NUEVO: Mejor espaciado de líneas */
+        line-height: 1.4; 
     }
 
-    /* ✅ NUEVO: Resaltado para elementos del plan */
+ 
     .plan-name {
         color: #1db954;
         font-weight: 600;
@@ -293,7 +293,6 @@
         font-weight: 600;
     }
 
-    /* ✅ RESTO DE ESTILOS EXISTENTES MEJORADOS */
     .send-invitation-card,
     .invitations-list-card {
         background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
@@ -336,7 +335,7 @@
 
     .form-control {
         width: 100%;
-        padding: 12px 16px; /* ✅ AUMENTADO: Más padding */
+        padding: 12px 16px; 
         background: rgba(255, 255, 255, 0.1);
         border: 1px solid #444;
         border-radius: 8px;
@@ -359,9 +358,9 @@
     .btn-send-invitation {
         background: linear-gradient(135deg, #1db954, #1ed760);
         color: #000;
-        padding: 12px 24px; /* ✅ AUMENTADO: Más padding */
+        padding: 12px 24px; 
         border: none;
-        border-radius: 25px; /* ✅ MEJORADO: Más redondeado */
+        border-radius: 25px; 
         font-weight: 600;
         cursor: pointer;
         transition: all 0.3s ease;
@@ -419,7 +418,6 @@
         align-items: center;
     }
 
-    /* ✅ MEJORADO: Tabla de invitaciones */
     .invitations-table {
         background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
         border-radius: 12px;

@@ -33,10 +33,10 @@
                         <div class="preview-cover">
                             <div class="cover-placeholder" id="cover-placeholder">
                                 <i class="fas fa-list-music"></i>
-                                <!-- ✅ NUEVO: Vista previa de imagen -->
+                                <!--  Vista previa de imagen -->
                                 <img id="image-preview" style="display: none; width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" />
                             </div>
-                            <!-- ✅ NUEVO: Botón para cambiar imagen -->
+                            <!--  Botón para cambiar imagen -->
                             <div class="image-upload-overlay">
                                 <label for="image-file-input" class="image-upload-btn">
                                     <i class="fas fa-camera"></i>
@@ -826,7 +826,6 @@
             transform: translateY(-2px);
         }
 
-    /* ✅ NUEVOS ESTILOS PARA SUBIDA DE IMAGEN */
     .preview-cover {
         position: relative;
         overflow: hidden;
@@ -1087,7 +1086,7 @@
 </script>
 
 <script>
-// ✅ NUEVO: JavaScript para vista previa de imagen
+
 document.addEventListener('DOMContentLoaded', () => {
     const imageInput = document.getElementById('image-file-input');
     const imagePreview = document.getElementById('image-preview');
