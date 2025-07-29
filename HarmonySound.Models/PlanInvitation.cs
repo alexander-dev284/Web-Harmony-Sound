@@ -15,7 +15,7 @@ namespace HarmonySound.Models
         [EmailAddress]
         public string InviteeEmail { get; set; } // Email del invitado
         
-        public int? InviteeId { get; set; } // ID del usuario invitado (si ya existe)
+        public int? InviteeId { get; set; } // ID del usuario invitado
         public User? Invitee { get; set; }
         
         [Required]
@@ -30,7 +30,7 @@ namespace HarmonySound.Models
         public DateTimeOffset ExpirationDate { get; set; }
         
         [Required]
-        public string Status { get; set; } // "Pending", "Accepted", "Declined", "Expired"
+        public string Status { get; set; } 
         
         public string? InvitationMessage { get; set; }
     }

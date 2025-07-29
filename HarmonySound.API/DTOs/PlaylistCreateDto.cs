@@ -4,6 +4,6 @@
     {
         public string Name { get; set; }
         public int UserId { get; set; }
-        public IFormFile? ImageFile { get; set; } // ✅ NUEVA PROPIEDAD
+        public IFormFile? ImageFile { get; set; } 
     }
 }

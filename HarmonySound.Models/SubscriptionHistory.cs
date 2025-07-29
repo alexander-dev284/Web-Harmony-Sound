@@ -16,9 +16,9 @@ namespace HarmonySound.Models
 
         public decimal Amount { get; set; }
 
-        public string State { get; set; }  // Ejemplo: "Éxito", "Fallido"
+        public string State { get; set; }
 
-        public string PaymentMethod { get; set; }  // "PayPhone"
+        public string PaymentMethod { get; set; } 
 
         public string PayReference { get; set; }
 

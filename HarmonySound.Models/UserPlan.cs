@@ -17,7 +17,6 @@ namespace HarmonySound.Models
 
         public bool Active { get; set; }
         
-        // ✅ ESTAS PROPIEDADES DEBEN EXISTIR
         public bool IsCancelled { get; set; } = false;
         public DateTimeOffset? CancelledDate { get; set; }
     }

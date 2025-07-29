@@ -10,7 +10,7 @@ namespace HarmonySound.Models
         [MaxLength(20)]
         public string Title { get; set; }
 
-        public string Type { get; set; }  // Ejemplo: "Canción", "Podcast"
+        public string Type { get; set; }  
 
         [Required]
         public string UrlMedia { get; set; }  // Ruta o URL del archivo

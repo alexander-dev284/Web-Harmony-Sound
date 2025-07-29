@@ -18,7 +18,7 @@ namespace HarmonySound.API
         {
             var builder = WebApplication.CreateBuilder(args);
             
-            // Database context
+            // Contexto base de datos
             builder.Services.AddDbContext<HarmonySoundDbContext>(options =>
                 options.UseNpgsql(builder.Configuration.GetConnectionString("HarmonySoundDbContext")));
 
@@ -27,7 +27,7 @@ namespace HarmonySound.API
                 .AddEntityFrameworkStores<HarmonySoundDbContext>()
                 .AddDefaultTokenProviders();
 
-            // JWT Authentication
+            // JWT Autenticación
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
@@ -45,7 +45,7 @@ namespace HarmonySound.API
                     };
                 });
 
-            // Controllers
+            // Controladores
             builder.Services.AddControllers()
                 .AddJsonOptions(options =>
                 {
@@ -83,7 +83,7 @@ namespace HarmonySound.API
                 });
             });
 
-            // Custom services
+            // Servicios personalizados
             builder.Services.AddTransient<IEmailSender, EmailService>();
             builder.Services.AddTransient<IJwtService, JwtService>();
             builder.Services.AddTransient<I2FAService, TwoFactorAuthService>();
@@ -92,7 +92,6 @@ namespace HarmonySound.API
 
             var app = builder.Build();
 
-            // Pipeline
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
