@@ -16,13 +16,35 @@ namespace HarmonySound.MVC.Controllers
             _httpClient = httpClient;
         }
 
-        // GET: Albums
+        // GET: Albums 
         public async Task<IActionResult> Index()
         {
-            var response = await _httpClient.GetAsync("https://localhost:7120/api/Albums");
-            var json = await response.Content.ReadAsStringAsync();
-            var albums = System.Text.Json.JsonSerializer.Deserialize<List<AlbumDto>>(json, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-            return View(albums);
+            try
+            {
+                // Obtener ID del artista autenticado
+                int artistId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                
+                // Usar el endpoint específico para álbumes del artista
+                var response = await _httpClient.GetAsync($"https://localhost:7120/api/Albums/ByArtist/{artistId}");
+                
+                if (response.IsSuccessStatusCode)
+                {
+                    var json = await response.Content.ReadAsStringAsync();
+                    var albums = System.Text.Json.JsonSerializer.Deserialize<List<AlbumDto>>(json, 
+                        new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    return View(albums ?? new List<AlbumDto>());
+                }
+                else
+                {
+                    ViewBag.Error = "No se pudieron cargar los álbumes.";
+                    return View(new List<AlbumDto>());
+                }
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = $"Error al cargar álbumes: {ex.Message}";
+                return View(new List<AlbumDto>());
+            }
         }
 
         // GET: Albums/Details/5

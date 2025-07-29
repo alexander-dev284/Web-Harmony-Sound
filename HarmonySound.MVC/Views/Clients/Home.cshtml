@@ -87,6 +87,12 @@
                             <div class="artist-info">
                                 <h3 class="artist-name">@artist.Name</h3>
                                 <p class="artist-role">Artista</p>
+                                <!-- Nuevo botón para ver álbumes -->
+                                <a href="@Url.Action("ArtistAlbums", "Clients", new { artistId = artist.Id })" 
+                                   class="btn-view-albums">
+                                    <i class="fas fa-compact-disc me-1"></i>
+                                    Ver Álbumes
+                                </a>
                             </div>
                         </div>
                     }

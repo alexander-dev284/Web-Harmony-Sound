@@ -1,0 +1,585 @@
+﻿@model IEnumerable<HarmonySound.API.DTOs.AlbumDto>
+@{
+    ViewData["Title"] = $"Álbumes de {ViewBag.Artist?.Name ?? "Artista"}";
+}
+
+<div class="artist-albums-container">
+    <!-- Header del artista -->
+    <div class="artist-header">
+        <div class="navigation-bar">
+            <a href="@Url.Action("Home", "Clients")" class="btn-back">
+                <i class="fas fa-arrow-left me-2"></i>
+                Volver al Inicio
+            </a>
+        </div>
+
+        <div class="artist-hero">
+            <div class="artist-image">
+                @if (!string.IsNullOrEmpty(ViewBag.Artist?.ProfileImageUrl))
+                {
+                    <img src="@ViewBag.Artist.ProfileImageUrl" alt="@ViewBag.Artist.Name" />
+                }
+                else
+                {
+                    <div class="default-artist-image">
+                        <i class="fas fa-user-music"></i>
+                    </div>
+                }
+            </div>
+            <div class="artist-info">
+                <span class="artist-label">ARTISTA</span>
+                <h1 class="artist-name">@ViewBag.Artist?.Name</h1>
+                @if (!string.IsNullOrEmpty(ViewBag.Artist?.Biography))
+                {
+                    <p class="artist-biography">@ViewBag.Artist.Biography</p>
+                }
+                <div class="artist-metadata">
+                    <span class="albums-count">@Model.Count() álbum(es)</span>
+                    <span class="separator">•</span>
+                    <span class="total-songs">@Model.Sum(a => a.Contents?.Count ?? 0) canción(es)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de álbumes -->
+    <div class="albums-section">
+        @if (Model.Any())
+        {
+            <div class="albums-header">
+                <h2>
+                    <i class="fas fa-compact-disc me-2"></i>
+                    Álbumes
+                </h2>
+            </div>
+
+            <div class="albums-grid">
+                @foreach (var album in Model)
+                {
+                    <div class="album-card" onclick="goToAlbumDetails(@album.Id)">  
+                        <div class="album-cover">
+                            <div class="cover-placeholder">
+                                @if (!string.IsNullOrEmpty(album.ImageUrl))
+                                {
+                                    <img src="@album.ImageUrl" alt="@album.Title" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;" />
+                                }
+                                else
+                                {
+                                    <i class="fas fa-compact-disc"></i>
+                                }
+                            </div>
+                            <div class="album-overlay">
+                                <button class="play-album-btn" title="Ver álbum">
+                                    <i class="fas fa-play"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="album-info">
+                            <h3 class="album-title">@album.Title</h3>
+                            <p class="album-artist">@album.ArtistName</p>
+                            <div class="album-meta">
+                                <span class="album-date">
+                                    <i class="fas fa-calendar-alt me-1"></i>
+                                    @album.CreationDate.ToString("MMM yyyy")
+                                </span>
+                                <span class="album-songs">
+                                    <i class="fas fa-music me-1"></i>
+                                    @(album.Contents?.Count ?? 0) canción(es)
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="empty-albums">
+                <div class="empty-icon">
+                    <i class="fas fa-compact-disc"></i>
+                </div>
+                <h3>Este artista no tiene álbumes</h3>
+                <p>@ViewBag.Artist?.Name aún no ha publicado ningún álbum</p>
+                <a href="@Url.Action("Home", "Clients")" class="btn-primary">
+                    <i class="fas fa-arrow-left me-2"></i>
+                    Volver al Inicio
+                </a>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    /* Reset base */
+    .container {
+        max-width: none !important;
+        padding: 0 !important;
+    }
+
+    body {
+        background: #000 !important;
+        color: #fff !important;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+        margin: 0;
+        padding: 0;
+        padding-bottom: 90px;
+    }
+
+    /* Contenedor principal */
+    .artist-albums-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+        min-height: 100vh;
+        position: relative;
+    }
+
+    /* Header del artista */
+    .artist-header {
+        margin-bottom: 3rem;
+        position: relative;
+        padding-top: 3rem;
+    }
+
+    .navigation-bar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 10;
+    }
+
+    .btn-back {
+        background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+        color: #fff !important;
+        border: 1px solid #333;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        font-size: 0.9rem;
+    }
+
+    .btn-back:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        color: #000 !important;
+        border-color: #1db954;
+        background: linear-gradient(135deg, #1db954, #1ed760);
+    }
+
+    .artist-hero {
+        display: flex;
+        align-items: flex-end;
+        gap: 2rem;
+        margin-bottom: 2rem;
+        padding: 3rem 0;
+        background: linear-gradient(135deg, rgba(29, 185, 84, 0.1), transparent);
+        border-radius: 12px;
+        padding-left: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .artist-hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="%23ffffff" opacity="0.02"/><circle cx="75" cy="75" r="1" fill="%23ffffff" opacity="0.02"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        opacity: 0.3;
+        z-index: 1;
+    }
+
+    .artist-image {
+        width: 200px;
+        height: 200px;
+        flex-shrink: 0;
+        z-index: 2;
+        position: relative;
+    }
+
+    .artist-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    }
+
+    .default-artist-image {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #282828, #404040);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 4rem;
+        color: #1db954;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    }
+
+    .artist-info {
+        flex: 1;
+        z-index: 2;
+        position: relative;
+    }
+
+    .artist-label {
+        color: #b3b3b3;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .artist-name {
+        font-size: 4rem;
+        font-weight: 900;
+        margin-bottom: 1rem;
+        color: #fff;
+        line-height: 1.1;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .artist-biography {
+        color: #b3b3b3;
+        font-size: 1.1rem;
+        line-height: 1.5;
+        margin-bottom: 1rem;
+        max-width: 600px;
+    }
+
+    .artist-metadata {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 1rem;
+        color: #b3b3b3;
+        flex-wrap: wrap;
+    }
+
+    .separator {
+        opacity: 0.7;
+    }
+
+    /* Sección de álbumes */
+    .albums-section {
+        background: #121212;
+        border-radius: 12px;
+        padding: 2rem;
+    }
+
+    .albums-header h2 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 2rem;
+        color: #fff;
+        display: flex;
+        align-items: center;
+    }
+
+    .albums-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 2rem;
+    }
+
+    .album-card {
+        background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+        border-radius: 12px;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+    }
+
+    .album-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(29, 185, 84, 0.1), rgba(30, 215, 96, 0.1));
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: 1;
+    }
+
+    .album-card:hover::before {
+        opacity: 1;
+    }
+
+    .album-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        border-color: rgba(29, 185, 84, 0.5);
+    }
+
+    .album-cover {
+        position: relative;
+        margin-bottom: 1.5rem;
+        border-radius: 8px;
+        overflow: hidden;
+        aspect-ratio: 1;
+        z-index: 2;
+    }
+
+    .cover-placeholder {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #282828, #404040);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #b3b3b3;
+        font-size: 3rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .album-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        border-radius: 8px;
+    }
+
+    .album-card:hover .album-overlay {
+        opacity: 1;
+    }
+
+    .play-album-btn {
+        background: #1db954;
+        border: none;
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #000;
+        font-size: 1.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(29, 185, 84, 0.3);
+    }
+
+    .play-album-btn:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 20px rgba(29, 185, 84, 0.4);
+    }
+
+    .album-info {
+        margin-bottom: 1.5rem;
+        z-index: 2;
+        position: relative;
+    }
+
+    .album-title {
+        font-size: 1.4rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: #fff;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .album-artist {
+        color: #b3b3b3;
+        font-size: 1rem;
+        margin-bottom: 1rem;
+        font-weight: 500;
+    }
+
+    .album-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .album-date,
+    .album-songs {
+        color: #b3b3b3;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+    }
+
+    /* Estado vacío */
+    .empty-albums {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 4rem 2rem;
+        text-align: center;
+    }
+
+    .empty-icon {
+        font-size: 5rem;
+        color: #404040;
+        margin-bottom: 2rem;
+    }
+
+    .empty-albums h3 {
+        font-size: 1.8rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: #fff;
+    }
+
+    .empty-albums p {
+        color: #b3b3b3;
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+        max-width: 400px;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #1db954, #1ed760);
+        color: #000 !important;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 25px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(29, 185, 84, 0.3);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(29, 185, 84, 0.4);
+        color: #000 !important;
+    }
+
+    /* FontAwesome */
+    .fas {
+        font-family: "Font Awesome 5 Free" !important;
+        font-weight: 900 !important;
+    }
+
+    /* Ocultar elementos del layout */
+    header, footer {
+        display: none !important;
+    }
+
+    /* Animaciones de entrada */
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .album-card {
+        animation: fadeInUp 0.6s ease forwards;
+    }
+
+    .album-card:nth-child(1) { animation-delay: 0.1s; }
+    .album-card:nth-child(2) { animation-delay: 0.2s; }
+    .album-card:nth-child(3) { animation-delay: 0.3s; }
+    .album-card:nth-child(4) { animation-delay: 0.4s; }
+    .album-card:nth-child(5) { animation-delay: 0.5s; }
+    .album-card:nth-child(6) { animation-delay: 0.6s; }
+</style>
+
+<!-- FontAwesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animación de entrada para las tarjetas de álbumes
+    const cards = document.querySelectorAll('.album-card');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+
+    // Efecto de hover mejorado para las tarjetas
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-8px)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+
+    console.log('Vista de álbumes del artista cargada correctamente');
+});
+
+// Función para navegar a los detalles del álbum
+function goToAlbumDetails(albumId) {
+    window.location.href = '@Url.Action("AlbumDetails", "Clients")/' + albumId;
+}
+
+// Función para el botón de reproducir álbum (evento click del botón play)
+document.addEventListener('click', function(e) {
+    if (e.target.closest('.play-album-btn')) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // Obtener el ID del álbum desde el card padre
+        const albumCard = e.target.closest('.album-card');
+        const albumId = albumCard ? albumCard.getAttribute('onclick').match(/\d+/)?.[0] : null;
+        
+        if (albumId) {
+            goToAlbumDetails(albumId);
+        }
+    }
+});
+
+// Mejoras de accesibilidad
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' || e.key === ' ') {
+        const focusedElement = document.activeElement;
+        if (focusedElement.classList.contains('album-card')) {
+            e.preventDefault();
+            focusedElement.click();
+        }
+    }
+});
+
+// Agregar atributos de accesibilidad a las tarjetas
+document.querySelectorAll('.album-card').forEach(card => {
+    card.setAttribute('role', 'button');
+    card.setAttribute('tabindex', '0');
+    card.setAttribute('aria-label', 'Ver detalles del álbum');
+});
+</script>

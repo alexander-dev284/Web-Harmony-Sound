@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using System.Text.Json;
+using HarmonySound.API.DTOs;
 
 namespace HarmonySound.MVC.Controllers
 {
@@ -602,6 +603,102 @@ namespace HarmonySound.MVC.Controllers
             catch (Exception ex)
             {
                 return Json(new { success = false, message = $"Error: {ex.Message}" });
+            }
+        }
+
+        // GET: Ver álbumes de un artista específico
+        public async Task<IActionResult> ArtistAlbums(int artistId)
+        {
+            try
+            {
+                int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                ViewBag.UserId = userId;
+
+                // Verificar estado de suscripción del cliente
+                var userPlanResponse = await _httpClient.GetAsync($"https://localhost:7120/api/UserPlans/user/{userId}");
+                if (userPlanResponse.IsSuccessStatusCode)
+                {
+                    var userPlanJson = await userPlanResponse.Content.ReadAsStringAsync();
+                    var userPlan = JsonSerializer.Deserialize<UserPlan>(userPlanJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    
+                    ViewBag.SubscriptionStatus = new {
+                        IsCancelled = userPlan?.IsCancelled ?? false,
+                        IsActive = userPlan?.Active ?? false,
+                        EndDate = userPlan?.EndDate
+                    };
+                }
+
+                // Obtener información del artista
+                var artistResponse = await _httpClient.GetAsync($"https://localhost:7120/api/Users/profile/{artistId}");
+                if (!artistResponse.IsSuccessStatusCode)
+                {
+                    TempData["Error"] = "No se pudo encontrar el artista.";
+                    return RedirectToAction("Home");
+                }
+
+                var artistJson = await artistResponse.Content.ReadAsStringAsync();
+                var artist = JsonSerializer.Deserialize<User>(artistJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                ViewBag.Artist = artist;
+
+                // Obtener álbumes del artista
+                var albumsResponse = await _httpClient.GetAsync($"https://localhost:7120/api/Albums/ByArtist/{artistId}");
+                if (!albumsResponse.IsSuccessStatusCode)
+                {
+                    ViewBag.Error = "No se pudieron cargar los álbumes del artista.";
+                    return View(new List<AlbumDto>());
+                }
+
+                var albumsJson = await albumsResponse.Content.ReadAsStringAsync();
+                var albums = JsonSerializer.Deserialize<List<AlbumDto>>(albumsJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                return View(albums ?? new List<AlbumDto>());
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Error al cargar álbumes: {ex.Message}";
+                return RedirectToAction("Home");
+            }
+        }
+
+        // GET: Ver detalles de un álbum 
+        public async Task<IActionResult> AlbumDetails(int id)
+        {
+            try
+            {
+                int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                ViewBag.UserId = userId;
+
+                // Verificar estado de suscripción
+                var userPlanResponse = await _httpClient.GetAsync($"https://localhost:7120/api/UserPlans/user/{userId}");
+                if (userPlanResponse.IsSuccessStatusCode)
+                {
+                    var userPlanJson = await userPlanResponse.Content.ReadAsStringAsync();
+                    var userPlan = JsonSerializer.Deserialize<UserPlan>(userPlanJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    
+                    ViewBag.SubscriptionStatus = new {
+                        IsCancelled = userPlan?.IsCancelled ?? false,
+                        IsActive = userPlan?.Active ?? false,
+                        EndDate = userPlan?.EndDate
+                    };
+                }
+
+                // Obtener detalles del álbum
+                var response = await _httpClient.GetAsync($"https://localhost:7120/api/Albums/{id}");
+                if (!response.IsSuccessStatusCode)
+                {
+                    TempData["Error"] = "No se pudo encontrar el álbum.";
+                    return RedirectToAction("Home");
+                }
+
+                var json = await response.Content.ReadAsStringAsync();
+                var album = JsonSerializer.Deserialize<AlbumDto>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                return View(album);
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Error al cargar el álbum: {ex.Message}";
+                return RedirectToAction("Home");
             }
         }
     }
