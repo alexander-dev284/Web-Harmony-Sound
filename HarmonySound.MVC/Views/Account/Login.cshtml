@@ -6,44 +6,328 @@
 }
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="utf-8" />
     <title>Login - HarmonySound</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-    <!-- CSS global -->
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
-
     <div class="auth-container">
         <div class="auth-card">
+            <!-- Icono de HarmonySound -->
+            <div class="auth-logo">
+                <i class="fas fa-music"></i>
+            </div>
+            
             <h2>Login</h2>
+            <p class="auth-subtitle">Bienvenido de vuelta a HarmonySound</p>
+
             @using (Html.BeginForm())
             {
                 @Html.AntiForgeryToken()
-                <div>
-                    @Html.LabelFor(m => m.Email, "Email")
-                    @Html.TextBoxFor(m => m.Email, new { @placeholder = "Email" })
-                    @Html.ValidationMessageFor(m => m.Email)
+                
+                <!-- Mostrar mensajes de éxito -->
+                @if (TempData["Success"] != null)
+                {
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle me-2"></i>
+                        @TempData["Success"]
+                    </div>
+                }
+                
+                <!-- Mostrar errores de validación -->
+                @Html.ValidationSummary(true, "", new { @class = "validation-summary" })
+
+                <div class="form-group">
+                    @Html.LabelFor(m => m.Email, "Email", new { @class = "form-label" })
+                    <div class="input-group">
+                        <span class="input-icon">
+                            <i class="fas fa-envelope"></i>
+                        </span>
+                        @Html.TextBoxFor(m => m.Email, new { @placeholder = "tu@email.com", @class = "form-control" })
+                    </div>
+                    @Html.ValidationMessageFor(m => m.Email, "", new { @class = "validation-error" })
                 </div>
-                <div>
-                    @Html.LabelFor(m => m.Password, "Password")
-                    @Html.PasswordFor(m => m.Password, new { @placeholder = "Password" })
-                    @Html.ValidationMessageFor(m => m.Password)
+
+                <div class="form-group">
+                    @Html.LabelFor(m => m.Password, "Contraseña", new { @class = "form-label" })
+                    <div class="input-group">
+                        <span class="input-icon">
+                            <i class="fas fa-lock"></i>
+                        </span>
+                        @Html.PasswordFor(m => m.Password, new { @placeholder = "••••••••", @class = "form-control" })
+                    </div>
+                    @Html.ValidationMessageFor(m => m.Password, "", new { @class = "validation-error" })
                 </div>
-                <button type="submit">Sign In</button>
-                <p class="mt-3 text-center">
-                    Don't have an account? <a href="@Url.Action("Register", "Account")">Register here</a>
-                </p>
-                @Html.ValidationSummary(true)
+
+                <button type="submit" class="btn-primary">
+                    <i class="fas fa-sign-in-alt me-2"></i>
+                    Iniciar Sesión
+                </button>
+
+                <!-- Enlaces de navegación -->
+                <div class="auth-links">
+                    <p class="register-link">
+                        ¿No tienes una cuenta? 
+                        <a href="@Url.Action("Register", "Account")">Regístrate aquí</a>
+                    </p>
+                    
+                    <!-- ✅ NUEVO: Enlace de recuperación de contraseña -->
+                    <p class="forgot-password-link">
+                        <a href="@Url.Action("ForgotPassword", "Account")">
+                            <i class="fas fa-key me-1"></i>
+                            ¿Olvidaste tu contraseña?
+                        </a>
+                    </p>
+                </div>
             }
         </div>
     </div>
 
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #000000, #1a1a1a) !important;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: #fff;
+        }
+
+        .auth-container {
+            width: 100%;
+            max-width: 450px;
+            padding: 2rem;
+        }
+
+        .auth-card {
+            background: linear-gradient(135deg, #1e1e1e, #2d2d2d);
+            border: 1px solid #404040;
+            border-radius: 20px;
+            padding: 3rem 2rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(29, 185, 84, 0.05), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        .auth-logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #1db954, #1ed760);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 2rem;
+            color: #000;
+            position: relative;
+            z-index: 2;
+        }
+
+        .auth-card h2 {
+            color: #fff;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .auth-subtitle {
+            color: #b3b3b3;
+            font-size: 1rem;
+            margin-bottom: 2rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            text-align: left;
+            position: relative;
+            z-index: 2;
+        }
+
+        .form-label {
+            display: block;
+            color: #fff;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #1db954;
+            z-index: 3;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 14px 16px 14px 48px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .form-control:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: #1db954;
+            box-shadow: 0 0 0 0.2rem rgba(29, 185, 84, 0.25);
+            outline: none;
+        }
+
+        .form-control::placeholder {
+            color: #888;
+        }
+
+        .btn-primary {
+            width: 100%;
+            background: linear-gradient(135deg, #1db954, #1ed760);
+            border: none;
+            color: #000;
+            font-weight: 600;
+            padding: 14px 24px;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(29, 185, 84, 0.3);
+            margin: 1rem 0;
+            position: relative;
+            z-index: 2;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #1ed760, #22c55e);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(29, 185, 84, 0.4);
+        }
+
+        .auth-links {
+            margin-top: 1.5rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .register-link {
+            color: #b3b3b3;
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+        }
+
+        .register-link a {
+            color: #1db954;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .register-link a:hover {
+            color: #1ed760;
+        }
+
+        .forgot-password-link {
+            margin: 0;
+        }
+
+        .forgot-password-link a {
+            color: #ff9500;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            transition: all 0.3s ease;
+            padding: 8px 16px;
+            border-radius: 8px;
+            background: rgba(255, 149, 0, 0.1);
+            border: 1px solid rgba(255, 149, 0, 0.2);
+        }
+
+        .forgot-password-link a:hover {
+            color: #ffb366;
+            background: rgba(255, 149, 0, 0.2);
+            border-color: rgba(255, 149, 0, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .alert-success {
+            background: rgba(29, 185, 84, 0.1);
+            color: #1db954;
+            border: 1px solid rgba(29, 185, 84, 0.3);
+        }
+
+        .validation-summary, .validation-error {
+            color: #ff6b6b;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            display: block;
+        }
+
+        .validation-summary {
+            background: rgba(255, 107, 107, 0.1);
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* ✅ NUEVO: Estilo específico para errores de cuenta suspendida */
+        .validation-summary:contains("suspendida") {
+            background: rgba(255, 149, 0, 0.1);
+            border-color: rgba(255, 149, 0, 0.3);
+            color: #ff9500;
+        }
+
+        .fas {
+            font-family: "Font Awesome 5 Free" !important;
+            font-weight: 900 !important;
+        }
+
+        .me-1 { margin-right: 0.25rem !important; }
+        .me-2 { margin-right: 0.5rem !important; }
+    </style>
 </body>
 </html>
 

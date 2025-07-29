@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace HarmonySound.API.Migrations
 {
     [DbContext(typeof(HarmonySoundDbContext))]
-    [Migration("20250721203436_HarmonySound")]
+    [Migration("20250728203817_HarmonySound")]
     partial class HarmonySound
     {
         /// <inheritdoc />

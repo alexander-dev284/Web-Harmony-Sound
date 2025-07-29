@@ -2,13 +2,13 @@
 using HarmonySound.API.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using Microsoft.AspNetCore.Http.Features;
 using HarmonySound.API.Services;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using System.Text.Json.Serialization;
+using Microsoft.OpenApi.Models;
 
 namespace HarmonySound.API
 {
@@ -18,15 +18,16 @@ namespace HarmonySound.API
         {
             var builder = WebApplication.CreateBuilder(args);
             
+            // Database context
             builder.Services.AddDbContext<HarmonySoundDbContext>(options =>
-                options.UseNpgsql(builder.Configuration.GetConnectionString("HarmonySoundDbContext") ?? throw new InvalidOperationException("Connection string 'HarmonySoundDbContext' not found.")));
+                options.UseNpgsql(builder.Configuration.GetConnectionString("HarmonySoundDbContext")));
 
-            // Add services to the container.
+            // Identity
             builder.Services.AddIdentity<User, Role>()
                 .AddEntityFrameworkStores<HarmonySoundDbContext>()
                 .AddDefaultTokenProviders();
 
-            // Configurar la autenticación JWT
+            // JWT Authentication
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
@@ -44,31 +45,54 @@ namespace HarmonySound.API
                     };
                 });
 
-            builder.Services.Configure<FormOptions>(options =>
-            {
-                options.MultipartBodyLengthLimit = 200 * 1024 * 1024; // 200 MB
-            });
+            // Controllers
+            builder.Services.AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+                    });
 
-            builder.Services.Configure<IISServerOptions>(options =>
-            {
-                options.MaxRequestBodySize = 104857600; // 100 MB
-            });
-
-            builder.Services.AddControllers();
+            // Swagger
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "HarmonySound API", Version = "v1" });
+                
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Description = "JWT Authorization header using the Bearer scheme",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer"
+                });
 
-            // Registro de servicios personalizados
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        Array.Empty<string>()
+                    }
+                });
+            });
+
+            // Custom services
             builder.Services.AddTransient<IEmailSender, EmailService>();
             builder.Services.AddTransient<IJwtService, JwtService>();
             builder.Services.AddTransient<I2FAService, TwoFactorAuthService>();
-            // CORRECCIÓN: Registrar PayPalService con logger
             builder.Services.AddScoped<IPayPalService, PayPalService>();
-            builder.Services.AddMemoryCache(); // Necesario para TwoFactorAuthService
+            builder.Services.AddMemoryCache();
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
+            // Pipeline
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
@@ -76,13 +100,10 @@ namespace HarmonySound.API
             }
 
             app.UseHttpsRedirection();
-            
-            // AGREGAR ESTA LÍNEA PARA SERVIR ARCHIVOS ESTÁTICOS
             app.UseStaticFiles();
-
+            app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
-
             app.MapControllers();
 
             app.Run();

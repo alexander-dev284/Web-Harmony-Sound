@@ -12,6 +12,7 @@ using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Microsoft.Extensions.Configuration;
 using System.IO;
+using Microsoft.EntityFrameworkCore;
 
 namespace HarmonySound.API.Controllers
 {
@@ -21,11 +22,13 @@ namespace HarmonySound.API.Controllers
     {
         private readonly UserManager<User> _userManager;
         private readonly IConfiguration _configuration;
+        private readonly HarmonySoundDbContext _context; // ✅ INYECTAR DataContext
 
-        public UsersController(UserManager<User> userManager, IConfiguration configuration)
+        public UsersController(UserManager<User> userManager, IConfiguration configuration, HarmonySoundDbContext context)
         {
             _userManager = userManager;
             _configuration = configuration;
+            _context = context; // ✅ ASIGNAR DataContext
         }
 
         // GET: api/Users
@@ -243,6 +246,123 @@ namespace HarmonySound.API.Controllers
                 .ToList();
 
             return Ok(filtered);
+        }
+
+        // ✅ AGREGAR este método al UsersController existente
+        [HttpGet("with-roles")]
+        public async Task<ActionResult<IEnumerable<object>>> GetUsersWithRoles()
+        {
+            try
+            {
+                var usersWithRoles = await _context.Users
+                    .Select(u => new
+                    {
+                        Id = u.Id,
+                        Name = u.Name,
+                        Email = u.Email,
+                        State = u.State,
+                        RegisterDate = u.RegisterDate,
+                        ProfileImageUrl = u.ProfileImageUrl,
+                        // ✅ OBTENER EL ROL PRINCIPAL DEL USUARIO
+                        Role = _context.UserRoles
+                            .Where(ur => ur.UserId == u.Id)
+                            .Join(_context.Roles, ur => ur.RoleId, r => r.Id, (ur, r) => r.RoleName)
+                            .FirstOrDefault() ?? "Sin Rol"
+                    })
+                    .ToListAsync();
+
+                return Ok(usersWithRoles);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = "Error interno del servidor", Error = ex.Message });
+            }
+        }
+
+        // ✅ AGREGAR: Endpoint específico para toggle de estado de usuario
+        [HttpPost("{id}/toggle-status")]
+        public async Task<IActionResult> ToggleUserStatus(int id, [FromBody] ToggleUserStatusRequest request)
+        {
+            try
+            {
+                
+                var user = await _userManager.FindByIdAsync(id.ToString());
+                if (user == null)
+                {
+                   
+                    return NotFound(new { message = "Usuario no encontrado" });
+                }
+
+                // ✅ PREVENIR: No permitir suspender administradores
+                var userRoles = await _userManager.GetRolesAsync(user);
+                if (userRoles.Contains("Admin") && request.NewState == "Suspended")
+                {
+                   
+                    return BadRequest(new { message = "No se puede suspender un usuario administrador" });
+                }
+
+                // ✅ VALIDAR: Estados válidos
+                var validStates = new[] { "Active", "Suspended", "Inactive" };
+                if (!validStates.Contains(request.NewState))
+                {
+                    return BadRequest(new { message = $"Estado inválido. Estados válidos: {string.Join(", ", validStates)}" });
+                }
+
+                // ✅ VERIFICAR: Si ya tiene ese estado
+                if (user.State == request.NewState)
+                {
+                    return BadRequest(new { message = $"El usuario ya está en estado {request.NewState}" });
+                }
+
+                // ✅ CAMBIAR ESTADO
+                var previousState = user.State;
+                user.State = request.NewState;
+
+                // ✅ OPCIONAL: Agregar timestamp de cambio si tienes estas propiedades
+                if (request.NewState == "Suspended")
+                {
+                    // Puedes agregar campos como SuspendedDate, SuspendedBy si los tienes en tu modelo
+                    
+                }
+                else if (request.NewState == "Active")
+                {
+                
+                }
+
+                var result = await _userManager.UpdateAsync(user);
+                
+                if (!result.Succeeded)
+                {
+                     return BadRequest(new { 
+                        message = "Error al actualizar estado del usuario", 
+                        errors = result.Errors.Select(e => e.Description) 
+                    });
+                }
+
+                // ✅ OPCIONAL: Registro de auditoría
+                
+                return Ok(new { 
+                    message = $"Usuario {request.Action} correctamente",
+                    userId = user.Id,
+                    newState = user.State,
+                    previousState = previousState,
+                    timestamp = DateTime.UtcNow
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error interno del servidor", error = ex.Message });
+            }
+        }
+
+        // ✅ NUEVO: Clase para el request de toggle de estado
+        public class ToggleUserStatusRequest
+        {
+            public int UserId { get; set; }
+            public string NewState { get; set; } = "";
+            public string Action { get; set; } = "";
+            public int AdminId { get; set; }
+            public DateTime Timestamp { get; set; }
         }
     }
 }

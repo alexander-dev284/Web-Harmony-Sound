@@ -1,4 +1,4 @@
-@model HarmonySound.MVC.Models.AdminDashboardViewModel
+Ôªø@model HarmonySound.MVC.Models.AdminDashboardViewModel
 
 @{
     ViewData["Title"] = "Dashboard Administrativo";
@@ -38,13 +38,9 @@
                     <i class="fas fa-music"></i>
                     <span>Contenido</span>
                 </a>
-                <a href="@Url.Action("Reports", "Admin")" class="menu-item">
-                    <i class="fas fa-flag"></i>
-                    <span>Reportes</span>
-                </a>
-                <a href="@Url.Action("Plans", "Admin")" class="menu-item">
-                    <i class="fas fa-crown"></i>
-                    <span>Planes</span>
+                <a href="@Url.Action("UserRoles", "Admin")" class="menu-item">
+                    <i class="fas fa-user-shield"></i>
+                    <span>Roles</span>
                 </a>
             </div>
 
@@ -52,7 +48,7 @@
                 <form asp-action="Logout" asp-controller="Account" method="post">
                     <button type="submit" class="logout-btn">
                         <i class="fas fa-sign-out-alt"></i>
-                        <span>Cerrar SesiÛn</span>
+                        <span>Cerrar Sesi√≥n</span>
                     </button>
                 </form>
             </div>
@@ -61,95 +57,88 @@
         <!-- Main Content -->
         <main class="admin-main">
             <div class="admin-header">
-                <h1>
-                    <i class="fas fa-tachometer-alt me-3"></i>
-                    Dashboard Administrativo
-                </h1>
-                <p>Panel de control principal</p>
+                <h1>Dashboard Administrativo</h1>
+                <p>Bienvenido, @ViewBag.AdminName</p>
             </div>
 
-            <!-- Mensajes -->
-            @if (ViewBag.Success != null)
-            {
-                <div class="alert alert-success">
-                    <i class="fas fa-check-circle me-2"></i>
-                    @ViewBag.Success
-                </div>
-            }
-            @if (ViewBag.Error != null)
-            {
-                <div class="alert alert-danger">
-                    <i class="fas fa-exclamation-circle me-2"></i>
-                    @ViewBag.Error
-                </div>
-            }
-
-            <!-- EstadÌsticas principales -->
+            <!-- Stats Cards -->
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-icon users">
+                    <div class="stat-icon">
                         <i class="fas fa-users"></i>
                     </div>
-                    <div class="stat-content">
-                        <h3>Total Usuarios</h3>
-                        <div class="stat-number">@Model.TotalUsers</div>
+                    <div class="stat-info">
+                        <h3>@Model.TotalUsers</h3>
+                        <p>Total Usuarios</p>
                     </div>
                 </div>
 
                 <div class="stat-card">
-                    <div class="stat-icon content">
+                    <div class="stat-icon">
+                        <i class="fas fa-microphone-alt"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>@Model.TotalArtists</h3>
+                        <p>Total Artistas</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>@Model.TotalClients</h3>
+                        <p>Total Clientes</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">
                         <i class="fas fa-music"></i>
                     </div>
-                    <div class="stat-content">
-                        <h3>Canciones</h3>
-                        <div class="stat-number">@Model.TotalSongs</div>
+                    <div class="stat-info">
+                        <h3>@Model.TotalSongs</h3>
+                        <p>Total Canciones</p>
                     </div>
                 </div>
 
                 <div class="stat-card">
-                    <div class="stat-icon albums">
-                        <i class="fas fa-compact-disc"></i>
+                    <div class="stat-icon">
+                        <i class="fas fa-album"></i>
                     </div>
-                    <div class="stat-content">
-                        <h3>¡lbumes</h3>
-                        <div class="stat-number">@Model.TotalAlbums</div>
+                    <div class="stat-info">
+                        <h3>@Model.TotalAlbums</h3>
+                        <p>Total √Ålbumes</p>
                     </div>
                 </div>
 
                 <div class="stat-card">
-                    <div class="stat-icon reports">
-                        <i class="fas fa-flag"></i>
+                    <div class="stat-icon">
+                        <i class="fas fa-crown"></i>
                     </div>
-                    <div class="stat-content">
-                        <h3>Reportes Pendientes</h3>
-                        <div class="stat-number">@Model.PendingReports</div>
+                    <div class="stat-info">
+                        <h3>@Model.ActiveSubscriptions</h3>
+                        <p>Suscripciones Activas</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Acciones r·pidas -->
+            <!-- Quick Actions -->
             <div class="quick-actions">
-                <h2>Acciones R·pidas</h2>
+                <h3>Acciones R√°pidas</h3>
                 <div class="actions-grid">
                     <a href="@Url.Action("Users", "Admin")" class="action-card">
-                        <i class="fas fa-user-cog"></i>
-                        <h3>Gestionar Usuarios</h3>
-                        <p>Administrar cuentas de usuarios</p>
+                        <i class="fas fa-users-cog"></i>
+                        <span>Gestionar Usuarios</span>
                     </a>
                     <a href="@Url.Action("Content", "Admin")" class="action-card">
                         <i class="fas fa-music"></i>
-                        <h3>Moderar Contenido</h3>
-                        <p>Revisar y gestionar contenido</p>
+                        <span>Gestionar Contenido</span>
                     </a>
-                    <a href="@Url.Action("Reports", "Admin")" class="action-card">
-                        <i class="fas fa-flag"></i>
-                        <h3>Revisar Reportes</h3>
-                        <p>Atender reportes de usuarios</p>
-                    </a>
-                    <a href="@Url.Action("Plans", "Admin")" class="action-card">
-                        <i class="fas fa-crown"></i>
-                        <h3>Gestionar Planes</h3>
-                        <p>Administrar planes de suscripciÛn</p>
+                    <a href="@Url.Action("UserRoles", "Admin")" class="action-card">
+                        <i class="fas fa-user-shield"></i>
+                        <span>Gestionar Roles</span>
                     </a>
                 </div>
             </div>
@@ -157,18 +146,12 @@
     </div>
 
     <style>
-        /* Estilos del dashboard admin */
-        * {
+        .admin-body {
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-        }
-
-        .admin-body {
-            background: #0f172a;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #000;
             color: #fff;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            overflow-x: hidden;
         }
 
         .admin-dashboard {
@@ -176,45 +159,35 @@
             min-height: 100vh;
         }
 
-        /* Sidebar */
         .admin-sidebar {
-            width: 280px;
-            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
-            border-right: 1px solid #334155;
+            width: 250px;
+            background: linear-gradient(180deg, #1a1a1a, #2a2a2a);
+            border-right: 1px solid #333;
             display: flex;
             flex-direction: column;
-            position: fixed;
-            height: 100vh;
-            z-index: 1000;
         }
 
         .sidebar-header {
-            padding: 2rem 1.5rem;
-            border-bottom: 1px solid #334155;
-        }
-
-        .logo {
+            padding: 2rem 1rem;
+            border-bottom: 1px solid #333;
             text-align: center;
         }
 
         .logo i {
-            font-size: 3rem;
+            font-size: 2rem;
             color: #ef4444;
-            margin-bottom: 1rem;
-            display: block;
-        }
-
-        .logo h2 {
-            font-size: 1.5rem;
-            color: #fff;
             margin-bottom: 0.5rem;
         }
 
+        .logo h2 {
+            margin: 0;
+            color: #fff;
+            font-size: 1.2rem;
+        }
+
         .logo span {
-            color: #94a3b8;
+            color: #888;
             font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
         }
 
         .sidebar-menu {
@@ -226,51 +199,45 @@
             display: flex;
             align-items: center;
             padding: 1rem 1.5rem;
-            color: #94a3b8;
+            color: #ccc;
             text-decoration: none;
             transition: all 0.3s ease;
             border-left: 3px solid transparent;
         }
 
-        .menu-item:hover {
+        .menu-item:hover, .menu-item.active {
             background: rgba(239, 68, 68, 0.1);
             color: #ef4444;
             border-left-color: #ef4444;
         }
 
-        .menu-item.active {
-            background: rgba(239, 68, 68, 0.2);
-            color: #ef4444;
-            border-left-color: #ef4444;
-        }
-
         .menu-item i {
-            width: 20px;
             margin-right: 1rem;
-            font-size: 1.1rem;
+            width: 20px;
         }
 
         .sidebar-footer {
-            padding: 1rem 1.5rem;
-            border-top: 1px solid #334155;
+            padding: 1rem;
+            border-top: 1px solid #333;
         }
 
         .logout-btn {
             width: 100%;
-            background: none;
-            border: 1px solid #ef4444;
-            color: #ef4444;
-            padding: 0.75rem 1rem;
-            border-radius: 8px;
+            background: transparent;
+            border: 1px solid #333;
+            color: #ccc;
+            padding: 0.75rem;
+            border-radius: 6px;
             cursor: pointer;
-            transition: all 0.3s ease;
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: all 0.3s ease;
         }
 
         .logout-btn:hover {
-            background: #ef4444;
+            background: #dc3545;
+            border-color: #dc3545;
             color: #fff;
         }
 
@@ -278,12 +245,10 @@
             margin-right: 0.5rem;
         }
 
-        /* Main Content */
         .admin-main {
             flex: 1;
-            margin-left: 280px;
             padding: 2rem;
-            background: #0f172a;
+            overflow-y: auto;
         }
 
         .admin-header {
@@ -291,19 +256,17 @@
         }
 
         .admin-header h1 {
+            margin: 0 0 0.5rem 0;
             font-size: 2.5rem;
-            color: #fff;
-            margin-bottom: 0.5rem;
-            display: flex;
-            align-items: center;
+            color: #ef4444;
         }
 
         .admin-header p {
-            color: #94a3b8;
+            margin: 0;
+            color: #888;
             font-size: 1.1rem;
         }
 
-        /* EstadÌsticas */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -312,152 +275,77 @@
         }
 
         .stat-card {
-            background: linear-gradient(135deg, #1e293b, #334155);
-            border: 1px solid #475569;
+            background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+            padding: 2rem;
             border-radius: 12px;
-            padding: 1.5rem;
+            border: 1px solid #333;
             display: flex;
             align-items: center;
-            transition: transform 0.3s ease;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-2px);
         }
 
         .stat-icon {
+            background: #ef4444;
+            color: #fff;
             width: 60px;
             height: 60px;
-            border-radius: 12px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-right: 1rem;
+            margin-right: 1.5rem;
             font-size: 1.5rem;
         }
 
-        .stat-icon.users { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: #fff; }
-        .stat-icon.content { background: linear-gradient(135deg, #10b981, #047857); color: #fff; }
-        .stat-icon.albums { background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; }
-        .stat-icon.reports { background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; }
-
-        .stat-content h3 {
-            color: #94a3b8;
-            font-size: 0.9rem;
-            margin-bottom: 0.5rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .stat-number {
-            color: #fff;
+        .stat-info h3 {
+            margin: 0;
             font-size: 2rem;
-            font-weight: 700;
-        }
-
-        /* Acciones r·pidas */
-        .quick-actions {
-            margin-bottom: 3rem;
-        }
-
-        .quick-actions h2 {
             color: #fff;
+        }
+
+        .stat-info p {
+            margin: 0;
+            color: #888;
+        }
+
+        .quick-actions {
+            margin-bottom: 2rem;
+        }
+
+        .quick-actions h3 {
             margin-bottom: 1.5rem;
-            font-size: 1.8rem;
+            color: #fff;
         }
 
         .actions-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
         }
 
         .action-card {
-            background: linear-gradient(135deg, #1e293b, #334155);
-            border: 1px solid #475569;
-            border-radius: 12px;
-            padding: 2rem;
+            background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid #333;
             text-decoration: none;
-            color: #fff;
-            transition: all 0.3s ease;
+            color: #ccc;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             text-align: center;
+            transition: all 0.3s ease;
         }
 
         .action-card:hover {
-            transform: translateY(-5px);
+            background: rgba(239, 68, 68, 0.1);
             border-color: #ef4444;
-            color: #fff;
+            color: #ef4444;
+            transform: translateY(-2px);
         }
 
         .action-card i {
-            font-size: 3rem;
-            color: #ef4444;
-            margin-bottom: 1rem;
-            display: block;
-        }
-
-        .action-card h3 {
-            font-size: 1.3rem;
+            font-size: 2rem;
             margin-bottom: 0.5rem;
-        }
-
-        .action-card p {
-            color: #94a3b8;
-            font-size: 0.9rem;
-        }
-
-        /* Alertas */
-        .alert {
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-        }
-
-        .alert-success {
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            color: #10b981;
-        }
-
-        .alert-danger {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            color: #ef4444;
-        }
-
-        /* FontAwesome */
-        .fas {
-            font-family: "Font Awesome 6 Free" !important;
-            font-weight: 900 !important;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .admin-sidebar {
-                width: 60px;
-            }
-
-            .admin-main {
-                margin-left: 60px;
-                padding: 1rem;
-            }
-
-            .sidebar-header .logo h2,
-            .sidebar-header .logo span,
-            .menu-item span,
-            .logout-btn span {
-                display: none;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .actions-grid {
-                grid-template-columns: 1fr;
-            }
         }
     </style>
 </body>

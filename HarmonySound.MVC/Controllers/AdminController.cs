@@ -3,6 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using HarmonySound.MVC.Models;
 using System.Text.Json;
 using System.Security.Claims;
+using System.Text;
+using HarmonySound.API.DTOs;
+
 
 namespace HarmonySound.MVC.Controllers
 {
@@ -24,7 +27,10 @@ namespace HarmonySound.MVC.Controllers
             try
             {
                 var stats = await GetAdminStats();
-                return View(stats);
+                ViewBag.AdminName = User.Identity?.Name ?? "Administrador";
+                
+                // ✅ CAMBIAR: Usar convención en lugar de ruta explícita
+                return View(stats);  // Esto buscará Views/Admin/Dashboard.cshtml automáticamente
             }
             catch (Exception ex)
             {
@@ -34,18 +40,19 @@ namespace HarmonySound.MVC.Controllers
             }
         }
 
-        // ✅ NUEVO: Gestión de usuarios
+        // ✅ GESTIÓN DE USUARIOS
         public async Task<IActionResult> Users()
         {
             try
             {
-                var response = await _httpClient.GetAsync("https://localhost:7120/api/Users");
+                // ✅ USAR endpoint con roles
+                var response = await _httpClient.GetAsync("https://localhost:7120/api/Users/with-roles");
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();
                     var users = JsonSerializer.Deserialize<List<AdminUserViewModel>>(json, 
                         new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    return View(users);
+                    return View(users ?? new List<AdminUserViewModel>());
                 }
                 TempData["Error"] = "Error al cargar usuarios";
                 return View(new List<AdminUserViewModel>());
@@ -58,18 +65,18 @@ namespace HarmonySound.MVC.Controllers
             }
         }
 
-        // ✅ NUEVO: Gestión de contenido
+        // ✅ GESTIÓN DE CONTENIDO
         public async Task<IActionResult> Content()
         {
             try
             {
-                var response = await _httpClient.GetAsync("https://localhost:7120/api/Contents");
+                var response = await _httpClient.GetAsync("https://localhost:7120/api/Contents/with-artists");
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();
                     var contents = JsonSerializer.Deserialize<List<AdminContentViewModel>>(json,
                         new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    return View(contents);
+                    return View(contents ?? new List<AdminContentViewModel>());
                 }
                 TempData["Error"] = "Error al cargar contenido";
                 return View(new List<AdminContentViewModel>());
@@ -82,79 +89,167 @@ namespace HarmonySound.MVC.Controllers
             }
         }
 
-        // ✅ NUEVO: Gestión de reportes
-        public async Task<IActionResult> Reports()
+        // ✅ GESTIÓN DE ROLES Y PERMISOS
+        public async Task<IActionResult> UserRoles()
         {
             try
             {
-                var response = await _httpClient.GetAsync("https://localhost:7120/api/Reports");
+                var response = await _httpClient.GetAsync("https://localhost:7120/api/UserRoles");
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();
-                    var reports = JsonSerializer.Deserialize<List<AdminReportViewModel>>(json,
+                    var userRoles = JsonSerializer.Deserialize<List<HarmonySound.API.DTOs.UserRoleDto>>(json,
                         new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    return View(reports);
+                    
+                    // Obtener todos los roles disponibles
+                    var rolesResponse = await _httpClient.GetAsync("https://localhost:7120/api/Roles");
+                    var allRoles = new List<string>();
+                    if (rolesResponse.IsSuccessStatusCode)
+                    {
+                        var rolesJson = await rolesResponse.Content.ReadAsStringAsync();
+                        var roles = JsonSerializer.Deserialize<List<dynamic>>(rolesJson);
+                        ViewBag.AllRoles = new List<string> { "Admin", "Artist", "Client" };
+                    }
+                    
+                    return View(userRoles ?? new List<HarmonySound.API.DTOs.UserRoleDto>());  // ✅ SIN RUTA EXPLÍCITA
                 }
-                TempData["Error"] = "Error al cargar reportes";
-                return View(new List<AdminReportViewModel>());
+                TempData["Error"] = "Error al cargar roles de usuario";
+                return View(new List<HarmonySound.API.DTOs.UserRoleDto>());
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error loading reports");
-                TempData["Error"] = "Error al cargar reportes";
-                return View(new List<AdminReportViewModel>());
+                _logger.LogError(ex, "Error loading user roles");
+                TempData["Error"] = "Error al cargar roles de usuario";
+                return View(new List<HarmonySound.API.DTOs.UserRoleDto>());
             }
         }
 
-        // ✅ NUEVO: Gestión de planes
-        public async Task<IActionResult> Plans()
-        {
-            try
-            {
-                var response = await _httpClient.GetAsync("https://localhost:7120/api/Plans");
-                if (response.IsSuccessStatusCode)
-                {
-                    var json = await response.Content.ReadAsStringAsync();
-                    var plans = JsonSerializer.Deserialize<List<AdminPlanViewModel>>(json,
-                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    return View(plans);
-                }
-                TempData["Error"] = "Error al cargar planes";
-                return View(new List<AdminPlanViewModel>());
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error loading plans");
-                TempData["Error"] = "Error al cargar planes";
-                return View(new List<AdminPlanViewModel>());
-            }
-        }
-
-        // ✅ NUEVO: Acción para suspender usuario
+        // ✅ ASIGNAR ROL A USUARIO
         [HttpPost]
-        public async Task<IActionResult> SuspendUser(int userId)
+        public async Task<IActionResult> AssignRole(int userId, string roleName)
         {
             try
             {
-                var response = await _httpClient.PostAsync($"https://localhost:7120/api/Users/{userId}/suspend", null);
+                var assignRequest = new { UserId = userId, RoleName = roleName };
+                var json = JsonSerializer.Serialize(assignRequest);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                
+                var response = await _httpClient.PostAsync("https://localhost:7120/api/UserRoles/assign", content);
+                
                 if (response.IsSuccessStatusCode)
                 {
-                    TempData["Success"] = "Usuario suspendido correctamente";
+                    TempData["Success"] = "Rol asignado correctamente";
                 }
                 else
                 {
-                    TempData["Error"] = "Error al suspender usuario";
+                    var error = await response.Content.ReadAsStringAsync();
+                    TempData["Error"] = $"Error al asignar rol: {error}";
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error suspending user");
-                TempData["Error"] = "Error al suspender usuario";
+                _logger.LogError(ex, "Error assigning role");
+                TempData["Error"] = "Error al asignar rol";
             }
+            return RedirectToAction("UserRoles");
+        }
+
+        // ✅ REMOVER ROL DE USUARIO
+        [HttpPost]
+        public async Task<IActionResult> RemoveRole(int userId, string roleName)
+        {
+            try
+            {
+                var removeRequest = new { UserId = userId, RoleName = roleName };
+                var json = JsonSerializer.Serialize(removeRequest);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                
+                var response = await _httpClient.PostAsync("https://localhost:7120/api/UserRoles/remove", content);
+                
+                if (response.IsSuccessStatusCode)
+                {
+                    TempData["Success"] = "Rol removido correctamente";
+                }
+                else
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+                    TempData["Error"] = $"Error al remover rol: {error}";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error removing role");
+                TempData["Error"] = "Error al remover rol";
+            }
+            return RedirectToAction("UserRoles");
+        }
+
+        // ✅ SUSPENDER/ACTIVAR USUARIO
+        [HttpPost]
+        public async Task<IActionResult> ToggleUserStatus(int userId, string action)
+        {
+            try
+            {
+                _logger.LogInformation($"Iniciando {action} para usuario {userId}");
+                
+                // ✅ NUEVO: Crear modelo específico para el cambio de estado
+                var statusRequest = new
+                {
+                    UserId = userId,
+                    NewState = action == "activate" ? "Active" : "Suspended", // ✅ Usar valores exactos del enum
+                    Action = action,
+                    AdminId = GetCurrentUserId(), // Para auditoría
+                    Timestamp = DateTime.UtcNow
+                };
+
+                var json = System.Text.Json.JsonSerializer.Serialize(statusRequest);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                
+                // ✅ CORREGIDO: Usar endpoint específico en lugar de genérico
+                var endpoint = $"https://localhost:7120/api/Users/{userId}/toggle-status";
+                
+                _logger.LogInformation($"Llamando a API: {endpoint}");
+                
+                var response = await _httpClient.PostAsync(endpoint, content);
+                var responseContent = await response.Content.ReadAsStringAsync();
+                
+                _logger.LogInformation($"Respuesta API: {response.StatusCode} - {responseContent}");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var message = action == "activate" ? "Usuario activado" : "Usuario suspendido";
+                    TempData["Success"] = $"{message} correctamente";
+                    
+                    // ✅ OPCIONAL: Log de auditoría
+                    _logger.LogInformation($"Usuario {userId} {action} exitosamente por admin {GetCurrentUserId()}");
+                }
+                else
+                {
+                    // ✅ MEJOR MANEJO DE ERRORES
+                    try
+                    {
+                        var errorObj = System.Text.Json.JsonSerializer.Deserialize<dynamic>(responseContent);
+                        var errorMessage = errorObj?.GetProperty("message").GetString() ?? "Error desconocido";
+                        TempData["Error"] = $"Error al cambiar estado: {errorMessage}";
+                    }
+                    catch
+                    {
+                        TempData["Error"] = $"Error al cambiar estado del usuario: {responseContent}";
+                    }
+                    
+                    _logger.LogError($"Error en API al {action} usuario {userId}: {responseContent}");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Excepción al {action} usuario {userId}");
+                TempData["Error"] = $"Error del sistema al {action} usuario: {ex.Message}";
+            }
+            
             return RedirectToAction("Users");
         }
 
-        // ✅ NUEVO: Acción para eliminar contenido
+        // ✅ ELIMINAR CONTENIDO
         [HttpPost]
         public async Task<IActionResult> DeleteContent(int contentId)
         {
@@ -178,55 +273,93 @@ namespace HarmonySound.MVC.Controllers
             return RedirectToAction("Content");
         }
 
-        // ✅ NUEVO: Método privado para obtener estadísticas
+        // ✅ OBTENER ESTADÍSTICAS DEL DASHBOARD
         private async Task<AdminDashboardViewModel> GetAdminStats()
         {
-            var stats = new AdminDashboardViewModel();
+            var stats = new AdminDashboardViewModel
+            {
+                RecentActivities = new List<RecentActivityViewModel>()
+            };
 
             try
             {
-                // Obtener total de usuarios
-                var usersResponse = await _httpClient.GetAsync("https://localhost:7120/api/Users");
+                // ✅ Usuarios con roles
+                var usersResponse = await _httpClient.GetAsync("https://localhost:7120/api/Users/with-roles");
                 if (usersResponse.IsSuccessStatusCode)
                 {
                     var usersJson = await usersResponse.Content.ReadAsStringAsync();
-                    var users = JsonSerializer.Deserialize<List<object>>(usersJson);
+                    var users = JsonSerializer.Deserialize<List<AdminUserViewModel>>(usersJson,
+                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    
                     stats.TotalUsers = users?.Count ?? 0;
+                    stats.TotalArtists = users?.Count(u => u.Role == "artist") ?? 0;
+                    stats.TotalClients = users?.Count(u => u.Role == "client") ?? 0;  // ✅ Cambiar de "Client" a "CLIENT"
+                    
+                    Console.WriteLine($"🔍 Total usuarios: {stats.TotalUsers}");
+                    Console.WriteLine($"🔍 Total artistas: {stats.TotalArtists}");
+                    Console.WriteLine($"🔍 Total clientes: {stats.TotalClients}");
                 }
 
-                // Obtener total de contenido
-                var contentsResponse = await _httpClient.GetAsync("https://localhost:7120/api/Contents");
+                // ✅ Contenido con artistas
+                var contentsResponse = await _httpClient.GetAsync("https://localhost:7120/api/Contents/with-artists");
                 if (contentsResponse.IsSuccessStatusCode)
                 {
                     var contentsJson = await contentsResponse.Content.ReadAsStringAsync();
-                    var contents = JsonSerializer.Deserialize<List<object>>(contentsJson);
+                    var contents = JsonSerializer.Deserialize<List<AdminContentViewModel>>(contentsJson,
+                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                     stats.TotalSongs = contents?.Count ?? 0;
+                    
+                    Console.WriteLine($"🔍 Total canciones: {stats.TotalSongs}");
                 }
 
-                // Obtener total de álbumes
+                // ✅ Álbumes
                 var albumsResponse = await _httpClient.GetAsync("https://localhost:7120/api/Albums");
                 if (albumsResponse.IsSuccessStatusCode)
                 {
                     var albumsJson = await albumsResponse.Content.ReadAsStringAsync();
                     var albums = JsonSerializer.Deserialize<List<object>>(albumsJson);
                     stats.TotalAlbums = albums?.Count ?? 0;
+                    
+                    Console.WriteLine($"🔍 Total álbumes: {stats.TotalAlbums}");
                 }
 
-                // Obtener total de reportes
-                var reportsResponse = await _httpClient.GetAsync("https://localhost:7120/api/Reports");
-                if (reportsResponse.IsSuccessStatusCode)
+                // ✅ Suscripciones activas
+                var subscriptionsResponse = await _httpClient.GetAsync("https://localhost:7120/api/UserPlans");
+                if (subscriptionsResponse.IsSuccessStatusCode)
                 {
-                    var reportsJson = await reportsResponse.Content.ReadAsStringAsync();
-                    var reports = JsonSerializer.Deserialize<List<object>>(reportsJson);
-                    stats.PendingReports = reports?.Count ?? 0;
+                    var subscriptionsJson = await subscriptionsResponse.Content.ReadAsStringAsync();
+                    var subscriptions = JsonSerializer.Deserialize<List<object>>(subscriptionsJson);
+                    stats.ActiveSubscriptions = subscriptions?.Count ?? 0;
+                    
+                    Console.WriteLine($"🔍 Total suscripciones: {stats.ActiveSubscriptions}");
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting admin stats");
+                Console.WriteLine($"❌ Error obteniendo estadísticas: {ex.Message}");
             }
 
             return stats;
+        }
+
+        // ✅ NUEVO: Método auxiliar para obtener ID del usuario actual
+        private int GetCurrentUserId()
+        {
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+            if (userIdClaim != null && int.TryParse(userIdClaim.Value, out int userId))
+            {
+                return userId;
+            }
+            
+            // Fallback: buscar en otros tipos de claims
+            var subClaim = User.FindFirst("sub");
+            if (subClaim != null && int.TryParse(subClaim.Value, out int subUserId))
+            {
+                return subUserId;
+            }
+            
+            return 0; // Usuario no identificado
         }
     }
 }

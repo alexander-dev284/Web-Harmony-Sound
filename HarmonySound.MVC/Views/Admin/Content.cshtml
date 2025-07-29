@@ -1,0 +1,986 @@
+﻿@model List<HarmonySound.MVC.Models.AdminContentViewModel>
+
+@{
+    ViewData["Title"] = "Gestión de Contenido";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - HarmonySound Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="admin-body">
+    <div class="admin-dashboard">
+        <!-- Sidebar -->
+        <nav class="admin-sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-shield-alt"></i>
+                    <h2>HarmonySound</h2>
+                    <span>Admin Panel</span>
+                </div>
+            </div>
+
+            <div class="sidebar-menu">
+                <a href="@Url.Action("Dashboard", "Admin")" class="menu-item">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="@Url.Action("Users", "Admin")" class="menu-item">
+                    <i class="fas fa-users"></i>
+                    <span>Usuarios</span>
+                </a>
+                <a href="@Url.Action("Content", "Admin")" class="menu-item active">
+                    <i class="fas fa-music"></i>
+                    <span>Contenido</span>
+                </a>
+                <a href="@Url.Action("UserRoles", "Admin")" class="menu-item">
+                    <i class="fas fa-user-shield"></i>
+                    <span>Roles</span>
+                </a>
+            </div>
+
+            <div class="sidebar-footer">
+                <form asp-action="Logout" asp-controller="Account" method="post">
+                    <button type="submit" class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Cerrar Sesión</span>
+                    </button>
+                </form>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="admin-main">
+            <div class="admin-header">
+                <h1>
+                    <i class="fas fa-music me-3"></i>
+                    Gestión de Contenido
+                </h1>
+                <p>Administrar todas las canciones y contenido musical del sistema</p>
+                
+                <!-- Estadísticas de contenido -->
+                <div class="content-stats">
+                    <div class="stat-item">
+                        <i class="fas fa-music"></i>
+                        <span>Total Canciones: @Model.Count</span>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-microphone-alt"></i>
+                        <span>Artistas: @Model.Select(c => c.ArtistName).Distinct().Count()</span>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-clock"></i>
+                        <span>Duración Total: @TimeSpan.FromMinutes(Model.Sum(c => c.Duration.TotalMinutes)).ToString(@"hh\:mm")</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filtros para contenido -->
+            <div class="filters-section">
+                <div class="filters-card">
+                    <h3><i class="fas fa-filter me-2"></i>Filtros de Contenido</h3>
+                    <div class="filters-row">
+                        <div class="filter-group">
+                            <label>Buscar canción</label>
+                            <input type="text" id="search-content" placeholder="Título o artista..." class="search-input">
+                        </div>
+                        <div class="filter-group">
+                            <label>Tipo</label>
+                            <select id="type-filter" class="filter-select">
+                                <option value="">Todos los tipos</option>
+                                <option value="Song">Canción</option>
+                                <option value="Podcast">Podcast</option>
+                                <option value="Audio">Audio</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Artista</label>
+                            <select id="artist-filter" class="filter-select">
+                                <option value="">Todos los artistas</option>
+                                @foreach (var artist in Model.Select(c => c.ArtistName).Distinct().OrderBy(a => a))
+                                {
+                                    <option value="@artist">@artist</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <button type="button" class="btn-clear-filters" onclick="clearContentFilters()">
+                                <i class="fas fa-broom me-2"></i>Limpiar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lista de contenido -->
+            <div class="content-grid-container">
+                <div class="content-header">
+                    <h3><i class="fas fa-list me-2"></i>Biblioteca Musical</h3>
+                    <div class="content-actions">
+                        <span class="results-count">Mostrando <span id="visible-content-count">@Model.Count</span> de @Model.Count canciones</span>
+                        <button type="button" class="btn-bulk-actions" onclick="toggleBulkMode()">
+                            <i class="fas fa-check-square me-2"></i>Selección múltiple
+                        </button>
+                    </div>
+                </div>
+
+                @if (Model.Any())
+                {
+                    <div class="content-grid" id="content-grid">
+                        @foreach (var content in Model)
+                        {
+                            <div class="content-card" 
+                                 data-title="@content.Title.ToLower()" 
+                                 data-artist="@content.ArtistName.ToLower()" 
+                                 data-type="@content.Type">
+                                
+                                <div class="content-checkbox" style="display: none;">
+                                    <input type="checkbox" class="bulk-checkbox" value="@content.Id">
+                                </div>
+
+                                <div class="content-info">
+                                    <h4 class="content-title">@content.Title</h4>
+                                    <p class="content-artist">@content.ArtistName</p>
+                                    <div class="content-meta">
+                                        <span class="content-type">@content.Type</span>
+                                        <span class="content-duration">
+                                            <i class="fas fa-clock me-1"></i>
+                                            @content.Duration.ToString(@"mm\:ss")
+                                        </span>
+                                    </div>
+                                    <div class="content-date">
+                                        <i class="fas fa-calendar me-1"></i>
+                                        @content.UploadDate.ToString("dd/MM/yyyy")
+                                    </div>
+                                </div>
+                                
+                                <!-- ✅ ACTUALIZADO: Solo botón de eliminar -->
+                                <div class="content-actions">
+                                    <button class="btn-content-action btn-danger" 
+                                            onclick="deleteContent(@content.Id, '@content.Title', '@content.ArtistName')"
+                                            title="Eliminar">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="empty-content">
+                        <i class="fas fa-music-slash"></i>
+                        <h3>No hay contenido disponible</h3>
+                        <p>No se encontraron canciones en el sistema</p>
+                    </div>
+                }
+            </div>
+
+            <!-- Acciones masivas -->
+            <div class="bulk-actions-bar" id="bulk-actions-bar" style="display: none;">
+                <div class="bulk-info">
+                    <span id="selected-count">0</span> elementos seleccionados
+                </div>
+                <div class="bulk-buttons">
+                    <button type="button" class="btn-bulk btn-select-all" onclick="selectAllContent()">
+                        Seleccionar todo
+                    </button>
+                    <button type="button" class="btn-bulk btn-clear-selection" onclick="clearSelection()">
+                        Limpiar selección
+                    </button>
+                    <button type="button" class="btn-bulk btn-bulk-delete" onclick="bulkDeleteContent()">
+                        <i class="fas fa-trash-alt me-2"></i>Eliminar seleccionados
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal para eliminar contenido -->
+    <div id="deleteContentModal" class="modal-overlay d-none">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3><i class="fas fa-exclamation-triangle me-2"></i>Eliminar Contenido</h3>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro de que quieres eliminar la canción <strong id="contentToDelete"></strong>?</p>
+                <div class="content-details">
+                    <p><strong>Artista:</strong> <span id="artistToDelete"></span></p>
+                </div>
+                <div class="modal-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Esta acción eliminará permanentemente el archivo y no se puede deshacer.
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel" onclick="closeDeleteModal()">Cancelar</button>
+                <button type="button" class="btn-confirm-delete" onclick="confirmDeleteContent()">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulario oculto para eliminar -->
+    <form id="deleteContentForm" asp-action="DeleteContent" method="post" style="display: none;">
+        <input type="hidden" name="contentId" id="contentIdToDelete" />
+    </form>
+
+    <style>
+        /* Reutilizar estilos base del admin */
+        .admin-body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0a;
+            color: #fff;
+        }
+
+        .admin-dashboard {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .admin-sidebar {
+            width: 250px;
+            background: linear-gradient(180deg, #1a1a1a, #2a2a2a);
+            border-right: 1px solid #333;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 2rem 1rem;
+            border-bottom: 1px solid #333;
+            text-align: center;
+        }
+
+        .logo i {
+            font-size: 2rem;
+            color: #ef4444;
+            margin-bottom: 0.5rem;
+        }
+
+        .logo h2 {
+            margin: 0;
+            color: #fff;
+            font-size: 1.2rem;
+        }
+
+        .logo span {
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        .sidebar-menu {
+            flex: 1;
+            padding: 1rem 0;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            color: #ccc;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .menu-item:hover, .menu-item.active {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border-left-color: #ef4444;
+        }
+
+        .menu-item i {
+            margin-right: 1rem;
+            width: 20px;
+        }
+
+        .sidebar-footer {
+            padding: 1rem;
+            border-top: 1px solid #333;
+        }
+
+        .logout-btn {
+            width: 100%;
+            background: transparent;
+            border: 1px solid #333;
+            color: #ccc;
+            padding: 0.75rem;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: #dc3545;
+            border-color: #dc3545;
+            color: #fff;
+        }
+
+        .logout-btn i {
+            margin-right: 0.5rem;
+        }
+
+        .admin-main {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            background: linear-gradient(135deg, #0a0a0a, #1a1a1a);
+        }
+
+        .admin-header {
+            margin-bottom: 3rem;
+            background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+            padding: 2rem;
+            border-radius: 16px;
+            border: 1px solid #333;
+        }
+
+        .admin-header h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 2.5rem;
+            color: #ef4444;
+            display: flex;
+            align-items: center;
+        }
+
+        .admin-header p {
+            margin: 0 0 1.5rem 0;
+            color: #888;
+            font-size: 1.1rem;
+        }
+
+        /* Estadísticas de contenido */
+        .content-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .stat-item {
+            background: rgba(29, 185, 84, 0.1);
+            border: 1px solid rgba(29, 185, 84, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: #1db954;
+            font-weight: 600;
+        }
+
+        /* Filtros (reutilizar estilos de Users) */
+        .filters-section {
+            margin-bottom: 2rem;
+        }
+
+        .filters-card {
+            background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .filters-card h3 {
+            margin: 0 0 1rem 0;
+            color: #1db954;
+            display: flex;
+            align-items: center;
+        }
+
+        .filters-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1.5fr auto;
+            gap: 1rem;
+            align-items: end;
+        }
+
+        .filter-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #ccc;
+            font-weight: 500;
+        }
+
+        .search-input, .filter-select {
+            width: 100%;
+            padding: 0.75rem;
+            background: #333;
+            border: 1px solid #555;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 0.95rem;
+        }
+
+        .search-input:focus, .filter-select:focus {
+            outline: none;
+            border-color: #1db954;
+            box-shadow: 0 0 0 2px rgba(29, 185, 84, 0.2);
+        }
+
+        .btn-clear-filters {
+            background: #666;
+            color: #fff;
+            border: none;
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            height: fit-content;
+        }
+
+        .btn-clear-filters:hover {
+            background: #777;
+        }
+
+        /* Contenedor de contenido */
+        .content-grid-container {
+            background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+            border: 1px solid #333;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 1px solid #333;
+            background: rgba(29, 185, 84, 0.05);
+        }
+
+        .content-header h3 {
+            margin: 0;
+            color: #1db954;
+            display: flex;
+            align-items: center;
+        }
+
+        .content-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .results-count {
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        .btn-bulk-actions {
+            background: #1db954;
+            color: #000;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s ease;
+        }
+
+        .btn-bulk-actions:hover {
+            background: #1ed760;
+        }
+
+        /* Grid de contenido */
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+            padding: 2rem;
+        }
+
+        .content-card {
+            background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
+            border: 1px solid #444;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .content-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border-color: #1db954;
+        }
+
+        .content-card.selected {
+            border-color: #1db954;
+            box-shadow: 0 0 0 2px rgba(29, 185, 84, 0.3);
+        }
+
+        .content-checkbox {
+            position: absolute;
+            top: 0.75rem;
+            left: 0.75rem;
+            z-index: 10;
+        }
+
+        .bulk-checkbox {
+            width: 18px;
+            height: 18px;
+            accent-color: #1db954;
+        }
+
+        .content-cover {
+            position: relative;
+            height: 200px;
+            background: linear-gradient(135deg, #333, #555);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cover-placeholder {
+            font-size: 3rem;
+            color: #666;
+        }
+
+        .content-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .content-card:hover .content-overlay {
+            opacity: 1;
+        }
+
+        .play-btn {
+            background: #1db954;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #000;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .play-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .content-info {
+            padding: 1.5rem;
+        }
+
+        .content-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 0 0 0.5rem 0;
+            color: #fff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .content-artist {
+            color: #1db954;
+            margin: 0 0 1rem 0;
+            font-weight: 500;
+        }
+
+        .content-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .content-type {
+            background: rgba(29, 185, 84, 0.2);
+            color: #1db954;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .content-duration {
+            color: #888;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .content-date {
+            color: #666;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+        }
+
+        /* ✅ ACTUALIZADO: Acciones de contenido centradas con solo el botón de eliminar */
+        .content-actions {
+            display: flex;
+            justify-content: center;
+            padding: 1rem 1.5rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-top: 1px solid #444;
+        }
+
+        .btn-content-action {
+            background: #333;
+            color: #ccc;
+            border: 1px solid #555;
+            border-radius: 6px;
+            padding: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-danger:hover {
+            background: #dc3545;
+            border-color: #dc3545;
+            color: #fff;
+        }
+
+        /* Estado vacío */
+        .empty-content {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #666;
+        }
+
+        .empty-content i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Barra de acciones masivas */
+        .bulk-actions-bar {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+            border: 1px solid #333;
+            border-radius: 25px;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .bulk-info {
+            color: #1db954;
+            font-weight: 600;
+        }
+
+        .bulk-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn-bulk {
+            background: #333;
+            color: #fff;
+            border: 1px solid #555;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .btn-select-all:hover {
+            background: #1db954;
+            border-color: #1db954;
+            color: #000;
+        }
+
+        .btn-clear-selection:hover {
+            background: #666;
+            border-color: #666;
+        }
+
+        .btn-bulk-delete:hover {
+            background: #dc3545;
+            border-color: #dc3545;
+            color: #fff;
+        }
+
+        /* Modal (reutilizar estilos de Users) */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+
+        .modal-overlay.d-none {
+            display: none !important;
+        }
+
+        .modal-container {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 0;
+            max-width: 480px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-header {
+            background: #dc3545;
+            color: #fff;
+            padding: 1.5rem;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        .content-details {
+            background: rgba(29, 185, 84, 0.1);
+            border: 1px solid rgba(29, 185, 84, 0.3);
+            padding: 1rem;
+            border-radius: 6px;
+            margin: 1rem 0;
+        }
+
+        .modal-warning {
+            background: rgba(255, 193, 7, 0.1);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            padding: 1rem;
+            border-radius: 6px;
+            margin-top: 1rem;
+            color: #ffc107;
+            display: flex;
+            align-items: center;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            padding: 1.5rem;
+            background: #333;
+            border-radius: 0 0 12px 12px;
+        }
+
+        .btn-cancel, .btn-confirm-delete {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s ease;
+        }
+
+        .btn-cancel {
+            background: #666;
+            color: #fff;
+        }
+
+        .btn-cancel:hover {
+            background: #777;
+        }
+
+        .btn-confirm-delete {
+            background: #dc3545;
+            color: #fff;
+        }
+
+        .btn-confirm-delete:hover {
+            background: #c82333;
+        }
+
+    </style>
+
+    <script>
+        // Variables globales
+        let contentIdToDelete = null;
+        let bulkModeActive = false;
+        let selectedContent = [];
+
+        // Filtrado de contenido
+        function filterContent() {
+            const searchTerm = document.getElementById('search-content').value.toLowerCase();
+            const typeFilter = document.getElementById('type-filter').value;
+            const artistFilter = document.getElementById('artist-filter').value;
+            
+            const cards = document.querySelectorAll('.content-card');
+            let visibleCount = 0;
+            
+            cards.forEach(card => {
+                const title = card.dataset.title;
+                const artist = card.dataset.artist;
+                const type = card.dataset.type;
+                
+                const matchesSearch = searchTerm === '' || title.includes(searchTerm) || artist.includes(searchTerm);
+                const matchesType = typeFilter === '' || type === typeFilter;
+                const matchesArtist = artistFilter === '' || artist.includes(artistFilter.toLowerCase());
+                
+                if (matchesSearch && matchesType && matchesArtist) {
+                    card.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+            
+            document.getElementById('visible-content-count').textContent = visibleCount;
+        }
+
+        // Event listeners para filtros
+        document.getElementById('search-content').addEventListener('input', filterContent);
+        document.getElementById('type-filter').addEventListener('change', filterContent);
+        document.getElementById('artist-filter').addEventListener('change', filterContent);
+
+        // Limpiar filtros
+        function clearContentFilters() {
+            document.getElementById('search-content').value = '';
+            document.getElementById('type-filter').value = '';
+            document.getElementById('artist-filter').value = '';
+            filterContent();
+        }
+
+        // Modo de selección masiva
+        function toggleBulkMode() {
+            bulkModeActive = !bulkModeActive;
+            const checkboxes = document.querySelectorAll('.content-checkbox');
+            const bulkBar = document.getElementById('bulk-actions-bar');
+            
+            if (bulkModeActive) {
+                checkboxes.forEach(cb => cb.style.display = 'block');
+                bulkBar.style.display = 'flex';
+            } else {
+                checkboxes.forEach(cb => cb.style.display = 'none');
+                bulkBar.style.display = 'none';
+                clearSelection();
+            }
+        }
+
+        // Seleccionar todo el contenido
+        function selectAllContent() {
+            const visibleCheckboxes = document.querySelectorAll('.content-card:not([style*="display: none"]) .bulk-checkbox');
+            visibleCheckboxes.forEach(cb => {
+                cb.checked = true;
+                cb.closest('.content-card').classList.add('selected');
+            });
+            updateSelectedCount();
+        }
+
+        // Limpiar selección
+        function clearSelection() {
+            const checkboxes = document.querySelectorAll('.bulk-checkbox');
+            checkboxes.forEach(cb => {
+                cb.checked = false;
+                cb.closest('.content-card').classList.remove('selected');
+            });
+            selectedContent = [];
+            updateSelectedCount();
+        }
+
+        // Actualizar contador de seleccionados
+        function updateSelectedCount() {
+            const selected = document.querySelectorAll('.bulk-checkbox:checked');
+            selectedContent = Array.from(selected).map(cb => cb.value);
+            document.getElementById('selected-count').textContent = selectedContent.length;
+        }
+
+        // Event listeners para checkboxes
+        document.addEventListener('change', function(e) {
+            if (e.target.classList.contains('bulk-checkbox')) {
+                if (e.target.checked) {
+                    e.target.closest('.content-card').classList.add('selected');
+                } else {
+                    e.target.closest('.content-card').classList.remove('selected');
+                }
+                updateSelectedCount();
+            }
+        });
+
+        // Eliminar contenido individual
+        function deleteContent(contentId, title, artist) {
+            contentIdToDelete = contentId;
+            document.getElementById('contentToDelete').textContent = title;
+            document.getElementById('artistToDelete').textContent = artist;
+            document.getElementById('deleteContentModal').classList.remove('d-none');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteContentModal').classList.add('d-none');
+            contentIdToDelete = null;
+        }
+
+        function confirmDeleteContent() {
+            if (contentIdToDelete) {
+                document.getElementById('contentIdToDelete').value = contentIdToDelete;
+                document.getElementById('deleteContentForm').submit();
+            }
+        }
+
+        // Eliminar contenido masivo
+        function bulkDeleteContent() {
+            if (selectedContent.length === 0) {
+                alert('Por favor selecciona al menos un elemento para eliminar.');
+                return;
+            }
+            
+            if (confirm(`¿Estás seguro de que quieres eliminar ${selectedContent.length} canciones?`)) {
+                // Implementar eliminación masiva
+                console.log('Eliminar canciones:', selectedContent);
+                // Aquí enviarías los IDs al servidor para eliminación masiva
+            }
+        }
+
+        // ✅ REMOVIDO: Funciones viewContentDetails y editContent eliminadas
+
+        // Cerrar modal al hacer clic fuera
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal-overlay')) {
+                closeDeleteModal();
+            }
+        });
+    </script>
+</body>
+</html>

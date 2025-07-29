@@ -1,13 +1,9 @@
 ﻿using HarmonySound.API.DTOs;
 using HarmonySound.Models;
 using HarmonySound.API.Services;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.WebUtilities;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Identity.UI.Services;
 
@@ -131,9 +127,32 @@ namespace HarmonySound.API.Controllers
             if (user == null || !await _userManager.CheckPasswordAsync(user, model.Password))
                 return Unauthorized(new { Message = "Credenciales inválidas" });
 
+            // ✅ VERIFICAR: Estado del usuario con mensajes específicos
+            if (user.State == "Suspended")
+                return Unauthorized(new { 
+                    Message = "Tu cuenta ha sido suspendida. Contacta al administrador para más información.",
+                    StatusCode = "ACCOUNT_SUSPENDED",
+                    RedirectAction = "AccountSuspended"
+                });
+
+            if (user.State == "Inactive")
+                return Unauthorized(new { 
+                    Message = "Tu cuenta está inactiva. Contacta al administrador para reactivarla.",
+                    StatusCode = "ACCOUNT_INACTIVE"
+                });
+
+            if (user.State != "Active")
+                return Unauthorized(new { 
+                    Message = "Estado de cuenta no válido. Contacta al administrador.",
+                    StatusCode = "ACCOUNT_INVALID_STATE"
+                });
+
             // Opcional: Verifica si el email está confirmado
             if (!await _userManager.IsEmailConfirmedAsync(user))
-                return Unauthorized(new { Message = "Debes confirmar tu email antes de iniciar sesión." });
+                return Unauthorized(new { 
+                    Message = "Debes confirmar tu email antes de iniciar sesión.",
+                    StatusCode = "EMAIL_NOT_CONFIRMED"
+                });
 
             var token = await _jwtService.GenerateTokenAsync(user);
 
@@ -142,8 +161,11 @@ namespace HarmonySound.API.Controllers
 
         // Recuperación de contraseña: envío de código por email
         [HttpPost("forgot-password")]
-        public async Task<IActionResult> ForgotPassword([FromBody] LoginModel model)
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordModel model)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
                 return BadRequest("Usuario no encontrado o email no confirmado.");
@@ -213,28 +235,61 @@ namespace HarmonySound.API.Controllers
         [HttpPost("admin-login")]
         public async Task<IActionResult> AdminLogin([FromBody] LoginModel model)
         {
+            Console.WriteLine($"🔐 AdminLogin iniciado para: {model.Email}");
+            
             if (!ModelState.IsValid)
+            {
+                Console.WriteLine("❌ ModelState inválido");
                 return BadRequest(ModelState);
+            }
 
             var user = await _userManager.FindByEmailAsync(model.Email);
-            if (user == null || !await _userManager.CheckPasswordAsync(user, model.Password))
-                return Unauthorized(new { Message = "Credenciales inválidas" });
+            Console.WriteLine($"🔍 Usuario encontrado: {user != null}");
+            
+            if (user == null)
+            {
+                Console.WriteLine("❌ Usuario no encontrado");
+                return Unauthorized(new { Message = "Credenciales inválidas - Usuario no encontrado" });
+            }
+
+            Console.WriteLine($"🔍 Email confirmado: {user.EmailConfirmed}");
+            Console.WriteLine($"🔍 Estado usuario: {user.State}");
+
+            var passwordValid = await _userManager.CheckPasswordAsync(user, model.Password);
+            Console.WriteLine($"🔍 Contraseña válida: {passwordValid}");
+            
+            if (!passwordValid)
+            {
+                Console.WriteLine("❌ Contraseña incorrecta");
+                return Unauthorized(new { Message = "Credenciales inválidas - Contraseña incorrecta" });
+            }
 
             // ✅ VERIFICAR: Solo admins pueden usar este endpoint
             var roles = await _userManager.GetRolesAsync(user);
+            Console.WriteLine($"🔍 Roles del usuario: [{string.Join(", ", roles)}]");
+            
             if (!roles.Contains("Admin"))
+            {
+                Console.WriteLine("❌ Usuario no tiene rol Admin");
                 return Unauthorized(new { Message = "Acceso denegado. Solo administradores." });
+            }
 
             // ✅ VERIFICAR: Cuenta activa
             if (user.State != "Active")
+            {
+                Console.WriteLine($"❌ Cuenta no activa: {user.State}");
                 return Unauthorized(new { Message = "Cuenta de administrador desactivada" });
+            }
 
+            Console.WriteLine("✅ Generando token...");
             var token = await _jwtService.GenerateTokenAsync(user);
+            Console.WriteLine("✅ AdminLogin exitoso");
 
             return Ok(new
             {
                 Token = token,
-                RequiresTwoFactor = true
+                RequiresTwoFactor = true,
+                Message = "Login exitoso" // ✅ AGREGAR para debugging
             });
         }
 

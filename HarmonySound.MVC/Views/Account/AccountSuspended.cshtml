@@ -1,0 +1,302 @@
+@{
+    ViewBag.Title = "Cuenta Suspendida";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <title>Cuenta Suspendida - HarmonySound</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="suspended-container">
+        <div class="suspended-card">
+            <!-- Icono de cuenta suspendida -->
+            <div class="suspended-icon">
+                <i class="fas fa-ban"></i>
+            </div>
+            
+            <h1>Cuenta Suspendida</h1>
+            <p class="suspended-subtitle">Tu acceso a HarmonySound ha sido temporalmente restringido</p>
+
+            <div class="suspended-content">
+                <div class="info-section">
+                    <div class="info-item">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <div>
+                            <h3>Estado de la cuenta</h3>
+                            <p>Tu cuenta ha sido suspendida temporalmente por nuestro equipo de moderación.</p>
+                        </div>
+                    </div>
+
+                    <div class="info-item">
+                        <i class="fas fa-clock"></i>
+                        <div>
+                            <h3>¿Qué significa esto?</h3>
+                            <p>Durante la suspensión, no podrás acceder a tu cuenta ni utilizar los servicios de HarmonySound.</p>
+                        </div>
+                    </div>
+
+                    <div class="info-item">
+                        <i class="fas fa-envelope"></i>
+                        <div>
+                            <h3>¿Necesitas ayuda?</h3>
+                            <p>Si crees que esto es un error o tienes preguntas sobre tu suspensión, contacta a nuestro equipo de soporte.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="contact-section">
+                    <h3>Contactar Soporte</h3>
+                    <div class="contact-options">
+                        <a href="mailto:thevector1999@gmail.com" class="contact-btn email-btn">
+                            <i class="fas fa-envelope"></i>
+                            <span>thevector1999@gmail.com</span>
+                        </a>
+                        
+                        <a href="mailto:mirandaarcosandres@gmail.com" class="contact-btn admin-btn">
+                            <i class="fas fa-user-shield"></i>
+                            <span>mirandaarcosandres@gmail.com</span>
+                        </a>
+
+                        <a href="mailto:ruanogabriel20@gmail.com" class="contact-btn admin-btn">
+                            <i class="fas fa-user-shield"></i>
+                            <span>ruanogabriel20@gmail.com</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="actions-section">
+                    <a href="@Url.Action("Login", "Account")" class="btn-back">
+                        <i class="fas fa-arrow-left"></i>
+                        Volver al Login
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a1a, #2d2d2d) !important;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: #fff;
+            padding: 2rem;
+        }
+
+        .suspended-container {
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .suspended-card {
+            background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
+            border: 1px solid #555;
+            border-radius: 20px;
+            padding: 3rem 2rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .suspended-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(220, 53, 69, 0.05), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        .suspended-icon {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 2rem;
+            font-size: 3rem;
+            color: #fff;
+            position: relative;
+            z-index: 2;
+            box-shadow: 0 10px 30px rgba(220, 53, 69, 0.3);
+        }
+
+        .suspended-card h1 {
+            color: #dc3545;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .suspended-subtitle {
+            color: #ccc;
+            font-size: 1.1rem;
+            margin-bottom: 2.5rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .suspended-content {
+            text-align: left;
+            position: relative;
+            z-index: 2;
+        }
+
+        .info-section {
+            margin-bottom: 2.5rem;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .info-item i {
+            color: #dc3545;
+            font-size: 1.5rem;
+            margin-top: 0.25rem;
+            min-width: 24px;
+        }
+
+        .info-item h3 {
+            color: #fff;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-item p {
+            color: #ccc;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .contact-section {
+            background: rgba(220, 53, 69, 0.1);
+            border: 1px solid rgba(220, 53, 69, 0.3);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .contact-section h3 {
+            color: #dc3545;
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+
+        .contact-options {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .contact-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .email-btn {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+
+        .email-btn:hover {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: #3b82f6;
+            transform: translateY(-2px);
+        }
+
+        .admin-btn {
+            background: rgba(255, 193, 7, 0.1);
+            color: #ffc107;
+            border-color: rgba(255, 193, 7, 0.3);
+        }
+
+        .admin-btn:hover {
+            background: rgba(255, 193, 7, 0.2);
+            border-color: #ffc107;
+            transform: translateY(-2px);
+        }
+
+        .actions-section {
+            text-align: center;
+        }
+
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-back:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            color: #fff;
+        }
+
+        @@keyframes shimmer {
+            0% {
+                transform: translateX(-100%) translateY(-100%) rotate(45deg);
+            }
+            100% {
+                transform: translateX(100%) translateY(100%) rotate(45deg);
+            }
+        }
+
+        
+
+        .fas {
+            font-family: "Font Awesome 6 Free" !important;
+            font-weight: 900 !important;
+        }
+    </style>
+</body>
+</html>

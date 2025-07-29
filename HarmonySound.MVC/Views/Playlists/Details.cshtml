@@ -156,9 +156,6 @@
 
                         <div class="track-actions">
                             <div class="track-menu-container">
-                                <button class="track-menu-btn" title="Más opciones" onclick="toggleTrackMenu(@track.ContentId)">
-                                    <i class="fas fa-ellipsis-h"></i>
-                                </button>
                                 <div class="track-dropdown-menu" id="trackMenu-@track.ContentId">
                                     <button type="button" class="track-dropdown-item" onclick="removeTrackFromPlaylist(@Model.Id, @track.ContentId, '@track.Title')">
                                         <i class="fas fa-minus-circle"></i>

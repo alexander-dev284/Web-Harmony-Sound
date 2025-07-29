@@ -8,19 +8,19 @@
 
   <ItemGroup>
     <Compile Remove="Data\**" />
-    <Compile Remove="Views\Admin\**" />
+    <Compile Remove="Services\**" />
     <Compile Remove="Views\Client\**" />
     <Compile Remove="wwwroot\media\**" />
     <Content Remove="Data\**" />
-    <Content Remove="Views\Admin\**" />
+    <Content Remove="Services\**" />
     <Content Remove="Views\Client\**" />
     <Content Remove="wwwroot\media\**" />
     <EmbeddedResource Remove="Data\**" />
-    <EmbeddedResource Remove="Views\Admin\**" />
+    <EmbeddedResource Remove="Services\**" />
     <EmbeddedResource Remove="Views\Client\**" />
     <EmbeddedResource Remove="wwwroot\media\**" />
     <None Remove="Data\**" />
-    <None Remove="Views\Admin\**" />
+    <None Remove="Services\**" />
     <None Remove="Views\Client\**" />
     <None Remove="wwwroot\media\**" />
   </ItemGroup>
@@ -39,15 +39,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Services\" />
     <Folder Include="Views\UserRoles\" />
     <Folder Include="wwwroot\ads\" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Include="Views\Admin\Dashboard.cshtml" />
-    <None Include="Views\Admin\Users.cshtml" />
-    <None Include="Views\Admin\_AdminSidebar.cshtml" />
-  </ItemGroup>
 
 </Project>

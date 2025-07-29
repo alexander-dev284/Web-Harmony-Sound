@@ -1,7 +1,7 @@
-@model List<HarmonySound.MVC.Models.AdminUserViewModel>
+﻿@model List<HarmonySound.MVC.Models.AdminUserViewModel>
 
 @{
-    ViewData["Title"] = "Gesti�n de Usuarios";
+    ViewData["Title"] = "Gestión de Usuarios";
     Layout = null;
 }
 
@@ -15,115 +15,928 @@
 </head>
 <body class="admin-body">
     <div class="admin-dashboard">
-        <!-- Incluir sidebar -->
-        @await Html.PartialAsync("_AdminSidebar")
+        <!-- Sidebar -->
+        <nav class="admin-sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-shield-alt"></i>
+                    <h2>HarmonySound</h2>
+                    <span>Admin Panel</span>
+                </div>
+            </div>
+
+            <div class="sidebar-menu">
+                <a href="@Url.Action("Dashboard", "Admin")" class="menu-item">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="@Url.Action("Users", "Admin")" class="menu-item active">
+                    <i class="fas fa-users"></i>
+                    <span>Usuarios</span>
+                </a>
+                <a href="@Url.Action("Content", "Admin")" class="menu-item">
+                    <i class="fas fa-music"></i>
+                    <span>Contenido</span>
+                </a>
+                <a href="@Url.Action("UserRoles", "Admin")" class="menu-item">
+                    <i class="fas fa-user-shield"></i>
+                    <span>Roles</span>
+                </a>
+            </div>
+
+            <div class="sidebar-footer">
+                <form asp-action="Logout" asp-controller="Account" method="post">
+                    <button type="submit" class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Cerrar Sesión</span>
+                    </button>
+                </form>
+            </div>
+        </nav>
 
         <!-- Main Content -->
         <main class="admin-main">
             <div class="admin-header">
                 <h1>
                     <i class="fas fa-users me-3"></i>
-                    Gesti�n de Usuarios
+                    Gestión de Usuarios
                 </h1>
                 <p>Administrar cuentas de usuarios del sistema</p>
+                
+                <!-- Estadísticas rápidas -->
+                <div class="stats-summary">
+                    <div class="stat-item">
+                        <i class="fas fa-users"></i>
+                        <span>Total: @Model.Count</span>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-user-tie"></i>
+                        <span>Admins: @Model.Count(u => u.Role == "Admin")</span>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-microphone-alt"></i>
+                        <span>Artistas: @Model.Count(u => u.Role == "artist")</span>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-user"></i>
+                        <span>Clientes: @Model.Count(u => u.Role == "client")</span>
+                    </div>
+                </div>
             </div>
 
             <!-- Filtros -->
             <div class="filters-section">
-                <div class="filters-row">
-                    <input type="text" id="search-users" placeholder="Buscar usuarios..." class="search-input">
-                    <select id="role-filter" class="filter-select">
-                        <option value="">Todos los roles</option>
-                        <option value="Admin">Administradores</option>
-                        <option value="Artist">Artistas</option>
-                        <option value="Client">Clientes</option>
-                    </select>
-                    <select id="status-filter" class="filter-select">
-                        <option value="">Todos los estados</option>
-                        <option value="Active">Activos</option>
-                        <option value="Suspended">Suspendidos</option>
-                        <option value="Inactive">Inactivos</option>
-                    </select>
+                <div class="filters-card">
+                    <h3><i class="fas fa-filter me-2"></i>Filtros</h3>
+                    <div class="filters-row">
+                        <div class="filter-group">
+                            <label>Buscar usuario</label>
+                            <input type="text" id="search-users" placeholder="Nombre o email..." class="search-input">
+                        </div>
+                        <div class="filter-group">
+                            <label>Rol</label>
+                            <select id="role-filter" class="filter-select">
+                                <option value="">Todos los roles</option>
+                                <option value="Admin">Administradores</option>
+                                <option value="artist">Artistas</option>
+                                <option value="client">Clientes</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Estado</label>
+                            <select id="status-filter" class="filter-select">
+                                <option value="">Todos los estados</option>
+                                <option value="Active">Activos</option>
+                                <option value="Suspended">Suspendidos</option>
+                                <option value="Inactive">Inactivos</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <button type="button" class="btn-clear-filters" onclick="clearFilters()">
+                                <i class="fas fa-broom me-2"></i>Limpiar
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <!-- Tabla de usuarios -->
             <div class="users-table-container">
-                <table class="users-table">
-                    <thead>
-                        <tr>
-                            <th>Usuario</th>
-                            <th>Email</th>
-                            <th>Rol</th>
-                            <th>Estado</th>
-                            <th>Registro</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var user in Model)
-                        {
-                            <tr class="user-row" data-role="@user.Role" data-status="@user.State">
-                                <td>
-                                    <div class="user-info">
-                                        <div class="user-avatar">
-                                            @if (!string.IsNullOrEmpty(user.ProfileImageUrl))
+                <div class="table-header">
+                    <h3><i class="fas fa-table me-2"></i>Lista de Usuarios</h3>
+                    <div class="table-actions">
+                        <span class="results-count">Mostrando <span id="visible-count">@Model.Count</span> de @Model.Count usuarios</span>
+                    </div>
+                </div>
+                
+                <div class="table-wrapper">
+                    <table class="users-table">
+                        <thead>
+                            <tr>
+                                <th><i class="fas fa-user me-2"></i>Usuario</th>
+                                <th><i class="fas fa-envelope me-2"></i>Email</th>
+                                <th><i class="fas fa-user-tag me-2"></i>Rol</th>
+                                <th><i class="fas fa-circle me-2"></i>Estado</th>
+                                <th><i class="fas fa-calendar me-2"></i>Registro</th>
+                                <th><i class="fas fa-cogs me-2"></i>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-tbody">
+                            @foreach (var user in Model)
+                            {
+                                <tr class="user-row" data-role="@user.Role" data-status="@user.State" data-name="@user.Name.ToLower()" data-email="@user.Email.ToLower()">
+                                    <td>
+                                        <div class="user-info">
+                                            <div class="user-avatar">
+                                                @if (!string.IsNullOrEmpty(user.ProfileImageUrl))
+                                                {
+                                                    <img src="@user.ProfileImageUrl" alt="@user.Name" />
+                                                }
+                                                else
+                                                {
+                                                    <div class="avatar-placeholder">
+                                                        <i class="fas fa-user"></i>
+                                                    </div>
+                                                }
+                                            </div>
+                                            <div class="user-details">
+                                                <div class="user-name">@user.Name</div>
+                                                <div class="user-id">ID: @user.Id</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="email-cell">
+                                            <i class="fas fa-envelope me-2"></i>
+                                            @user.Email
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="role-badge role-@user.Role.ToLower()">
+                                            @if (user.Role == "Admin")
                                             {
-                                                <img src="@user.ProfileImageUrl" alt="@user.Name" />
+                                                <i class="fas fa-crown me-1"></i>
+                                            }
+                                            else if (user.Role == "Artist")
+                                            {
+                                                <i class="fas fa-microphone-alt me-1"></i>
                                             }
                                             else
                                             {
-                                                <i class="fas fa-user"></i>
+                                                <i class="fas fa-user me-1"></i>
                                             }
+                                            @user.Role
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge status-@user.State.ToLower()">
+                                            @if (user.State == "Active")
+                                            {
+                                                <i class="fas fa-check-circle me-1"></i>
+                                            }
+                                            else if (user.State == "Suspended")
+                                            {
+                                                <i class="fas fa-ban me-1"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="fas fa-pause-circle me-1"></i>
+                                            }
+                                            @user.State
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="date-cell">
+                                            <i class="fas fa-calendar-alt me-2"></i>
+                                            <span>@user.RegisterDate.ToString("dd/MM/yyyy")</span>
+                                            <small>@user.RegisterDate.ToString("HH:mm")</small>
                                         </div>
-                                        <div class="user-details">
-                                            <div class="user-name">@user.Name</div>
-                                            <div class="user-id">#@user.Id</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>@user.Email</td>
-                                <td>
-                                    <span class="role-badge role-@user.Role.ToLower()">
-                                        @user.Role
-                                    </span>
-                                </td>
-                                <td>
-                                    <span class="status-badge status-@user.State.ToLower()">
-                                        @user.State
-                                    </span>
-                                </td>
-                                <td>@user.RegisterDate.ToString("dd/MM/yyyy")</td>
-                                <td>
-                                    <div class="action-buttons">
-                                        @if (user.State == "Active")
-                                        {
-                                            <form asp-action="SuspendUser" method="post" style="display: inline;">
-                                                <input type="hidden" name="userId" value="@user.Id" />
-                                                <button type="submit" class="btn-action btn-suspend" 
-                                                        onclick="return confirm('�Suspender este usuario?')"
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            @if (user.State == "Active")
+                                            {
+                                                <button type="button" class="btn-action btn-suspend" 
+                                                        onclick="suspendUser(@user.Id, '@user.Name')"
                                                         title="Suspender usuario">
                                                     <i class="fas fa-ban"></i>
                                                 </button>
-                                            </form>
-                                        }
-                                        <button class="btn-action btn-view" 
-                                                onclick="viewUserDetails(@user.Id)"
-                                                title="Ver detalles">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+                                            }
+                                            else if (user.State == "Suspended")
+                                            {
+                                                <button type="button" class="btn-action btn-activate" 
+                                                        onclick="activateUser(@user.Id, '@user.Name')"
+                                                        title="Activar usuario">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                            }
+                                            <button class="btn-action btn-edit" 
+                                                    onclick="editUserRoles(@user.Id, '@user.Name')"
+                                                    title="Editar roles">
+                                                <i class="fas fa-user-cog"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </main>
     </div>
 
-    <!-- Estilos y scripts aqu� -->
-    <link rel="stylesheet" href="~/css/admin-common.css">
-    <script src="~/js/admin-users.js"></script>
+    <!-- Modal para suspender usuario -->
+    <div id="suspendModal" class="modal-overlay d-none">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3><i class="fas fa-ban me-2"></i>Suspender Usuario</h3>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro de que quieres suspender al usuario <strong id="userToSuspend"></strong>?</p>
+                <div class="modal-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    El usuario no podrá acceder al sistema hasta ser reactivado.
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel" onclick="closeSuspendModal()">Cancelar</button>
+                <button type="button" class="btn-confirm" onclick="confirmSuspend()">Suspender</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formularios ocultos -->
+    <form id="suspendForm" asp-action="ToggleUserStatus" method="post" style="display: none;">
+        <input type="hidden" name="userId" id="userIdToSuspend" />
+        <input type="hidden" name="action" value="suspend" />
+    </form>
+
+    <form id="activateForm" asp-action="ToggleUserStatus" method="post" style="display: none;">
+        <input type="hidden" name="userId" id="userIdToActivate" />
+        <input type="hidden" name="action" value="activate" />
+    </form>
+
+    <style>
+        /* Estilos del panel de administración */
+        .admin-body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #000;
+            color: #fff;
+        }
+
+        .admin-dashboard {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .admin-sidebar {
+            width: 250px;
+            background: linear-gradient(180deg, #1a1a1a, #2a2a2a);
+            border-right: 1px solid #333;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 2rem 1rem;
+            border-bottom: 1px solid #333;
+            text-align: center;
+        }
+
+        .logo i {
+            font-size: 2rem;
+            color: #ef4444;
+            margin-bottom: 0.5rem;
+        }
+
+        .logo h2 {
+            margin: 0;
+            color: #fff;
+            font-size: 1.2rem;
+        }
+
+        .logo span {
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        .sidebar-menu {
+            flex: 1;
+            padding: 1rem 0;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            color: #ccc;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .menu-item:hover, .menu-item.active {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border-left-color: #ef4444;
+        }
+
+        .menu-item i {
+            margin-right: 1rem;
+            width: 20px;
+        }
+
+        .sidebar-footer {
+            padding: 1rem;
+            border-top: 1px solid #333;
+        }
+
+        .logout-btn {
+            width: 100%;
+            background: transparent;
+            border: 1px solid #333;
+            color: #ccc;
+            padding: 0.75rem;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: #dc3545;
+            border-color: #dc3545;
+            color: #fff;
+        }
+
+        .logout-btn i {
+            margin-right: 0.5rem;
+        }
+
+        .admin-main {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            background: linear-gradient(135deg, #0a0a0a, #1a1a1a);
+        }
+
+        .admin-header {
+            margin-bottom: 3rem;
+            background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+            padding: 2rem;
+            border-radius: 16px;
+            border: 1px solid #333;
+        }
+
+        .admin-header h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 2.5rem;
+            color: #ef4444;
+            display: flex;
+            align-items: center;
+        }
+
+        .admin-header p {
+            margin: 0 0 1.5rem 0;
+            color: #888;
+            font-size: 1.1rem;
+        }
+
+        /* Estadísticas rápidas */
+        .stats-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .stat-item {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: #ef4444;
+            font-weight: 600;
+        }
+
+        .stat-item i {
+            font-size: 1.2rem;
+        }
+
+        /* Filtros */
+        .filters-section {
+            margin-bottom: 2rem;
+        }
+
+        .filters-card {
+            background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .filters-card h3 {
+            margin: 0 0 1rem 0;
+            color: #ef4444;
+            display: flex;
+            align-items: center;
+        }
+
+        .filters-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr auto;
+            gap: 1rem;
+            align-items: end;
+        }
+
+        .filter-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #ccc;
+            font-weight: 500;
+        }
+
+        .search-input, .filter-select {
+            width: 100%;
+            padding: 0.75rem;
+            background: #333;
+            border: 1px solid #555;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 0.95rem;
+        }
+
+        .search-input:focus, .filter-select:focus {
+            outline: none;
+            border-color: #ef4444;
+            box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+        }
+
+        .btn-clear-filters {
+            background: #666;
+            color: #fff;
+            border: none;
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            height: fit-content;
+        }
+
+        .btn-clear-filters:hover {
+            background: #777;
+        }
+
+        /* Tabla */
+        .users-table-container {
+            background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+            border: 1px solid #333;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 1px solid #333;
+            background: rgba(239, 68, 68, 0.05);
+        }
+
+        .table-header h3 {
+            margin: 0;
+            color: #ef4444;
+            display: flex;
+            align-items: center;
+        }
+
+        .results-count {
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        .users-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .users-table th {
+            background: #333;
+            color: #ef4444;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #ef4444;
+        }
+
+        .users-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #333;
+        }
+
+        .user-row {
+            transition: background 0.3s ease;
+        }
+
+        .user-row:hover {
+            background: rgba(239, 68, 68, 0.05);
+        }
+
+        .user-row.hidden {
+            display: none;
+        }
+
+        /* Celdas específicas */
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 2px solid #ef4444;
+        }
+
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .avatar-placeholder {
+            width: 100%;
+            height: 100%;
+            background: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+        }
+
+        .user-details {
+            min-width: 0;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 0.25rem;
+        }
+
+        .user-id {
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        .email-cell {
+            display: flex;
+            align-items: center;
+            color: #ccc;
+        }
+
+        .date-cell {
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .date-cell small {
+            color: #888;
+            font-size: 0.8rem;
+        }
+
+        /* Badges */
+        .role-badge, .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .role-admin {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+            border: 1px solid rgba(255, 193, 7, 0.5);
+        }
+
+        .role-artist {
+            background: rgba(139, 69, 19, 0.2);
+            color: #8b4513;
+            border: 1px solid rgba(139, 69, 19, 0.5);
+        }
+
+        .role-client {
+            background: rgba(32, 201, 151, 0.2);
+            color: #20c997;
+            border: 1px solid rgba(32, 201, 151, 0.5);
+        }
+
+        .status-active {
+            background: rgba(40, 167, 69, 0.2);
+            color: #28a745;
+            border: 1px solid rgba(40, 167, 69, 0.5);
+        }
+
+        .status-suspended {
+            background: rgba(220, 53, 69, 0.2);
+            color: #dc3545;
+            border: 1px solid rgba(220, 53, 69, 0.5);
+        }
+
+        .status-inactive {
+            background: rgba(108, 117, 125, 0.2);
+            color: #6c757d;
+            border: 1px solid rgba(108, 117, 125, 0.5);
+        }
+
+        /* Botones de acción */
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        .btn-action {
+            background: #333;
+            color: #ccc;
+            border: 1px solid #555;
+            border-radius: 6px;
+            padding: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-action:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-suspend:hover {
+            background: #dc3545;
+            border-color: #dc3545;
+            color: #fff;
+        }
+
+        .btn-activate:hover {
+            background: #28a745;
+            border-color: #28a745;
+            color: #fff;
+        }
+
+        .btn-edit:hover {
+            background: #ffc107;
+            border-color: #ffc107;
+            color: #000;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+
+        .modal-overlay.d-none {
+            display: none !important;
+        }
+
+        .modal-container {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 0;
+            max-width: 480px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-header {
+            background: #ef4444;
+            color: #fff;
+            padding: 1.5rem;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        .modal-warning {
+            background: rgba(255, 193, 7, 0.1);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            padding: 1rem;
+            border-radius: 6px;
+            margin-top: 1rem;
+            color: #ffc107;
+            display: flex;
+            align-items: center;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            padding: 1.5rem;
+            background: #333;
+            border-radius: 0 0 12px 12px;
+        }
+
+        .btn-cancel, .btn-confirm {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s ease;
+        }
+
+        .btn-cancel {
+            background: #666;
+            color: #fff;
+        }
+
+        .btn-cancel:hover {
+            background: #777;
+        }
+
+        .btn-confirm {
+            background: #dc3545;
+            color: #fff;
+        }
+
+        .btn-confirm:hover {
+            background: #c82333;
+        }
+
+    </style>
+
+    <!-- ✅ MEJORAR: Script para mejor manejo de estados -->
+    <script>
+        // Variables globales
+        let userIdToSuspend = null;
+        let userIdToActivate = null;
+
+        // Función de filtrado (mantener existente)
+        function filterUsers() {
+            const searchTerm = document.getElementById('search-users').value.toLowerCase();
+            const roleFilter = document.getElementById('role-filter').value;
+            const statusFilter = document.getElementById('status-filter').value;
+            
+            const rows = document.querySelectorAll('.user-row');
+            let visibleCount = 0;
+            
+            rows.forEach(row => {
+                const name = row.dataset.name;
+                const email = row.dataset.email;
+                const role = row.dataset.role;
+                const status = row.dataset.status;
+                
+                const matchesSearch = searchTerm === '' || name.includes(searchTerm) || email.includes(searchTerm);
+                const matchesRole = roleFilter === '' || role === roleFilter;
+                const matchesStatus = statusFilter === '' || status === statusFilter;
+                
+                if (matchesSearch && matchesRole && matchesStatus) {
+                    row.classList.remove('hidden');
+                    visibleCount++;
+                } else {
+                    row.classList.add('hidden');
+                }
+            });
+            
+            document.getElementById('visible-count').textContent = visibleCount;
+        }
+
+        // Event listeners para filtros
+        document.getElementById('search-users').addEventListener('input', filterUsers);
+        document.getElementById('role-filter').addEventListener('change', filterUsers);
+        document.getElementById('status-filter').addEventListener('change', filterUsers);
+
+        // Limpiar filtros
+        function clearFilters() {
+            document.getElementById('search-users').value = '';
+            document.getElementById('role-filter').value = '';
+            document.getElementById('status-filter').value = '';
+            filterUsers();
+        }
+
+        // ✅ MEJORADO: Funciones para suspender usuario con mejor UX
+        function suspendUser(userId, userName) {
+            userIdToSuspend = userId;
+            document.getElementById('userToSuspend').textContent = userName;
+            document.getElementById('suspendModal').classList.remove('d-none');
+        }
+
+        function closeSuspendModal() {
+            document.getElementById('suspendModal').classList.add('d-none');
+            userIdToSuspend = null;
+        }
+
+        function confirmSuspend() {
+            if (userIdToSuspend) {
+                // ✅ MEJORAR: Deshabilitar botón durante el procesamiento
+                const submitBtn = document.querySelector('#suspendModal .btn-confirm');
+                const originalText = submitBtn.innerHTML;
+                
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Suspendiendo...';
+                
+                document.getElementById('userIdToSuspend').value = userIdToSuspend;
+                document.getElementById('suspendForm').submit();
+            }
+        }
+
+        // ✅ MEJORADO: Función para activar usuario con confirmación
+        function activateUser(userId, userName) {
+            if (confirm(`¿Estás seguro de que quieres activar al usuario ${userName}?\n\nEsto le permitirá volver a acceder al sistema.`)) {
+                // ✅ MOSTRAR INDICADOR DE CARGA
+                const button = event.target.closest('.btn-action');
+                const originalHTML = button.innerHTML;
+                
+                button.disabled = true;
+                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                
+                // ✅ ENVIAR FORMULARIO
+                document.getElementById('userIdToActivate').value = userId;
+                document.getElementById('activateForm').submit();
+            }
+        }
+
+        // Función para editar roles (mantener existente)
+        function editUserRoles(userId, userName) {
+            window.location.href = `/Admin/UserRoles#user-${userId}`;
+        }
+
+        // Cerrar modal al hacer clic fuera
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal-overlay')) {
+                closeSuspendModal();
+            }
+        });
+
+        // ✅ NUEVO: Actualizar UI después de cambios de estado
+        document.addEventListener('DOMContentLoaded', function() {
+            // Verificar si hay mensajes de éxito/error y mostrar notificaciones
+            const successMsg = document.querySelector('.alert-success');
+            const errorMsg = document.querySelector('.alert-error');
+            
+            if (successMsg) {
+                setTimeout(() => {
+                    successMsg.style.transition = 'opacity 0.5s';
+                    successMsg.style.opacity = '0';
+                    setTimeout(() => successMsg.remove(), 500);
+                }, 4000);
+            }
+            
+            if (errorMsg) {
+                setTimeout(() => {
+                    errorMsg.style.transition = 'opacity 0.5s';
+                    errorMsg.style.opacity = '0';
+                    setTimeout(() => errorMsg.remove(), 500);
+                }, 6000);
+            }
+        });
+    </script>
 </body>
 </html>

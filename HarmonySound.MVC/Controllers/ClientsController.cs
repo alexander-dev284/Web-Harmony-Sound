@@ -454,18 +454,33 @@ namespace HarmonySound.MVC.Controllers
         [HttpGet]
         public async Task<IActionResult> GetRandomAd()
         {
-            // Simular anuncios aleatorios para usuarios gratuitos
-            var ads = new[]
+            try
             {
-                new { url = "https://www2.cs.uic.edu/~i101/SoundFiles/BabyElephantWalk60.wav", duration = 30 },
-                new { url = "https://www2.cs.uic.edu/~i101/SoundFiles/CantinaBand60.wav", duration = 25 },
-                new { url = "https://www2.cs.uic.edu/~i101/SoundFiles/ImperialMarch60.wav", duration = 20 }
-            };
-            
-            var random = new Random();
-            var selectedAd = ads[random.Next(ads.Length)];
-            
-            return Json(selectedAd);
+                // ✅ CORRECCIÓN: URLs apuntando al proyecto API (puerto 7120)
+                var ads = new[]
+                {
+                    new { url = "https://localhost:7120/ads/ad1.mp3", duration = 30 },
+                    new { url = "https://localhost:7120/ads/ad2.mp3", duration = 25 },
+                    new { url = "https://localhost:7120/ads/ad3.mp3", duration = 20 }
+                };
+                
+                var random = new Random();
+                var selectedAd = ads[random.Next(ads.Length)];
+                
+                Console.WriteLine($"📢 Anuncio seleccionado: {selectedAd.url} ({selectedAd.duration}s)");
+                
+                return Json(selectedAd);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Error al obtener anuncio: {ex.Message}");
+                
+                // ✅ FALLBACK: Anuncio silencioso
+                return Json(new { 
+                    url = "data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmMbBDuX3ixOQBNH", 
+                    duration = 5 
+                });
+            }
         }
 
         [HttpPost]

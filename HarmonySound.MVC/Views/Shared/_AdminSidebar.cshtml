@@ -1,0 +1,127 @@
+<nav class="admin-sidebar">
+    <div class="sidebar-header">
+        <div class="logo">
+            <i class="fas fa-shield-alt"></i>
+            <h2>HarmonySound</h2>
+            <span>Admin Panel</span>
+        </div>
+    </div>
+
+    <div class="sidebar-menu">
+        <a href="@Url.Action("Dashboard", "Admin")" class="menu-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Dashboard" ? "active" : "")">
+            <i class="fas fa-tachometer-alt"></i>
+            <span>Dashboard</span>
+        </a>
+        <a href="@Url.Action("Users", "Admin")" class="menu-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Users" ? "active" : "")">
+            <i class="fas fa-users"></i>
+            <span>Usuarios</span>
+        </a>
+        <a href="@Url.Action("Content", "Admin")" class="menu-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Content" ? "active" : "")">
+            <i class="fas fa-music"></i>
+            <span>Contenido</span>
+        </a>
+        <a href="@Url.Action("UserRoles", "Admin")" class="menu-item @(ViewContext.RouteData.Values["action"]?.ToString() == "UserRoles" ? "active" : "")">
+            <i class="fas fa-user-shield"></i>
+            <span>Roles</span>
+        </a>
+    </div>
+
+    <div class="sidebar-footer">
+        <form asp-action="Logout" asp-controller="Account" method="post">
+            <button type="submit" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Cerrar Sesión</span>
+            </button>
+        </form>
+    </div>
+</nav>
+
+<style>
+    .admin-sidebar {
+        width: 250px;
+        background: linear-gradient(180deg, #1a1a1a, #2a2a2a);
+        border-right: 1px solid #333;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
+
+    .sidebar-header {
+        padding: 2rem 1rem;
+        border-bottom: 1px solid #333;
+        text-align: center;
+    }
+
+    .logo i {
+        font-size: 2rem;
+        color: #ef4444;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .logo h2 {
+        margin: 0;
+        color: #fff;
+        font-size: 1.2rem;
+    }
+
+    .logo span {
+        color: #888;
+        font-size: 0.9rem;
+    }
+
+    .sidebar-menu {
+        flex: 1;
+        padding: 1rem 0;
+    }
+
+    .menu-item {
+        display: flex;
+        align-items: center;
+        padding: 1rem 1.5rem;
+        color: #ccc;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        border-left: 3px solid transparent;
+    }
+
+    .menu-item:hover, .menu-item.active {
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+        border-left-color: #ef4444;
+    }
+
+    .menu-item i {
+        margin-right: 1rem;
+        width: 20px;
+    }
+
+    .sidebar-footer {
+        padding: 1rem;
+        border-top: 1px solid #333;
+    }
+
+    .logout-btn {
+        width: 100%;
+        background: transparent;
+        border: 1px solid #333;
+        color: #ccc;
+        padding: 0.75rem;
+        border-radius: 6px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+
+    .logout-btn:hover {
+        background: #dc3545;
+        border-color: #dc3545;
+        color: #fff;
+    }
+
+    .logout-btn i {
+        margin-right: 0.5rem;
+    }
+</style>
