@@ -7,6 +7,6 @@
         public string Name { get; set; }
         public string Biography { get; set; }
         public string? ProfileImageUrl { get; set; }
-        public IFormFile? ProfileImageFile { get; set; } /
+        public IFormFile? ProfileImageFile { get; set; } 
     }
 }

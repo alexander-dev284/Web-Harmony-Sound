@@ -429,6 +429,55 @@
             box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
         }
 
+        .filter-select {
+            padding: 0.75rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid #444;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 0.95rem;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: #ef4444;
+            box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+        }
+
+        /* Estilos específicos para las opciones del select */
+        .filter-select option {
+            background: #1a1a1a;
+            color: #fff;
+            padding: 0.5rem;
+            border: none;
+        }
+
+        .filter-select option:hover {
+            background: #333;
+            color: #ef4444;
+        }
+
+        .filter-select option:checked {
+            background: #ef4444;
+            color: #fff;
+        }
+
+        /* Alternativa para mejor compatibilidad del dropdown */
+        .filter-select {
+            padding: 0.75rem 1rem;
+            background: #1a1a1a;
+            border: 1px solid #444;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 0.95rem;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 1rem;
+            padding-right: 2.5rem;
+        }
+
         .btn-primary {
             background: linear-gradient(135deg, #ef4444, #dc2626);
             color: #fff;
