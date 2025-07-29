@@ -1,5 +1,4 @@
-﻿/* wwwroot/css/artist.css */
-
+﻿
 body {
     background-color: #121212;
     color: white;
@@ -40,6 +39,6 @@ body {
 
 hr {
     border: none;
-    border-top: 1px solid #333; /* Gris oscuro */
+    border-top: 1px solid #333; 
     margin: 30px 0;
 }

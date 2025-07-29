@@ -675,66 +675,6 @@
         border: 1px solid rgba(220, 53, 69, 0.3);
     }
 
-    /* Responsive */
-    @@media (max-width: 768px) {
-        .hero-section {
-            padding: 2rem 1rem;
-        }
-
-        .artist-profile {
-            flex-direction: column;
-            text-align: center;
-            gap: 2rem;
-        }
-
-        .artist-name {
-            font-size: 2.5rem;
-        }
-
-        .dashboard-content {
-            padding: 0 1rem 4rem;
-        }
-
-        .quick-actions-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .management-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .stats-grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
-
-        .action-card {
-            padding: 1.5rem;
-        }
-
-        .card-icon {
-            width: 50px;
-            height: 50px;
-            font-size: 1.3rem;
-        }
-    }
-
-    @@media (max-width: 480px) {
-        .artist-name {
-            font-size: 2rem;
-        }
-
-        .stats-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .logout-section {
-            position: relative;
-            top: auto;
-            right: auto;
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-    }
 
     /* Ocultar elementos del layout principal */
     header, footer {
@@ -760,13 +700,13 @@
         }
 
         init() {
-            console.log('🎨 Inicializando Dashboard del Artista...');
+            console.log('Inicializando Dashboard del Artista...');
             
             this.setupAnimations();
             this.loadArtistStats();
             this.setupEventListeners();
             
-            console.log('✅ Dashboard del artista inicializado correctamente');
+            console.log('Dashboard del artista inicializado correctamente');
         }
 
         setupAnimations() {
@@ -808,13 +748,13 @@
         // Función para cargar estadísticas del artista
         async loadArtistStats() {
             try {
-                console.log('🔄 Cargando estadísticas del artista...');
+                console.log('Cargando estadísticas del artista...');
                 
                 const response = await fetch('/Artists/GetArtistStats');
                 if (response.ok) {
                     const stats = await response.json();
                     
-                    console.log('📊 Estadísticas recibidas:', stats);
+                    console.log('Estadísticas recibidas:', stats);
                     
                     // Actualizar los elementos con animación
                     this.updateStatWithAnimation('total-songs', stats.totalSongs);
@@ -822,13 +762,13 @@
                     this.updateStatWithAnimation('total-likes', stats.totalLikes);
                     this.updateStatText('last-upload', stats.lastUpload);
                     
-                    console.log('✅ Estadísticas actualizadas correctamente');
+                    console.log('Estadísticas actualizadas correctamente');
                 } else {
-                    console.error('❌ Error al cargar estadísticas:', response.status);
+                    console.error(' Error al cargar estadísticas:', response.status);
                     this.showErrorStats();
                 }
             } catch (error) {
-                console.error('❌ Error al cargar estadísticas:', error);
+                console.error(' Error al cargar estadísticas:', error);
                 this.showErrorStats();
             }
         }

@@ -2,7 +2,6 @@
 using HarmonySound.Models;
 using HarmonySound.MVC.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using System.Text;
@@ -45,7 +44,7 @@ namespace HarmonySound.MVC.Controllers
                 var viewModel = new SubscriptionViewModel
                 {
                     CurrentPlan = userPlan?.Plan,
-                    CurrentUserPlan = userPlan, // ✅ NUEVO
+                    CurrentUserPlan = userPlan,
                     PremiumPlans = premiumPlans
                 };
 
@@ -290,7 +289,7 @@ namespace HarmonySound.MVC.Controllers
                 var userPlanJson = await userPlanResponse.Content.ReadAsStringAsync();
                 var userPlan = JsonSerializer.Deserialize<UserPlan>(userPlanJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-                // ✅ VERIFICAR: Solo el propietario del plan puede gestionar invitaciones
+                // Solo el propietario del plan puede gestionar invitaciones
                 // Verificar si el usuario actual pagó por el plan o solo fue invitado
                 var isOwnerResponse = await _httpClient.GetAsync($"https://localhost:7120/api/UserPlans/is-plan-owner/{userId}");
                 bool isPlanOwner = false;
@@ -308,7 +307,7 @@ namespace HarmonySound.MVC.Controllers
                     return RedirectToAction("Index");
                 }
 
-                // ✅ CORREGIR: Obtener invitaciones con deserialización correcta
+                // Obtener invitaciones con deserialización correcta
                 List<InvitationDto> invitations = new List<InvitationDto>();
                 
                 var invitationsResponse = await _httpClient.GetAsync($"https://localhost:7120/api/PlanInvitations/sent/{userId}");
@@ -319,7 +318,7 @@ namespace HarmonySound.MVC.Controllers
                     invitations = JsonSerializer.Deserialize<List<InvitationDto>>(invitationsJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new List<InvitationDto>();
                 }
 
-                // ✅ CORREGIR: Contar correctamente las cuentas activas
+                // Contar correctamente las cuentas activas
                 var activeInvitationsCount = invitations.Count(i => i.Status == "Accepted") + 1; // +1 por el propietario del plan
                 ViewBag.ActiveInvitationsCount = activeInvitationsCount;
                 ViewBag.CanSendMoreInvitations = activeInvitationsCount < userPlan.Plan.AccountLimit;
@@ -346,7 +345,7 @@ namespace HarmonySound.MVC.Controllers
             {
                 int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
 
-                // ✅ VERIFICAR: Solo el propietario del plan puede enviar invitaciones
+                // Solo el propietario del plan puede enviar invitaciones
                 var isOwnerResponse = await _httpClient.GetAsync($"https://localhost:7120/api/UserPlans/is-plan-owner/{userId}");
                 
                 if (!isOwnerResponse.IsSuccessStatusCode)
@@ -469,7 +468,6 @@ namespace HarmonySound.MVC.Controllers
             return RedirectToAction("ManageInvitations");
         }
 
-        // Métodos CRUD existentes...
         public ActionResult Details(int id)
         {
             var data = Crud<Plan>.GetById(id);

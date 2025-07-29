@@ -2,7 +2,6 @@
 using HarmonySound.Models;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
-using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
 namespace HarmonySound.MVC
@@ -42,7 +41,7 @@ namespace HarmonySound.MVC
                 options.Limits.MaxRequestBodySize = 104857600; // 100 MB
             });
 
-            // Configuración de logging (se usa Serilog)
+            // Configuración de logging 
             builder.Logging.ClearProviders();  // Limpiar proveedores de logs predeterminados
             builder.Logging.AddSerilog();  // Usar Serilog para los logs
 
@@ -60,7 +59,7 @@ namespace HarmonySound.MVC
                 {
                     var identity = (System.Security.Claims.ClaimsIdentity)context.Principal.Identity;
 
-                    // Mapea cualquier claim "role" o "roles" a ClaimTypes.Role
+                    // Mapea cualquier claim "role" o "roles" 
                     var roleClaims = identity.FindAll("role").ToList();
                     foreach (var rc in roleClaims)
                     {
@@ -103,7 +102,7 @@ namespace HarmonySound.MVC
             // Inyectar HttpClient para hacer solicitudes a la API
             builder.Services.AddHttpClient(); // Esto permite usar HttpClient en tus controladores
 
-            // ✅ AGREGAR: MemoryCache para 2FA
+            // MemoryCache para 2FA
             builder.Services.AddMemoryCache();
 
             var app = builder.Build();

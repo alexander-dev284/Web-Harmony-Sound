@@ -16,7 +16,6 @@
 <body>
     <div class="auth-container">
         <div class="auth-card">
-            <!-- Icono de HarmonySound -->
             <div class="auth-logo">
                 <i class="fas fa-music"></i>
             </div>
@@ -74,7 +73,7 @@
                         <a href="@Url.Action("Register", "Account")">Regístrate aquí</a>
                     </p>
                     
-                    <!-- ✅ NUEVO: Enlace de recuperación de contraseña -->
+                    <!-- Enlace de recuperación de contraseña -->
                     <p class="forgot-password-link">
                         <a href="@Url.Action("ForgotPassword", "Account")">
                             <i class="fas fa-key me-1"></i>
@@ -313,7 +312,6 @@
             z-index: 2;
         }
 
-        /* ✅ NUEVO: Estilo específico para errores de cuenta suspendida */
         .validation-summary:contains("suspendida") {
             background: rgba(255, 149, 0, 0.1);
             border-color: rgba(255, 149, 0, 0.3);

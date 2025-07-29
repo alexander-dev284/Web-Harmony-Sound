@@ -25,7 +25,7 @@
         <div class="form-container">
             <form asp-action="Edit" method="post" class="edit-form">
                 @Html.AntiForgeryToken()
-                <!-- ✅ MODIFICADO: Solo enviar campos editables -->
+                <!-- Solo enviar campos editables -->
                 <input type="hidden" name="id" value="@Model.Id" />
 
                 <!-- Mostrar errores de validación -->

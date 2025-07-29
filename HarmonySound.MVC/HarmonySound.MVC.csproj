@@ -10,18 +10,22 @@
     <Compile Remove="Data\**" />
     <Compile Remove="Services\**" />
     <Compile Remove="Views\Client\**" />
+    <Compile Remove="Views\UserRoles\**" />
     <Compile Remove="wwwroot\media\**" />
     <Content Remove="Data\**" />
     <Content Remove="Services\**" />
     <Content Remove="Views\Client\**" />
+    <Content Remove="Views\UserRoles\**" />
     <Content Remove="wwwroot\media\**" />
     <EmbeddedResource Remove="Data\**" />
     <EmbeddedResource Remove="Services\**" />
     <EmbeddedResource Remove="Views\Client\**" />
+    <EmbeddedResource Remove="Views\UserRoles\**" />
     <EmbeddedResource Remove="wwwroot\media\**" />
     <None Remove="Data\**" />
     <None Remove="Services\**" />
     <None Remove="Views\Client\**" />
+    <None Remove="Views\UserRoles\**" />
     <None Remove="wwwroot\media\**" />
   </ItemGroup>
 
@@ -39,7 +43,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Views\UserRoles\" />
     <Folder Include="wwwroot\ads\" />
   </ItemGroup>
 

@@ -1,7 +1,7 @@
 ﻿@model HarmonySound.MVC.Models.ProfileEditViewModel
 
 <div class="edit-profile-container">
-    <!-- ✅ NUEVO: Botón de navegación al Home del Cliente -->
+    <!-- Botón de navegación al Home del Cliente -->
     <div class="navigation-bar">
         <a href="@Url.Action("Home", "Clients")" class="btn-home">
             <i class="fas fa-home me-2"></i>
@@ -128,7 +128,7 @@
         position: relative;
     }
 
-    /* ✅ NUEVO: Estilos para barra de navegación */
+    /*Estilos para barra de navegación */
     .navigation-bar {
         position: absolute;
         top: 0;
@@ -364,30 +364,7 @@
         transform: translateY(-2px);
     }
 
-    /* Responsive */
-    @@media (max-width: 768px) {
-        .edit-profile-container {
-            padding: 1rem;
-        }
-
-        .edit-profile-content {
-            padding: 1.5rem;
-        }
-
-        .edit-profile-title {
-            font-size: 1.5rem;
-        }
-
-        .form-actions {
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .btn {
-            min-width: 200px;
-        }
-    }
-
+    
     /* Ocultar elementos del layout principal */
     header, footer {
         display: none !important;

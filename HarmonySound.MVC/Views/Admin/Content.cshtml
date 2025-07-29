@@ -15,7 +15,6 @@
 </head>
 <body class="admin-body">
     <div class="admin-dashboard">
-        <!-- Sidebar -->
         <nav class="admin-sidebar">
             <div class="sidebar-header">
                 <div class="logo">
@@ -159,7 +158,7 @@
                                     </div>
                                 </div>
                                 
-                                <!-- ✅ ACTUALIZADO: Solo botón de eliminar -->
+                                <!--  Solo botón de eliminar -->
                                 <div class="content-actions">
                                     <button class="btn-content-action btn-danger" 
                                             onclick="deleteContent(@content.Id, '@content.Title', '@content.ArtistName')"
@@ -230,7 +229,6 @@
     </form>
 
     <style>
-        /* Reutilizar estilos base del admin */
         .admin-body {
             margin: 0;
             padding: 0;
@@ -359,7 +357,6 @@
             font-size: 1.1rem;
         }
 
-        /* Estadísticas de contenido */
         .content-stats {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -379,7 +376,6 @@
             font-weight: 600;
         }
 
-        /* Filtros (reutilizar estilos de Users) */
         .filters-section {
             margin-bottom: 2rem;
         }
@@ -443,7 +439,7 @@
             background: #777;
         }
 
-        /* Contenedor de contenido */
+
         .content-grid-container {
             background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
             border: 1px solid #333;
@@ -493,7 +489,6 @@
             background: #1ed760;
         }
 
-        /* Grid de contenido */
         .content-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -636,7 +631,6 @@
             align-items: center;
         }
 
-        /* ✅ ACTUALIZADO: Acciones de contenido centradas con solo el botón de eliminar */
         .content-actions {
             display: flex;
             justify-content: center;
@@ -666,7 +660,6 @@
             color: #fff;
         }
 
-        /* Estado vacío */
         .empty-content {
             text-align: center;
             padding: 4rem 2rem;
@@ -678,7 +671,6 @@
             margin-bottom: 1rem;
         }
 
-        /* Barra de acciones masivas */
         .bulk-actions-bar {
             position: fixed;
             bottom: 2rem;
@@ -733,7 +725,6 @@
             color: #fff;
         }
 
-        /* Modal (reutilizar estilos de Users) */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -973,7 +964,7 @@
             }
         }
 
-        // ✅ REMOVIDO: Funciones viewContentDetails y editContent eliminadas
+        // Funciones viewContentDetails y editContent eliminadas
 
         // Cerrar modal al hacer clic fuera
         document.addEventListener('click', function(e) {

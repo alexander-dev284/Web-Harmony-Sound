@@ -16,7 +16,6 @@
 <body>
     <div class="auth-container">
         <div class="auth-card">
-            <!-- Logo de HarmonySound -->
             <div class="auth-logo">
                 <i class="fas fa-music"></i>
             </div>
@@ -103,7 +102,7 @@
                         <a href="@Url.Action("Login", "Account")">Inicia sesión</a>
                     </p>
                     
-                    <!-- ✅ NUEVO: Enlace de recuperación de contraseña -->
+                    <!-- Enlace de recuperación de contraseña -->
                     <p class="forgot-password-link">
                         <a href="@Url.Action("ForgotPassword", "Account")">
                             <i class="fas fa-key me-1"></i>
@@ -237,10 +236,9 @@
             appearance: none;
             -webkit-appearance: none;
             -moz-appearance: none;
-            color: #000 !important; /* ✅ CAMBIO: Color negro para el texto del select */
+            color: #000 !important;
         }
 
-        /* ✅ NUEVO: Estilo específico para las opciones del select */
         .select-control option {
             color: #000 !important;
             background: #fff !important;

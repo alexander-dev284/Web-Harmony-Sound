@@ -43,24 +43,4 @@ namespace HarmonySound.MVC.Models
         public string UrlMedia { get; set; } = "";
     }
 
-    public class AdminReportViewModel
-    {
-        public int Id { get; set; }
-        public string Reason { get; set; } = "";
-        public string Description { get; set; } = "";
-        public string Status { get; set; } = "";
-        public DateTime ReportDate { get; set; }
-        public string ReporterName { get; set; } = "";
-        public string ContentTitle { get; set; } = "";
-    }
-
-    public class AdminPlanViewModel
-    {
-        public int Id { get; set; }
-        public string PlanName { get; set; } = "";
-        public string Description { get; set; } = "";
-        public decimal Price { get; set; }
-        public int AccountLimit { get; set; }
-        public int ActiveSubscriptions { get; set; }
-    }
 }

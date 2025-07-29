@@ -6,7 +6,7 @@
 
 <div class="music-library-container">
     <div class="library-header">
-        <!-- ✅ NUEVO: Botón de navegación al Home del Artista -->
+        <!--  Botón de navegación al Home del Artista -->
         <div class="navigation-bar">
             <a href="@Url.Action("Home", "Artists")" class="btn-home">
                 <i class="fas fa-home me-2"></i>
@@ -14,7 +14,7 @@
             </a>
         </div>
         
-        <!-- ✅ NUEVO: Botón de cerrar sesión mejorado -->
+        <!--  Botón de cerrar sesión mejorado -->
         <div class="logout-section">
             <form asp-action="Logout" asp-controller="Account" method="post" class="logout-form">
                 <button type="submit" class="btn-logout">
@@ -86,7 +86,7 @@
                             <button class="btn-menu" title="Más opciones" onclick="toggleDropdown(@content.Id)">
                                 <i class="fas fa-ellipsis-h"></i>
                             </button>
-                            <!-- ✅ NUEVO: Menú desplegable -->
+                            <!--  Menú desplegable -->
                             <div class="dropdown-menu" id="dropdown-@content.Id">
                                 <a href="@Url.Action("Details", "Artists", new { id = content.Id })" class="dropdown-item">
                                     <i class="fas fa-info-circle"></i>
@@ -96,7 +96,7 @@
                                     <i class="fas fa-edit"></i>
                                     Editar Canción
                                 </a>
-                                <!-- ✅ MODIFICADO: Botón de eliminar con modal -->
+                                <!--  Botón de eliminar con modal -->
                                 <button type="button" class="dropdown-item dropdown-delete" onclick="showDeleteModal(@content.Id, '@content.Title')">
                                     <i class="fas fa-trash-alt"></i>
                                     Eliminar Canción
@@ -124,7 +124,7 @@
     </div>
 </div>
 
-<!-- ✅ NUEVO: Modal de confirmación para eliminar -->
+<!-- Modal de confirmación para eliminar -->
 <div id="deleteModal" class="modal-overlay d-none">
     <div class="modal-container">
         <div class="modal-header">
@@ -210,7 +210,7 @@
 
         <!-- Controles adicionales -->
         <div class="extra-controls">
-            <!-- ❌ REMOVIDO: Botón de cola -->
+            <!-- REMOVIDO: Botón de cola -->
             <div class="volume-control">
                 <button class="control-btn" id="volume-btn" title="Volumen">
                     <i class="fas fa-volume-up"></i>
@@ -240,7 +240,7 @@
         margin: 0; padding: 0; padding-bottom: 90px; 
     }
 
-    /* ✅ NUEVO: Estilos para barra de navegación */
+    /*  Estilos para barra de navegación */
     .navigation-bar {
         position: absolute;
         top: 0;
@@ -272,7 +272,7 @@
         background: linear-gradient(135deg, #1db954, #1ed760);
     }
 
-    /* ✅ NUEVO: Estilos para botón de logout mejorado */
+    /* Estilos para botón de logout mejorado */
     .logout-section {
         position: absolute;
         top: 0;
@@ -365,7 +365,6 @@
     }
     .artist-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #b3b3b3 !important; }
 
-    /* ✅ ACCIONES SIMPLIFICADAS - SOLO REPRODUCIR */
     .song-actions { 
         grid-area: actions; display: flex; gap: 4px; justify-content: center; 
         opacity: 1 !important; visibility: visible !important; 
@@ -385,7 +384,6 @@
         font-variant-numeric: tabular-nums; text-align: right; 
     }
     
-    /* ✅ NUEVO: Menú desplegable */
     .song-menu { 
         grid-area: menu; opacity: 1 !important; visibility: visible !important; 
         position: relative;
@@ -452,7 +450,7 @@
         color: #dc3545 !important;
     }
 
-    /* ✅ NUEVO: Estilos del Modal */
+    /* Estilos del Modal */
     .modal-overlay {
         position: fixed;
         top: 0;
@@ -694,51 +692,6 @@
         cursor: pointer; left: 50%; 
     }
 
-    /* Responsive */
-    @@media (max-width: 768px) {
-        .player-container { grid-template-columns: 1fr 1fr; gap: 8px; }
-        .extra-controls { display: none; }
-        .song-item { grid-template-columns: 1fr 60px; grid-template-areas: "info actions"; }
-        .song-duration, .song-menu { display: none; }
-        .progress-section { max-width: 300px; } 
-        
-        .modal-container {
-            width: 95%;
-            margin: 1rem;
-        }
-        
-        .modal-actions {
-            flex-direction: column;
-        }
-        
-        .btn-modal {
-            width: 100%;
-        }
-    }
-
-    @@media (max-width: 480px) {
-        .custom-player { height: 80px; }
-        .now-playing { gap: 8px; }
-        .track-cover { width: 48px; height: 48px; }
-        .control-btn { width: 28px; height: 28px; }
-        .play-btn { width: 36px !important; height: 36px !important; }
-        
-        .logout-section {
-            position: relative;
-            top: auto;
-            right: auto;
-            margin-bottom: 1rem;
-            text-align: center;
-        }
-        
-        .navigation-bar {
-            position: relative;
-            top: auto;
-            left: auto;
-            text-align: center;
-            margin-bottom: 1rem;
-        }
-    }
 
     /* Ocultar elementos del layout */
     header, footer { display: none !important; }
@@ -764,8 +717,8 @@ class ArtistAudioPlayer {
         this.duration = 0;
         this.playlist = [];
         this.currentTrackIndex = 0;
-        this.isLooping = false; // ✅ NUEVO: Estado de bucle
-        this.isShuffling = false; // ✅ NUEVO: Estado de aleatorio
+        this.isLooping = false; 
+        this.isShuffling = false; 
         
         // Estados de interacción
         this.isProgressDragging = false;
@@ -784,16 +737,16 @@ class ArtistAudioPlayer {
         this.volumeControl = null;
         this.volumeFill = null;
         this.volumeHandle = null;
-        this.prevBtn = null; // ✅ NUEVO
-        this.nextBtn = null; // ✅ NUEVO
-        this.repeatBtn = null; // ✅ NUEVO
-        this.shuffleBtn = null; // ✅ NUEVO
+        this.prevBtn = null; 
+        this.nextBtn = null; 
+        this.repeatBtn = null; 
+        this.shuffleBtn = null; 
         
         this.init();
     }
     
     init() {
-        console.log('🎵 Inicializando reproductor para artistas con navegación y bucle...');
+        console.log(' Inicializando reproductor para artistas con navegación y bucle...');
         
         // Crear elemento de audio oculto
         this.audio = document.getElementById('hidden-audio');
@@ -817,7 +770,7 @@ class ArtistAudioPlayer {
         // Construir playlist
         this.buildPlaylist();
         
-        console.log('✅ Reproductor para artistas inicializado correctamente');
+        console.log(' Reproductor para artistas inicializado correctamente');
     }
     
     getElementReferences() {
@@ -834,13 +787,13 @@ class ArtistAudioPlayer {
         this.volumeFill = document.getElementById('volume-fill');
         this.volumeHandle = document.getElementById('volume-handle');
         
-        // ✅ NUEVO: Referencias a controles de navegación
+        // Referencias a controles de navegación
         this.prevBtn = document.getElementById('prev-btn');
         this.nextBtn = document.getElementById('next-btn');
         this.repeatBtn = document.getElementById('repeat-btn');
         this.shuffleBtn = document.getElementById('shuffle-btn');
         
-        console.log('🔗 Referencias obtenidas:', {
+        console.log(' Referencias obtenidas:', {
             playerElement: !!this.playerElement,
             playPauseBtn: !!this.playPauseBtn,
             prevBtn: !!this.prevBtn,
@@ -850,7 +803,7 @@ class ArtistAudioPlayer {
         });
     }
     
-    // ✅ NUEVO: Construir playlist de todas las canciones
+    //  Construir playlist de todas las canciones
     buildPlaylist() {
         this.playlist = [];
         const songItems = document.querySelectorAll('.song-item');
@@ -868,12 +821,12 @@ class ArtistAudioPlayer {
                     index: index
                 };
                 
-                console.log(`🎶 Canción ${index + 1}: ${trackData.title} - URL: ${trackData.url ? 'Válida' : 'Inválida'}`);
+                console.log(`Canción ${index + 1}: ${trackData.title} - URL: ${trackData.url ? 'Válida' : 'Inválida'}`);
                 this.playlist.push(trackData);
             }
         });
         
-        console.log(`✅ Playlist construida con ${this.playlist.length} canciones`);
+        console.log(` Playlist construida con ${this.playlist.length} canciones`);
     }
     
     setupEventListeners() {
@@ -883,7 +836,7 @@ class ArtistAudioPlayer {
             this.audio.addEventListener('timeupdate', () => this.onTimeUpdate());
             this.audio.addEventListener('ended', () => this.onTrackEnded());
             this.audio.addEventListener('error', (e) => this.onError(e));
-            this.audio.addEventListener('canplay', () => console.log('✅ Audio listo para reproducir'));
+            this.audio.addEventListener('canplay', () => console.log(' Audio listo para reproducir'));
         }
         
         // Botón play/pause
@@ -891,7 +844,7 @@ class ArtistAudioPlayer {
             this.playPauseBtn.addEventListener('click', () => this.togglePlayPause());
         }
         
-        // ✅ NUEVO: Controles de navegación
+        // Controles de navegación
         if (this.prevBtn) {
             this.prevBtn.addEventListener('click', () => this.playPrevious());
         }
@@ -918,7 +871,7 @@ class ArtistAudioPlayer {
             this.setupVolumeControl();
         }
         
-        // ✅ MODIFICADO: Botones de las canciones
+        // Botones de las canciones
         document.querySelectorAll('.play-in-player-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -996,7 +949,7 @@ class ArtistAudioPlayer {
         };
     }
     
-    // ✅ MODIFICADO: Encontrar índice de canción en playlist
+    //  Encontrar índice de canción en playlist
     findTrackInPlaylist(trackId) {
         return this.playlist.findIndex(track => track.id === trackId);
     }
@@ -1011,7 +964,7 @@ class ArtistAudioPlayer {
         
         this.currentTrack = track;
         
-        // ✅ NUEVO: Actualizar índice actual
+        // Actualizar índice actual
         this.currentTrackIndex = this.findTrackInPlaylist(track.id);
         console.log('📍 Índice de canción actual:', this.currentTrackIndex);
         
@@ -1032,20 +985,19 @@ class ArtistAudioPlayer {
             this.audio.src = track.url;
             await this.audio.load();
             
-            // ✅ REPRODUCIR AUTOMÁTICAMENTE
             await this.audio.play();
             this.isPlaying = true;
             this.updatePlayPauseButton();
             
-            console.log('🎉 Reproduciendo automáticamente:', track.title);
+            console.log(' Reproduciendo automáticamente:', track.title);
         } catch (error) {
             console.error('❌ Error al reproducir automáticamente:', error);
             // Si falla la reproducción automática, solo cargar la canción
-            console.log('🔄 Fallback: Canción cargada, esperando interacción del usuario');
+            console.log(' Fallback: Canción cargada, esperando interacción del usuario');
         }
     }
     
-    // ✅ NUEVO: Actualizar UI de lista de canciones
+    // Actualizar UI de lista de canciones
     updateTrackListUI(currentTrackId) {
         // Remover estado playing de todas las canciones
         document.querySelectorAll('.song-item').forEach(item => {
@@ -1056,14 +1008,14 @@ class ArtistAudioPlayer {
         const currentItem = document.querySelector(`[data-content-id="${currentTrackId}"]`);
         if (currentItem) {
             currentItem.classList.add('playing');
-            console.log('🎯 UI actualizada para canción:', currentTrackId);
+            console.log(' UI actualizada para canción:', currentTrackId);
         }
     }
     
-    // ✅ NUEVO: Reproducir canción anterior
+    // Reproducir canción anterior
     playPrevious() {
         if (this.playlist.length === 0) {
-            console.warn('⚠️ No hay playlist');
+            console.warn(' No hay playlist');
             return;
         }
         
@@ -1078,18 +1030,18 @@ class ArtistAudioPlayer {
         
         const prevTrack = this.playlist[prevIndex];
         if (prevTrack && prevTrack.url) {
-            console.log('⏮️ Reproduciendo canción anterior:', prevTrack.title);
+            console.log(' Reproduciendo canción anterior:', prevTrack.title);
             this.currentTrackIndex = prevIndex;
             this.playTrackAndStart(prevTrack);
         } else {
-            console.warn('⚠️ Canción anterior no válida');
+            console.warn(' Canción anterior no válida');
         }
     }
     
-    // ✅ NUEVO: Reproducir canción siguiente
+    //  Reproducir canción siguiente
     playNext() {
         if (this.playlist.length === 0) {
-            console.warn('⚠️ No hay playlist');
+            console.warn(' No hay playlist');
             return;
         }
         
@@ -1104,40 +1056,40 @@ class ArtistAudioPlayer {
         
         const nextTrack = this.playlist[nextIndex];
         if (nextTrack && nextTrack.url) {
-            console.log('⏭️ Reproduciendo canción siguiente:', nextTrack.title);
+            console.log(' Reproduciendo canción siguiente:', nextTrack.title);
             this.currentTrackIndex = nextIndex;
             this.playTrackAndStart(nextTrack);
         } else {
-            console.warn('⚠️ Canción siguiente no válida');
+            console.warn(' Canción siguiente no válida');
         }
     }
     
-    // ✅ NUEVO: Toggle modo repetir
+    //  Toggle modo repetir
     toggleRepeat() {
         this.isLooping = !this.isLooping;
         
         if (this.repeatBtn) {
             if (this.isLooping) {
                 this.repeatBtn.classList.add('active');
-                console.log('🔄 Modo bucle activado');
+                console.log(' Modo bucle activado');
             } else {
                 this.repeatBtn.classList.remove('active');
-                console.log('🔄 Modo bucle desactivado');
+                console.log(' Modo bucle desactivado');
             }
         }
     }
     
-    // ✅ NUEVO: Toggle modo aleatorio
+    // Toggle modo aleatorio
     toggleShuffle() {
         this.isShuffling = !this.isShuffling;
         
         if (this.shuffleBtn) {
             if (this.isShuffling) {
                 this.shuffleBtn.classList.add('active');
-                console.log('🔀 Modo aleatorio activado');
+                console.log(' Modo aleatorio activado');
             } else {
                 this.shuffleBtn.classList.remove('active');
-                console.log('🔀 Modo aleatorio desactivado');
+                console.log(' Modo aleatorio desactivado');
             }
         }
     }
@@ -1149,15 +1101,15 @@ class ArtistAudioPlayer {
             if (this.audio.paused) {
                 await this.audio.play();
                 this.isPlaying = true;
-                console.log('▶️ Reproducción reanudada');
+                console.log(' Reproducción reanudada');
             } else {
                 this.audio.pause();
                 this.isPlaying = false;
-                console.log('⏸️ Reproducción pausada');
+                console.log(' Reproducción pausada');
             }
             this.updatePlayPauseButton();
         } catch (error) {
-            console.error('❌ Error al cambiar estado de reproducción:', error);
+            console.error(' Error al cambiar estado de reproducción:', error);
         }
     }
     
@@ -1224,7 +1176,7 @@ class ArtistAudioPlayer {
     onLoadedMetadata() {
         this.duration = this.audio.duration;
         this.updateTimeDisplay();
-        console.log('📊 Metadatos cargados - Duración:', this.formatTime(this.duration));
+        console.log(' Metadatos cargados - Duración:', this.formatTime(this.duration));
     }
     
     onTimeUpdate() {
@@ -1267,7 +1219,7 @@ class ArtistAudioPlayer {
         return `${mins}:${secs.toString().padStart(2, '0')}`;
     }
     
-    // ✅ MODIFICADO: Manejar fin de canción con bucle
+    // Manejar fin de canción con bucle
     onTrackEnded() {
         console.log('🏁 Canción terminada');
         this.isPlaying = false;
@@ -1275,13 +1227,13 @@ class ArtistAudioPlayer {
         
         if (this.isLooping) {
             // Si está en modo bucle, repetir la misma canción
-            console.log('🔄 Repitiendo canción en bucle');
+            console.log(' Repitiendo canción en bucle');
             setTimeout(() => {
                 this.playTrackAndStart(this.currentTrack);
             }, 500);
         } else {
             // Si no está en bucle, reproducir la siguiente canción
-            console.log('⏭️ Reproduciendo siguiente canción automáticamente');
+            console.log(' Reproduciendo siguiente canción automáticamente');
             setTimeout(() => {
                 this.playNext();
             }, 1000);
@@ -1289,8 +1241,8 @@ class ArtistAudioPlayer {
     }
     
     onError(e) {
-        console.error('❌ Error en audio:', e);
-        console.error('🔗 URL que causó el error:', this.audio?.src);
+        console.error(' Error en audio:', e);
+        console.error(' URL que causó el error:', this.audio?.src);
         
         // Mostrar información del error en la UI
         if (this.trackTitle) {
@@ -1302,7 +1254,7 @@ class ArtistAudioPlayer {
     }
 }
 
-// ✅ FUNCIONES PARA EL MENÚ DESPLEGABLE (sin cambios)
+
 function toggleDropdown(contentId) {
     // Cerrar otros dropdowns
     document.querySelectorAll('.dropdown-menu').forEach(menu => {
@@ -1326,7 +1278,6 @@ function toggleDropdown(contentId) {
     }, 100);
 }
 
-// ✅ FUNCIONES DEL MODAL DE ELIMINACIÓN (sin cambios)
 let contentIdToDelete = null;
 
 function showDeleteModal(contentId, songTitle) {
@@ -1367,14 +1318,12 @@ document.addEventListener('keydown', function(e) {
     }
 });
 
-// ✅ INICIALIZACIÓN
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🎵 === INICIALIZANDO REPRODUCTOR DE ARTISTAS ===');
+    console.log('=== INICIALIZANDO REPRODUCTOR DE ARTISTAS ===');
     window.artistPlayer = new ArtistAudioPlayer();
     
-    console.log('✅ Reproductor de artistas inicializado completamente');
+    console.log('Reproductor de artistas inicializado completamente');
     
-    // ✅ FUNCIÓN DE DEBUGGING
     window.testControls = function() {
         console.log('🧪 Testing controles del reproductor...');
         console.log('Playlist:', window.artistPlayer.playlist.length, 'canciones');

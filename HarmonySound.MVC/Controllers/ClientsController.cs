@@ -1,9 +1,7 @@
-﻿using HarmonySound.API.Consumer;
-using HarmonySound.Models;
+﻿using HarmonySound.Models;
 using HarmonySound.MVC.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Net.Http;
 using System.Security.Claims;
 using System.Text.Json;
 
@@ -12,7 +10,7 @@ namespace HarmonySound.MVC.Controllers
     [Authorize(Roles = "client")]
     public class ClientsController : Controller
     {
-        // ✅ AGREGAR: Campo para la URL base de la API
+        // Campo para la URL base de la API
         private readonly string _apiBaseUrl = "https://localhost:7120";
         private readonly HttpClient _httpClient;
 
@@ -29,7 +27,7 @@ namespace HarmonySound.MVC.Controllers
                 int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
                 ViewBag.UserId = userId;
 
-                // ✅ AGREGAR: Verificar estado de suscripción
+                // Verificar estado de suscripción
                 var userPlanResponse = await _httpClient.GetAsync($"https://localhost:7120/api/UserPlans/user/{userId}");
                 if (userPlanResponse.IsSuccessStatusCode)
                 {
@@ -166,7 +164,7 @@ namespace HarmonySound.MVC.Controllers
             
             var model = new SearchResultsViewModel { Query = query };
 
-            // ✅ AGREGAR: Verificar estado de suscripción
+            // Verificar estado de suscripción
             var userPlanResponse = await _httpClient.GetAsync($"https://localhost:7120/api/UserPlans/user/{userId}");
             if (userPlanResponse.IsSuccessStatusCode)
             {
@@ -456,7 +454,7 @@ namespace HarmonySound.MVC.Controllers
         {
             try
             {
-                // ✅ CORRECCIÓN: URLs apuntando al proyecto API (puerto 7120)
+                // URLs apuntando al proyecto API (puerto 7120)
                 var ads = new[]
                 {
                     new { url = "https://localhost:7120/ads/ad1.mp3", duration = 30 },
@@ -467,15 +465,15 @@ namespace HarmonySound.MVC.Controllers
                 var random = new Random();
                 var selectedAd = ads[random.Next(ads.Length)];
                 
-                Console.WriteLine($"📢 Anuncio seleccionado: {selectedAd.url} ({selectedAd.duration}s)");
+                Console.WriteLine($"Anuncio seleccionado: {selectedAd.url} ({selectedAd.duration}s)");
                 
                 return Json(selectedAd);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Error al obtener anuncio: {ex.Message}");
+                Console.WriteLine($"Error al obtener anuncio: {ex.Message}");
                 
-                // ✅ FALLBACK: Anuncio silencioso
+                // Anuncio silencioso
                 return Json(new { 
                     url = "data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmMbBDuX3ixOQBNH", 
                     duration = 5 
@@ -514,7 +512,6 @@ namespace HarmonySound.MVC.Controllers
             return RedirectToAction("Index", "Plans");
         }
 
-        // ✅ MÉTODOS PARA LIKES CORREGIDOS
         [HttpGet]
         public async Task<IActionResult> GetUserLikes()
         {
@@ -537,9 +534,6 @@ namespace HarmonySound.MVC.Controllers
                 return Json(new List<int>());
             }
         }
-
-        // Replace all usages of 'FormData' with 'MultipartFormDataContent' for HTTP form data in C#
-        // Fix in LikeContent and UnlikeContent methods:
 
         [HttpPost]
         public async Task<IActionResult> LikeContent(int contentId, int userId)

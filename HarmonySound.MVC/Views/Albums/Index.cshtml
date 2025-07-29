@@ -6,7 +6,7 @@
 
 <div class="albums-container">
     <div class="albums-header">
-        <!-- ✅ NUEVO: Botón de navegación al Home del Artista -->
+        <!-- Botón de navegación al Home del Artista -->
         <div class="navigation-bar">
             <a href="@Url.Action("Home", "Artists")" class="btn-home">
                 <i class="fas fa-home me-2"></i>
@@ -37,7 +37,7 @@
                     <div class="album-cover">
                         <a href="@Url.Action("Details", "Albums", new { id = album.Id })" class="cover-link">
                             <div class="cover-placeholder">
-                                <!-- ✅ ACTUALIZADO: Mostrar imagen si existe -->
+                                <!-- Mostrar imagen si existe -->
                                 @if (!string.IsNullOrEmpty(album.ImageUrl))
                                 {
                                     <img src="@album.ImageUrl" alt="@album.Title" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;" />
@@ -168,7 +168,6 @@
         padding-top: 3rem;
     }
 
-    /* ✅ NUEVO: Estilos para barra de navegación */
     .navigation-bar {
         position: absolute;
         top: 0;
@@ -462,50 +461,6 @@
         max-width: 400px;
     }
 
-    /* Responsive Design */
-    @@media (max-width: 768px) {
-        .albums-container {
-            padding: 1rem;
-        }
-
-        .albums-title {
-            font-size: 2rem;
-        }
-
-        .albums-grid {
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .album-card {
-            padding: 1rem;
-        }
-
-        .album-title {
-            font-size: 1.2rem;
-        }
-
-        .play-album-btn {
-            width: 50px;
-            height: 50px;
-            font-size: 1.2rem;
-        }
-    }
-
-    @@media (max-width: 480px) {
-        .albums-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .header-actions {
-            justify-content: center;
-        }
-
-        .btn-create {
-            padding: 10px 20px;
-            font-size: 0.9rem;
-        }
-    }
 
     /* Ocultar elementos del layout principal */
     header, footer {

@@ -1,13 +1,8 @@
-﻿using HarmonySound.API.Consumer;
-using HarmonySound.API.DTOs; // Importa el namespace de los DTOs
+﻿using HarmonySound.API.DTOs;
 using HarmonySound.Models;
-using HarmonySound.MVC.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace HarmonySound.MVC.Controllers
 {
@@ -40,7 +35,7 @@ namespace HarmonySound.MVC.Controllers
             var json = await response.Content.ReadAsStringAsync();
             var album = System.Text.Json.JsonSerializer.Deserialize<AlbumDto>(json, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             
-            // ✅ DEBUGGING: Verificar las URLs que llegan
+            // Verificar las URLs que llegan
             if (album?.Contents != null)
             {
                 System.Diagnostics.Debug.WriteLine($"=== Álbum '{album.Title}' con {album.Contents.Count} canciones ===");
@@ -52,7 +47,7 @@ namespace HarmonySound.MVC.Controllers
             }
             else
             {
-                System.Diagnostics.Debug.WriteLine("⚠️ Álbum sin contenidos");
+                System.Diagnostics.Debug.WriteLine("Álbum sin contenidos");
             }
             
             return View(album);
@@ -75,15 +70,10 @@ namespace HarmonySound.MVC.Controllers
             // Asigna el ArtistId del usuario autenticado
             model.ArtistId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
 
-            // ✅ CORRECCIÓN: No necesitas asignar imageFile al modelo
-            // La línea model.ImageFile = imageFile; debe eliminarse
-
-            // ✅ CREAR formulario multipart
             using var content = new MultipartFormDataContent();
             content.Add(new StringContent(model.Title), "Title");
             content.Add(new StringContent(model.ArtistId.ToString()), "ArtistId");
 
-            // ✅ USAR el parámetro imageFile directamente
             if (imageFile != null && imageFile.Length > 0)
             {
                 var fileContent = new StreamContent(imageFile.OpenReadStream());
@@ -112,7 +102,7 @@ namespace HarmonySound.MVC.Controllers
 
             int artistId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier).Value);
             var allSongs = await GetAllSongsForArtist(artistId);
-            ViewBag.AllSongs = allSongs; // ✅ Ahora será List<ContentDto> con UrlMedia
+            ViewBag.AllSongs = allSongs; 
 
             return View(album);
         }
@@ -124,7 +114,7 @@ namespace HarmonySound.MVC.Controllers
         {
             try
             {
-                // ✅ CORREGIDO: Usar MultipartFormDataContent para el PUT
+                // Usar MultipartFormDataContent para el PUT
                 using var content = new MultipartFormDataContent();
                 content.Add(new StringContent(model.Title), "Title");
                 content.Add(new StringContent(int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value).ToString()), "ArtistId");
@@ -134,12 +124,12 @@ namespace HarmonySound.MVC.Controllers
                 if (!response.IsSuccessStatusCode)
                 {
                     var errorContent = await response.Content.ReadAsStringAsync();
-                    Console.WriteLine($"❌ Error en PUT álbum: {response.StatusCode} - {errorContent}");
+                    Console.WriteLine($"Error en PUT álbum: {response.StatusCode} - {errorContent}");
                     throw new Exception($"No se pudo actualizar el álbum: {response.StatusCode}");
                 }
 
-                // ✅ DEPURACIÓN: Verificar qué canciones se están enviando
-                Console.WriteLine($"🎵 Canciones seleccionadas: [{string.Join(", ", selectedSongIds ?? new List<int>())}]");
+                // Verificar qué canciones se están enviando
+                Console.WriteLine($"Canciones seleccionadas: [{string.Join(", ", selectedSongIds ?? new List<int>())}]");
 
                 // Actualizar las canciones del álbum usando la API
                 var songsJson = System.Text.Json.JsonSerializer.Serialize(selectedSongIds ?? new List<int>());
@@ -149,16 +139,16 @@ namespace HarmonySound.MVC.Controllers
                 if (!songsResponse.IsSuccessStatusCode)
                 {
                     var songErrorContent = await songsResponse.Content.ReadAsStringAsync();
-                    Console.WriteLine($"❌ Error en UpdateSongs: {songsResponse.StatusCode} - {songErrorContent}");
+                    Console.WriteLine($"Error en UpdateSongs: {songsResponse.StatusCode} - {songErrorContent}");
                     throw new Exception($"No se pudo actualizar las canciones del álbum: {songsResponse.StatusCode}");
                 }
 
-                Console.WriteLine("✅ Álbum actualizado correctamente");
+                Console.WriteLine("Álbum actualizado correctamente");
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Excepción en Edit: {ex.Message}");
+                Console.WriteLine($"Excepción en Edit: {ex.Message}");
                 
                 // Recargar datos para mostrar la vista con error
                 int artistId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
@@ -188,18 +178,18 @@ namespace HarmonySound.MVC.Controllers
             var json = await response.Content.ReadAsStringAsync();
             var allSongs = System.Text.Json.JsonSerializer.Deserialize<List<Content>>(json, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             
-            // ✅ CONVERTIR Content a ContentDto incluyendo UrlMedia
+            // Content a ContentDto incluyendo UrlMedia
             var contentDtos = allSongs.Where(c => c.ArtistId == artistId)
                 .Select(c => new ContentDto
                 {
                     Id = c.Id,
                     Title = c.Title,
                     Type = c.Type,
-                    UrlMedia = c.UrlMedia, // ✅ INCLUIR UrlMedia
+                    UrlMedia = c.UrlMedia, 
                     Duration = c.Duration,
                     UploadDate = c.UploadDate,
                     ArtistId = c.ArtistId,
-                    ArtistName = null, // Se puede llenar si necesitas
+                    ArtistName = null,
                     AlbumTitle = null
                 }).ToList();
             
@@ -232,25 +222,25 @@ namespace HarmonySound.MVC.Controllers
         {
             try
             {
-                Console.WriteLine($"🗑️ Intentando eliminar álbum ID: {id}");
+                Console.WriteLine($"Intentando eliminar álbum ID: {id}");
                 
                 var response = await _httpClient.DeleteAsync($"https://localhost:7120/api/Albums/{id}");
                 
                 if (response.IsSuccessStatusCode)
                 {
-                    Console.WriteLine($"✅ Álbum {id} eliminado correctamente");
+                    Console.WriteLine($"Álbum {id} eliminado correctamente");
                     TempData["Success"] = "Álbum eliminado correctamente.";
                 }
                 else
                 {
                     var error = await response.Content.ReadAsStringAsync();
-                    Console.WriteLine($"❌ Error al eliminar álbum: {response.StatusCode} - {error}");
+                    Console.WriteLine($"Error al eliminar álbum: {response.StatusCode} - {error}");
                     TempData["Error"] = "Error al eliminar el álbum.";
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Excepción al eliminar álbum: {ex.Message}");
+                Console.WriteLine($"Excepción al eliminar álbum: {ex.Message}");
                 TempData["Error"] = $"Error al eliminar el álbum: {ex.Message}";
             }
             

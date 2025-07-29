@@ -18,7 +18,7 @@
         <div class="album-hero">
             <div class="album-artwork">
                 <div class="artwork-placeholder">
-                    <!-- ✅ ACTUALIZADO: Mostrar imagen si existe -->
+                    <!-- Mostrar imagen si existe -->
                     @if (!string.IsNullOrEmpty(Model.ImageUrl))
                     {
                         <img src="@Model.ImageUrl" alt="@Model.Title" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;" />
@@ -376,7 +376,6 @@
         background: linear-gradient(135deg, #1db954, #1ed760);
     }
 
-    /* Hero del álbum */
     .album-hero {
         display: flex;
         align-items: flex-end;
@@ -742,7 +741,6 @@
         color: #fff;
     }
 
-    /* Estado vacío */
     .empty-tracks {
         display: flex;
         flex-direction: column;
@@ -772,7 +770,6 @@
         max-width: 400px;
     }
 
-    /* Reproductor personalizado */
     .custom-player {
         position: fixed;
         bottom: 0;
@@ -798,7 +795,6 @@
         gap: 16px;
     }
 
-    /* Información de la pista en el reproductor */
     .now-playing {
         display: flex;
         align-items: center;
@@ -849,7 +845,6 @@
         margin-bottom: 0;
     }
 
-    /* Controles del reproductor */
     .player-controls {
         display: flex;
         flex-direction: column;
@@ -906,7 +901,6 @@
         transform: scale(1.05) !important;
     }
 
-    /* Barra de progreso */
     .progress-section {
         display: flex;
         align-items: center;
@@ -1244,42 +1238,6 @@
             box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
         }
 
-    /* Responsive */
-    @@media (max-width: 768px) {
-        .player-container {
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-        }
-
-        .extra-controls {
-            display: none;
-        }
-    }
-
-    @@media (max-width: 480px) {
-        .custom-player {
-            height: 80px;
-        }
-
-        .now-playing {
-            gap: 8px;
-        }
-
-        .track-cover {
-            width: 48px;
-            height: 48px;
-        }
-
-        .control-btn {
-            width: 28px;
-            height: 28px;
-        }
-
-        .control-btn.play-btn {
-            width: 36px !important;
-            height: 36px !important;
-        }
-    }
 
     /* FontAwesome */
     .fas {
@@ -1659,8 +1617,8 @@ class AlbumDetailsPlayer {
     }
     
     onError(e) {
-        console.error('❌ Error en audio:', e);
-        console.error('🔗 URL que causó el error:', this.audio?.src);
+        console.error('Error en audio:', e);
+        console.error('URL que causó el error:', this.audio?.src);
         
         if (this.trackTitle) {
             this.trackTitle.textContent = 'Error al cargar audio';
@@ -1670,19 +1628,17 @@ class AlbumDetailsPlayer {
         }
     }
     
-    // ✅ RESTO DE MÉTODOS EXISTENTES:
-    
     toggleShuffle() {
         this.isShuffling = !this.isShuffling;
         
         if (this.shuffleBtn) {
             if (this.isShuffling) {
                 this.shuffleBtn.classList.add('active');
-                console.log('🔀 Modo aleatorio activado');
+                console.log('Modo aleatorio activado');
                 this.createShuffledPlaylist();
             } else {
                 this.shuffleBtn.classList.remove('active');
-                console.log('🔀 Modo aleatorio desactivado');
+                console.log('Modo aleatorio desactivado');
                 this.restoreOriginalPlaylist();
             }
         }
@@ -1694,10 +1650,10 @@ class AlbumDetailsPlayer {
         if (this.repeatBtn) {
             if (this.isLooping) {
                 this.repeatBtn.classList.add('active');
-                console.log('🔄 Modo bucle activado');
+                console.log('Modo bucle activado');
             } else {
                 this.repeatBtn.classList.remove('active');
-                console.log('🔄 Modo bucle desactivado');
+                console.log('Modo bucle desactivado');
             }
         }
     }
@@ -1743,19 +1699,19 @@ class AlbumDetailsPlayer {
                 this.currentTrackIndex = this.playlist.indexOf(firstValidTrack);
                 this.playTrackAndStart(firstValidTrack);
             } else {
-                alert('❌ Error: No hay canciones con URLs válidas en este álbum.');
+                alert('Error: No hay canciones con URLs válidas en este álbum.');
             }
         }
     }
     
     async playTrackAndStart(track) {
         if (!track || !track.url || track.url.trim() === '' || track.url === 'null') {
-            console.error('❌ Track inválido:', track);
-            alert(`❌ Error: La canción "${track.title}" no tiene una URL válida.`);
+            console.error('Track inválido:', track);
+            alert(`Error: La canción "${track.title}" no tiene una URL válida.`);
             return;
         }
         
-        console.log('🎵 Iniciando reproducción:', track.title);
+        console.log('Iniciando reproducción:', track.title);
         this.currentTrack = track;
         
         this.currentTrackIndex = this.findTrackInPlaylist(track.id);
@@ -1765,7 +1721,7 @@ class AlbumDetailsPlayer {
         
         if (this.playerElement) {
             this.playerElement.classList.remove('d-none');
-            console.log('🎵 Reproductor mostrado');
+            console.log('Reproductor mostrado');
         }
         
         this.updateTrackListUI(track.id);
@@ -1776,7 +1732,7 @@ class AlbumDetailsPlayer {
             await this.audio.play();
             this.isPlaying = true;
             this.updatePlayPauseButton();
-            console.log('✅ Reproduciendo:', track.title);
+            console.log('Reproduciendo:', track.title);
         } catch (error) {
             console.error('❌ Error al reproducir:', error);
             this.isPlaying = false;
@@ -1835,17 +1791,17 @@ class AlbumDetailsPlayer {
     }
     
     onTrackEnded() {
-        console.log('🏁 Canción terminada');
+        console.log('Canción terminada');
         this.isPlaying = false;
         this.updatePlayPauseButton();
         
         if (this.isLooping) {
-            console.log('🔄 Repitiendo canción en bucle');
+            console.log('Repitiendo canción en bucle');
             setTimeout(() => {
                 this.playTrackAndStart(this.currentTrack);
             }, 500);
         } else {
-            console.log('⏭️ Reproduciendo siguiente canción');
+            console.log('Reproduciendo siguiente canción');
             setTimeout(() => {
                 this.playNext();
             }, 1000);
@@ -1873,7 +1829,7 @@ let currentOpenMenu = null;
 let albumIdForRemoval = null;
 let trackIdForRemoval = null;
 
-// ✅ NUEVO: Función para mostrar/ocultar menú de canción
+// Función para mostrar/ocultar menú de canción
 function toggleTrackMenu(trackId) {
     const menu = document.getElementById(`trackMenu-${trackId}`);
     
@@ -1892,7 +1848,7 @@ function toggleTrackMenu(trackId) {
     }
 }
 
-// ✅ NUEVO: Función para eliminar canción del álbum
+// Función para eliminar canción del álbum
 function removeTrackFromAlbum(albumId, trackId, trackTitle) {
     albumIdForRemoval = albumId;
     trackIdForRemoval = trackId;
@@ -1907,14 +1863,14 @@ function removeTrackFromAlbum(albumId, trackId, trackTitle) {
     }
 }
 
-// ✅ NUEVO: Ocultar modal de eliminar canción
+// Ocultar modal de eliminar canción
 function hideRemoveTrackModal() {
     document.getElementById('removeTrackModal').classList.add('d-none');
     albumIdForRemoval = null;
     trackIdForRemoval = null;
 }
 
-// ✅ NUEVO: Confirmar eliminación de canción
+// Confirmar eliminación de canción
 function confirmRemoveTrack() {
     if (albumIdForRemoval && trackIdForRemoval) {
         document.getElementById('albumIdForTrackRemoval').value = albumIdForRemoval;
@@ -1939,10 +1895,9 @@ document.addEventListener('keydown', function(e) {
     }
 });
 
-// ✅ INICIALIZACIÓN COMPLETA
 document.addEventListener('DOMContentLoaded', () => {
     window.detailsPlayer = new AlbumDetailsPlayer();
-    console.log('✅ Vista de detalles cargada correctamente');
+    console.log('Vista de detalles cargada correctamente');
 });
 
     function showDeleteAlbumModal(albumId, albumTitle) {

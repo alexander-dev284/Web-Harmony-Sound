@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace HarmonySound.MVC.Models
 {
@@ -29,7 +28,6 @@ namespace HarmonySound.MVC.Models
         [Display(Name = "Rol")]
         public string Role { get; set; }
 
-        // NO debe tener [Required]
         public IEnumerable<string> Roles { get; set; }
     }
 }

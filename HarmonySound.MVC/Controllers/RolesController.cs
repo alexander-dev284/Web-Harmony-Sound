@@ -1,6 +1,5 @@
 ﻿using HarmonySound.API.Consumer;
 using HarmonySound.Models;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HarmonySound.MVC.Controllers

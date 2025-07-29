@@ -13,14 +13,14 @@ namespace HarmonySound.MVC.Models
         [Display(Name = "Clave secreta")]
         public string SecretKey { get; set; } = string.Empty;
 
-        // ✅ OPCIONAL: Propiedades adicionales para mejorar UX
+        // Propiedades adicionales para mejorar UX
         [Display(Name = "Email del administrador")]
         public string? AdminEmail { get; set; }
 
         [Display(Name = "Tiempo de expiración")]
         public DateTime? ExpirationTime { get; set; }
 
-        // ✅ OPCIONAL: Para mostrar tiempo restante
+        // Para mostrar tiempo restante
         public int RemainingMinutes => ExpirationTime.HasValue 
             ? Math.Max(0, (int)(ExpirationTime.Value - DateTime.UtcNow).TotalMinutes)
             : 5; // 5 minutos por defecto

@@ -6,7 +6,7 @@
 
 <div class="music-library-container">
     <div class="library-header">
-        <!-- ✅ NUEVO: Botón de cerrar sesión -->
+        <!--  Botón de cerrar sesión -->
         <div class="logout-section">
             <form asp-action="Logout" asp-controller="Account" method="post" class="logout-form">
                 <button type="submit" class="btn-logout">
@@ -695,7 +695,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
 <script>
-    // ✅ REPRODUCTOR HOME - VERSIÓN CORREGIDA Y FUNCIONAL
+    
     class HomeAudioPlayer {
         constructor() {
             this.audio = null;
@@ -745,41 +745,41 @@
         }
 
         async init() {
-            console.log('🎵 === INICIALIZANDO REPRODUCTOR HOME ===');
+            console.log(' === INICIALIZANDO REPRODUCTOR HOME ===');
 
             try {
-                // 1. Crear elemento de audio
+                //Crear elemento de audio
                 this.createAudioElement();
 
-                // 2. Obtener referencias DOM
+                //  Obtener referencias DOM
                 this.getElementReferences();
 
-                // 3. Configurar event listeners
+                //  Configurar event listeners
                 this.setupEventListeners();
 
-                // 4. Configurar volumen inicial
+                //  Configurar volumen inicial
                 this.setVolume(this.volume);
 
-                // 5. Construir playlist
+                //  Construir playlist
                 this.buildPlaylist();
 
-                // 6. Verificar estado premium (async)
+                //  Verificar estado premium (async)
                 await this.checkPremiumStatus();
 
-                // 7. Cargar estados de likes (async)
+                //  Cargar estados de likes (async)
                 await this.loadLikeStates();
 
-                console.log('✅ Reproductor Home inicializado correctamente');
+                console.log(' Reproductor Home inicializado correctamente');
 
             } catch (error) {
-                console.error('❌ Error en inicialización:', error);
+                console.error(' Error en inicialización:', error);
             }
         }
 
         createAudioElement() {
             this.audio = document.getElementById('hidden-audio');
             if (!this.audio) {
-                console.log('🔧 Creando elemento de audio...');
+                console.log(' Creando elemento de audio...');
                 this.audio = document.createElement('audio');
                 this.audio.id = 'hidden-audio';
                 this.audio.style.display = 'none';
@@ -787,7 +787,7 @@
                 this.audio.crossOrigin = 'anonymous';
                 document.body.appendChild(this.audio);
             }
-            console.log('✅ Elemento de audio configurado');
+            console.log('Elemento de audio configurado');
         }
 
         getElementReferences() {
@@ -832,7 +832,7 @@
                 }
             });
 
-            console.log(`✅ Playlist construida: ${this.playlist.length} canciones`);
+            console.log(` Playlist construida: ${this.playlist.length} canciones`);
         }
 
         setupEventListeners() {
@@ -842,10 +842,10 @@
                 this.audio.addEventListener('timeupdate', () => this.onTimeUpdate());
                 this.audio.addEventListener('ended', () => this.onTrackEnded());
                 this.audio.addEventListener('error', (e) => this.onError(e));
-                this.audio.addEventListener('canplay', () => console.log('🟢 Audio: canplay'));
-                this.audio.addEventListener('loadstart', () => console.log('🔵 Audio: loadstart'));
-                this.audio.addEventListener('play', () => console.log('▶️ Audio: play event'));
-                this.audio.addEventListener('pause', () => console.log('⏸️ Audio: pause event'));
+                this.audio.addEventListener('canplay', () => console.log(' Audio: canplay'));
+                this.audio.addEventListener('loadstart', () => console.log(' Audio: loadstart'));
+                this.audio.addEventListener('play', () => console.log(' Audio: play event'));
+                this.audio.addEventListener('pause', () => console.log(' Audio: pause event'));
             }
 
             // Control buttons
@@ -878,44 +878,43 @@
                 this.setupVolumeControl();
             }
 
-            // ✅ CRÍTICO: Event listeners para botones de reproducir
             this.setupPlayButtons();
             this.setupLikeButtons();
             this.setupPlayerHeartButton();
 
-            console.log('✅ Event listeners configurados');
+            console.log(' Event listeners configurados');
         }
 
-        // ✅ MÉTODO CRÍTICO: Configurar botones de reproducir
+        // Configurar botones de reproducir
         setupPlayButtons() {
             const playButtons = document.querySelectorAll('.play-in-player-btn');
-            console.log(`🎵 Configurando ${playButtons.length} botones de reproducir`);
+            console.log(` Configurando ${playButtons.length} botones de reproducir`);
 
             playButtons.forEach((btn, index) => {
                 btn.addEventListener('click', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
 
-                    console.log(`🎵 CLICK en botón ${index + 1}`);
+                    console.log(` CLICK en botón ${index + 1}`);
 
                     const track = this.extractTrackData(btn);
-                    console.log('🎵 Datos extraídos:', track);
+                    console.log(' Datos extraídos:', track);
 
-                    // ✅ VALIDACIÓN MEJORADA DE URL
+                 
                     if (!track.url || track.url.trim() === '' || track.url === 'null' || track.url === 'undefined') {
-                        console.error('❌ URL inválida:', track.url);
+                        console.error(' URL inválida:', track.url);
                         this.showToast('La canción no tiene una URL válida para reproducir', 'error');
                         return;
                     }
 
-                    // ✅ VALIDACIÓN DE URL HTTP/HTTPS
+                   
                     if (!track.url.startsWith('http://') && !track.url.startsWith('https://')) {
-                        console.error('❌ URL no es HTTP/HTTPS:', track.url);
+                        console.error(' URL no es HTTP/HTTPS:', track.url);
                         this.showToast('La URL de la canción no es válida', 'error');
                         return;
                     }
 
-                    console.log('🚀 Iniciando reproducción...');
+                    console.log(' Iniciando reproducción...');
                     this.playTrackAndStart(track);
                 });
             });
@@ -930,7 +929,7 @@
             };
         }
 
-        // ✅ MÉTODO CRÍTICO: Reproducir canción
+        //  Reproducir canción
         async playTrackAndStart(track) {
             if (!track || !track.url || track.url.trim() === '' || track.url === 'null') {
                 console.error('❌ Track inválido:', track);
@@ -938,10 +937,10 @@
                 return;
             }
 
-            console.log('🎵 === INICIANDO REPRODUCCIÓN ===');
-            console.log('🎵 Canción:', track.title);
-            console.log('🎵 Artista:', track.artist);
-            console.log('🎵 URL:', track.url);
+            console.log(' === INICIANDO REPRODUCCIÓN ===');
+            console.log(' Canción:', track.title);
+            console.log('Artista:', track.artist);
+            console.log(' URL:', track.url);
 
             // Actualizar estado interno
             this.currentTrack = track;
@@ -959,14 +958,14 @@
 
             try {
                 if (this.isPremiumUser) {
-                    console.log('👑 Usuario premium - reproducción directa');
+                    console.log(' Usuario premium - reproducción directa');
                     await this.playDirectly(track);
                 } else {
-                    console.log('🆓 Usuario gratuito - con anuncio');
+                    console.log(' Usuario gratuito - con anuncio');
                     await this.playWithAds(track);
                 }
             } catch (error) {
-                console.error('❌ Error al reproducir:', error);
+                console.error(' Error al reproducir:', error);
                 this.showToast('Error al reproducir el audio: ' + error.message, 'error');
                 this.isPlaying = false;
                 this.updatePlayPauseButton();
@@ -980,20 +979,19 @@
             if (this.trackArtist) {
                 this.trackArtist.textContent = track.artist || 'Artista desconocido';
             }
-            console.log('🎨 UI del reproductor actualizada');
+            console.log(' UI del reproductor actualizada');
         }
 
         showPlayer() {
             if (this.playerElement) {
                 this.playerElement.classList.remove('d-none');
-                console.log('👁️ Reproductor mostrado');
+                console.log(' Reproductor mostrado');
             }
         }
 
-        // ✅ MÉTODO CRÍTICO: Cargar y reproducir audio - MEJORADO
         async loadAndPlay(url) {
             return new Promise((resolve, reject) => {
-                console.log('🔄 Cargando audio:', url);
+                console.log(' Cargando audio:', url);
 
                 const cleanup = () => {
                     this.audio.removeEventListener('canplay', onCanPlay);
@@ -1002,46 +1000,44 @@
                 };
 
                 const onCanPlay = async () => {
-                    console.log('✅ Audio listo para reproducir');
+                    console.log(' Audio listo para reproducir');
                     cleanup();
                     try {
-                        // ✅ VERIFICAR QUE EL AUDIO TENGA DURACIÓN
+                    
                         if (this.audio.duration && this.audio.duration > 0) {
-                            console.log('🎵 Duración del audio:', this.formatTime(this.audio.duration));
+                            console.log('Duración del audio:', this.formatTime(this.audio.duration));
                             await this.audio.play();
                             this.isPlaying = true;
                             this.updatePlayPauseButton();
                             resolve();
                         } else {
-                            console.error('❌ Audio sin duración válida');
+                            console.error(' Audio sin duración válida');
                             reject(new Error('Audio sin duración válida'));
                         }
                     } catch (playError) {
-                        console.error('❌ Error al reproducir:', playError);
+                        console.error(' Error al reproducir:', playError);
                         reject(playError);
                     }
                 };
 
                 const onError = (e) => {
-                    console.error('❌ Error al cargar audio:', e);
-                    console.error('❌ Audio error details:', this.audio?.error);
+                    console.error(' Error al cargar audio:', e);
+                    console.error(' Audio error details:', this.audio?.error);
                     cleanup();
                     reject(new Error('Error al cargar audio: ' + (this.audio?.error?.message || 'Desconocido')));
                 };
 
                 const onLoadedData = () => {
-                    console.log('📦 Datos de audio cargados');
+                    console.log(' Datos de audio cargados');
                 };
 
                 this.audio.addEventListener('canplay', onCanPlay);
                 this.audio.addEventListener('error', onError);
                 this.audio.addEventListener('loadeddata', onLoadedData);
 
-                // ✅ CONFIGURAR FUENTE Y CARGAR
                 this.audio.src = url;
                 this.audio.load();
 
-                // ✅ TIMEOUT DE SEGURIDAD
                 setTimeout(() => {
                     if (this.audio && this.audio.readyState < 3) { // HAVE_FUTURE_DATA
                         console.warn('⚠️ Timeout al cargar audio');
@@ -1052,39 +1048,36 @@
             });
         }
 
-        // ✅ MÉTODO CRÍTICO: Reproducción directa
         async playDirectly(track = this.currentTrack) {
             try {
-                console.log('🎵 Reproducción directa:', track.title);
+                console.log('Reproducción directa:', track.title);
                 this.isPlayingAd = false;
 
                 // Actualizar UI
                 this.updatePlayerUI(track);
 
-                // ✅ VERIFICAR URL ANTES DE REPRODUCIR
-                console.log('🔗 Verificando URL:', track.url);
+                console.log('Verificando URL:', track.url);
 
                 // Reproducir
                 await this.loadAndPlay(track.url);
-                console.log('✅ Música reproduciendo exitosamente');
+                console.log('Música reproduciendo exitosamente');
 
             } catch (error) {
-                console.error('❌ Error en reproducción directa:', error);
+                console.error(' Error en reproducción directa:', error);
                 this.showToast('Error al reproducir el audio: ' + error.message, 'error');
                 this.isPlaying = false;
                 this.updatePlayPauseButton();
             }
         }
 
-        // ✅ MÉTODO CRÍTICO: Reproducción con anuncios
         async playWithAds(track) {
             try {
-                console.log('🎬 Iniciando sistema de anuncios...');
+                console.log('Iniciando sistema de anuncios...');
 
                 this.isPlayingAd = true;
                 this.originalTrackToPlay = track;
 
-                // ✅ NUEVO: Deshabilitar controles durante anuncio
+                //  Deshabilitar controles durante anuncio
                 if (this.progressBar) {
                     this.progressBar.classList.add('ad-playing');
                 }
@@ -1099,13 +1092,12 @@
                 }
 
                 const adData = await response.json();
-                console.log('📢 Anuncio obtenido:', adData);
+                console.log(' Anuncio obtenido:', adData);
 
                 if (!adData.url) {
                     throw new Error('URL del anuncio no disponible');
                 }
 
-                // ✅ MOSTRAR NOTIFICACIÓN MEJORADA
                 this.showAdNotification(adData.duration);
 
                 // Actualizar UI
@@ -1118,13 +1110,13 @@
                 }
 
                 this.adEndedHandler = async () => {
-                    console.log('📢 Anuncio terminado');
+                    console.log(' Anuncio terminado');
                     this.audio.removeEventListener('ended', this.adEndedHandler);
                     this.isPlayingAd = false;
                     this.adEndedHandler = null;
                     this.hideAdNotification();
 
-                    // ✅ NUEVO: Rehabilitar controles
+                    //  Rehabilitar controles
                     if (this.progressBar) {
                         this.progressBar.classList.remove('ad-playing');
                     }
@@ -1137,7 +1129,7 @@
                             await this.playDirectly(this.originalTrackToPlay);
                             this.showToast('¡Ahora reproduciendo tu música!', 'success');
                         } catch (error) {
-                            console.error('❌ Error post-anuncio:', error);
+                            console.error(' Error post-anuncio:', error);
                             this.showToast('Error al reproducir la música', 'error');
                         }
                     }, 500);
@@ -1147,15 +1139,14 @@
 
                 // Reproducir anuncio
                 await this.loadAndPlay(adData.url);
-                console.log('✅ Anuncio reproduciendo');
+                console.log(' Anuncio reproduciendo');
 
                 } catch (error) {
-        console.error('❌ Error en sistema de anuncios:', error);
+        console.error(' Error en sistema de anuncios:', error);
         this.isPlayingAd = false;
         this.adEndedHandler = null;
         this.hideAdNotification();
 
-        // ✅ CORREGIDO: Rehabilitar controles en caso de error
         if (this.progressBar) {
             this.progressBar.classList.remove('ad-playing');
         }
@@ -1164,13 +1155,13 @@
         }
 
         // Fallback: reproducir música directamente
-        console.log('🔄 Fallback: reproduciendo música directamente');
+        console.log('Fallback: reproduciendo música directamente');
         await this.playDirectly(track);
         this.showToast('Reproduciendo sin anuncio (error técnico)', 'info');
     }
         }
 
-        // ✅ RESTO DE MÉTODOS ESENCIALES
+        //  RESTO DE MÉTODOS ESENCIALES
         findTrackInPlaylist(trackId) {
             return this.playlist.findIndex(track => track.id === trackId);
         }
@@ -1204,20 +1195,19 @@
                 if (this.audio.paused) {
                     await this.audio.play();
                     this.isPlaying = true;
-                    console.log('▶️ Reproducción reanudada');
+                    console.log(' Reproducción reanudada');
                 } else {
                     this.audio.pause();
                     this.isPlaying = false;
-                    console.log('⏸️ Reproducción pausada');
+                    console.log(' Reproducción pausada');
                 }
                 this.updatePlayPauseButton();
             } catch (error) {
-                console.error('❌ Error en togglePlayPause:', error);
+                console.error(' Error en togglePlayPause:', error);
                 this.showToast('Error al controlar la reproducción', 'error');
             }
         }
 
-        // ✅ MÉTODOS DE NAVEGACIÓN
         playNext() {
             if (this.playlist.length === 0) return;
             let nextIndex = (this.currentTrackIndex + 1) % this.playlist.length;
@@ -1247,7 +1237,7 @@
                     this.repeatBtn.classList.remove('active');
                 }
             }
-            console.log('🔄 Repeat:', this.isLooping);
+            console.log('Repeat:', this.isLooping);
         }
 
         toggleShuffle() {
@@ -1259,14 +1249,13 @@
                     this.shuffleBtn.classList.remove('active');
                 }
             }
-            console.log('🔀 Shuffle:', this.isShuffling);
+            console.log(' Shuffle:', this.isShuffling);
         }
 
-        // ✅ EVENTOS DE AUDIO
         onLoadedMetadata() {
             this.duration = this.audio.duration;
             this.updateTimeDisplay();
-            console.log('📦 Metadata cargada, duración:', this.formatTime(this.duration));
+            console.log(' Metadata cargada, duración:', this.formatTime(this.duration));
         }
 
         onTimeUpdate() {
@@ -1278,23 +1267,23 @@
         }
 
         onTrackEnded() {
-            console.log('🏁 Canción terminada');
+            console.log(' Canción terminada');
             this.isPlaying = false;
             this.updatePlayPauseButton();
 
             if (this.isPlayingAd) {
-                console.log('📢 Anuncio terminó naturalmente');
+                console.log(' Anuncio terminó naturalmente');
                 return; // El handler del anuncio se encargará del resto
             }
 
             // Si es música normal, continuar con la siguiente
             if (this.isLooping) {
-                console.log('🔄 Repitiendo canción');
+                console.log(' Repitiendo canción');
                 setTimeout(() => {
                     this.playTrackAndStart(this.currentTrack);
                 }, 500);
             } else {
-                console.log('⏭️ Pasando a siguiente canción');
+                console.log(' Pasando a siguiente canción');
                 setTimeout(() => {
                     this.playNext();
                 }, 1000);
@@ -1302,10 +1291,10 @@
         }
 
         onError(e) {
-            console.error('❌ Error en audio:', e);
-            console.error('❌ Audio src actual:', this.audio?.src);
-            console.error('❌ Audio readyState:', this.audio?.readyState);
-            console.error('❌ Audio networkState:', this.audio?.networkState);
+            console.error(' Error en audio:', e);
+            console.error(' Audio src actual:', this.audio?.src);
+            console.error(' Audio readyState:', this.audio?.readyState);
+            console.error(' Audio networkState:', this.audio?.networkState);
 
             let errorMessage = 'Error al cargar el audio';
             if (this.audio?.error) {
@@ -1322,7 +1311,6 @@
             this.updatePlayPauseButton();
         }
 
-        // ✅ MÉTODOS DE UI Y UTILIDADES
         formatTime(seconds) {
             if (!seconds || isNaN(seconds)) return '0:00';
             const mins = Math.floor(seconds / 60);
@@ -1351,7 +1339,7 @@
         }
 
         showToast(message, type = 'info') {
-            console.log(`🔔 Toast: ${message} (${type})`);
+            console.log(` Toast: ${message} (${type})`);
             const toastElement = document.getElementById('liveToast');
             const messageElement = document.getElementById('toast-message');
 
@@ -1374,19 +1362,18 @@
             }
         }
 
-        // ✅ MÉTODOS BÁSICOS (implementaciones mínimas funcionales)
         async checkPremiumStatus() {
             try {
                 const response = await fetch('@Url.Action("CheckPremiumStatus", "Clients")');
                 if (response.ok) {
                     const data = await response.json();
                     this.isPremiumUser = data.isPremium;
-                    console.log('👑 Estado premium:', this.isPremiumUser);
+                    console.log(' Estado premium:', this.isPremiumUser);
                 } else {
                     this.isPremiumUser = false;
                 }
             } catch (error) {
-                console.error('❌ Error al verificar estado premium:', error);
+                console.error(' Error al verificar estado premium:', error);
                 this.isPremiumUser = false;
             }
         }
@@ -1398,7 +1385,7 @@
                     const likedContentIds = await response.json();
                     this.likedContentIds = new Set(likedContentIds.map(id => id.toString()));
                     this.updateAllLikeButtons();
-                    console.log('✅ Estados de likes cargados:', this.likedContentIds.size);
+                    console.log(' Estados de likes cargados:', this.likedContentIds.size);
                 }
             } catch (error) {
                 console.error('Error al cargar likes:', error);
@@ -1447,7 +1434,7 @@
                 btn.addEventListener('click', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    console.log('❤️ Like clickeado');
+                    console.log(' Like clickeado');
                 });
             });
         }
@@ -1456,7 +1443,7 @@
             const heartBtn = document.getElementById('like-current-btn');
             if (heartBtn) {
                 heartBtn.addEventListener('click', () => {
-                    console.log('❤️ Heart del reproductor clickeado');
+                    console.log(' Heart del reproductor clickeado');
                 });
             }
         }
@@ -1466,7 +1453,7 @@
 
             this.progressBar.addEventListener('mousedown', (e) => {
                 if (this.isPlayingAd) {
-                    console.log('🚫 No se puede adelantar durante un anuncio');
+                    console.log(' No se puede adelantar durante un anuncio');
                     return;
                 }
 
@@ -1479,7 +1466,7 @@
             if (this.progressHandle) {
                 this.progressHandle.addEventListener('mousedown', (e) => {
                     if (this.isPlayingAd) {
-                        console.log('🚫 No se puede adelantar durante un anuncio');
+                        console.log(' No se puede adelantar durante un anuncio');
                         return;
                     }
 
@@ -1504,7 +1491,7 @@
                 }
             });
 
-            console.log('📊 Barra de progreso configurada completamente');
+            console.log(' Barra de progreso configurada completamente');
         }
 
         setupVolumeControl() {
@@ -1512,7 +1499,7 @@
 
             this.volumeControl.addEventListener('mousedown', (e) => {
                 if (this.isPlayingAd) {
-                    console.log('🚫 No se puede cambiar volumen durante un anuncio');
+                    console.log(' No se puede cambiar volumen durante un anuncio');
                     return;
                 }
 
@@ -1524,7 +1511,7 @@
             if (this.volumeHandle) {
                 this.volumeHandle.addEventListener('mousedown', (e) => {
                     if (this.isPlayingAd) {
-                        console.log('🚫 No se puede cambiar volumen durante un anuncio');
+                        console.log(' No se puede cambiar volumen durante un anuncio');
                         return;
                     }
 
@@ -1547,7 +1534,7 @@
                 }
             });
 
-            console.log('🔊 Control de volumen configurado completamente');
+            console.log(' Control de volumen configurado completamente');
         }
 
         setVolumeFromPosition(e) {
@@ -1593,7 +1580,7 @@
                 }
             }
 
-            console.log(`🔊 Volumen ajustado a: ${Math.round(this.volume * 100)}%`);
+            console.log(` Volumen ajustado a: ${Math.round(this.volume * 100)}%`);
         }
 
         seekToPosition(e) {
@@ -1608,7 +1595,6 @@
             console.log(`⏯️ Saltando a: ${Math.round(percent * 100)}%`);
         }
 
-        // ✅ AGREGAR: Notificación de anuncio completa con countdown
         showAdNotification(duration) {
             this.hideAdNotification(); // Limpiar notificación anterior
 
@@ -1646,7 +1632,7 @@
                 }
             }, 1000);
 
-            console.log(`📢 Notificación de anuncio mostrada: ${duration}s`);
+            console.log(` Notificación de anuncio mostrada: ${duration}s`);
         }
 
         hideAdNotification() {
@@ -1667,7 +1653,6 @@
         }
     }
 
-    // ✅ FUNCIÓN GLOBAL para redirección a playlists
     function redirectToPlaylistsWithContent(contentId) {
         if (!contentId) {
             console.error('ContentId no válido');
@@ -1676,14 +1661,13 @@
         window.location.href = '@Url.Action("Index", "Playlists")?contentId=' + contentId;
     }
 
-    // ✅ INICIALIZACIÓN
     document.addEventListener('DOMContentLoaded', () => {
-        console.log('🎵 Inicializando vista Home de Clientes...');
+        console.log(' Inicializando vista Home de Clientes...');
         try {
             window.homePlayer = new HomeAudioPlayer();
-            console.log('✅ Vista Home de Clientes inicializada correctamente');
+            console.log(' Vista Home de Clientes inicializada correctamente');
         } catch (error) {
-            console.error('❌ Error al inicializar reproductor:', error);
+            console.error(' Error al inicializar reproductor:', error);
         }
     });
 </script>

@@ -1,17 +1,9 @@
 ﻿using HarmonySound.MVC.Models;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using System.Net.Http;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Security.Claims;
-using HarmonySound.API.Consumer;
-using HarmonySound.Models;
-using System.Text; // ✅ AGREGADO
-using System.Text.Json; // ✅ AGREGADO
 
 namespace HarmonySound.MVC.Controllers
 {
@@ -78,12 +70,12 @@ namespace HarmonySound.MVC.Controllers
                         return View(model);
                     }
 
-                    // ✅ VERIFICAR: Estado del usuario antes de procesar el token
+                    // Estado del usuario antes de procesar el token
                     var handler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
                     var jwt = handler.ReadJwtToken(loginResult.Token);
                     var claimsList = jwt.Claims.ToList();
 
-                    // ✅ EXTRAER: UserId para verificar estado
+                    // UserId para verificar estado
                     var userIdClaim = claimsList.FirstOrDefault(c => 
                         c.Type == "UserId" || 
                         c.Type == "sub" || 
@@ -91,27 +83,27 @@ namespace HarmonySound.MVC.Controllers
 
                     if (userIdClaim != null && int.TryParse(userIdClaim.Value, out int userId))
                     {
-                        // ✅ VERIFICAR: Estado del usuario en la API
+                        // Estado del usuario en la API
                         var userStatusResponse = await client.GetAsync($"https://localhost:7120/api/Users/{userId}");
                         if (userStatusResponse.IsSuccessStatusCode)
                         {
                             var userStatusJson = await userStatusResponse.Content.ReadAsStringAsync();
                             var userStatus = JsonConvert.DeserializeObject<UserStatusDto>(userStatusJson);
 
-                            // ✅ REDIRIGIR: Usuarios suspendidos a vista específica
+                            // Usuarios suspendidos a vista específica
                             if (userStatus?.State == "Suspended")
                             {
                                 return RedirectToAction("AccountSuspended");
                             }
 
-                            // ✅ BLOQUEAR: Usuarios inactivos
+                            // Usuarios inactivos
                             if (userStatus?.State == "Inactive")
                             {
                                 ModelState.AddModelError("", "Tu cuenta está inactiva. Contacta al administrador para reactivarla.");
                                 return View(model);
                             }
 
-                            // ✅ SOLO PERMITIR: Usuarios activos
+                            // Usuarios activos
                             if (userStatus?.State != "Active")
                             {
                                 ModelState.AddModelError("", "Estado de cuenta no válido. Contacta al administrador.");
@@ -132,7 +124,7 @@ namespace HarmonySound.MVC.Controllers
                         if (sub != null)
                             claimsList.Add(new Claim(ClaimTypes.NameIdentifier, sub));
                         else
-                            claimsList.Add(new Claim(ClaimTypes.NameIdentifier, model.Email)); // fallback
+                            claimsList.Add(new Claim(ClaimTypes.NameIdentifier, model.Email));
                     }
 
                     var claimsIdentity = new ClaimsIdentity(claimsList, CookieAuthenticationDefaults.AuthenticationScheme);
@@ -160,7 +152,7 @@ namespace HarmonySound.MVC.Controllers
                         return View(model);
                     }
 
-                    // Redirigir según el rol (EXCLUYE Admin - deben usar AdminLogin)
+                    // Redirigir según el rol
                     if (role.Equals("Client", System.StringComparison.OrdinalIgnoreCase))
                         return RedirectToAction("Home", "Clients");
                     else if (role.Equals("Artist", System.StringComparison.OrdinalIgnoreCase))
@@ -186,23 +178,23 @@ namespace HarmonySound.MVC.Controllers
             }
         }
 
-        // ✅ NUEVO: GET AdminLogin - Acceso específico para administradores
+        // Acceso específico para administradores
         [HttpGet]
         public IActionResult AdminLogin()
         {
             return View();
         }
 
-        // ✅ NUEVO: POST AdminLogin - Proceso de login para administradores
+        // Proceso de login para administradores
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AdminLogin(AdminLoginViewModel model)
         {
-            Console.WriteLine("🔧 MVC AdminLogin POST iniciado");
+            Console.WriteLine("MVC AdminLogin POST iniciado");
 
             if (!ModelState.IsValid)
             {
-                Console.WriteLine("❌ MVC ModelState inválido");
+                Console.WriteLine("MVC ModelState inválido");
                 return View(model);
             }
 
@@ -213,31 +205,31 @@ namespace HarmonySound.MVC.Controllers
             };
 
             var json = JsonConvert.SerializeObject(apiModel);
-            Console.WriteLine($"🔧 JSON enviado: {json}");
+            Console.WriteLine($"JSON enviado: {json}");
 
             try
             {
                 using (var client = new HttpClient())
                 {
                     var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-                    Console.WriteLine("🔧 Llamando a API admin-login...");
+                    Console.WriteLine("Llamando a API admin-login...");
 
                     var response = await client.PostAsync("https://localhost:7120/api/Auth/admin-login", content);
-                    Console.WriteLine($"🔧 Respuesta API: {response.StatusCode}");
+                    Console.WriteLine($"Respuesta API: {response.StatusCode}");
 
                     if (!response.IsSuccessStatusCode)
                     {
                         var errorContent = await response.Content.ReadAsStringAsync();
-                        Console.WriteLine($"❌ Error API: {errorContent}");
+                        Console.WriteLine($"Error API: {errorContent}");
                         ModelState.AddModelError("", "Error: " + errorContent);
                         return View(model);
                     }
 
                     var responseContent = await response.Content.ReadAsStringAsync();
-                    Console.WriteLine($"🔧 Contenido respuesta: {responseContent}");
+                    Console.WriteLine($"Contenido respuesta: {responseContent}");
 
                     var adminLoginResult = JsonConvert.DeserializeObject<AdminLoginResult>(responseContent);
-                    Console.WriteLine($"🔧 Token deserializado: {!string.IsNullOrEmpty(adminLoginResult?.Token)}");
+                    Console.WriteLine($"Token deserializado: {!string.IsNullOrEmpty(adminLoginResult?.Token)}");
 
                     if (string.IsNullOrEmpty(adminLoginResult?.Token))
                     {
@@ -246,19 +238,18 @@ namespace HarmonySound.MVC.Controllers
                         return View(model);
                     }
 
-                    // ✅ USAR MÉTODO AUXILIAR
                     var userId = ExtractUserIdFromJwt(adminLoginResult.Token);
 
                     if (string.IsNullOrEmpty(userId))
                     {
-                        Console.WriteLine("❌ No se encontró claim de userId");
+                        Console.WriteLine("No se encontró claim de userId");
                         ModelState.AddModelError("", "Error en la autenticación. Token inválido.");
                         return View(model);
                     }
 
-                    Console.WriteLine($"🔧 UserId extraído: {userId}");
+                    Console.WriteLine($"UserId extraído: {userId}");
 
-                    Console.WriteLine("🔧 Generando código 2FA...");
+                    Console.WriteLine("Generando código 2FA...");
                     var twoFactorRequest = new
                     {
                         UserId = int.Parse(userId)
@@ -267,39 +258,39 @@ namespace HarmonySound.MVC.Controllers
                     var twoFactorJson = JsonConvert.SerializeObject(twoFactorRequest);
                     var twoFactorContent = new StringContent(twoFactorJson, System.Text.Encoding.UTF8, "application/json");
 
-                    Console.WriteLine("🔧 Llamando a generate-2fa-code...");
+                    Console.WriteLine("Llamando a generate-2fa-code...");
                     var twoFactorResponse = await client.PostAsync("https://localhost:7120/api/Auth/generate-2fa-code", twoFactorContent);
-                    Console.WriteLine($"🔧 Respuesta 2FA: {twoFactorResponse.StatusCode}");
+                    Console.WriteLine($"Respuesta 2FA: {twoFactorResponse.StatusCode}");
 
                     if (!twoFactorResponse.IsSuccessStatusCode)
                     {
                         var twoFactorError = await twoFactorResponse.Content.ReadAsStringAsync();
-                        Console.WriteLine($"❌ Error 2FA: {twoFactorError}");
+                        Console.WriteLine($"Error 2FA: {twoFactorError}");
                         ModelState.AddModelError("", "Error al generar código de verificación: " + twoFactorError);
                         return View(model);
                     }
 
                     var twoFactorResponseContent = await twoFactorResponse.Content.ReadAsStringAsync();
-                    Console.WriteLine($"✅ 2FA generado: {twoFactorResponseContent}");
+                    Console.WriteLine($"2FA generado: {twoFactorResponseContent}");
 
                     // Guardar el token temporalmente y redirigir a verificación 2FA
                     TempData["AdminToken"] = adminLoginResult.Token;
-                    TempData["AdminUserId"] = userId; // ✅ USAR userId extraído
+                    TempData["AdminUserId"] = userId; 
 
-                    Console.WriteLine("🔧 Redirigiendo a AdminVerify2FA...");
+                    Console.WriteLine("Redirigiendo a AdminVerify2FA...");
                     return RedirectToAction("AdminVerify2FA", new { secretKey = GenerateSecretKey() });
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Excepción MVC: {ex.Message}");
-                Console.WriteLine($"❌ StackTrace: {ex.StackTrace}");
+                Console.WriteLine($"Excepción MVC: {ex.Message}");
+                Console.WriteLine($"StackTrace: {ex.StackTrace}");
                 ModelState.AddModelError("", "Error de red o de servidor: " + ex.Message);
                 return View(model);
             }
         }
 
-        // ✅ NUEVO: GET AdminVerify2FA - Vista de verificación 2FA
+        // GET AdminVerify2FA - Vista de verificación 2FA
         [HttpGet]
         public IActionResult AdminVerify2FA(string secretKey)
         {
@@ -330,7 +321,7 @@ namespace HarmonySound.MVC.Controllers
                 }
             }
 
-            // ✅ PRESERVAR: Mantener TempData para el POST
+            // Mantener TempData para el POST
             TempData.Keep("AdminToken");
             TempData.Keep("AdminUserId");
 
@@ -344,36 +335,36 @@ namespace HarmonySound.MVC.Controllers
             return View(model);
         }
 
-        // ✅ NUEVO: POST AdminVerify2FA - Verificación del código 2FA
+        // POST AdminVerify2FA - Verificación del código 2FA
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AdminVerify2FA(Admin2FAViewModel model)
         {
-            Console.WriteLine("🔧 AdminVerify2FA POST iniciado");
+            Console.WriteLine("AdminVerify2FA POST iniciado");
 
             if (!ModelState.IsValid)
             {
-                Console.WriteLine("❌ ModelState inválido");
+                Console.WriteLine("ModelState inválido");
                 return View(model);
             }
 
             var adminToken = TempData["AdminToken"]?.ToString();
             var adminUserId = TempData["AdminUserId"]?.ToString();
 
-            Console.WriteLine($"🔧 AdminToken presente: {!string.IsNullOrEmpty(adminToken)}");
-            Console.WriteLine($"🔧 AdminUserId presente: {!string.IsNullOrEmpty(adminUserId)}");
-            Console.WriteLine($"🔧 Código ingresado: {model.Code}");
+            Console.WriteLine($"AdminToken presente: {!string.IsNullOrEmpty(adminToken)}");
+            Console.WriteLine($"AdminUserId presente: {!string.IsNullOrEmpty(adminUserId)}");
+            Console.WriteLine($"Código ingresado: {model.Code}");
 
             if (string.IsNullOrEmpty(adminToken) || string.IsNullOrEmpty(adminUserId))
             {
-                Console.WriteLine("❌ Sesión expirada - TempData faltante");
+                Console.WriteLine("Sesión expirada - TempData faltante");
                 ModelState.AddModelError("", "Sesión expirada. Inicia sesión nuevamente.");
                 return RedirectToAction("AdminLogin");
             }
 
             try
             {
-                Console.WriteLine("🔧 Verificando código 2FA...");
+                Console.WriteLine("Verificando código 2FA...");
 
                 var verifyRequest = new
                 {
@@ -386,14 +377,14 @@ namespace HarmonySound.MVC.Controllers
 
                 using (var client = new HttpClient())
                 {
-                    Console.WriteLine("🔧 Llamando a verify-2fa-code...");
+                    Console.WriteLine("Llamando a verify-2fa-code...");
                     var response = await client.PostAsync("https://localhost:7120/api/Auth/verify-2fa-code", content);
-                    Console.WriteLine($"🔧 Respuesta verificación: {response.StatusCode}");
+                    Console.WriteLine($"Respuesta verificación: {response.StatusCode}");
 
                     if (!response.IsSuccessStatusCode)
                     {
                         var errorContent = await response.Content.ReadAsStringAsync();
-                        Console.WriteLine($"❌ Error verificación: {errorContent}");
+                        Console.WriteLine($"Error verificación: {errorContent}");
                         ModelState.AddModelError("", "Error al verificar el código.");
                         TempData.Keep("AdminToken");
                         TempData.Keep("AdminUserId");
@@ -401,7 +392,7 @@ namespace HarmonySound.MVC.Controllers
                     }
 
                     var responseContent = await response.Content.ReadAsStringAsync();
-                    Console.WriteLine($"🔧 Contenido verificación: {responseContent}");
+                    Console.WriteLine($"Contenido verificación: {responseContent}");
 
 
                     // Por la siguiente línea:
@@ -409,26 +400,26 @@ namespace HarmonySound.MVC.Controllers
 
                     bool isValid = verifyResult?.IsValid ?? false;
 
-                    Console.WriteLine($"🔧 VerifyResult.IsValid: {verifyResult?.IsValid}");
-                    Console.WriteLine($"🔧 Código válido final: {isValid}");
+                    Console.WriteLine($"VerifyResult.IsValid: {verifyResult?.IsValid}");
+                    Console.WriteLine($"Código válido final: {isValid}");
 
                     if (!isValid)
                     {
-                        Console.WriteLine("❌ Código inválido");
+                        Console.WriteLine("Código inválido");
                         ModelState.AddModelError("", "Código inválido o expirado.");
                         TempData.Keep("AdminToken");
                         TempData.Keep("AdminUserId");
                         return View(model);
                     }
 
-                    Console.WriteLine("✅ Código válido, procediendo con autenticación...");
+                    Console.WriteLine("Código válido, procediendo con autenticación...");
 
                     // Código válido, proceder con el login completo
                     var handler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
                     var jwt = handler.ReadJwtToken(adminToken);
                     var claimsList = jwt.Claims.ToList();
 
-                    // ✅ MEJORADO: Mejor manejo de NameIdentifier
+                    // Mejor manejo de NameIdentifier
                     if (!claimsList.Any(c => c.Type == ClaimTypes.NameIdentifier))
                     {
                         var idClaim = claimsList.FirstOrDefault(c =>
@@ -439,11 +430,11 @@ namespace HarmonySound.MVC.Controllers
                         if (idClaim != null)
                         {
                             claimsList.Add(new Claim(ClaimTypes.NameIdentifier, idClaim.Value));
-                            Console.WriteLine($"🔧 NameIdentifier agregado: {idClaim.Value}");
+                            Console.WriteLine($"NameIdentifier agregado: {idClaim.Value}");
                         }
                         else
                         {
-                            Console.WriteLine("❌ No se pudo determinar NameIdentifier");
+                            Console.WriteLine("No se pudo determinar NameIdentifier");
                             claimsList.Add(new Claim(ClaimTypes.NameIdentifier, adminUserId));
                         }
                     }
@@ -457,7 +448,7 @@ namespace HarmonySound.MVC.Controllers
                         authProperties
                     );
 
-                    Console.WriteLine("✅ Usuario autenticado, redirigiendo a Dashboard...");
+                    Console.WriteLine("Usuario autenticado, redirigiendo a Dashboard...");
 
                     // Limpiar TempData
                     TempData.Remove("AdminToken");
@@ -469,8 +460,8 @@ namespace HarmonySound.MVC.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Excepción en verificación 2FA: {ex.Message}");
-                Console.WriteLine($"❌ StackTrace: {ex.StackTrace}");
+                Console.WriteLine($"Excepción en verificación 2FA: {ex.Message}");
+                Console.WriteLine($"StackTrace: {ex.StackTrace}");
                 ModelState.AddModelError("", "Error de red o de servidor: " + ex.Message);
                 TempData.Keep("AdminToken");
                 TempData.Keep("AdminUserId");
@@ -543,7 +534,7 @@ namespace HarmonySound.MVC.Controllers
             }
         }
 
-        // Método auxiliar para obtener roles públicos (EXCLUYE Admin)
+        // Método auxiliar para obtener roles públicos 
         private async Task<List<string>> GetRolesFromApi()
         {
             try
@@ -555,7 +546,7 @@ namespace HarmonySound.MVC.Controllers
                     {
                         var content = await response.Content.ReadAsStringAsync();
 
-                        // ✅ MEJOR: Usar un tipo anónimo más específico
+                        // Usar un tipo anónimo más específico
                         var rolesData = JsonConvert.DeserializeAnonymousType(content, new[]
                         {
                             new { Id = 0, Name = "", RoleName = "" }
@@ -573,7 +564,7 @@ namespace HarmonySound.MVC.Controllers
             }
             catch (Exception ex)
             {
-                // ✅ OPCIONAL: Log del error para debugging
+                // Log del error para debugging
                 System.Diagnostics.Debug.WriteLine($"Error al obtener roles: {ex.Message}");
             }
             return new List<string>();
@@ -625,7 +616,7 @@ namespace HarmonySound.MVC.Controllers
             return base64.Replace('-', '+').Replace('_', '/');
         }
 
-        // ✅ NUEVO: Método auxiliar para generar clave secreta
+        // Método auxiliar para generar clave secreta
         private string GenerateSecretKey()
         {
             return Guid.NewGuid().ToString("N")[..16];
@@ -642,7 +633,6 @@ namespace HarmonySound.MVC.Controllers
             public bool RequiresTwoFactor { get; set; }
         }
 
-        // ✅ AGREGAR MÉTODO AUXILIAR
         private string? ExtractUserIdFromJwt(string token)
         {
             try
@@ -664,12 +654,12 @@ namespace HarmonySound.MVC.Controllers
                     var claim = jwt.Claims.FirstOrDefault(c => c.Type == claimType);
                     if (claim != null && !string.IsNullOrEmpty(claim.Value))
                     {
-                        Console.WriteLine($"🔧 UserId encontrado en claim '{claimType}': {claim.Value}");
+                        Console.WriteLine($"UserId encontrado en claim '{claimType}': {claim.Value}");
                         return claim.Value;
                     }
                 }
 
-                Console.WriteLine("❌ Claims disponibles:");
+                Console.WriteLine("Claims disponibles:");
                 foreach (var claim in jwt.Claims)
                 {
                     Console.WriteLine($"  - {claim.Type}: {claim.Value}");
@@ -679,18 +669,18 @@ namespace HarmonySound.MVC.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Error extrayendo UserId: {ex.Message}");
+                Console.WriteLine($"Error extrayendo UserId: {ex.Message}");
                 return null;
             }
         }
 
-        // ✅ AGREGAR: Clase para deserialización tipada
+        // Clase para deserialización tipada
         public class VerifyResult
         {
             public bool IsValid { get; set; }
         }
 
-        // ✅ NUEVO: Agregar estos métodos al AccountController existente
+        // Agregar estos métodos al AccountController existente
 
         // GET: /Account/ForgotPassword
         [HttpGet]
@@ -707,7 +697,7 @@ namespace HarmonySound.MVC.Controllers
             if (!ModelState.IsValid)
                 return View(model);
 
-            // ✅ CORREGIDO: Solo enviar Email, sin Password
+            // Solo enviar Email, sin Password
             var apiModel = new
             {
                 Email = model.Email
@@ -732,7 +722,6 @@ namespace HarmonySound.MVC.Controllers
                     {
                         var errorContent = await response.Content.ReadAsStringAsync();
                         
-                        // ✅ MEJOR MANEJO DE ERRORES
                         try
                         {
                             var errorObj = JsonConvert.DeserializeObject<dynamic>(errorContent);
@@ -855,7 +844,7 @@ namespace HarmonySound.MVC.Controllers
             }
         }
 
-        // ✅ AGREGAR: Clase para deserializar usuarios
+        // Clase para deserializar usuarios
         public class UserDto
         {
             public int Id { get; set; }
@@ -863,7 +852,7 @@ namespace HarmonySound.MVC.Controllers
             public string Name { get; set; } = "";
         }
 
-        // ✅ AGREGAR: DTO para el estado del usuario
+        // DTO para el estado del usuario
         public class UserStatusDto
         {
             public int Id { get; set; }
@@ -883,7 +872,7 @@ namespace HarmonySound.MVC.Controllers
             };
         }
 
-        // ✅ AGREGAR: Action para mostrar vista de cuenta suspendida
+        // Action para mostrar vista de cuenta suspendida
         [HttpGet]
         public IActionResult AccountSuspended()
         {

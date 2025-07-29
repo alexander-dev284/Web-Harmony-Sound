@@ -2,9 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using HarmonySound.MVC.Models;
 using System.Text.Json;
-using System.Security.Claims;
 using System.Text;
-using HarmonySound.API.DTOs;
 
 
 namespace HarmonySound.MVC.Controllers
@@ -29,7 +27,7 @@ namespace HarmonySound.MVC.Controllers
                 var stats = await GetAdminStats();
                 ViewBag.AdminName = User.Identity?.Name ?? "Administrador";
                 
-                // ✅ CAMBIAR: Usar convención en lugar de ruta explícita
+                // Usar convención en lugar de ruta explícita
                 return View(stats);  // Esto buscará Views/Admin/Dashboard.cshtml automáticamente
             }
             catch (Exception ex)
@@ -40,12 +38,11 @@ namespace HarmonySound.MVC.Controllers
             }
         }
 
-        // ✅ GESTIÓN DE USUARIOS
         public async Task<IActionResult> Users()
         {
             try
             {
-                // ✅ USAR endpoint con roles
+                // endpoint con roles
                 var response = await _httpClient.GetAsync("https://localhost:7120/api/Users/with-roles");
                 if (response.IsSuccessStatusCode)
                 {
@@ -65,7 +62,6 @@ namespace HarmonySound.MVC.Controllers
             }
         }
 
-        // ✅ GESTIÓN DE CONTENIDO
         public async Task<IActionResult> Content()
         {
             try
@@ -88,8 +84,6 @@ namespace HarmonySound.MVC.Controllers
                 return View(new List<AdminContentViewModel>());
             }
         }
-
-        // ✅ GESTIÓN DE ROLES Y PERMISOS
         public async Task<IActionResult> UserRoles()
         {
             try
@@ -124,7 +118,6 @@ namespace HarmonySound.MVC.Controllers
             }
         }
 
-        // ✅ ASIGNAR ROL A USUARIO
         [HttpPost]
         public async Task<IActionResult> AssignRole(int userId, string roleName)
         {
@@ -154,7 +147,6 @@ namespace HarmonySound.MVC.Controllers
             return RedirectToAction("UserRoles");
         }
 
-        // ✅ REMOVER ROL DE USUARIO
         [HttpPost]
         public async Task<IActionResult> RemoveRole(int userId, string roleName)
         {
@@ -184,7 +176,7 @@ namespace HarmonySound.MVC.Controllers
             return RedirectToAction("UserRoles");
         }
 
-        // ✅ SUSPENDER/ACTIVAR USUARIO
+        // SUSPENDER/ACTIVAR USUARIO
         [HttpPost]
         public async Task<IActionResult> ToggleUserStatus(int userId, string action)
         {
@@ -192,11 +184,11 @@ namespace HarmonySound.MVC.Controllers
             {
                 _logger.LogInformation($"Iniciando {action} para usuario {userId}");
                 
-                // ✅ NUEVO: Crear modelo específico para el cambio de estado
+                // Crear modelo específico para el cambio de estado
                 var statusRequest = new
                 {
                     UserId = userId,
-                    NewState = action == "activate" ? "Active" : "Suspended", // ✅ Usar valores exactos del enum
+                    NewState = action == "activate" ? "Active" : "Suspended", // Usar valores exactos del enum
                     Action = action,
                     AdminId = GetCurrentUserId(), // Para auditoría
                     Timestamp = DateTime.UtcNow
@@ -205,7 +197,7 @@ namespace HarmonySound.MVC.Controllers
                 var json = System.Text.Json.JsonSerializer.Serialize(statusRequest);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
                 
-                // ✅ CORREGIDO: Usar endpoint específico en lugar de genérico
+                // Usar endpoint específico en lugar de genérico
                 var endpoint = $"https://localhost:7120/api/Users/{userId}/toggle-status";
                 
                 _logger.LogInformation($"Llamando a API: {endpoint}");
@@ -220,12 +212,12 @@ namespace HarmonySound.MVC.Controllers
                     var message = action == "activate" ? "Usuario activado" : "Usuario suspendido";
                     TempData["Success"] = $"{message} correctamente";
                     
-                    // ✅ OPCIONAL: Log de auditoría
+                    // Log de auditoría
                     _logger.LogInformation($"Usuario {userId} {action} exitosamente por admin {GetCurrentUserId()}");
                 }
                 else
                 {
-                    // ✅ MEJOR MANEJO DE ERRORES
+                    // MEJOR MANEJO DE ERRORES
                     try
                     {
                         var errorObj = System.Text.Json.JsonSerializer.Deserialize<dynamic>(responseContent);
@@ -249,7 +241,6 @@ namespace HarmonySound.MVC.Controllers
             return RedirectToAction("Users");
         }
 
-        // ✅ ELIMINAR CONTENIDO
         [HttpPost]
         public async Task<IActionResult> DeleteContent(int contentId)
         {
@@ -273,7 +264,6 @@ namespace HarmonySound.MVC.Controllers
             return RedirectToAction("Content");
         }
 
-        // ✅ OBTENER ESTADÍSTICAS DEL DASHBOARD
         private async Task<AdminDashboardViewModel> GetAdminStats()
         {
             var stats = new AdminDashboardViewModel
@@ -283,7 +273,7 @@ namespace HarmonySound.MVC.Controllers
 
             try
             {
-                // ✅ Usuarios con roles
+                // Usuarios con roles
                 var usersResponse = await _httpClient.GetAsync("https://localhost:7120/api/Users/with-roles");
                 if (usersResponse.IsSuccessStatusCode)
                 {
@@ -293,14 +283,14 @@ namespace HarmonySound.MVC.Controllers
                     
                     stats.TotalUsers = users?.Count ?? 0;
                     stats.TotalArtists = users?.Count(u => u.Role == "artist") ?? 0;
-                    stats.TotalClients = users?.Count(u => u.Role == "client") ?? 0;  // ✅ Cambiar de "Client" a "CLIENT"
+                    stats.TotalClients = users?.Count(u => u.Role == "client") ?? 0;  
                     
-                    Console.WriteLine($"🔍 Total usuarios: {stats.TotalUsers}");
-                    Console.WriteLine($"🔍 Total artistas: {stats.TotalArtists}");
-                    Console.WriteLine($"🔍 Total clientes: {stats.TotalClients}");
+                    Console.WriteLine($"Total usuarios: {stats.TotalUsers}");
+                    Console.WriteLine($"Total artistas: {stats.TotalArtists}");
+                    Console.WriteLine($"Total clientes: {stats.TotalClients}");
                 }
 
-                // ✅ Contenido con artistas
+                // Contenido con artistas
                 var contentsResponse = await _httpClient.GetAsync("https://localhost:7120/api/Contents/with-artists");
                 if (contentsResponse.IsSuccessStatusCode)
                 {
@@ -309,10 +299,10 @@ namespace HarmonySound.MVC.Controllers
                         new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                     stats.TotalSongs = contents?.Count ?? 0;
                     
-                    Console.WriteLine($"🔍 Total canciones: {stats.TotalSongs}");
+                    Console.WriteLine($"Total canciones: {stats.TotalSongs}");
                 }
 
-                // ✅ Álbumes
+                // Álbumes
                 var albumsResponse = await _httpClient.GetAsync("https://localhost:7120/api/Albums");
                 if (albumsResponse.IsSuccessStatusCode)
                 {
@@ -320,10 +310,10 @@ namespace HarmonySound.MVC.Controllers
                     var albums = JsonSerializer.Deserialize<List<object>>(albumsJson);
                     stats.TotalAlbums = albums?.Count ?? 0;
                     
-                    Console.WriteLine($"🔍 Total álbumes: {stats.TotalAlbums}");
+                    Console.WriteLine($"Total álbumes: {stats.TotalAlbums}");
                 }
 
-                // ✅ Suscripciones activas
+                // Suscripciones activas
                 var subscriptionsResponse = await _httpClient.GetAsync("https://localhost:7120/api/UserPlans");
                 if (subscriptionsResponse.IsSuccessStatusCode)
                 {
@@ -331,19 +321,19 @@ namespace HarmonySound.MVC.Controllers
                     var subscriptions = JsonSerializer.Deserialize<List<object>>(subscriptionsJson);
                     stats.ActiveSubscriptions = subscriptions?.Count ?? 0;
                     
-                    Console.WriteLine($"🔍 Total suscripciones: {stats.ActiveSubscriptions}");
+                    Console.WriteLine($"Total suscripciones: {stats.ActiveSubscriptions}");
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting admin stats");
-                Console.WriteLine($"❌ Error obteniendo estadísticas: {ex.Message}");
+                Console.WriteLine($"Error obteniendo estadísticas: {ex.Message}");
             }
 
             return stats;
         }
 
-        // ✅ NUEVO: Método auxiliar para obtener ID del usuario actual
+        // Método auxiliar para obtener ID del usuario actual
         private int GetCurrentUserId()
         {
             var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);

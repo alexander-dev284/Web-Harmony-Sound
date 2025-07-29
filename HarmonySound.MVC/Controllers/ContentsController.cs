@@ -1,8 +1,5 @@
 ﻿using HarmonySound.API.Consumer;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Net.Http;
-using System.Threading.Tasks;
 using HarmonySound.Models;
 using HarmonySound.MVC.Models;
 namespace HarmonySound.MVC.Controllers

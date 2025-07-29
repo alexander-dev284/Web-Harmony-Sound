@@ -2,7 +2,6 @@
 using HarmonySound.Models;
 using HarmonySound.MVC.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using System.Text;
@@ -22,46 +21,46 @@ namespace HarmonySound.MVC.Controllers
             _httpClient.Timeout = TimeSpan.FromMinutes(10);
         }
 
-        // ✅ CORREGIDO: Método para obtener estadísticas del artista
+        // Método para obtener estadísticas del artista
         [HttpGet]
         public async Task<IActionResult> GetArtistStats()
         {
             try
             {
                 int artistId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
-                Console.WriteLine($"🔍 Obteniendo estadísticas para artista ID: {artistId}");
+                Console.WriteLine($"Obteniendo estadísticas para artista ID: {artistId}");
 
-                // 1. Obtener total de canciones del artista
+                // Obtener total de canciones del artista
                 var songsResponse = await _httpClient.GetAsync("https://localhost:7120/api/Contents");
                 var songsJson = await songsResponse.Content.ReadAsStringAsync();
                 var allSongs = JsonSerializer.Deserialize<List<Content>>(songsJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                 var artistSongs = allSongs?.Where(c => c.ArtistId == artistId).ToList() ?? new List<Content>();
                 var totalSongs = artistSongs.Count;
 
-                // 2. ✅ CORREGIDO: Usar el endpoint específico para álbumes del artista que ahora devuelve DTOs
+                // Usar el endpoint específico para álbumes del artista que ahora devuelve DTOs
                 var albumsResponse = await _httpClient.GetAsync($"https://localhost:7120/api/Albums/ByArtist/{artistId}");
                 var totalAlbums = 0;
                 
-                Console.WriteLine($"🔍 Respuesta de álbumes: {albumsResponse.StatusCode}");
+                Console.WriteLine($"Respuesta de álbumes: {albumsResponse.StatusCode}");
                 
                 if (albumsResponse.IsSuccessStatusCode)
                 {
                     var albumsJson = await albumsResponse.Content.ReadAsStringAsync();
-                    Console.WriteLine($"🔍 JSON de álbumes: {albumsJson}");
+                    Console.WriteLine($"JSON de álbumes: {albumsJson}");
                     
-                    // ✅ CORREGIDO: Ahora esperamos una lista de AlbumDto
+                    //Ahora esperamos una lista de AlbumDto
                     var albums = JsonSerializer.Deserialize<List<AlbumDto>>(albumsJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                     totalAlbums = albums?.Count ?? 0;
                     
-                    Console.WriteLine($"📊 Total álbumes encontrados: {totalAlbums}");
+                    Console.WriteLine($"Total álbumes encontrados: {totalAlbums}");
                 }
                 else
                 {
                     var errorContent = await albumsResponse.Content.ReadAsStringAsync();
-                    Console.WriteLine($"❌ Error al obtener álbumes: {albumsResponse.StatusCode} - {errorContent}");
+                    Console.WriteLine($"Error al obtener álbumes: {albumsResponse.StatusCode} - {errorContent}");
                 }
 
-                // 3. ✅ CORREGIDO: Obtener total de likes usando JsonElement
+                //  Obtener total de likes usando JsonElement
                 var totalLikes = 0;
                 foreach (var song in artistSongs)
                 {
@@ -87,15 +86,14 @@ namespace HarmonySound.MVC.Controllers
                     }
                 }
 
-                // 4. Obtener la última canción subida
+                // Obtener la última canción subida
                 var lastUpload = artistSongs
                     .OrderByDescending(c => c.UploadDate)
                     .FirstOrDefault();
 
                 var lastUploadTitle = lastUpload?.Title ?? "Sin subidas";
 
-                // ✅ AGREGAR LOGS PARA DEPURACIÓN
-                Console.WriteLine($"📊 Estadísticas finales:");
+                Console.WriteLine($" Estadísticas finales:");
                 Console.WriteLine($"   - Canciones: {totalSongs}");
                 Console.WriteLine($"   - Álbumes: {totalAlbums}");
                 Console.WriteLine($"   - Likes: {totalLikes}");
@@ -114,8 +112,8 @@ namespace HarmonySound.MVC.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Error en GetArtistStats: {ex.Message}");
-                Console.WriteLine($"❌ Stack trace: {ex.StackTrace}");
+                Console.WriteLine($"Error en GetArtistStats: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
                 
                 // En caso de error, retornar valores por defecto
                 var errorStats = new
@@ -253,13 +251,13 @@ namespace HarmonySound.MVC.Controllers
             return RedirectToAction("Home");
         }
 
-        // ✅ NUEVO: Vista Upload - Solo para mostrar el formulario de subida
+        // Vista Upload - Solo para mostrar el formulario de subida
         public IActionResult Upload()
         {
             return View();
         }
 
-        // ✅ MODIFICADO: UploadAudio - Redirige a Upload después de subir
+        // UploadAudio - Redirige a Upload después de subir
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UploadAudio(IFormCollection form)
@@ -315,7 +313,7 @@ namespace HarmonySound.MVC.Controllers
             return RedirectToAction("Upload");
         }
 
-        // ✅ MODIFICADO: Index - Para mostrar las canciones con reproductor
+        // Index - Para mostrar las canciones con reproductor
         public async Task<IActionResult> Index()
         {
             var nameIdentifierClaim = User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
@@ -331,7 +329,7 @@ namespace HarmonySound.MVC.Controllers
             return View(myContents);
         }
 
-        // ✅ MODIFICADO: Ver detalles de una canción con nombre del artista
+        // Ver detalles de una canción con nombre del artista
         public async Task<IActionResult> Details(int id)
         {
             try
@@ -354,7 +352,7 @@ namespace HarmonySound.MVC.Controllers
                     return RedirectToAction("Index");
                 }
 
-                // ✅ NUEVO: Obtener nombre del artista
+                // Obtener nombre del artista
                 var artistResponse = await _httpClient.GetAsync($"https://localhost:7120/api/Users/profile/{artistId}");
                 if (artistResponse.IsSuccessStatusCode)
                 {
@@ -376,7 +374,7 @@ namespace HarmonySound.MVC.Controllers
             }
         }
 
-        // ✅ MODIFICADO: GET - Editar canción con nombre del artista
+        // GET - Editar canción con nombre del artista
         public async Task<IActionResult> Edit(int id)
         {
             try
@@ -399,7 +397,7 @@ namespace HarmonySound.MVC.Controllers
                     return RedirectToAction("Index");
                 }
 
-                // ✅ NUEVO: Obtener nombre del artista
+                // Obtener nombre del artista
                 var artistResponse = await _httpClient.GetAsync($"https://localhost:7120/api/Users/profile/{artistId}");
                 if (artistResponse.IsSuccessStatusCode)
                 {
@@ -421,7 +419,7 @@ namespace HarmonySound.MVC.Controllers
             }
         }
 
-        // ✅ MODIFICADO: POST - Editar canción - Incluir UrlMedia
+        // POST - Editar canción - Incluir UrlMedia
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, string title, string type)
@@ -486,16 +484,16 @@ namespace HarmonySound.MVC.Controllers
                     return View(existingContent);
                 }
 
-                // ✅ CORREGIDO: Incluir todos los campos requeridos, incluyendo UrlMedia
+                // Incluir todos los campos requeridos, incluyendo UrlMedia
                 var updateModel = new
                 {
                     Id = id,
                     Title = title.Trim(),
                     Type = type ?? existingContent.Type,
-                    UrlMedia = existingContent.UrlMedia, // ✅ AGREGADO: Campo requerido
-                    Duration = existingContent.Duration, // ✅ AGREGADO: Mantener duración
-                    UploadDate = existingContent.UploadDate, // ✅ AGREGADO: Mantener fecha
-                    ArtistId = existingContent.ArtistId // ✅ AGREGADO: Mantener artista
+                    UrlMedia = existingContent.UrlMedia, 
+                    Duration = existingContent.Duration, 
+                    UploadDate = existingContent.UploadDate, 
+                    ArtistId = existingContent.ArtistId 
                 };
 
                 var updateJson = JsonSerializer.Serialize(updateModel);
@@ -535,7 +533,7 @@ namespace HarmonySound.MVC.Controllers
             }
         }
 
-        // ✅ NUEVO: POST - Eliminar canción (incluye eliminación de Azure)
+        // Eliminar canción (incluye eliminación de Azure)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)

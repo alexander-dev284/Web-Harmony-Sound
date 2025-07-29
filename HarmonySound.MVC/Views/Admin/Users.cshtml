@@ -15,7 +15,6 @@
 </head>
 <body class="admin-body">
     <div class="admin-dashboard">
-        <!-- Sidebar -->
         <nav class="admin-sidebar">
             <div class="sidebar-header">
                 <div class="logo">
@@ -54,7 +53,6 @@
             </div>
         </nav>
 
-        <!-- Main Content -->
         <main class="admin-main">
             <div class="admin-header">
                 <h1>
@@ -278,7 +276,6 @@
     </form>
 
     <style>
-        /* Estilos del panel de administración */
         .admin-body {
             margin: 0;
             padding: 0;
@@ -407,7 +404,6 @@
             font-size: 1.1rem;
         }
 
-        /* Estadísticas rápidas */
         .stats-summary {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -431,7 +427,6 @@
             font-size: 1.2rem;
         }
 
-        /* Filtros */
         .filters-section {
             margin-bottom: 2rem;
         }
@@ -495,7 +490,6 @@
             background: #777;
         }
 
-        /* Tabla */
         .users-table-container {
             background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
             border: 1px solid #333;
@@ -562,7 +556,6 @@
             display: none;
         }
 
-        /* Celdas específicas */
         .user-info {
             display: flex;
             align-items: center;
@@ -626,7 +619,6 @@
             font-size: 0.8rem;
         }
 
-        /* Badges */
         .role-badge, .status-badge {
             padding: 0.5rem 1rem;
             border-radius: 20px;
@@ -674,7 +666,6 @@
             border: 1px solid rgba(108, 117, 125, 0.5);
         }
 
-        /* Botones de acción */
         .action-buttons {
             display: flex;
             gap: 0.5rem;
@@ -718,7 +709,6 @@
             color: #000;
         }
 
-        /* Modal */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -812,13 +802,13 @@
 
     </style>
 
-    <!-- ✅ MEJORAR: Script para mejor manejo de estados -->
+    <!-- Script para mejor manejo de estados -->
     <script>
         // Variables globales
         let userIdToSuspend = null;
         let userIdToActivate = null;
 
-        // Función de filtrado (mantener existente)
+        // Función de filtrado 
         function filterUsers() {
             const searchTerm = document.getElementById('search-users').value.toLowerCase();
             const roleFilter = document.getElementById('role-filter').value;
@@ -861,7 +851,7 @@
             filterUsers();
         }
 
-        // ✅ MEJORADO: Funciones para suspender usuario con mejor UX
+        // Funciones para suspender usuario con mejor UX
         function suspendUser(userId, userName) {
             userIdToSuspend = userId;
             document.getElementById('userToSuspend').textContent = userName;
@@ -875,7 +865,7 @@
 
         function confirmSuspend() {
             if (userIdToSuspend) {
-                // ✅ MEJORAR: Deshabilitar botón durante el procesamiento
+                // Deshabilitar botón durante el procesamiento
                 const submitBtn = document.querySelector('#suspendModal .btn-confirm');
                 const originalText = submitBtn.innerHTML;
                 
@@ -887,17 +877,17 @@
             }
         }
 
-        // ✅ MEJORADO: Función para activar usuario con confirmación
+        // Función para activar usuario con confirmación
         function activateUser(userId, userName) {
             if (confirm(`¿Estás seguro de que quieres activar al usuario ${userName}?\n\nEsto le permitirá volver a acceder al sistema.`)) {
-                // ✅ MOSTRAR INDICADOR DE CARGA
+                // MOSTRAR INDICADOR DE CARGA
                 const button = event.target.closest('.btn-action');
                 const originalHTML = button.innerHTML;
                 
                 button.disabled = true;
                 button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
                 
-                // ✅ ENVIAR FORMULARIO
+                // ENVIAR FORMULARIO
                 document.getElementById('userIdToActivate').value = userId;
                 document.getElementById('activateForm').submit();
             }
@@ -915,7 +905,7 @@
             }
         });
 
-        // ✅ NUEVO: Actualizar UI después de cambios de estado
+        // Actualizar UI después de cambios de estado
         document.addEventListener('DOMContentLoaded', function() {
             // Verificar si hay mensajes de éxito/error y mostrar notificaciones
             const successMsg = document.querySelector('.alert-success');

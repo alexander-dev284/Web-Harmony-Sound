@@ -25,9 +25,9 @@ html, body {
     height: 100%;
     margin: 0;
     padding: 0;
-    background-color: #121212; /* mismo que var(--background-dark) */
+    background-color: #121212;
     color: #fff;
-    overflow-x: hidden; /* evita scroll horizontal por si acaso */
+    overflow-x: hidden; 
 }
 
 
@@ -168,7 +168,7 @@ html, body {
 }
 
 :root {
-    --spotify-green: #178a43; /* Más oscuro que #1db954 */
+    --spotify-green: #178a43; 
     --spotify-green-hover: #14733a;
     --background-dark: #121212;
     --input-bg: #232323;
@@ -176,26 +176,25 @@ html, body {
 }
 
 .auth-card select {
-    background-color: var(--input-bg); /* oscuro */
-    color: #fff; /* texto blanco */
+    background-color: var(--input-bg); 
+    color: #fff;
     border: none;
     border-radius: 10px;
     width: 100%;
     padding: 0.8rem 1rem;
     font-size: 1rem;
-    appearance: none; /* para eliminar el estilo nativo */
-}
+    appearance: none;
 
 .auth-card select option {
- background-color: #232323; /* fondo de las opciones */
-    color: #fff; /* texto blanco */
+ background-color: #232323; 
+    color: #fff; 
  }
-/* Ocultar la barra de navegación */
+
 .navbar {
     display: none;
 }
 
-/* Mostrar solo el botón de cerrar sesión */
+
 .logout-btn {
     display: block;
     position: absolute;

@@ -937,45 +937,7 @@
         font-variant-numeric: tabular-nums;
     }
 
-    /* Responsive */
-    @@media (max-width: 768px) {
-        .edit-album-container {
-            padding: 1rem;
-        }
-
-        .edit-title {
-            font-size: 2rem;
-        }
-
-        .songs-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .preview-header {
-            flex-direction: column;
-            text-align: center;
-        }
-
-        .form-actions {
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .btn-save, .btn-secondary, .btn-cancel, .btn-primary {
-            width: 100%;
-            max-width: 280px;
-        }
-
-        .preview-player {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            width: auto;
-            border-radius: 16px 16px 0 0;
-        }
-    }
-
+    
     /* Ocultar elementos del layout */
     header, footer {
         display: none !important;
@@ -1104,7 +1066,7 @@ function selectAllSongs() {
 function clearAllSongs() {
     document.querySelectorAll('.song-selection-checkbox').forEach(checkbox => {
         checkbox.checked = false;
-        updateSongSelection(checkbox); // ✅ CORREGIR: quitar el guión bajo
+        updateSongSelection(checkbox); 
     });
 }
 

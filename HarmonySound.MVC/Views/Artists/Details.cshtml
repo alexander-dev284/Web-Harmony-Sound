@@ -76,7 +76,7 @@
                 </div>
             </div>
 
-            <!-- ✅ NUEVO: Tarjeta con nombre del artista -->
+            <!--  Tarjeta con nombre del artista -->
             <div class="detail-card">
                 <div class="detail-icon">
                     <i class="fas fa-user"></i>
@@ -94,7 +94,7 @@
                 Editar Canción
             </a>
 
-            <!-- ✅ MODIFICADO: Botón de eliminar con modal -->
+            <!-- Botón de eliminar con modal -->
             <button type="button" class="btn-action btn-delete" onclick="showDeleteModal(@Model.Id, '@Model.Title')">
                 <i class="fas fa-trash-alt me-2"></i>
                 Eliminar Canción
@@ -103,7 +103,7 @@
     </div>
 </div>
 
-<!-- ✅ NUEVO: Modal de confirmación para eliminar -->
+<!--  Modal de confirmación para eliminar -->
 <div id="deleteModal" class="modal-overlay d-none">
     <div class="modal-container">
         <div class="modal-header">
@@ -1282,7 +1282,7 @@
         }
     }
 
-    // ✅ NUEVO: Funciones del modal de eliminación
+    // Funciones del modal de eliminación
     let contentIdToDelete = null;
 
     function showDeleteModal(contentId, songTitle) {

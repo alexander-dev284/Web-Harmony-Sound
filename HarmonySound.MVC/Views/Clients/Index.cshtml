@@ -294,7 +294,6 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
 <script>
-    // ✅ REPRODUCTOR CORREGIDO - VERSION COMPLETA Y FUNCIONAL
     class IndexAudioPlayer {
         constructor() {
             this.audio = null;
@@ -322,7 +321,6 @@
         async init() {
             console.log('🎵 Inicializando reproductor...');
 
-            // ✅ CREAR/OBTENER ELEMENTO DE AUDIO
             this.audio = document.getElementById('hidden-audio');
             if (!this.audio) {
                 this.audio = document.createElement('audio');
@@ -345,7 +343,7 @@
                 console.error('Error en inicialización:', error);
             }
 
-            console.log('✅ Reproductor inicializado correctamente');
+            console.log('Reproductor inicializado correctamente');
         }
 
         async checkPremiumStatus() {
@@ -354,13 +352,13 @@
                 if (response.ok) {
                     const data = await response.json();
                     this.isPremiumUser = data.isPremium;
-                    console.log('👑 Estado premium:', this.isPremiumUser);
+                    console.log(' Estado premium:', this.isPremiumUser);
                 } else {
                     console.warn('Error al verificar estado premium');
                     this.isPremiumUser = false;
                 }
             } catch (error) {
-                console.error('❌ Error al verificar estado premium:', error);
+                console.error(' Error al verificar estado premium:', error);
                 this.isPremiumUser = false;
             }
         }
@@ -372,7 +370,7 @@
                     const likedContentIds = await response.json();
                     this.likedContentIds = new Set(likedContentIds.map(id => id.toString()));
                     this.updateAllLikeButtons();
-                    console.log('✅ Estados de likes cargados');
+                    console.log(' Estados de likes cargados');
                 }
             } catch (error) {
                 console.error('Error al cargar likes:', error);
@@ -420,7 +418,7 @@
                     });
                 }
             });
-            console.log(`✅ Playlist construida con ${this.playlist.length} canciones`);
+            console.log(`Playlist construida con ${this.playlist.length} canciones`);
         }
 
         getElementReferences() {
@@ -446,10 +444,10 @@
                 this.audio.addEventListener('error', (e) => this.onError(e));
 
                 // Event listeners de diagnóstico
-                this.audio.addEventListener('loadstart', () => console.log('🔵 Audio: loadstart'));
-                this.audio.addEventListener('canplay', () => console.log('🟢 Audio: canplay'));
-                this.audio.addEventListener('play', () => console.log('▶️ Audio: play event'));
-                this.audio.addEventListener('pause', () => console.log('⏸️ Audio: pause event'));
+                this.audio.addEventListener('loadstart', () => console.log(' Audio: loadstart'));
+                this.audio.addEventListener('canplay', () => console.log(' Audio: canplay'));
+                this.audio.addEventListener('play', () => console.log(' Audio: play event'));
+                this.audio.addEventListener('pause', () => console.log(' Audio: pause event'));
             }
 
             if (this.playPauseBtn) {
@@ -470,19 +468,18 @@
             this.setupProgressBar();
             this.setupVolumeControl();
 
-            // ✅ BOTONES DE REPRODUCIR - CORREGIDO
             document.querySelectorAll('.play-in-player-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
 
-                    console.log('🎵 Botón de reproducir clickeado');
+                    console.log(' Botón de reproducir clickeado');
 
                     const track = this.extractTrackData(btn);
-                    console.log('🎵 Datos de la canción:', track);
+                    console.log(' Datos de la canción:', track);
 
                     if (!track.url || track.url.trim() === '' || track.url === 'null') {
-                        console.error('❌ URL de canción inválida:', track.url);
+                        console.error(' URL de canción inválida:', track.url);
                         this.showToast('La canción no tiene una URL válida', 'error');
                         return;
                     }
@@ -523,15 +520,14 @@
             };
         }
 
-        // ✅ MÉTODO PRINCIPAL DE REPRODUCCIÓN - CORREGIDO COMPLETAMENTE
         async playTrackAndStart(track) {
             if (!track || !track.url || track.url.trim() === '' || track.url === 'null') {
-                console.error('❌ Track inválido:', track);
+                console.error(' Track inválido:', track);
                 this.showToast('Error: Canción no válida', 'error');
                 return;
             }
 
-            console.log('🎵 Iniciando reproducción:', track.title);
+            console.log(' Iniciando reproducción:', track.title);
 
             // Actualizar información del track actual
             this.currentTrack = track;
@@ -552,24 +548,23 @@
 
             try {
                 if (this.isPremiumUser) {
-                    console.log('👑 Usuario premium - reproduciendo directamente');
+                    console.log(' Usuario premium - reproduciendo directamente');
                     await this.playDirectly(track);
                 } else {
-                    console.log('🆓 Usuario gratuito - reproduciendo con anuncio');
+                    console.log(' Usuario gratuito - reproduciendo con anuncio');
                     await this.playWithAds(track);
                 }
             } catch (error) {
-                console.error('❌ Error general al reproducir:', error);
+                console.error(' Error general al reproducir:', error);
                 this.showToast('Error al reproducir el audio', 'error');
                 this.isPlaying = false;
                 this.updatePlayPauseButton();
             }
         }
 
-        // ✅ NUEVO MÉTODO PARA CARGAR Y REPRODUCIR AUDIO
         async loadAndPlay(url) {
             return new Promise((resolve, reject) => {
-                console.log('🔄 Cargando audio:', url);
+                console.log(' Cargando audio:', url);
 
                 // Limpiar eventos anteriores
                 const cleanupEvents = () => {
@@ -579,25 +574,25 @@
                 };
 
                 const onCanPlay = async () => {
-                    console.log('✅ Audio listo para reproducir');
+                    console.log(' Audio listo para reproducir');
                     cleanupEvents();
                     try {
                         await this.audio.play();
                         resolve();
                     } catch (playError) {
-                        console.error('❌ Error al reproducir:', playError);
+                        console.error(' Error al reproducir:', playError);
                         reject(playError);
                     }
                 };
 
                 const onError = (e) => {
-                    console.error('❌ Error al cargar audio:', e);
+                    console.error(' Error al cargar audio:', e);
                     cleanupEvents();
                     reject(new Error('Error al cargar audio'));
                 };
 
                 const onLoadedData = () => {
-                    console.log('📦 Datos de audio cargados');
+                    console.log(' Datos de audio cargados');
                 };
 
                 // Configurar eventos
@@ -611,10 +606,9 @@
             });
         }
 
-        // ✅ REPRODUCCIÓN CON ANUNCIOS - MEJORADA
         async playWithAds(track) {
             try {
-                console.log('🎬 Iniciando flujo de anuncio...');
+                console.log(' Iniciando flujo de anuncio...');
 
                 this.isPlayingAd = true;
                 this.originalTrackToPlay = track;
@@ -626,26 +620,24 @@
                 }
 
                 const adData = await response.json();
-                console.log('📢 Anuncio obtenido:', adData);
+                console.log(' Anuncio obtenido:', adData);
 
                 if (!adData.url) {
                     throw new Error('URL del anuncio no disponible');
                 }
 
-                // ✅ MOSTRAR NOTIFICACIÓN ANTES DE REPRODUCIR
                 this.showAdNotification(adData.duration);
 
                 // Actualizar UI con información del anuncio
                 if (this.trackTitle) this.trackTitle.textContent = 'Reproduciendo anuncio...';
                 if (this.trackArtist) this.trackArtist.textContent = 'Anuncio publicitario';
 
-                // ✅ CONFIGURAR EVENT HANDLER PARA FINAL DEL ANUNCIO
                 if (this.adEndedHandler) {
                     this.audio.removeEventListener('ended', this.adEndedHandler);
                 }
 
                 this.adEndedHandler = async () => {
-                    console.log('📢 Anuncio terminado');
+                    console.log(' Anuncio terminado');
                     this.audio.removeEventListener('ended', this.adEndedHandler);
                     this.isPlayingAd = false;
                     this.adEndedHandler = null;
@@ -653,13 +645,12 @@
                     // Ocultar notificación
                     this.hideAdNotification();
 
-                    // ✅ REPRODUCIR MÚSICA DESPUÉS DEL ANUNCIO
                     setTimeout(async () => {
                         try {
                             await this.playDirectly(this.originalTrackToPlay);
                             this.showToast('¡Ahora reproduciendo tu música!', 'success');
                         } catch (error) {
-                            console.error('❌ Error al reproducir música después del anuncio:', error);
+                            console.error(' Error al reproducir música después del anuncio:', error);
                             this.showToast('Error al reproducir la música', 'error');
                         }
                     }, 500);
@@ -667,15 +658,13 @@
 
                 this.audio.addEventListener('ended', this.adEndedHandler);
 
-                // ✅ CONFIGURAR Y REPRODUCIR ANUNCIO
-                console.log('📢 Configurando anuncio:', adData.url);
+                console.log(' Configurando anuncio:', adData.url);
 
-                // ✅ USAR loadAndPlay PARA MEJOR CONTROL
                 await this.loadAndPlay(adData.url);
 
                 this.isPlaying = true;
                 this.updatePlayPauseButton();
-                console.log('✅ Anuncio reproduciendo');
+                console.log(' Anuncio reproduciendo');
 
             } catch (error) {
                 console.error('❌ Error en sistema de anuncios:', error);
@@ -690,7 +679,6 @@
             }
         }
 
-        // ✅ REPRODUCCIÓN DIRECTA - MEJORADA
         async playDirectly(track = this.currentTrack) {
             try {
                 console.log('🎵 Reproduciendo directamente:', track.title);
@@ -700,15 +688,14 @@
                 if (this.trackTitle) this.trackTitle.textContent = track.title || 'Canción desconocida';
                 if (this.trackArtist) this.trackArtist.textContent = track.artist || 'Artista desconocido';
 
-                // ✅ USAR loadAndPlay PARA MEJOR CONTROL
                 await this.loadAndPlay(track.url);
 
                 this.isPlaying = true;
                 this.updatePlayPauseButton();
-                console.log('✅ Música reproduciendo exitosamente:', track.title);
+                console.log(' Música reproduciendo exitosamente:', track.title);
 
             } catch (error) {
-                console.error('❌ Error al reproducir música:', error);
+                console.error(' Error al reproducir música:', error);
                 this.showToast('Error al reproducir el audio', 'error');
                 this.isPlaying = false;
                 this.updatePlayPauseButton();
@@ -767,7 +754,7 @@
 
         async togglePlayPause() {
             if (!this.audio || !this.currentTrack) {
-                console.warn('⚠️ No hay audio o track para pausar/reproducir');
+                console.warn(' No hay audio o track para pausar/reproducir');
                 return;
             }
 
@@ -775,15 +762,15 @@
                 if (this.audio.paused) {
                     await this.audio.play();
                     this.isPlaying = true;
-                    console.log('▶️ Reproducción iniciada/reanudada');
+                    console.log(' Reproducción iniciada/reanudada');
                 } else {
                     this.audio.pause();
                     this.isPlaying = false;
-                    console.log('⏸️ Reproducción pausada');
+                    console.log(' Reproducción pausada');
                 }
                 this.updatePlayPauseButton();
             } catch (error) {
-                console.error('❌ Error al cambiar estado de reproducción:', error);
+                console.error(' Error al cambiar estado de reproducción:', error);
                 this.isPlaying = false;
                 this.updatePlayPauseButton();
                 this.showToast('Error al controlar la reproducción', 'error');
@@ -916,7 +903,7 @@
 
             this.progressBar.addEventListener('mousedown', (e) => {
                 if (this.isPlayingAd) {
-                    console.log('🚫 No se puede adelantar durante un anuncio');
+                    console.log(' No se puede adelantar durante un anuncio');
                     return;
                 }
                 this.isProgressDragging = true;
@@ -1028,7 +1015,7 @@
         }
 
         onTrackEnded() {
-            console.log('🏁 Canción terminada');
+            console.log(' Canción terminada');
             this.isPlaying = false;
             this.updatePlayPauseButton();
 
@@ -1038,12 +1025,12 @@
             }
 
             if (this.isLooping) {
-                console.log('🔄 Repitiendo canción');
+                console.log(' Repitiendo canción');
                 setTimeout(() => {
                     this.playTrackAndStart(this.currentTrack);
                 }, 500);
             } else {
-                console.log('⏭️ Siguiente canción');
+                console.log(' Siguiente canción');
                 setTimeout(() => {
                     this.playNext();
                 }, 1000);
@@ -1051,10 +1038,10 @@
         }
 
         onError(e) {
-            console.error('❌ Error en audio:', e);
-            console.error('❌ Audio src actual:', this.audio?.src);
-            console.error('❌ Audio readyState:', this.audio?.readyState);
-            console.error('❌ Audio networkState:', this.audio?.networkState);
+            console.error(' Error en audio:', e);
+            console.error(' Audio src actual:', this.audio?.src);
+            console.error(' Audio readyState:', this.audio?.readyState);
+            console.error(' Audio networkState:', this.audio?.networkState);
 
             let errorMessage = 'Error al cargar el audio';
             if (this.audio?.error) {
@@ -1072,7 +1059,7 @@
         }
 
         showToast(message, type = 'info') {
-            console.log(`🔔 Toast: ${message} (${type})`);
+            console.log(` Toast: ${message} (${type})`);
             const toastElement = document.getElementById('liveToast');
             const messageElement = document.getElementById('toast-message');
 
@@ -1105,14 +1092,13 @@
         window.location.href = '@Url.Action("Index", "Playlists")?contentId=' + contentId;
     }
 
-    // ✅ INICIALIZACIÓN MEJORADA
     document.addEventListener('DOMContentLoaded', () => {
-        console.log('🎵 Inicializando vista Index de Clientes...');
+        console.log(' Inicializando vista Index de Clientes...');
         try {
             window.indexPlayer = new IndexAudioPlayer();
-            console.log('✅ Vista Index de Clientes inicializada correctamente');
+            console.log(' Vista Index de Clientes inicializada correctamente');
         } catch (error) {
-            console.error('❌ Error al inicializar reproductor:', error);
+            console.error(' Error al inicializar reproductor:', error);
         }
     });
 </script>

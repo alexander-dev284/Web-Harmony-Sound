@@ -1,12 +1,9 @@
 ﻿using HarmonySound.Models;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Net.Http;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
-using HarmonySound.MVC.Models; // Usar el namespace local
+using HarmonySound.MVC.Models; 
 
 namespace HarmonySound.MVC.Controllers
 {
@@ -51,7 +48,6 @@ namespace HarmonySound.MVC.Controllers
                     {
                         Id = p.GetProperty("id").GetInt32(),
                         Name = p.GetProperty("name").GetString() ?? "",
-                        // ✅ AGREGAR ESTA LÍNEA:
                         ImageUrl = p.TryGetProperty("imageUrl", out var imageUrl) 
                             ? imageUrl.GetString() 
                             : null,
@@ -64,7 +60,7 @@ namespace HarmonySound.MVC.Controllers
                                 ArtistName = s.TryGetProperty("artistName", out var artistName) 
                                     ? artistName.GetString() ?? "Artista desconocido"
                                     : "Artista desconocido",
-                                // ✅ AGREGAR: Mapear Duration
+                                // Mapear Duration
                                 Duration = s.TryGetProperty("duration", out var duration) 
                                     ? TimeSpan.Parse(duration.GetString() ?? "00:00:00")
                                     : TimeSpan.Zero
@@ -136,7 +132,7 @@ namespace HarmonySound.MVC.Controllers
                 content.Add(new StringContent(playlist.Name), "Name");
                 content.Add(new StringContent(userId.ToString()), "UserId");
                 
-                // ✅ NUEVO: Agregar imagen si existe
+                // Agregar imagen si existe
                 if (imageFile != null && imageFile.Length > 0)
                 {
                     var fileContent = new StreamContent(imageFile.OpenReadStream());
@@ -165,14 +161,13 @@ namespace HarmonySound.MVC.Controllers
         }
 
         // GET: Playlists/Details/5
-        // ✅ ACTUALIZADO: GET Details - Incluir ImageUrl
         public async Task<IActionResult> Details(int id)
         {
             try
             {
                 int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
                 
-                // ✅ IMPORTANTE: Pasar UserId a la vista
+                // Pasar UserId a la vista
                 ViewBag.UserId = userId;
                 
                 // Obtener playlist específica
@@ -258,7 +253,7 @@ namespace HarmonySound.MVC.Controllers
                     {
                         Id = playlist.GetProperty("id").GetInt32(),
                         Name = playlist.GetProperty("name").GetString() ?? "",
-                        // ✅ AGREGAR: ImageUrl para mostrar imagen actual
+                        // ImageUrl para mostrar imagen actual
                         ImageUrl = playlist.TryGetProperty("imageUrl", out var imageUrl) 
                             ? imageUrl.GetString() 
                             : null,
@@ -271,7 +266,7 @@ namespace HarmonySound.MVC.Controllers
                                 ArtistName = s.TryGetProperty("artistName", out var artistName) 
                                     ? artistName.GetString() ?? "Artista desconocido"
                                     : "Artista desconocido",
-                                // ✅ AGREGAR: Mapear Duration
+                                // Mapear Duration
                                 Duration = s.TryGetProperty("duration", out var duration) 
                                     ? TimeSpan.Parse(duration.GetString() ?? "00:00:00")
                                     : TimeSpan.Zero
@@ -293,7 +288,7 @@ namespace HarmonySound.MVC.Controllers
             }
         }
 
-        // ✅ CORREGIDO: POST PlaylistsController/Edit/5 - Actualizar playlist
+        //POST PlaylistsController/Edit/5 - Actualizar playlist
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Edit(int id, PlaylistDto playlistDto, IFormFile? imageFile)
@@ -314,13 +309,13 @@ namespace HarmonySound.MVC.Controllers
                     return View(playlistDto);
                 }
 
-                // ✅ NUEVO: Crear formulario multipart para manejar imagen
+                // Crear formulario multipart para manejar imagen
                 using var content = new MultipartFormDataContent();
                 content.Add(new StringContent(playlistDto.Id.ToString()), "Id");
                 content.Add(new StringContent(playlistDto.Name), "Name");
                 content.Add(new StringContent(User.FindFirst(ClaimTypes.NameIdentifier).Value), "UserId");
                 
-                // ✅ AGREGAR imagen si se proporciona
+                // AGREGAR imagen si se proporciona
                 if (imageFile != null && imageFile.Length > 0)
                 {
                     var fileContent = new StreamContent(imageFile.OpenReadStream());

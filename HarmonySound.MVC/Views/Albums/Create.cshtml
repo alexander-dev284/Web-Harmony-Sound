@@ -22,7 +22,7 @@
     </div>
 
     <div class="create-content">
-        <!-- ✅ ACTUALIZADO: Agregar enctype para archivos -->
+        <!-- Agregar enctype para archivos -->
         <form asp-action="Create" method="post" class="create-form" id="albumCreateForm" enctype="multipart/form-data">
             @Html.AntiForgeryToken()
             
@@ -34,10 +34,10 @@
                         <div class="preview-cover">
                             <div class="cover-placeholder" id="cover-placeholder">
                                 <i class="fas fa-compact-disc"></i>
-                                <!-- ✅ NUEVO: Vista previa de imagen -->
+                                <!-- Vista previa de imagen -->
                                 <img id="image-preview" style="display: none; width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" />
                             </div>
-                            <!-- ✅ NUEVO: Botón para cambiar imagen -->
+                            <!--  Botón para cambiar imagen -->
                             <div class="image-upload-overlay">
                                 <label for="image-file-input" class="image-upload-btn">
                                     <i class="fas fa-camera"></i>
@@ -136,7 +136,7 @@
                             <span id="char-count">0</span> / 20 caracteres
                         </div>
 
-                        <!-- ✅ NUEVO: Sección de imagen -->
+                        <!-- Sección de imagen -->
                         <div class="form-group">
                             <label class="form-label">
                                 <i class="fas fa-image me-2"></i>
@@ -190,7 +190,6 @@
 </div>
 
 <style>
-    /* Reset base */
     .container {
         max-width: none !important;
         padding: 0 !important;
@@ -205,7 +204,6 @@
         min-height: 100vh;
     }
 
-    /* Contenedor principal */
     .create-album-container {
         max-width: 1200px;
         margin: 0 auto;
@@ -214,7 +212,6 @@
         position: relative;
     }
 
-    /* Header */
     .create-header {
         margin-bottom: 3rem;
         position: relative;
@@ -269,7 +266,6 @@
         margin-bottom: 0;
     }
 
-    /* Contenido principal */
     .create-content {
         background: linear-gradient(135deg, #121212, #1a1a1a);
         border-radius: 16px;
@@ -284,7 +280,6 @@
         gap: 2rem;
     }
 
-    /* Sección principal dividida */
     .form-section {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -292,7 +287,6 @@
         align-items: start;
     }
 
-    /* Lado izquierdo - Vista previa */
     .form-left {
         display: flex;
         flex-direction: column;
@@ -423,7 +417,6 @@
         font-size: 0.9rem;
     }
 
-    /* Información adicional */
     .creation-info {
         display: flex;
         flex-direction: column;
@@ -475,7 +468,6 @@
         margin: 0;
     }
 
-    /* Lado derecho - Formulario */
     .form-right {
         display: flex;
         flex-direction: column;
@@ -499,7 +491,6 @@
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
 
-    /* Grupos de formulario */
     .form-group {
         margin-bottom: 1.5rem;
     }
@@ -552,7 +543,6 @@
         line-height: 1.4;
     }
 
-    /* Alertas */
     .alert {
         border-radius: 8px;
         border: none;
@@ -595,7 +585,6 @@
         color: #dc3545;
     }
 
-    /* ✅ ESTILOS PARA SUBIDA DE IMAGEN */
     .preview-cover {
         position: relative;
         overflow: hidden;
@@ -775,7 +764,6 @@
         font-size: 0.9rem;
     }
 
-    /* Acciones del formulario */
     .form-actions {
         display: flex;
         gap: 1rem;
@@ -833,59 +821,12 @@
         transform: translateY(-2px);
     }
 
-    /* Responsive */
-    @@media (max-width: 768px) {
-        .create-album-container {
-            padding: 1rem;
-        }
-
-        .create-title {
-            font-size: 2rem;
-        }
-
-        .form-section {
-            grid-template-columns: 1fr;
-            gap: 2rem;
-        }
-
-        .form-left {
-            order: 2;
-        }
-
-        .form-right {
-            order: 1;
-        }
-
-        .preview-cover {
-            width: 150px;
-            height: 150px;
-        }
-
-        .cover-placeholder {
-            font-size: 3rem;
-        }
-
-        .form-actions {
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .btn-create, .btn-cancel {
-            width: 100%;
-            max-width: 280px;
-        }
-
-        .creation-info {
-            display: none;
-        }
-    }
 
     /* Ocultar elementos del layout */
     header, footer {
         display: none !important;
     }
 
-    /* FontAwesome */
     .fas {
         font-family: "Font Awesome 5 Free" !important;
         font-weight: 900 !important;
@@ -896,7 +837,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
 <script>
-// ✅ NUEVO: JavaScript para vista previa de imagen
+// JavaScript para vista previa de imagen
 document.addEventListener('DOMContentLoaded', () => {
     const titleInput = document.getElementById('album-title-input');
     const previewTitle = document.getElementById('preview-title');
@@ -948,7 +889,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // ✅ NUEVO: Manejo de imagen
+    // Manejo de imagen
     if (imageInput) {
         imageInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
@@ -983,14 +924,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // ✅ NUEVO: Click en área de upload
+    // Click en área de upload
     if (uploadArea) {
         uploadArea.addEventListener('click', function() {
             imageInput.click();
         });
     }
     
-    // ✅ NUEVO: Drag & Drop
+    // Drag & Drop
     if (uploadArea) {
         uploadArea.addEventListener('dragover', function(e) {
             e.preventDefault();
@@ -1076,7 +1017,7 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('Vista de creación de álbum inicializada');
 });
 
-// ✅ NUEVO: Función para remover imagen seleccionada
+// Función para remover imagen seleccionada
 function removeSelectedImage() {
     const imageInput = document.getElementById('image-file-input');
     const imagePreview = document.getElementById('image-preview');
