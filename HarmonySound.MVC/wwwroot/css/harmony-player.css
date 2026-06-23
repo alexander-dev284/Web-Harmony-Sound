@@ -1,0 +1,222 @@
+/* ============================================================
+   HarmonySound — Estilos compartidos del reproductor
+   ============================================================ */
+
+/* ── Barra del reproductor ─────────────────────────────────── */
+.custom-player {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: linear-gradient(135deg, #181818, #1a1a1a);
+    border-top: 1px solid #282828;
+    height: 90px;
+    z-index: 1000;
+    box-shadow: 0 -4px 20px rgba(0,0,0,.5);
+}
+.custom-player.d-none { display: none !important; }
+
+.player-container {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    align-items: center;
+    height: 100%;
+    padding: 0 16px;
+    gap: 16px;
+}
+
+/* Now playing */
+.now-playing {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+.track-cover {
+    width: 56px; height: 56px;
+    flex-shrink: 0;
+}
+.track-cover .cover-placeholder {
+    width: 100%; height: 100%;
+    background: linear-gradient(135deg, #282828, #404040);
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    color: #b3b3b3; font-size: 1.4rem;
+}
+.now-playing .track-info { min-width: 0; flex-grow: 1; }
+.now-playing .track-title {
+    font-size: 14px; font-weight: 400; color: #fff;
+    margin-bottom: 4px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.now-playing .track-artist {
+    font-size: 12px; color: #b3b3b3;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* Botón corazón en el player */
+.btn-heart {
+    background: none; border: none;
+    color: #b3b3b3; padding: 8px; cursor: pointer;
+    border-radius: 50%;
+    transition: color .2s ease;
+    flex-shrink: 0;
+}
+.btn-heart:hover    { color: #1db954; }
+.btn-heart.liked    { color: #1db954 !important; }
+.btn-heart.liked i  { font-weight: 900; }
+
+/* Controles centrales */
+.player-controls {
+    display: flex; flex-direction: column;
+    align-items: center; gap: 8px;
+}
+.control-buttons {
+    display: flex; align-items: center; gap: 16px;
+}
+.control-btn {
+    background: none; border: none;
+    color: #b3b3b3; padding: 8px; cursor: pointer;
+    border-radius: 50%;
+    transition: all .2s ease;
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+}
+.control-btn:hover           { color: #fff; transform: scale(1.1); }
+.control-btn.active          { color: #1db954 !important; }
+.control-btn.play-btn        { background: #fff !important; color: #000 !important;
+                                width: 40px !important; height: 40px !important; font-size: 18px !important; }
+.control-btn.play-btn:hover  { background: #f0f0f0 !important; transform: scale(1.05) !important; }
+
+/* Barra de progreso */
+.progress-section {
+    display: flex; align-items: center; gap: 12px;
+    width: 100%; max-width: 500px;
+}
+.time {
+    font-size: 11px; color: #b3b3b3;
+    font-variant-numeric: tabular-nums;
+    min-width: 40px; text-align: center;
+}
+.custom-progress-bar {
+    position: relative; width: 100%; height: 6px;
+    cursor: pointer; border-radius: 3px; overflow: visible;
+}
+.progress-background {
+    position: absolute; inset: 0;
+    background: #535353; border-radius: 3px;
+}
+.progress-fill {
+    position: absolute; top: 0; left: 0; height: 100%;
+    background: linear-gradient(90deg, #1db954, #1ed760);
+    border-radius: 3px; width: 0%;
+    transition: width .1s ease;
+}
+.progress-handle {
+    position: absolute; top: 50%; left: 0%;
+    transform: translate(-50%, -50%);
+    width: 14px; height: 14px;
+    background: #fff; border-radius: 50%;
+    cursor: pointer; opacity: 0;
+    transition: opacity .2s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,.3);
+}
+.custom-progress-bar:hover .progress-handle,
+.custom-progress-bar.dragging .progress-handle { opacity: 1; }
+
+/* Volumen */
+.extra-controls {
+    display: flex; align-items: center;
+    justify-content: flex-end; gap: 16px;
+}
+.volume-control { display: flex; align-items: center; gap: 8px; }
+.custom-volume-slider {
+    position: relative; width: 80px; height: 4px;
+    cursor: pointer; border-radius: 2px; overflow: visible;
+}
+.volume-background {
+    position: absolute; inset: 0;
+    background: #535353; border-radius: 2px;
+}
+.volume-fill {
+    position: absolute; top: 0; left: 0; height: 100%;
+    background: #1db954; border-radius: 2px; width: 50%; z-index: 1;
+}
+.volume-handle {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 12px; height: 12px;
+    background: #fff; border-radius: 50%; cursor: pointer;
+    z-index: 2; box-shadow: 0 2px 8px rgba(0,0,0,.3);
+    opacity: 0; transition: opacity .2s ease;
+}
+.custom-volume-slider:hover .volume-handle,
+.custom-volume-slider.dragging .volume-handle { opacity: 1; }
+
+/* ── Like buttons en listas ────────────────────────────────── */
+.like-btn,
+.track-like-btn {
+    background: none !important;
+    border: none !important;
+    color: #b3b3b3 !important;
+    padding: 6px !important;
+    border-radius: 50% !important;
+    cursor: pointer !important;
+    transition: all .2s ease;
+    width: 28px !important; height: 28px !important;
+    display: inline-flex !important;
+    align-items: center !important; justify-content: center !important;
+    font-size: 13px !important;
+}
+.like-btn:hover,
+.track-like-btn:hover          { color: #1db954 !important; transform: scale(1.15); }
+.like-btn.liked,
+.track-like-btn.liked          { color: #1db954 !important; }
+.like-btn.liked i,
+.track-like-btn.liked i        { font-weight: 900 !important; }
+
+/* ── Filas de canciones — estados hover / playing ──────────── */
+.track-row,
+.song-item {
+    cursor: pointer;
+    transition: background .2s ease, border-color .2s ease;
+}
+.track-row:hover,
+.song-item:hover               { background: #1a1a1a !important; }
+.track-row.playing,
+.song-item.playing             { background: #1a1a1a !important; border-color: #1db954 !important; }
+.track-row.playing .track-title,
+.song-item.playing .song-title { color: #1db954 !important; }
+
+/* ── Notificación de anuncio ───────────────────────────────── */
+.harmony-ad-notification {
+    position: fixed; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255,152,0,.95); color: #000;
+    padding: 20px 28px; border-radius: 12px;
+    font-size: 14px; z-index: 1100;
+    box-shadow: 0 8px 32px rgba(0,0,0,.4);
+    text-align: center; font-weight: 600;
+    border: 2px solid #ff8f00;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+}
+.harmony-ad-notification i  { font-size: 20px; }
+.harmony-ad-notification small { opacity: .75; font-weight: 400; }
+.harmony-ad-notification .ad-countdown { font-size: 18px; font-weight: 700; }
+
+/* ── Toast ─────────────────────────────────────────────────── */
+.harmony-toast {
+    position: fixed; bottom: 100px; left: 50%;
+    transform: translateX(-50%) translateY(12px);
+    color: #fff; padding: 10px 20px; border-radius: 8px;
+    font-size: 14px; font-weight: 600;
+    box-shadow: 0 4px 16px rgba(0,0,0,.35);
+    z-index: 1200; opacity: 0;
+    transition: opacity .25s ease, transform .25s ease;
+    pointer-events: none;
+    white-space: nowrap;
+}
+.harmony-toast.show {
+    opacity: 1; transform: translateX(-50%) translateY(0);
+}
+
+/* ── FontAwesome override ──────────────────────────────────── */
+.fas { font-family: "Font Awesome 5 Free" !important; font-weight: 900 !important; }

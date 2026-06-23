@@ -525,14 +525,15 @@ namespace HarmonySound.MVC.Controllers
                 {
                     var json = await response.Content.ReadAsStringAsync();
                     var likes = JsonSerializer.Deserialize<List<int>>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    return Json(likes);
+                    // Use plain JsonSerializerOptions to avoid ReferenceHandler.Preserve wrapping into {"$values":[...]}
+                    return new JsonResult(likes, new System.Text.Json.JsonSerializerOptions());
                 }
-                
-                return Json(new List<int>());
+
+                return new JsonResult(new List<int>(), new System.Text.Json.JsonSerializerOptions());
             }
-            catch (Exception ex)
+            catch
             {
-                return Json(new List<int>());
+                return new JsonResult(new List<int>(), new System.Text.Json.JsonSerializerOptions());
             }
         }
 

@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "qVGHN7fzpvo=",
+  "dgSpecHash": "ccgpyspHJWA=",
   "success": true,
-  "projectFilePath": "C:\\Users\\Victus\\Desktop\\Web-Harmony-Sound\\HarmonySound.MVC\\HarmonySound.MVC.csproj",
+  "projectFilePath": "C:\\Universidad\\Tercer Semestre\\Herramientas de Programación\\Web-Harmony-Sound\\HarmonySound.MVC\\HarmonySound.MVC.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Victus\\.nuget\\packages\\humanizer\\2.14.1\\humanizer.2.14.1.nupkg.sha512",
     "C:\\Users\\Victus\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",

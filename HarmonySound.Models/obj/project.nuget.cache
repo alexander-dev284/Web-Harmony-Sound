@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "j58S6IQsfL8=",
+  "dgSpecHash": "FxlD24Iq2XQ=",
   "success": true,
-  "projectFilePath": "C:\\Users\\Victus\\Desktop\\Web-Harmony-Sound\\HarmonySound.Models\\HarmonySound.Models.csproj",
+  "projectFilePath": "C:\\Universidad\\Tercer Semestre\\Herramientas de Programación\\Web-Harmony-Sound\\HarmonySound.Models\\HarmonySound.Models.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Victus\\.nuget\\packages\\microsoft.aspnetcore.cryptography.internal\\8.0.0\\microsoft.aspnetcore.cryptography.internal.8.0.0.nupkg.sha512",
     "C:\\Users\\Victus\\.nuget\\packages\\microsoft.aspnetcore.cryptography.keyderivation\\8.0.0\\microsoft.aspnetcore.cryptography.keyderivation.8.0.0.nupkg.sha512",

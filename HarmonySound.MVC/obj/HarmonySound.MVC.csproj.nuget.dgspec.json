@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Victus\\Desktop\\Web-Harmony-Sound\\HarmonySound.MVC\\HarmonySound.MVC.csproj": {}
+    "C:\\Universidad\\Tercer Semestre\\Herramientas de Programación\\Web-Harmony-Sound\\HarmonySound.MVC\\HarmonySound.MVC.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Victus\\Desktop\\Web-Harmony-Sound\\HarmonySound.API.Consumer\\HarmonySound.API.Consumer.csproj": {
+    "C:\\Universidad\\Tercer Semestre\\Herramientas de Programación\\Web-Harmony-Sound\\HarmonySound.API.Consumer\\HarmonySound.API.Consumer.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Victus\\Desktop\\Web-Harmony-Sound\\HarmonySound.API.Consumer\\HarmonySound.API.Consumer.csproj",
+        "projectUniqueName": "C:\\Universidad\\Tercer Semestre\\Herramientas de Programación\\Web-Harmony-Sound\\HarmonySound.API.Consumer\\HarmonySound.API.Consumer.csproj",
         "projectName": "HarmonySound.API.Consumer",
-        "projectPath": "C:\\Users\\Victus\\Desktop\\Web-Harmony-Sound\\HarmonySound.API.Consumer\\HarmonySound.API.Consumer.csproj",
+        "projectPath": "C:\\Universidad\\Tercer Semestre\\Herramientas de Programación\\Web-Harmony-Sound\\HarmonySound.API.Consumer\\HarmonySound.API.Consumer.csproj",
         "packagesPath": "C:\\Users\\Victus\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Victus\\Desktop\\Web-Harmony-Sound\\HarmonySound.API.Consumer\\obj\\",
+        "outputPath": "C:\\Universidad\\Tercer Semestre\\Herramientas de Programación\\Web-Harmony-Sound\\HarmonySound.API.Consumer\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -26,6 +26,7 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -71,18 +72,18 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.302/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.313/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\Victus\\Desktop\\Web-Harmony-Sound\\HarmonySound.Models\\HarmonySound.Models.csproj": {
+    "C:\\Universidad\\Tercer Semestre\\Herramientas de Programación\\Web-Harmony-Sound\\HarmonySound.Models\\HarmonySound.Models.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Victus\\Desktop\\Web-Harmony-Sound\\HarmonySound.Models\\HarmonySound.Models.csproj",
+        "projectUniqueName": "C:\\Universidad\\Tercer Semestre\\Herramientas de Programación\\Web-Harmony-Sound\\HarmonySound.Models\\HarmonySound.Models.csproj",
         "projectName": "HarmonySound.Models",
-        "projectPath": "C:\\Users\\Victus\\Desktop\\Web-Harmony-Sound\\HarmonySound.Models\\HarmonySound.Models.csproj",
+        "projectPath": "C:\\Universidad\\Tercer Semestre\\Herramientas de Programación\\Web-Harmony-Sound\\HarmonySound.Models\\HarmonySound.Models.csproj",
         "packagesPath": "C:\\Users\\Victus\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Victus\\Desktop\\Web-Harmony-Sound\\HarmonySound.Models\\obj\\",
+        "outputPath": "C:\\Universidad\\Tercer Semestre\\Herramientas de Programación\\Web-Harmony-Sound\\HarmonySound.Models\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -97,6 +98,7 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -142,18 +144,18 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.302/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.313/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\Victus\\Desktop\\Web-Harmony-Sound\\HarmonySound.MVC\\HarmonySound.MVC.csproj": {
+    "C:\\Universidad\\Tercer Semestre\\Herramientas de Programación\\Web-Harmony-Sound\\HarmonySound.MVC\\HarmonySound.MVC.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Victus\\Desktop\\Web-Harmony-Sound\\HarmonySound.MVC\\HarmonySound.MVC.csproj",
+        "projectUniqueName": "C:\\Universidad\\Tercer Semestre\\Herramientas de Programación\\Web-Harmony-Sound\\HarmonySound.MVC\\HarmonySound.MVC.csproj",
         "projectName": "HarmonySound.MVC",
-        "projectPath": "C:\\Users\\Victus\\Desktop\\Web-Harmony-Sound\\HarmonySound.MVC\\HarmonySound.MVC.csproj",
+        "projectPath": "C:\\Universidad\\Tercer Semestre\\Herramientas de Programación\\Web-Harmony-Sound\\HarmonySound.MVC\\HarmonySound.MVC.csproj",
         "packagesPath": "C:\\Users\\Victus\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Victus\\Desktop\\Web-Harmony-Sound\\HarmonySound.MVC\\obj\\",
+        "outputPath": "C:\\Universidad\\Tercer Semestre\\Herramientas de Programación\\Web-Harmony-Sound\\HarmonySound.MVC\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -168,17 +170,18 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "C:\\Users\\Victus\\Desktop\\Web-Harmony-Sound\\HarmonySound.API.Consumer\\HarmonySound.API.Consumer.csproj": {
-                "projectPath": "C:\\Users\\Victus\\Desktop\\Web-Harmony-Sound\\HarmonySound.API.Consumer\\HarmonySound.API.Consumer.csproj"
+              "C:\\Universidad\\Tercer Semestre\\Herramientas de Programación\\Web-Harmony-Sound\\HarmonySound.API.Consumer\\HarmonySound.API.Consumer.csproj": {
+                "projectPath": "C:\\Universidad\\Tercer Semestre\\Herramientas de Programación\\Web-Harmony-Sound\\HarmonySound.API.Consumer\\HarmonySound.API.Consumer.csproj"
               },
-              "C:\\Users\\Victus\\Desktop\\Web-Harmony-Sound\\HarmonySound.Models\\HarmonySound.Models.csproj": {
-                "projectPath": "C:\\Users\\Victus\\Desktop\\Web-Harmony-Sound\\HarmonySound.Models\\HarmonySound.Models.csproj"
+              "C:\\Universidad\\Tercer Semestre\\Herramientas de Programación\\Web-Harmony-Sound\\HarmonySound.Models\\HarmonySound.Models.csproj": {
+                "projectPath": "C:\\Universidad\\Tercer Semestre\\Herramientas de Programación\\Web-Harmony-Sound\\HarmonySound.Models\\HarmonySound.Models.csproj"
               }
             }
           }
@@ -239,7 +242,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.302/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.313/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

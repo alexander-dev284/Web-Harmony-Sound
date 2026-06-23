@@ -1,0 +1,72 @@
+@* Barra del reproductor compartida — incluir al final de cada vista con canciones *@
+
+<link rel="stylesheet" href="~/css/harmony-player.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+
+<div id="custom-player" class="custom-player d-none">
+    <div class="player-container">
+
+        <div class="now-playing">
+            <div class="track-cover">
+                <div class="cover-placeholder">
+                    <i class="fas fa-music"></i>
+                </div>
+            </div>
+            <div class="track-info">
+                <div id="track-title"  class="track-title">Selecciona una canción</div>
+                <div id="track-artist" class="track-artist">Artista</div>
+            </div>
+            <button class="btn-heart" id="like-current-btn" title="Me gusta">
+                <i class="far fa-heart"></i>
+            </button>
+        </div>
+
+        <div class="player-controls">
+            <div class="control-buttons">
+                <button class="control-btn" id="shuffle-btn" title="Aleatorio">
+                    <i class="fas fa-random"></i>
+                </button>
+                <button class="control-btn" id="prev-btn" title="Anterior">
+                    <i class="fas fa-step-backward"></i>
+                </button>
+                <button class="control-btn play-btn" id="play-pause-btn" title="Reproducir / Pausar">
+                    <i class="fas fa-play"></i>
+                </button>
+                <button class="control-btn" id="next-btn" title="Siguiente">
+                    <i class="fas fa-step-forward"></i>
+                </button>
+                <button class="control-btn" id="repeat-btn" title="Repetir">
+                    <i class="fas fa-redo"></i>
+                </button>
+            </div>
+
+            <div class="progress-section">
+                <span id="current-time" class="time">0:00</span>
+                <div class="custom-progress-bar" id="custom-progress-bar">
+                    <div class="progress-background"></div>
+                    <div class="progress-fill"   id="progress-fill"></div>
+                    <div class="progress-handle" id="progress-handle"></div>
+                </div>
+                <span id="total-time" class="time">0:00</span>
+            </div>
+        </div>
+
+        <div class="extra-controls">
+            <div class="volume-control">
+                <button class="control-btn" id="volume-btn" title="Volumen">
+                    <i class="fas fa-volume-up"></i>
+                </button>
+                <div class="custom-volume-slider" id="custom-volume-slider">
+                    <div class="volume-background"></div>
+                    <div class="volume-fill"   id="volume-fill"></div>
+                    <div class="volume-handle" id="volume-handle"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<audio id="hidden-audio" style="display:none" preload="metadata">
+    <source id="audio-source" src="" type="audio/mpeg">
+</audio>

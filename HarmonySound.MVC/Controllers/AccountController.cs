@@ -50,14 +50,11 @@ namespace HarmonySound.MVC.Controllers
                     if (!response.IsSuccessStatusCode)
                     {
                         var errorContent = await response.Content.ReadAsStringAsync();
-                        
-                        // ✅ VERIFICAR: Si es un error de cuenta suspendida desde la API
+
                         if (errorContent.Contains("suspendida") || errorContent.Contains("suspended"))
-                        {
                             return RedirectToAction("AccountSuspended");
-                        }
-                        
-                        ModelState.AddModelError("", "Error: " + errorContent);
+
+                        ModelState.AddModelError("", GetFriendlyApiError(errorContent, response.StatusCode));
                         return View(model);
                     }
 
@@ -173,7 +170,7 @@ namespace HarmonySound.MVC.Controllers
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", "Error de red o de servidor: " + ex.Message);
+                ModelState.AddModelError("", GetFriendlyNetworkError(ex));
                 return View(model);
             }
         }
@@ -221,7 +218,7 @@ namespace HarmonySound.MVC.Controllers
                     {
                         var errorContent = await response.Content.ReadAsStringAsync();
                         Console.WriteLine($"Error API: {errorContent}");
-                        ModelState.AddModelError("", "Error: " + errorContent);
+                        ModelState.AddModelError("", GetFriendlyApiError(errorContent, response.StatusCode));
                         return View(model);
                     }
 
@@ -266,7 +263,7 @@ namespace HarmonySound.MVC.Controllers
                     {
                         var twoFactorError = await twoFactorResponse.Content.ReadAsStringAsync();
                         Console.WriteLine($"Error 2FA: {twoFactorError}");
-                        ModelState.AddModelError("", "Error al generar código de verificación: " + twoFactorError);
+                        ModelState.AddModelError("", "No se pudo enviar el código de verificación. Intenta de nuevo más tarde.");
                         return View(model);
                     }
 
@@ -285,7 +282,7 @@ namespace HarmonySound.MVC.Controllers
             {
                 Console.WriteLine($"Excepción MVC: {ex.Message}");
                 Console.WriteLine($"StackTrace: {ex.StackTrace}");
-                ModelState.AddModelError("", "Error de red o de servidor: " + ex.Message);
+                ModelState.AddModelError("", GetFriendlyNetworkError(ex));
                 return View(model);
             }
         }
@@ -462,7 +459,7 @@ namespace HarmonySound.MVC.Controllers
             {
                 Console.WriteLine($"Excepción en verificación 2FA: {ex.Message}");
                 Console.WriteLine($"StackTrace: {ex.StackTrace}");
-                ModelState.AddModelError("", "Error de red o de servidor: " + ex.Message);
+                ModelState.AddModelError("", GetFriendlyNetworkError(ex));
                 TempData.Keep("AdminToken");
                 TempData.Keep("AdminUserId");
                 return View(model);
@@ -515,12 +512,11 @@ namespace HarmonySound.MVC.Controllers
 
                     if (response.IsSuccessStatusCode)
                     {
-                        // Redirige a la vista de confirmación de registro
                         return RedirectToAction("RegisterConfirmation", "Account");
                     }
                     else
                     {
-                        ModelState.AddModelError("", "No se pudo registrar el usuario: " + errorContent);
+                        ModelState.AddModelError("", GetFriendlyApiError(errorContent, response.StatusCode));
                         model.Roles = await GetRolesFromApi();
                         return View(model);
                     }
@@ -528,7 +524,7 @@ namespace HarmonySound.MVC.Controllers
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", "Error de red o de servidor: " + ex.Message);
+                ModelState.AddModelError("", GetFriendlyNetworkError(ex));
                 model.Roles = await GetRolesFromApi();
                 return View(model);
             }
@@ -745,7 +741,7 @@ namespace HarmonySound.MVC.Controllers
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", "Error de red o de servidor: " + ex.Message);
+                ModelState.AddModelError("", GetFriendlyNetworkError(ex));
                 return View(model);
             }
         }
@@ -794,7 +790,8 @@ namespace HarmonySound.MVC.Controllers
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "Error al procesar la solicitud: " + ex.Message;
+                Console.WriteLine($"Error en ResetPassword GET: {ex.Message}");
+                TempData["Error"] = "No se pudo procesar la solicitud. Intenta de nuevo.";
             }
 
             return RedirectToAction("ForgotPassword");
@@ -832,14 +829,14 @@ namespace HarmonySound.MVC.Controllers
                     else
                     {
                         var errorContent = await response.Content.ReadAsStringAsync();
-                        ModelState.AddModelError("", "Error: " + errorContent);
+                        ModelState.AddModelError("", GetFriendlyApiError(errorContent, response.StatusCode));
                         return View(model);
                     }
                 }
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", "Error de red o de servidor: " + ex.Message);
+                ModelState.AddModelError("", GetFriendlyNetworkError(ex));
                 return View(model);
             }
         }
@@ -870,6 +867,42 @@ namespace HarmonySound.MVC.Controllers
                 "Banned" => "Tu cuenta ha sido bloqueada permanentemente por violación de términos de servicio.",
                 _ => "Estado de cuenta no válido. Contacta al administrador para más información."
             };
+        }
+
+        private string GetFriendlyApiError(string errorContent, System.Net.HttpStatusCode statusCode)
+        {
+            try
+            {
+                var errorObj = JsonConvert.DeserializeObject<dynamic>(errorContent);
+                var message = errorObj?.message?.ToString() ?? errorObj?.Message?.ToString() ?? errorObj?.title?.ToString();
+                if (!string.IsNullOrWhiteSpace(message) && message.Length < 200
+                    && !message.Contains("Exception") && !message.Contains("socket", StringComparison.OrdinalIgnoreCase)
+                    && !message.Contains("SQL", StringComparison.OrdinalIgnoreCase)
+                    && !message.Contains("StackTrace") && !message.Contains("at System."))
+                {
+                    return message;
+                }
+            }
+            catch { }
+
+            return statusCode switch
+            {
+                System.Net.HttpStatusCode.Unauthorized => "Correo o contraseña incorrectos. Verifica tus datos e intenta de nuevo.",
+                System.Net.HttpStatusCode.Forbidden => "No tienes permisos para acceder como administrador.",
+                System.Net.HttpStatusCode.NotFound => "No se encontró una cuenta con ese correo electrónico.",
+                System.Net.HttpStatusCode.TooManyRequests => "Demasiados intentos fallidos. Espera unos minutos e intenta de nuevo.",
+                >= System.Net.HttpStatusCode.InternalServerError => "El servidor tuvo un problema. Por favor intenta de nuevo más tarde.",
+                _ => "No se pudo procesar tu solicitud. Verifica tus datos e intenta de nuevo."
+            };
+        }
+
+        private string GetFriendlyNetworkError(Exception ex)
+        {
+            if (ex is HttpRequestException || ex.InnerException is System.Net.Sockets.SocketException)
+                return "No se pudo conectar al servidor. Verifica tu conexión a internet e intenta de nuevo.";
+            if (ex is TaskCanceledException || ex is TimeoutException)
+                return "La solicitud tardó demasiado. Por favor intenta de nuevo.";
+            return "Ocurrió un error inesperado. Por favor intenta de nuevo más tarde.";
         }
 
         // Action para mostrar vista de cuenta suspendida

@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "TEJ9uKmSc+Q=",
+  "dgSpecHash": "VGpxOjKnJ38=",
   "success": true,
-  "projectFilePath": "C:\\Users\\Victus\\Desktop\\Web-Harmony-Sound\\HarmonySound.API.Consumer\\HarmonySound.API.Consumer.csproj",
+  "projectFilePath": "C:\\Universidad\\Tercer Semestre\\Herramientas de Programación\\Web-Harmony-Sound\\HarmonySound.API.Consumer\\HarmonySound.API.Consumer.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Victus\\.nuget\\packages\\microsoft.aspnetcore.jsonpatch\\8.0.15\\microsoft.aspnetcore.jsonpatch.8.0.15.nupkg.sha512",
     "C:\\Users\\Victus\\.nuget\\packages\\microsoft.aspnetcore.mvc.newtonsoftjson\\8.0.15\\microsoft.aspnetcore.mvc.newtonsoftjson.8.0.15.nupkg.sha512",
