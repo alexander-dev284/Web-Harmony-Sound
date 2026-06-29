@@ -1,0 +1,49 @@
+/* ============================================================
+   UniSound — TEMA OSCURO POR DEFECTO
+   Se desactiva solo si el sistema pide modo claro explícito.
+   Las vistas ahora usan var(--us-*); aquí solo redefinimos esas
+   variables a su versión oscura. El rojo de acento NO cambia.
+   ============================================================ */
+
+@media not all and (prefers-color-scheme: light) {
+
+    :root {
+        /* Superficies */
+        --us-bg:          #050505;   /* Fondo de página */
+        --us-surface:     #121212;   /* Tarjetas / paneles */
+        --us-surface-alt: #1a1a1a;   /* Superficie alterna */
+        --us-surface-2:   #1e1e1e;   /* Superficie elevada */
+
+        /* Texto */
+        --us-ink:        #ffffff;    /* Texto principal */
+        --us-ink-soft:   #a0a0a0;    /* Texto secundario */
+        --us-ink-faint:  #8a9099;    /* Texto terciario / placeholders */
+
+        /* Bordes y sombras */
+        --us-border:  rgba(255, 255, 255, 0.12);
+        --us-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.5);
+        --us-shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.5);
+        --us-shadow-md: 0 6px 18px rgba(0, 0, 0, 0.55);
+        --us-shadow-lg: 0 14px 40px rgba(0, 0, 0, 0.65);
+
+        /* El acento rojo (--us-accent / --us-accent-hover) se mantiene */
+        color-scheme: dark;
+    }
+
+    /* La página queda un punto más oscura que las tarjetas (profundidad) */
+    html body,
+    html body.us-app,
+    html .us-app {
+        background: var(--us-bg) !important;
+    }
+
+    /* Controles del reproductor que deben seguir claros en oscuro */
+    html .control-btn.play-btn {
+        background: #ffffff !important;
+        color: #1c1c1e !important;
+    }
+    html .progress-handle,
+    html .volume-handle {
+        background: #ffffff !important;
+    }
+}

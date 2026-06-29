@@ -467,12 +467,16 @@ namespace HarmonySound.MVC.Controllers
         }
 
         // GET: /Account/Register
-        public async Task<ActionResult> Register()
+        // Acepta email/token cuando el usuario llega desde un correo de invitación a plan compartido,
+        // para precargar el correo y arrastrar el token a través del formulario.
+        public async Task<ActionResult> Register(string? email = null, string? token = null)
         {
             var roles = await GetRolesFromApi();
             var model = new RegisterViewModel
             {
-                Roles = roles
+                Roles = roles,
+                Email = email,
+                InvitationToken = token
             };
             return View(model);
         }
@@ -512,6 +516,28 @@ namespace HarmonySound.MVC.Controllers
 
                     if (response.IsSuccessStatusCode)
                     {
+                        // Si el registro proviene de una invitación, acéptala ahora que el usuario ya existe
+                        // para asignarle automáticamente el plan compartido.
+                        if (!string.IsNullOrEmpty(model.InvitationToken))
+                        {
+                            try
+                            {
+                                var acceptPayload = JsonConvert.SerializeObject(new { Token = model.InvitationToken });
+                                var acceptContent = new StringContent(acceptPayload, System.Text.Encoding.UTF8, "application/json");
+                                var acceptResponse = await client.PostAsync("https://localhost:7120/api/PlanInvitations/accept", acceptContent);
+
+                                TempData[acceptResponse.IsSuccessStatusCode ? "Success" : "Info"] =
+                                    acceptResponse.IsSuccessStatusCode
+                                        ? "¡Cuenta creada y plan compartido activado! Inicia sesión para disfrutar tu acceso premium."
+                                        : "Tu cuenta fue creada. Inicia sesión; si el plan compartido no aparece, pide que te reenvíen la invitación.";
+                            }
+                            catch (Exception inviteEx)
+                            {
+                                System.Diagnostics.Debug.WriteLine($"Error al aceptar la invitación tras el registro: {inviteEx.Message}");
+                                TempData["Info"] = "Tu cuenta fue creada. Inicia sesión para activar tu plan compartido.";
+                            }
+                        }
+
                         return RedirectToAction("RegisterConfirmation", "Account");
                     }
                     else

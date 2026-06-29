@@ -1,7 +1,7 @@
 @model HarmonySound.MVC.Models.SearchResultsViewModel
 
 @{
-    ViewData["Title"] = "Welcome Client";
+    ViewData["Title"] = "Bienvenido";
 }
 
 <div class="music-library-container">
@@ -18,7 +18,7 @@
 
         <h1 class="library-title">
             <i class="fas fa-music me-3"></i>
-            Bienvenido a Harmony Sound
+            Bienvenido a UniSound
         </h1>
         <p class="library-subtitle">Descubre y reproduce música de tus artistas favoritos</p>
         
@@ -34,16 +34,16 @@
             
             <div class="action-buttons">
                 <a href="@Url.Action("EditProfile", "Clients")" class="btn-action btn-primary">
-                    <i class="fas fa-user-edit me-2"></i>Edit Profile
+                    <i class="fas fa-user-edit me-2"></i>Editar perfil
                 </a>
                 <a href="@Url.Action("Index", "Clients")" class="btn-action btn-success">
-                    <i class="fas fa-music me-2"></i>Music Library
+                    <i class="fas fa-music me-2"></i>Biblioteca musical
                 </a>
                 <a href="@Url.Action("Index", "Playlists")" class="btn-action btn-info">
-                    <i class="fas fa-list me-2"></i>My Playlists
+                    <i class="fas fa-list me-2"></i>Mis playlists
                 </a>
                 <a href="@Url.Action("Index", "Plans")" class="btn-action btn-warning">
-                    <i class="fas fa-crown me-2"></i>Subscription
+                    <i class="fas fa-crown me-2"></i>Suscripción
                 </a>
             </div>
         </div>
@@ -175,58 +175,311 @@
     }
     else
     {
-        <!-- Estado inicial - sin búsqueda -->
-        <div class="welcome-state">
-            <div class="welcome-icon">
-                <i class="fas fa-music"></i>
+        <!-- ===== PANTALLA DE INICIO / DESCUBRIMIENTO ===== -->
+
+        <!-- Canciones más populares del momento -->
+        @if (Model.PopularContents?.Any() == true)
+        {
+            <div class="discovery-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-fire me-2"></i>
+                        Lo más popular del momento
+                    </h2>
+                    <p class="section-subtitle">Las canciones que todos están escuchando</p>
+                </div>
+
+                <div class="songs-container">
+                    <div class="songs-list">
+                        @{ var rank = 0; }
+                        @foreach (var content in Model.PopularContents)
+                        {
+                            rank++;
+                            <div class="song-item" data-content-id="@content.Id">
+                                <div class="song-main-info">
+                                    <div class="song-rank">@rank</div>
+                                    <div class="song-cover">
+                                        <div class="cover-placeholder">
+                                            <i class="fas fa-music"></i>
+                                        </div>
+                                    </div>
+                                    <div class="song-details">
+                                        <div class="song-title">@content.Title</div>
+                                        <div class="song-meta">
+                                            <span class="content-type">@content.Type</span>
+                                            <a class="artist-name artist-link" href="@Url.Action("ArtistAlbums", "Clients", new { artistId = content.ArtistId })">@content.ArtistName</a>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="song-likes" title="Me gusta">
+                                    <i class="fas fa-heart"></i>
+                                    <span>@content.Likes</span>
+                                </div>
+
+                                <div class="song-actions">
+                                    <button class="btn btn-playlist"
+                                            onclick="redirectToPlaylistsWithContent(@content.Id)"
+                                            title="Agregar a Playlist">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                    <button class="btn btn-play play-in-player-btn"
+                                            data-content-id="@content.Id"
+                                            data-title="@content.Title"
+                                            data-artist="@content.ArtistName"
+                                            data-url="@content.UrlMedia"
+                                            title="Reproducir">
+                                        <i class="fas fa-play"></i>
+                                    </button>
+                                </div>
+
+                                <div class="song-duration">
+                                    <i class="fas fa-clock me-1"></i>
+                                    <span>@content.FormattedDuration</span>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
             </div>
-            <h3>¡Comienza tu experiencia musical!</h3>
-            <p>Busca tus artistas y canciones favoritas usando el campo de búsqueda arriba</p>
-            <div class="quick-actions">
-                <a href="@Url.Action("Index", "Clients")" class="btn-create">
-                    <i class="fas fa-music me-2"></i>
-                    Explorar Biblioteca Musical
-                </a>
+        }
+
+        <!-- Álbumes destacados -->
+        @if (Model.FeaturedAlbums?.Any() == true)
+        {
+            <div class="discovery-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-compact-disc me-2"></i>
+                        Álbumes destacados
+                    </h2>
+                    <p class="section-subtitle">Explora colecciones completas de tus artistas</p>
+                </div>
+
+                <div class="cards-grid">
+                    @foreach (var album in Model.FeaturedAlbums)
+                    {
+                        <a class="media-card" href="@Url.Action("AlbumDetails", "Clients", new { id = album.Id })">
+                            <div class="media-cover">
+                                @if (!string.IsNullOrEmpty(album.ImageUrl))
+                                {
+                                    <img src="@album.ImageUrl" alt="@album.Title" />
+                                }
+                                else
+                                {
+                                    <div class="media-cover-placeholder"><i class="fas fa-compact-disc"></i></div>
+                                }
+                                <div class="media-play"><i class="fas fa-play"></i></div>
+                            </div>
+                            <div class="media-card-info">
+                                <div class="media-card-title">@album.Title</div>
+                                <div class="media-card-subtitle">@album.ArtistName</div>
+                            </div>
+                        </a>
+                    }
+                </div>
             </div>
-        </div>
+        }
+
+        <!-- Novedades -->
+        @if (Model.RecentContents?.Any() == true)
+        {
+            <div class="discovery-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-bolt me-2"></i>
+                        Novedades
+                    </h2>
+                    <p class="section-subtitle">Lo último que se ha subido a UniSound</p>
+                </div>
+
+                <div class="songs-container">
+                    <div class="songs-list">
+                        @foreach (var content in Model.RecentContents)
+                        {
+                            <div class="song-item" data-content-id="@content.Id">
+                                <div class="song-main-info">
+                                    <div class="song-cover">
+                                        <div class="cover-placeholder">
+                                            <i class="fas fa-music"></i>
+                                        </div>
+                                    </div>
+                                    <div class="song-details">
+                                        <div class="song-title">@content.Title</div>
+                                        <div class="song-meta">
+                                            <span class="content-type">@content.Type</span>
+                                            <a class="artist-name artist-link" href="@Url.Action("ArtistAlbums", "Clients", new { artistId = content.ArtistId })">@content.ArtistName</a>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="song-actions">
+                                    <button class="btn btn-playlist"
+                                            onclick="redirectToPlaylistsWithContent(@content.Id)"
+                                            title="Agregar a Playlist">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                    <button class="btn btn-play play-in-player-btn"
+                                            data-content-id="@content.Id"
+                                            data-title="@content.Title"
+                                            data-artist="@content.ArtistName"
+                                            data-url="@content.UrlMedia"
+                                            title="Reproducir">
+                                        <i class="fas fa-play"></i>
+                                    </button>
+                                </div>
+
+                                <div class="song-duration">
+                                    <i class="fas fa-clock me-1"></i>
+                                    <span>@content.FormattedDuration</span>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- Artistas para explorar -->
+        @if (Model.FollowedArtists?.Any() == true)
+        {
+            <div class="discovery-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-heart me-2"></i>
+                        Artistas que sigo
+                    </h2>
+                    <p class="section-subtitle">Los artistas que sigues, siempre a mano</p>
+                </div>
+
+                <div class="cards-grid">
+                    @foreach (var artist in Model.FollowedArtists)
+                    {
+                        <a class="media-card artist-media-card" href="@Url.Action("ArtistAlbums", "Clients", new { artistId = artist.Id })">
+                            <div class="media-cover media-cover-round">
+                                @if (!string.IsNullOrEmpty(artist.ProfileImageUrl))
+                                {
+                                    <img src="@artist.ProfileImageUrl" alt="@artist.Name" />
+                                }
+                                else
+                                {
+                                    <div class="media-cover-placeholder"><i class="fas fa-user-music"></i></div>
+                                }
+                            </div>
+                            <div class="media-card-info">
+                                <div class="media-card-title">@artist.Name</div>
+                                <div class="media-card-subtitle">Siguiendo</div>
+                            </div>
+                        </a>
+                    }
+                </div>
+            </div>
+        }
+
+        @if (Model.FeaturedArtists?.Any() == true)
+        {
+            <div class="discovery-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-user-music me-2"></i>
+                        Artistas para explorar
+                    </h2>
+                    <p class="section-subtitle">Descubre nuevos artistas y escucha sus álbumes</p>
+                </div>
+
+                <div class="cards-grid">
+                    @foreach (var artist in Model.FeaturedArtists)
+                    {
+                        <a class="media-card artist-media-card" href="@Url.Action("ArtistAlbums", "Clients", new { artistId = artist.Id })">
+                            <div class="media-cover media-cover-round">
+                                @if (!string.IsNullOrEmpty(artist.ProfileImageUrl))
+                                {
+                                    <img src="@artist.ProfileImageUrl" alt="@artist.Name" />
+                                }
+                                else
+                                {
+                                    <div class="media-cover-placeholder"><i class="fas fa-user-music"></i></div>
+                                }
+                            </div>
+                            <div class="media-card-info">
+                                <div class="media-card-title">@artist.Name</div>
+                                <div class="media-card-subtitle">Artista</div>
+                            </div>
+                        </a>
+                    }
+                </div>
+            </div>
+        }
+
+        <!-- Si no hay nada que mostrar -->
+        @if ((Model.PopularContents == null || !Model.PopularContents.Any())
+            && (Model.RecentContents == null || !Model.RecentContents.Any())
+            && (Model.FeaturedAlbums == null || !Model.FeaturedAlbums.Any())
+            && (Model.FeaturedArtists == null || !Model.FeaturedArtists.Any()))
+        {
+            <div class="welcome-state">
+                <div class="welcome-icon">
+                    <i class="fas fa-music"></i>
+                </div>
+                <h3>¡Comienza tu experiencia musical!</h3>
+                <p>Aún no hay contenido disponible. Vuelve pronto o busca usando el campo de arriba.</p>
+                <div class="quick-actions">
+                    <a href="@Url.Action("Index", "Clients")" class="btn-create">
+                        <i class="fas fa-music me-2"></i>
+                        Explorar Biblioteca Musical
+                    </a>
+                </div>
+            </div>
+        }
     }
 </div>
 @await Html.PartialAsync("_PlayerBar")
 <style>
     /* CSS Base - Tema oscuro igual que Index */
     .container { max-width: none !important; padding: 0 !important; }
-    body { 
-        background: #000 !important; 
-        color: #fff !important; 
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important; 
-        margin: 0; padding: 0; padding-bottom: 90px; 
+    body {
+        background: var(--us-bg) !important;
+        color: var(--us-ink) !important;
+        font-family: var(--us-font) !important;
+        margin: 0; padding: 0; padding-bottom: 90px;
     }
 
     /* Biblioteca Musical */
     .music-library-container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
-    .library-header { margin-bottom: 2rem; text-align: center; }
-    .library-title { font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem; color: #fff !important; }
-    .library-subtitle { color: #b3b3b3 !important; font-size: 1.2rem; margin-bottom: 2rem; }
-    
-    /* Header con perfil y acciones */
-    .header-actions { 
-        display: flex; align-items: center; justify-content: center; gap: 2rem; 
-        flex-wrap: wrap; margin-top: 2rem; 
+
+    /* Encabezado en tarjeta limpia */
+    .library-header {
+        position: relative;
+        background: var(--us-surface); border: 1px solid var(--us-border);
+        border-radius: var(--us-radius-lg); box-shadow: var(--us-shadow-sm);
+        padding: 2rem 1.75rem 1.75rem; margin-bottom: 2rem; text-align: center;
     }
-    .profile-image { 
-        width: 80px; height: 80px; border-radius: 50%; object-fit: cover; 
-        border: 3px solid #1db954; box-shadow: 0 4px 15px rgba(29, 185, 84, 0.3); 
+    .library-title {
+        font-size: 1.9rem; font-weight: 800; margin: 0 0 0.3rem; color: var(--us-ink) !important;
+        letter-spacing: -0.02em; display: flex; align-items: center; justify-content: center;
     }
-    .action-buttons { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .library-title i { color: #c8102e; }
+    .library-subtitle { color: var(--us-ink-soft) !important; font-size: 1rem; margin: 0 0 1.5rem; }
+
+    /* Perfil + acciones (fila centrada) */
+    .header-actions {
+        display: flex; align-items: center; justify-content: center; gap: 1.25rem;
+        flex-wrap: wrap; margin-top: 0;
+    }
+    .profile-image {
+        width: 56px; height: 56px; border-radius: 50%; object-fit: cover;
+        border: 2px solid #c8102e; box-shadow: var(--us-shadow-sm); flex-shrink: 0;
+    }
+    .action-buttons { display: flex; gap: 0.6rem; flex-wrap: wrap; }
     .btn-action {
-        background: linear-gradient(135deg, #1a1a1a, #2a2a2a); color: #fff !important; 
-        border: 1px solid #333; padding: 10px 16px; border-radius: 25px;
-        font-weight: 600; text-decoration: none; display: inline-flex; align-items: center;
-        transition: all 0.3s ease; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        background: var(--us-surface); color: var(--us-ink) !important;
+        border: 1px solid var(--us-border); padding: 9px 16px; border-radius: var(--us-radius-pill);
+        font-weight: 600; font-size: 0.9rem; text-decoration: none; display: inline-flex; align-items: center;
+        transition: all 0.2s ease; box-shadow: none;
     }
     .btn-action:hover {
-        transform: translateY(-2px); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-        color: #fff !important; border-color: #1db954;
+        transform: translateY(-1px); box-shadow: var(--us-shadow-sm);
+        color: #c8102e !important; border-color: #c8102e;
     }
 
     /* Formulario de búsqueda */
@@ -234,52 +487,52 @@
     .search-form { max-width: 600px; margin: 0 auto; }
     .search-input-group { 
         position: relative; display: flex; align-items: center; 
-        background: #1a1a1a; border-radius: 25px; border: 2px solid #333;
+        background: var(--us-surface-alt); border-radius: 25px; border: 2px solid var(--us-border);
         transition: border-color 0.3s ease; overflow: hidden;
     }
-    .search-input-group:focus-within { border-color: #1db954; }
+    .search-input-group:focus-within { border-color: #c8102e; }
     .search-icon { 
-        position: absolute; left: 16px; color: #b3b3b3; font-size: 16px; z-index: 2; 
+        position: absolute; left: 16px; color: var(--us-ink-soft); font-size: 16px; z-index: 2; 
     }
     .search-input { 
-        flex: 1; background: transparent; border: none; color: #fff; 
+        flex: 1; background: transparent; border: none; color: var(--us-ink); 
         padding: 16px 16px 16px 50px; font-size: 16px; outline: none;
     }
-    .search-input::placeholder { color: #b3b3b3; }
+    .search-input::placeholder { color: var(--us-ink-soft); }
     .search-btn { 
-        background: #1db954; border: none; color: #000; padding: 16px 20px; 
+        background: #c8102e; border: none; color: #ffffff; padding: 16px 20px; 
         cursor: pointer; transition: background 0.3s ease; border-radius: 0;
     }
-    .search-btn:hover { background: #1ed760; }
+    .search-btn:hover { background: #a30d25; }
 
     /* Sección de resultados - Artistas */
     .results-section { margin-bottom: 3rem; }
     .section-header { margin-bottom: 1.5rem; }
-    .section-title { font-size: 1.5rem; font-weight: 700; color: #fff !important; }
+    .section-title { font-size: 1.5rem; font-weight: 700; color: var(--us-ink) !important; }
     .artists-grid { 
         display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
         gap: 1.5rem; margin-bottom: 2rem; 
     }
     .artist-card {
-        background: linear-gradient(135deg, #1a1a1a, #2a2a2a); border-radius: 12px; 
+        background: linear-gradient(135deg, var(--us-surface-alt), var(--us-surface-2)); border-radius: 12px; 
         padding: 1.5rem; text-align: center; transition: all 0.3s ease;
         border: 1px solid rgba(255, 255, 255, 0.1);
     }
     .artist-card:hover { 
         transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); 
-        border-color: rgba(29, 185, 84, 0.5); 
+        border-color: rgba(200, 16, 46, 0.5); 
     }
     .artist-image { margin-bottom: 1rem; }
     .artist-image img { 
         width: 80px; height: 80px; border-radius: 50%; object-fit: cover; 
-        border: 2px solid #333; 
+        border: 2px solid var(--us-border); 
     }
-    .artist-name { color: #fff; font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem; }
-    .artist-role { color: #b3b3b3; font-size: 0.9rem; }
+    .artist-name { color: var(--us-ink); font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem; }
+    .artist-role { color: var(--us-ink-soft); font-size: 0.9rem; }
 
     /* Contenedor de canciones - Igual que Index */
-    .songs-container { background: #121212 !important; border-radius: 8px; padding: 1.5rem; }
-    .songs-header h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; color: #fff !important; }
+    .songs-container { background: var(--us-surface) !important; border-radius: 8px; padding: 1.5rem; }
+    .songs-header h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; color: var(--us-ink) !important; }
     .songs-list { display: flex; flex-direction: column; gap: 4px; }
 
     /* Items de Canciones - Igual que Index */
@@ -289,27 +542,29 @@
         padding: 8px 16px; border-radius: 4px; transition: background-color 0.3s ease;
         cursor: pointer; position: relative; min-height: 56px; border: 1px solid transparent;
     }
-    .song-item:hover { background: #1a1a1a !important; border-color: #333 !important; }
-    .song-item.playing { background: #1a1a1a !important; border-color: #1db954 !important; }
-    .song-item.playing .song-title { color: #1db954 !important; }
+    .song-item:hover { background: var(--us-surface-alt) !important; border-color: var(--us-border) !important; }
+    .song-item.playing { background: var(--us-surface-alt) !important; border-color: #c8102e !important; }
+    .song-item.playing .song-title { color: #c8102e !important; }
 
     .song-main-info { grid-area: info; display: flex; align-items: center; gap: 12px; min-width: 0; }
     .song-cover { width: 40px; height: 40px; flex-shrink: 0; }
     .cover-placeholder { 
-        width: 100%; height: 100%; background: #282828; border-radius: 4px; 
-        display: flex; align-items: center; justify-content: center; color: #b3b3b3; 
+        width: 100%; height: 100%; background: var(--us-surface-2); border-radius: 4px; 
+        display: flex; align-items: center; justify-content: center; color: var(--us-ink-soft); 
     }
     .song-details { min-width: 0; flex-grow: 1; }
     .song-title { 
-        font-size: 16px; font-weight: 400; color: #fff !important; margin-bottom: 4px; 
+        font-size: 16px; font-weight: 400; color: var(--us-ink) !important; margin-bottom: 4px; 
         white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
     }
-    .song-meta { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #b3b3b3; }
-    .content-type { 
-        background: #1db954 !important; color: #000 !important; padding: 2px 8px; 
-        border-radius: 4px; font-size: 12px; font-weight: 500; 
+    .song-meta { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--us-ink-soft); }
+    .content-type {
+        background: var(--us-surface-2) !important; color: var(--us-ink-soft) !important;
+        padding: 2px 9px; border-radius: 999px; font-size: 10px; font-weight: 700;
+        text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid var(--us-border);
+        flex-shrink: 0;
     }
-    .artist-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #b3b3b3 !important; }
+    .artist-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--us-ink-soft) !important; }
 
     /* Acciones de Canciones */
     .song-actions { 
@@ -317,76 +572,76 @@
         opacity: 1 !important; visibility: visible !important; 
     }
     .song-actions .btn {
-        background: none !important; border: none !important; color: #b3b3b3 !important;
+        background: none !important; border: none !important; color: var(--us-ink-soft) !important;
         padding: 6px !important; border-radius: 50% !important; cursor: pointer !important;
         transition: all 0.3s ease; width: 28px !important; height: 28px !important;
         display: flex !important; align-items: center !important; justify-content: center !important;
         font-size: 12px !important;
     }
-    .song-actions .btn:hover { background: #1a1a1a !important; color: #fff !important; transform: scale(1.1); }
-    .btn-like:hover, .btn-playlist:hover, .btn-play:hover { color: #1db954 !important; }
+    .song-actions .btn:hover { background: var(--us-surface-alt) !important; color: var(--us-ink) !important; transform: scale(1.1); }
+    .btn-like:hover, .btn-playlist:hover, .btn-play:hover { color: #c8102e !important; }
     .song-actions .btn-like.liked { 
-        color: #1db954 !important; 
-        background: rgba(29, 185, 84, 0.1) !important;
-        border: 1px solid rgba(29, 185, 84, 0.3) !important;
+        color: #c8102e !important; 
+        background: rgba(200, 16, 46, 0.1) !important;
+        border: 1px solid rgba(200, 16, 46, 0.3) !important;
     }
 
     .song-actions .btn-like.liked:hover {
-        color: #1ed760 !important;
-        background: rgba(29, 185, 84, 0.2) !important;
+        color: #a30d25 !important;
+        background: rgba(200, 16, 46, 0.2) !important;
         transform: scale(1.15) !important;
     }
 
     .btn-heart.liked { 
-        color: #1db954 !important;
-        background: rgba(29, 185, 84, 0.1) !important;
+        color: #c8102e !important;
+        background: rgba(200, 16, 46, 0.1) !important;
     }
 
     .btn-heart.liked:hover {
-        color: #1ed760 !important;
-        background: rgba(29, 185, 84, 0.2) !important;
+        color: #a30d25 !important;
+        background: rgba(200, 16, 46, 0.2) !important;
     }
 
     .song-duration { 
-        grid-area: duration; font-size: 14px; color: #b3b3b3 !important; 
+        grid-area: duration; font-size: 14px; color: var(--us-ink-soft) !important; 
         font-variant-numeric: tabular-nums; text-align: right; 
     }
     .song-menu { grid-area: menu; opacity: 1 !important; visibility: visible !important; }
     .btn-menu {
-        background: none !important; border: none !important; color: #b3b3b3 !important;
+        background: none !important; border: none !important; color: var(--us-ink-soft) !important;
         padding: 6px !important; cursor: pointer !important; border-radius: 50% !important;
         width: 28px !important; height: 28px !important; display: flex !important;
         align-items: center !important; justify-content: center !important; font-size: 12px !important;
     }
-    .btn-menu:hover { background: #1a1a1a !important; color: #fff !important; }
+    .btn-menu:hover { background: var(--us-surface-alt) !important; color: var(--us-ink) !important; }
 
     /* Estados especiales */
     .no-results, .welcome-state {
         display: flex; flex-direction: column; align-items: center; justify-content: center;
-        padding: 4rem 2rem; text-align: center; background: #121212; border-radius: 8px;
+        padding: 4rem 2rem; text-align: center; background: var(--us-surface); border-radius: 8px;
     }
-    .no-results-icon, .welcome-icon { font-size: 5rem; color: #404040; margin-bottom: 2rem; }
-    .no-results h3, .welcome-state h3 { font-size: 1.8rem; font-weight: 600; margin-bottom: 1rem; color: #fff; }
-    .no-results p, .welcome-state p { color: #b3b3b3; font-size: 1.1rem; margin-bottom: 1rem; max-width: 400px; }
+    .no-results-icon, .welcome-icon { font-size: 5rem; color: var(--us-border); margin-bottom: 2rem; }
+    .no-results h3, .welcome-state h3 { font-size: 1.8rem; font-weight: 600; margin-bottom: 1rem; color: var(--us-ink); }
+    .no-results p, .welcome-state p { color: var(--us-ink-soft); font-size: 1.1rem; margin-bottom: 1rem; max-width: 400px; }
     .suggestion { font-style: italic; font-size: 1rem; }
     
     .quick-actions { margin-top: 2rem; }
     .btn-create {
-        background: linear-gradient(135deg, #1db954, #1ed760);
-        color: #000 !important; border: none; padding: 12px 24px; border-radius: 25px;
+        background: linear-gradient(135deg, #c8102e, #a30d25);
+        color: #ffffff !important; border: none; padding: 12px 24px; border-radius: 25px;
         font-weight: 600; text-decoration: none; display: inline-flex; align-items: center;
-        transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(29, 185, 84, 0.3);
+        transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(200, 16, 46, 0.3);
     }
     .btn-create:hover {
-        transform: translateY(-2px); box-shadow: 0 6px 20px rgba(29, 185, 84, 0.4);
-        color: #000 !important;
+        transform: translateY(-2px); box-shadow: 0 6px 20px rgba(200, 16, 46, 0.4);
+        color: #ffffff !important;
     }
 
     /* ===== REPRODUCTOR PERSONALIZADO ===== */
     .custom-player {
         position: fixed; bottom: 0; left: 0; right: 0;
-        background: linear-gradient(135deg, #181818, #1a1a1a);
-        border-top: 1px solid #282828; height: 90px; z-index: 1000;
+        background: linear-gradient(135deg, var(--us-surface), var(--us-surface-alt));
+        border-top: 1px solid var(--us-surface-2); height: 90px; z-index: 1000;
         box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
     }
     .custom-player.d-none { display: none !important; }
@@ -400,60 +655,60 @@
     .track-cover { width: 56px; height: 56px; flex-shrink: 0; }
     .track-info { min-width: 0; flex-grow: 1; }
     .track-title { 
-        font-size: 14px; font-weight: 400; color: #fff; margin-bottom: 4px; 
+        font-size: 14px; font-weight: 400; color: var(--us-ink); margin-bottom: 4px; 
         white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
     }
     .track-artist { 
-        font-size: 12px; color: #b3b3b3; 
+        font-size: 12px; color: var(--us-ink-soft); 
         white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
     }
     .btn-heart { 
-        background: none; border: none; color: #b3b3b3; padding: 8px; 
+        background: none; border: none; color: var(--us-ink-soft); padding: 8px; 
         cursor: pointer; border-radius: 50%; transition: color 0.3s ease; 
     }
-    .btn-heart:hover { color: #1db954; }
-    .btn-heart.liked { color: #1db954 !important; }
+    .btn-heart:hover { color: #c8102e; }
+    .btn-heart.liked { color: #c8102e !important; }
 
     .player-controls { display: flex; flex-direction: column; align-items: center; gap: 8px; }
     .control-buttons { display: flex; align-items: center; gap: 16px; }
     .control-btn {
-        background: none; border: none; color: #b3b3b3; padding: 8px;
+        background: none; border: none; color: var(--us-ink-soft); padding: 8px;
         cursor: pointer; border-radius: 50%; transition: all 0.3s ease;
         width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
     }
-    .control-btn:hover { color: #fff; transform: scale(1.1); }
-    .control-btn.active { color: #1db954; }
+    .control-btn:hover { color: var(--us-ink); transform: scale(1.1); }
+    .control-btn.active { color: #c8102e; }
     .play-btn { 
-        background: #fff !important; color: #000 !important; 
+        background: var(--us-surface) !important; color: #ffffff !important; 
         width: 40px !important; height: 40px !important; font-size: 18px !important; 
     }
-    .play-btn:hover { background: #f0f0f0 !important; transform: scale(1.05) !important; }
+    .play-btn:hover { background: var(--us-surface-2) !important; transform: scale(1.05) !important; }
 
     .progress-section { 
         display: flex; align-items: center; gap: 12px; 
         width: 100%; max-width: 500px; 
     }
     .time { 
-        font-size: 11px; color: #b3b3b3; font-variant-numeric: tabular-nums; 
+        font-size: 11px; color: var(--us-ink-soft); font-variant-numeric: tabular-nums; 
         min-width: 40px; text-align: center; 
     }
 
     .custom-progress-bar {
-        position: relative; width: 100%; height: 6px; cursor: pointer;
-        border-radius: 3px; overflow: hidden;
+        position: relative; width: 100%; height: 9px; cursor: pointer;
+        border-radius: 5px; overflow: visible;
     }
     .progress-background { 
         position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-        background: #535353; border-radius: 3px; 
+        background: var(--us-border); border-radius: 5px; 
     }
     .progress-fill { 
         position: absolute; top: 0; left: 0; height: 100%; 
-        background: linear-gradient(90deg, #1db954, #1ed760); 
-        border-radius: 3px; width: 0%; transition: width 0.1s ease; 
+        background: linear-gradient(90deg, #c8102e, #a30d25); 
+        border-radius: 5px; width: 0%; transition: width 0.1s ease; 
     }
     .progress-handle { 
         position: absolute; top: 50%; transform: translate(-50%, -50%); 
-        width: 14px; height: 14px; background: #fff; border-radius: 50%; 
+        width: 16px; height: 16px; background: var(--us-surface); border-radius: 50%; 
         cursor: pointer; opacity: 0; transition: opacity 0.3s ease; 
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3); left: 0%; 
     }
@@ -465,21 +720,21 @@
     }
     .volume-control { display: flex; align-items: center; gap: 8px; }
     .custom-volume-slider {
-        position: relative; width: 80px; height: 4px; cursor: pointer;
-        border-radius: 2px; overflow: hidden; opacity: 1 !important; 
+        position: relative; width: 110px; height: 8px; cursor: pointer;
+        border-radius: 4px; overflow: visible; opacity: 1 !important; 
         transition: opacity 0.3s ease;
     }
     .volume-background { 
         position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-        background: #535353; border-radius: 2px; 
+        background: var(--us-border); border-radius: 4px; 
     }
     .volume-fill { 
         position: absolute; top: 0; left: 0; height: 100%; 
-        background: #1db954; border-radius: 2px; width: 50%; 
+        background: #c8102e; border-radius: 4px; width: 50%; 
     }
     .volume-handle { 
         position: absolute; top: 50%; transform: translate(-50%, -50%); 
-        width: 12px; height: 12px; background: #fff; border-radius: 50%; 
+        width: 16px; height: 16px; background: var(--us-surface); border-radius: 50%; 
         cursor: pointer; left: 50%; 
     }
 
@@ -497,9 +752,9 @@
     }
 
     .btn-logout {
-        background: linear-gradient(135deg, #dc2626, #ef4444);
-        color: #fff !important;
-        border: 1px solid #dc2626;
+        background: linear-gradient(135deg, #c8102e, #c8102e);
+        color: #ffffff !important;
+        border: 1px solid #c8102e;
         padding: 8px 16px;
         border-radius: 20px;
         font-weight: 600;
@@ -515,9 +770,9 @@
     .btn-logout:hover {
         transform: translateY(-2px);
         box-shadow: 0 4px 20px rgba(220, 38, 38, 0.5);
-        background: linear-gradient(135deg, #b91c1c, #dc2626);
-        border-color: #b91c1c;
-        color: #fff !important;
+        background: linear-gradient(135deg, #a30d25, #c8102e);
+        border-color: #a30d25;
+        color: #ffffff !important;
     }
 
     .btn-logout:active {
@@ -594,7 +849,7 @@
         left: 50%;
         transform: translate(-50%, -50%);
         background: rgba(255, 152, 0, 0.95);
-        color: #000;
+        color: #ffffff;
         padding: 20px 28px;
         border-radius: 12px;
         font-size: 14px;
@@ -602,7 +857,7 @@
         box-shadow: 0 8px 32px rgba(0,0,0,0.4);
         text-align: center;
         font-weight: 600;
-        border: 2px solid #ff8f00;
+        border: 2px solid #c8102e;
         animation: slideIn 0.3s ease-out;
     }
 
@@ -616,7 +871,177 @@
         font-size: 16px;
         font-weight: bold;
     }
+
+    /* ===== SECCIONES DE DESCUBRIMIENTO ===== */
+    .discovery-section { margin-bottom: 3rem; }
+    .discovery-section .section-header { margin-bottom: 1.25rem; text-align: left; }
+    .section-subtitle { color: var(--us-ink-soft) !important; font-size: 0.95rem; margin: 0.25rem 0 0; }
+    .discovery-section .section-title i { color: #c8102e; }
+
+    /* Ranking de popularidad */
+    .song-rank {
+        width: 26px; flex-shrink: 0; text-align: center;
+        font-size: 1.1rem; font-weight: 700; color: #c8102e;
+        font-variant-numeric: tabular-nums;
+    }
+
+    /* Layout flexible para los items de descubrimiento */
+    .discovery-section .song-item {
+        display: flex; align-items: center; gap: 12px;
+        grid-template-columns: none; grid-template-areas: none;
+    }
+    .discovery-section .song-main-info { flex: 1; }
+    .song-likes {
+        display: flex; align-items: center; gap: 6px;
+        color: var(--us-ink); font-size: 0.9rem; min-width: 50px;
+        justify-content: flex-end; font-variant-numeric: tabular-nums; font-weight: 600;
+    }
+    .song-likes i { color: #c8102e; }
+
+    .artist-link { color: var(--us-ink-soft) !important; font-weight: 600; text-decoration: none; transition: color 0.2s ease; }
+    .artist-link:hover { color: #c8102e !important; }
+
+    /* Grid de tarjetas (álbumes y artistas) */
+    .cards-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+        gap: 1.25rem;
+    }
+    .media-card {
+        background: linear-gradient(135deg, var(--us-surface-alt), var(--us-surface-2));
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px; padding: 1rem; text-decoration: none;
+        display: block; transition: all 0.3s ease;
+    }
+    .media-card:hover {
+        transform: translateY(-5px);
+        background: linear-gradient(135deg, var(--us-surface-alt), var(--us-border));
+        border-color: rgba(200, 16, 46, 0.5);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+    .media-cover {
+        position: relative; width: 100%; aspect-ratio: 1;
+        border-radius: 8px; overflow: hidden; margin-bottom: 0.85rem;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    }
+    .media-cover img { width: 100%; height: 100%; object-fit: cover; }
+    .media-cover-round { border-radius: 50%; }
+    .media-cover-placeholder {
+        width: 100%; height: 100%;
+        background: linear-gradient(135deg, var(--us-surface-2), var(--us-border));
+        display: flex; align-items: center; justify-content: center;
+        color: #c8102e; font-size: 2.5rem;
+    }
+    .media-cover-round.media-cover .media-cover-placeholder { border-radius: 50%; }
+    .media-play {
+        position: absolute; bottom: 8px; right: 8px;
+        width: 44px; height: 44px; border-radius: 50%;
+        background: #c8102e; color: #ffffff;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1rem; opacity: 0; transform: translateY(8px);
+        transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    }
+    .media-card:hover .media-play { opacity: 1; transform: translateY(0); }
+    .media-card-info { min-width: 0; }
+    .media-card-title {
+        color: var(--us-ink); font-weight: 600; font-size: 1rem; margin-bottom: 0.25rem;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .media-card-subtitle {
+        color: var(--us-ink-soft); font-size: 0.85rem;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .artist-media-card { text-align: center; }
+
+    /* === Override: reproductor oscuro (consistencia con _PlayerBar) === */
+    .custom-player { background: linear-gradient(135deg, #181818, #1a1a1a) !important; border-top: 1px solid #2a2b2e !important; }
+    .now-playing .track-title { color: #f4f5f6 !important; }
+    .now-playing .track-artist { color: #b9bdc2 !important; }
+    .track-cover .cover-placeholder { background: linear-gradient(135deg, #2a2b2e, #34363a) !important; color: #b9bdc2 !important; }
+    .control-btn { color: #b9bdc2 !important; }
+    .control-btn:hover { color: #ffffff !important; }
+    .control-btn.active { color: #c8102e !important; background: rgba(200,16,46,0.15) !important; }
+    .control-btn.play-btn { background: var(--us-surface) !important; color: #1c1c1e !important; }
+    .control-btn.play-btn:hover { background: #f0f0f0 !important; }
+    .time { color: #b9bdc2 !important; }
+    .progress-background { background: #4a4d52 !important; }
+    .volume-background { background: #4a4d52 !important; }
+
+    /* ===== Mejora UX/UI: imagen de perfil y filas de canciones ===== */
+    .profile-image {
+        width: 100px !important; height: 100px !important;
+        border: 3px solid var(--us-accent) !important;
+        box-shadow: var(--us-shadow-md) !important;
+    }
+
+    /* Contenedor de canciones como tarjeta limpia */
+    .songs-container {
+        background: var(--us-surface) !important;
+        border: 1px solid var(--us-border);
+        border-radius: var(--us-radius-lg);
+        box-shadow: var(--us-shadow-sm);
+        padding: 0.6rem !important;
+    }
+    .songs-list { gap: 2px; }
+
+    /* Fila de canción */
+    .song-item {
+        gap: 14px !important;
+        padding: 10px 12px !important;
+        border-radius: var(--us-radius) !important;
+        min-height: 64px;
+        transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+    .song-item:hover { background: var(--us-surface-alt) !important; border-color: var(--us-border) !important; }
+    .song-item.playing { background: var(--us-accent-soft) !important; border-color: var(--us-accent-border) !important; }
+
+    .song-rank { width: 24px; color: var(--us-ink-faint); font-weight: 700; font-size: 0.95rem; }
+
+    /* Miniatura */
+    .song-cover { width: 48px !important; height: 48px !important; }
+    .song-cover .cover-placeholder {
+        background: var(--us-surface-2) !important;
+        color: var(--us-accent) !important;
+        border: 1px solid var(--us-border);
+        border-radius: 10px !important;
+        font-size: 1.05rem;
+    }
+
+    .song-title { font-size: 0.98rem !important; font-weight: 600 !important; margin-bottom: 3px !important; }
+    /* Línea "Tipo · Artista" limpia y profesional */
+    .song-meta { gap: 6px; margin-top: 0; align-items: baseline; }
+    .content-type {
+        background: transparent !important; border: none !important; padding: 0 !important;
+        color: var(--us-ink-faint) !important; font-size: 0.82rem !important; font-weight: 500 !important;
+        text-transform: none !important; letter-spacing: 0 !important;
+    }
+    .song-meta .artist-name, .song-meta .artist-link {
+        color: var(--us-ink-soft) !important; font-weight: 600; font-size: 0.85rem;
+        text-decoration: none;
+    }
+    .song-meta .artist-name::before {
+        content: "•"; color: var(--us-ink-faint); margin-right: 6px; font-weight: 700;
+    }
+    .song-meta .artist-link:hover { color: var(--us-accent) !important; }
+    .song-likes { color: var(--us-ink) !important; }
+    .song-duration { color: var(--us-ink-faint) !important; font-size: 0.85rem; }
+
+    /* Botones de acción de la fila (círculos sutiles -> rojos al hover) */
+    .song-actions { gap: 6px !important; }
+    .song-actions .btn {
+        width: 38px !important; height: 38px !important;
+        background: var(--us-surface-2) !important;
+        color: var(--us-ink-soft) !important;
+        border: 1px solid var(--us-border) !important;
+        display: inline-flex !important; align-items: center !important; justify-content: center !important;
+        transition: all 0.2s ease !important;
+    }
+    .song-actions .btn:hover {
+        background: var(--us-accent) !important; color: #ffffff !important;
+        border-color: var(--us-accent) !important; transform: scale(1.06);
+    }
 </style>
+
 
 <script>
 window.harmonyConfig = {

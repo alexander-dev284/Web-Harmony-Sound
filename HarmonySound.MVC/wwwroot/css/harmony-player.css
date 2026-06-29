@@ -60,8 +60,8 @@
     transition: color .2s ease;
     flex-shrink: 0;
 }
-.btn-heart:hover    { color: #1db954; }
-.btn-heart.liked    { color: #1db954 !important; }
+.btn-heart:hover    { color: #e50914; }
+.btn-heart.liked    { color: #e50914 !important; }
 .btn-heart.liked i  { font-weight: 900; }
 
 /* Controles centrales */
@@ -81,7 +81,7 @@
     display: flex; align-items: center; justify-content: center;
 }
 .control-btn:hover           { color: #fff; transform: scale(1.1); }
-.control-btn.active          { color: #1db954 !important; }
+.control-btn.active          { color: #e50914 !important; }
 .control-btn.play-btn        { background: #fff !important; color: #000 !important;
                                 width: 40px !important; height: 40px !important; font-size: 18px !important; }
 .control-btn.play-btn:hover  { background: #f0f0f0 !important; transform: scale(1.05) !important; }
@@ -97,23 +97,23 @@
     min-width: 40px; text-align: center;
 }
 .custom-progress-bar {
-    position: relative; width: 100%; height: 6px;
-    cursor: pointer; border-radius: 3px; overflow: visible;
+    position: relative; width: 100%; height: 9px;
+    cursor: pointer; border-radius: 5px; overflow: visible;
 }
 .progress-background {
     position: absolute; inset: 0;
-    background: #535353; border-radius: 3px;
+    background: #535353; border-radius: 5px;
 }
 .progress-fill {
     position: absolute; top: 0; left: 0; height: 100%;
-    background: linear-gradient(90deg, #1db954, #1ed760);
-    border-radius: 3px; width: 0%;
+    background: linear-gradient(90deg, #e50914, #ff1e2d);
+    border-radius: 5px; width: 0%;
     transition: width .1s ease;
 }
 .progress-handle {
     position: absolute; top: 50%; left: 0%;
     transform: translate(-50%, -50%);
-    width: 14px; height: 14px;
+    width: 16px; height: 16px;
     background: #fff; border-radius: 50%;
     cursor: pointer; opacity: 0;
     transition: opacity .2s ease;
@@ -129,21 +129,21 @@
 }
 .volume-control { display: flex; align-items: center; gap: 8px; }
 .custom-volume-slider {
-    position: relative; width: 80px; height: 4px;
-    cursor: pointer; border-radius: 2px; overflow: visible;
+    position: relative; width: 110px; height: 8px;
+    cursor: pointer; border-radius: 4px; overflow: visible;
 }
 .volume-background {
     position: absolute; inset: 0;
-    background: #535353; border-radius: 2px;
+    background: #535353; border-radius: 4px;
 }
 .volume-fill {
     position: absolute; top: 0; left: 0; height: 100%;
-    background: #1db954; border-radius: 2px; width: 50%; z-index: 1;
+    background: #e50914; border-radius: 4px; width: 50%; z-index: 1;
 }
 .volume-handle {
     position: absolute; top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    width: 12px; height: 12px;
+    width: 16px; height: 16px;
     background: #fff; border-radius: 50%; cursor: pointer;
     z-index: 2; box-shadow: 0 2px 8px rgba(0,0,0,.3);
     opacity: 0; transition: opacity .2s ease;
@@ -167,9 +167,9 @@
     font-size: 13px !important;
 }
 .like-btn:hover,
-.track-like-btn:hover          { color: #1db954 !important; transform: scale(1.15); }
+.track-like-btn:hover          { color: #e50914 !important; transform: scale(1.15); }
 .like-btn.liked,
-.track-like-btn.liked          { color: #1db954 !important; }
+.track-like-btn.liked          { color: #e50914 !important; }
 .like-btn.liked i,
 .track-like-btn.liked i        { font-weight: 900 !important; }
 
@@ -182,9 +182,9 @@
 .track-row:hover,
 .song-item:hover               { background: #1a1a1a !important; }
 .track-row.playing,
-.song-item.playing             { background: #1a1a1a !important; border-color: #1db954 !important; }
+.song-item.playing             { background: #1a1a1a !important; border-color: #e50914 !important; }
 .track-row.playing .track-title,
-.song-item.playing .song-title { color: #1db954 !important; }
+.song-item.playing .song-title { color: #e50914 !important; }
 
 /* ── Notificación de anuncio ───────────────────────────────── */
 .harmony-ad-notification {

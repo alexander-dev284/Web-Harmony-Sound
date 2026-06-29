@@ -1347,6 +1347,210 @@
         }
       }
     },
+    "/api/Contents/popular": {
+      "get": {
+        "tags": [
+          "Contents"
+        ],
+        "parameters": [
+          {
+            "name": "count",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 12
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": { }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Follows": {
+      "post": {
+        "tags": [
+          "Follows"
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "followerId": {
+                    "type": "integer",
+                    "format": "int32"
+                  },
+                  "artistId": {
+                    "type": "integer",
+                    "format": "int32"
+                  }
+                }
+              },
+              "encoding": {
+                "followerId": {
+                  "style": "form"
+                },
+                "artistId": {
+                  "style": "form"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Follows/is-following": {
+      "get": {
+        "tags": [
+          "Follows"
+        ],
+        "parameters": [
+          {
+            "name": "followerId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "artistId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Follows/followers/count/{artistId}": {
+      "get": {
+        "tags": [
+          "Follows"
+        ],
+        "parameters": [
+          {
+            "name": "artistId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Follows/following/{followerId}": {
+      "get": {
+        "tags": [
+          "Follows"
+        ],
+        "parameters": [
+          {
+            "name": "followerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Follows/top-artists": {
+      "get": {
+        "tags": [
+          "Follows"
+        ],
+        "parameters": [
+          {
+            "name": "count",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 5
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Follows/followers/{artistId}": {
+      "get": {
+        "tags": [
+          "Follows"
+        ],
+        "parameters": [
+          {
+            "name": "artistId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/Likes/user/{userId}": {
       "get": {
         "tags": [
@@ -4517,6 +4721,48 @@
               "$ref": "#/components/schemas/UserLike"
             },
             "nullable": true
+          },
+          "following": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserFollow"
+            },
+            "nullable": true
+          },
+          "followers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserFollow"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UserFollow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "followerId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "follower": {
+            "$ref": "#/components/schemas/User"
+          },
+          "artistId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "artist": {
+            "$ref": "#/components/schemas/User"
+          },
+          "followDate": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "additionalProperties": false

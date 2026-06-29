@@ -7,9 +7,11 @@
 <html lang="es">
 <head>
     <meta charset="utf-8" />
-    <title>Cuenta Suspendida - HarmonySound</title>
+    <title>Cuenta Suspendida - UniSound</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="~/css/design-system.css" />
+    <link rel="stylesheet" href="~/css/dark-theme.css" />
 </head>
 <body>
     <div class="suspended-container">
@@ -19,7 +21,7 @@
             </div>
             
             <h1>Cuenta Suspendida</h1>
-            <p class="suspended-subtitle">Tu acceso a HarmonySound ha sido temporalmente restringido</p>
+            <p class="suspended-subtitle">Tu acceso a UniSound ha sido temporalmente restringido</p>
 
             <div class="suspended-content">
                 <div class="info-section">
@@ -27,23 +29,23 @@
                         <i class="fas fa-exclamation-circle"></i>
                         <div>
                             <h3>Estado de la cuenta</h3>
-                            <p>Tu cuenta ha sido suspendida temporalmente por nuestro equipo de moderación.</p>
+                            <p>Tu cuenta ha sido suspendida temporalmente por nuestro equipo de moderaciÃ³n.</p>
                         </div>
                     </div>
 
                     <div class="info-item">
                         <i class="fas fa-clock"></i>
                         <div>
-                            <h3>¿Qué significa esto?</h3>
-                            <p>Durante la suspensión, no podrás acceder a tu cuenta ni utilizar los servicios de HarmonySound.</p>
+                            <h3>Â¿QuÃ© significa esto?</h3>
+                            <p>Durante la suspensiÃ³n, no podrÃ¡s acceder a tu cuenta ni utilizar los servicios de UniSound.</p>
                         </div>
                     </div>
 
                     <div class="info-item">
                         <i class="fas fa-envelope"></i>
                         <div>
-                            <h3>¿Necesitas ayuda?</h3>
-                            <p>Si crees que esto es un error o tienes preguntas sobre tu suspensión, contacta a nuestro equipo de soporte.</p>
+                            <h3>Â¿Necesitas ayuda?</h3>
+                            <p>Si crees que esto es un error o tienes preguntas sobre tu suspensiÃ³n, contacta a nuestro equipo de soporte.</p>
                         </div>
                     </div>
                 </div>
@@ -71,7 +73,7 @@
                 <div class="actions-section">
                     <a href="@Url.Action("Login", "Account")" class="btn-back">
                         <i class="fas fa-arrow-left"></i>
-                        Volver al Login
+                        Volver al inicio de sesiÃ³n
                     </a>
                 </div>
             </div>
@@ -86,13 +88,13 @@
         }
 
         body {
-            background: linear-gradient(135deg, #1a1a1a, #2d2d2d) !important;
+            background: linear-gradient(135deg, var(--us-surface-alt), var(--us-surface-alt)) !important;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            color: #fff;
+            color: var(--us-ink);
             padding: 2rem;
         }
 
@@ -102,8 +104,8 @@
         }
 
         .suspended-card {
-            background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
-            border: 1px solid #555;
+            background: linear-gradient(135deg, var(--us-surface-2), var(--us-surface-alt));
+            border: 1px solid var(--us-ink-faint);
             border-radius: 20px;
             padding: 3rem 2rem;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
@@ -119,28 +121,28 @@
             left: -50%;
             width: 200%;
             height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(220, 53, 69, 0.05), transparent);
+            background: linear-gradient(45deg, transparent, rgba(200, 16, 46, 0.05), transparent);
             animation: shimmer 3s infinite;
         }
 
         .suspended-icon {
             width: 100px;
             height: 100px;
-            background: linear-gradient(135deg, #dc3545, #c82333);
+            background: linear-gradient(135deg, #c8102e, #a30d25);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 0 auto 2rem;
             font-size: 3rem;
-            color: #fff;
+            color: #ffffff;
             position: relative;
             z-index: 2;
-            box-shadow: 0 10px 30px rgba(220, 53, 69, 0.3);
+            box-shadow: 0 10px 30px rgba(200, 16, 46, 0.3);
         }
 
         .suspended-card h1 {
-            color: #dc3545;
+            color: #c8102e;
             font-size: 2.5rem;
             font-weight: 700;
             margin-bottom: 0.5rem;
@@ -149,7 +151,7 @@
         }
 
         .suspended-subtitle {
-            color: #ccc;
+            color: var(--us-ink-soft);
             font-size: 1.1rem;
             margin-bottom: 2.5rem;
             position: relative;
@@ -178,28 +180,28 @@
         }
 
         .info-item i {
-            color: #dc3545;
+            color: #c8102e;
             font-size: 1.5rem;
             margin-top: 0.25rem;
             min-width: 24px;
         }
 
         .info-item h3 {
-            color: #fff;
+            color: var(--us-ink);
             font-size: 1.1rem;
             font-weight: 600;
             margin-bottom: 0.5rem;
         }
 
         .info-item p {
-            color: #ccc;
+            color: var(--us-ink-soft);
             font-size: 0.95rem;
             line-height: 1.5;
         }
 
         .contact-section {
-            background: rgba(220, 53, 69, 0.1);
-            border: 1px solid rgba(220, 53, 69, 0.3);
+            background: rgba(200, 16, 46, 0.1);
+            border: 1px solid rgba(200, 16, 46, 0.3);
             border-radius: 12px;
             padding: 2rem;
             margin-bottom: 2rem;
@@ -207,7 +209,7 @@
         }
 
         .contact-section h3 {
-            color: #dc3545;
+            color: #c8102e;
             font-size: 1.3rem;
             font-weight: 600;
             margin-bottom: 1.5rem;
@@ -266,7 +268,7 @@
             gap: 0.5rem;
             padding: 1rem 2rem;
             background: rgba(255, 255, 255, 0.1);
-            color: #fff;
+            color: var(--us-ink);
             text-decoration: none;
             border-radius: 12px;
             border: 1px solid rgba(255, 255, 255, 0.2);
@@ -278,7 +280,7 @@
             background: rgba(255, 255, 255, 0.15);
             border-color: rgba(255, 255, 255, 0.3);
             transform: translateY(-2px);
-            color: #fff;
+            color: var(--us-ink);
         }
 
         @@keyframes shimmer {

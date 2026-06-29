@@ -188,8 +188,14 @@ namespace HarmonySound.MVC.Controllers
             model.Profile = JsonSerializer.Deserialize<ProfileEditViewModel>(json, 
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
+            // Sin búsqueda: cargar el contenido de descubrimiento (populares, novedades, álbumes y artistas)
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                await LoadDiscoveryContentAsync(model);
+                await LoadFollowedArtistsAsync(model, userId);
+            }
             // Si hay búsqueda, consulta artistas y contenidos
-            if (!string.IsNullOrWhiteSpace(query))
+            else
             {
                 // Buscar artistas
                 var artistsResponse = await _httpClient.GetAsync($"https://localhost:7120/api/Users/search?query={Uri.EscapeDataString(query)}");
@@ -246,7 +252,116 @@ namespace HarmonySound.MVC.Controllers
             ViewBag.Success = TempData["Success"];
             return View(model);
         }
-                    
+
+        // Carga las secciones de descubrimiento de la pantalla de inicio:
+        // canciones populares, novedades, álbumes y artistas destacados.
+        private async Task LoadDiscoveryContentAsync(SearchResultsViewModel model)
+        {
+            var jsonOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+
+            // Canciones más populares del momento (ordenadas por "me gusta")
+            try
+            {
+                var popularResponse = await _httpClient.GetAsync("https://localhost:7120/api/Contents/popular?count=12");
+                if (popularResponse.IsSuccessStatusCode)
+                {
+                    var popularJson = await popularResponse.Content.ReadAsStringAsync();
+                    model.PopularContents = JsonSerializer.Deserialize<List<ContentWithArtistDto>>(popularJson, jsonOptions) ?? new();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error cargando canciones populares: {ex.Message}");
+            }
+
+            // Novedades: contenido más reciente (with-artists ya viene ordenado por fecha desc)
+            try
+            {
+                var recentResponse = await _httpClient.GetAsync("https://localhost:7120/api/Contents/with-artists");
+                if (recentResponse.IsSuccessStatusCode)
+                {
+                    var recentJson = await recentResponse.Content.ReadAsStringAsync();
+                    var recent = JsonSerializer.Deserialize<List<ContentWithArtistDto>>(recentJson, jsonOptions) ?? new();
+                    model.RecentContents = recent.Take(12).ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error cargando novedades: {ex.Message}");
+            }
+
+            // Álbumes destacados
+            try
+            {
+                var albumsResponse = await _httpClient.GetAsync("https://localhost:7120/api/Albums");
+                if (albumsResponse.IsSuccessStatusCode)
+                {
+                    var albumsJson = await albumsResponse.Content.ReadAsStringAsync();
+                    var albums = JsonSerializer.Deserialize<List<AlbumDto>>(albumsJson, jsonOptions) ?? new();
+                    model.FeaturedAlbums = albums
+                        .OrderByDescending(a => a.CreationDate)
+                        .Take(8)
+                        .ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error cargando álbumes destacados: {ex.Message}");
+            }
+
+            // Artistas para explorar
+            try
+            {
+                var artistsResponse = await _httpClient.GetAsync("https://localhost:7120/api/Users/Artists");
+                if (artistsResponse.IsSuccessStatusCode)
+                {
+                    var artistsJson = await artistsResponse.Content.ReadAsStringAsync();
+                    model.FeaturedArtists = JsonSerializer.Deserialize<List<ArtistCardViewModel>>(artistsJson, jsonOptions) ?? new();
+                    model.FeaturedArtists = model.FeaturedArtists.Take(12).ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error cargando artistas: {ex.Message}");
+            }
+        }
+
+        // Carga los artistas que el usuario sigue para la sección "Artistas que sigo".
+        private async Task LoadFollowedArtistsAsync(SearchResultsViewModel model, int userId)
+        {
+            var jsonOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+
+            try
+            {
+                var followingResponse = await _httpClient.GetAsync($"{_apiBaseUrl}/api/Follows/following/{userId}");
+                if (!followingResponse.IsSuccessStatusCode)
+                    return;
+
+                var followingJson = await followingResponse.Content.ReadAsStringAsync();
+                var followedIds = JsonSerializer.Deserialize<List<int>>(followingJson, jsonOptions) ?? new();
+                if (!followedIds.Any())
+                    return;
+
+                var artistsResponse = await _httpClient.GetAsync($"{_apiBaseUrl}/api/Users/Artists");
+                if (!artistsResponse.IsSuccessStatusCode)
+                    return;
+
+                var artistsJson = await artistsResponse.Content.ReadAsStringAsync();
+                var allArtists = JsonSerializer.Deserialize<List<ArtistCardViewModel>>(artistsJson, jsonOptions) ?? new();
+
+                // Mantener el orden en que se siguieron (followedIds viene ordenado por fecha desc).
+                model.FollowedArtists = followedIds
+                    .Select(id => allArtists.FirstOrDefault(a => a.Id == id))
+                    .Where(a => a != null)
+                    .Select(a => a!)
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error cargando artistas seguidos: {ex.Message}");
+            }
+        }
+
         [HttpGet]
         public async Task<IActionResult> GetContentLikes(int contentId)
         {
@@ -640,6 +755,33 @@ namespace HarmonySound.MVC.Controllers
                 var artistJson = await artistResponse.Content.ReadAsStringAsync();
                 var artist = JsonSerializer.Deserialize<User>(artistJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                 ViewBag.Artist = artist;
+                ViewBag.ArtistId = artistId;
+
+                // Estado de seguimiento del cliente sobre este artista
+                ViewBag.IsFollowing = false;
+                ViewBag.FollowersCount = 0;
+                try
+                {
+                    var followResponse = await _httpClient.GetAsync($"{_apiBaseUrl}/api/Follows/is-following?followerId={userId}&artistId={artistId}");
+                    if (followResponse.IsSuccessStatusCode)
+                    {
+                        var followJson = await followResponse.Content.ReadAsStringAsync();
+                        using var doc = JsonDocument.Parse(followJson);
+                        ViewBag.IsFollowing = doc.RootElement.GetProperty("isFollowing").GetBoolean();
+                    }
+
+                    var countResponse = await _httpClient.GetAsync($"{_apiBaseUrl}/api/Follows/followers/count/{artistId}");
+                    if (countResponse.IsSuccessStatusCode)
+                    {
+                        var countJson = await countResponse.Content.ReadAsStringAsync();
+                        using var doc = JsonDocument.Parse(countJson);
+                        ViewBag.FollowersCount = doc.RootElement.GetProperty("followersCount").GetInt32();
+                    }
+                }
+                catch (Exception followEx)
+                {
+                    Console.WriteLine($"No se pudo cargar el estado de seguimiento: {followEx.Message}");
+                }
 
                 // Obtener álbumes del artista
                 var albumsResponse = await _httpClient.GetAsync($"https://localhost:7120/api/Albums/ByArtist/{artistId}");
@@ -700,6 +842,41 @@ namespace HarmonySound.MVC.Controllers
             {
                 TempData["Error"] = $"Error al cargar el álbum: {ex.Message}";
                 return RedirectToAction("Home");
+            }
+        }
+
+        // POST: Seguir / dejar de seguir a un artista (toggle). Devuelve JSON para AJAX.
+        [HttpPost]
+        public async Task<IActionResult> ToggleFollow(int artistId)
+        {
+            try
+            {
+                int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+
+                var form = new FormUrlEncodedContent(new[]
+                {
+                    new KeyValuePair<string, string>("followerId", userId.ToString()),
+                    new KeyValuePair<string, string>("artistId", artistId.ToString())
+                });
+
+                var response = await _httpClient.PostAsync($"{_apiBaseUrl}/api/Follows", form);
+                var json = await response.Content.ReadAsStringAsync();
+
+                if (!response.IsSuccessStatusCode)
+                    return Json(new { success = false, message = "No se pudo procesar el seguimiento." });
+
+                using var doc = JsonDocument.Parse(json);
+                var root = doc.RootElement;
+                return Json(new
+                {
+                    success = true,
+                    isFollowing = root.GetProperty("isFollowing").GetBoolean(),
+                    followersCount = root.GetProperty("followersCount").GetInt32()
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
             }
         }
     }

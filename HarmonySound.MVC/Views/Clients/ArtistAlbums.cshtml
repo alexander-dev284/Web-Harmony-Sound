@@ -37,7 +37,21 @@
                     <span class="albums-count">@Model.Count() álbum(es)</span>
                     <span class="separator">•</span>
                     <span class="total-songs">@Model.Sum(a => a.Contents?.Count ?? 0) canción(es)</span>
+                    <span class="separator">•</span>
+                    <span class="followers-count"><span id="followersCount">@(ViewBag.FollowersCount ?? 0)</span> seguidor(es)</span>
                 </div>
+
+                @{
+                    var isFollowing = (bool)(ViewBag.IsFollowing ?? false);
+                }
+                <button id="followBtn"
+                        class="follow-btn @(isFollowing ? "following" : "")"
+                        data-artist-id="@ViewBag.ArtistId"
+                        data-following="@isFollowing.ToString().ToLower()"
+                        onclick="toggleFollow(this)">
+                    <i class="fas @(isFollowing ? "fa-user-check" : "fa-user-plus") me-2"></i>
+                    <span class="follow-btn-text">@(isFollowing ? "Siguiendo" : "Seguir")</span>
+                </button>
             </div>
         </div>
     </div>
@@ -118,9 +132,9 @@
     }
 
     body {
-        background: #000 !important;
-        color: #fff !important;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+        background: var(--us-surface) !important;
+        color: var(--us-ink) !important;
+        font-family: var(--us-font) !important;
         margin: 0;
         padding: 0;
         padding-bottom: 90px;
@@ -150,9 +164,9 @@
     }
 
     .btn-back {
-        background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
-        color: #fff !important;
-        border: 1px solid #333;
+        background: linear-gradient(135deg, var(--us-surface-alt), var(--us-surface-2));
+        color: var(--us-ink) !important;
+        border: 1px solid var(--us-border);
         padding: 8px 16px;
         border-radius: 20px;
         font-weight: 600;
@@ -167,9 +181,9 @@
     .btn-back:hover {
         transform: translateY(-2px);
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-        color: #000 !important;
-        border-color: #1db954;
-        background: linear-gradient(135deg, #1db954, #1ed760);
+        color: #ffffff !important;
+        border-color: #c8102e;
+        background: linear-gradient(135deg, #c8102e, #a30d25);
     }
 
     .artist-hero {
@@ -178,7 +192,7 @@
         gap: 2rem;
         margin-bottom: 2rem;
         padding: 3rem 0;
-        background: linear-gradient(135deg, rgba(29, 185, 84, 0.1), transparent);
+        background: linear-gradient(135deg, rgba(200, 16, 46, 0.1), transparent);
         border-radius: 12px;
         padding-left: 2rem;
         position: relative;
@@ -216,13 +230,13 @@
     .default-artist-image {
         width: 100%;
         height: 100%;
-        background: linear-gradient(135deg, #282828, #404040);
+        background: linear-gradient(135deg, var(--us-surface-2), var(--us-border));
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 4rem;
-        color: #1db954;
+        color: #c8102e;
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
     }
 
@@ -233,7 +247,7 @@
     }
 
     .artist-label {
-        color: #b3b3b3;
+        color: var(--us-ink-soft);
         font-size: 0.9rem;
         font-weight: 600;
         text-transform: uppercase;
@@ -246,13 +260,13 @@
         font-size: 4rem;
         font-weight: 900;
         margin-bottom: 1rem;
-        color: #fff;
+        color: var(--us-ink);
         line-height: 1.1;
         text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
     }
 
     .artist-biography {
-        color: #b3b3b3;
+        color: var(--us-ink-soft);
         font-size: 1.1rem;
         line-height: 1.5;
         margin-bottom: 1rem;
@@ -264,7 +278,7 @@
         align-items: center;
         gap: 0.5rem;
         font-size: 1rem;
-        color: #b3b3b3;
+        color: var(--us-ink-soft);
         flex-wrap: wrap;
     }
 
@@ -274,7 +288,7 @@
 
     /* Sección de álbumes */
     .albums-section {
-        background: #121212;
+        background: var(--us-surface);
         border-radius: 12px;
         padding: 2rem;
     }
@@ -283,7 +297,7 @@
         font-size: 1.8rem;
         font-weight: 700;
         margin-bottom: 2rem;
-        color: #fff;
+        color: var(--us-ink);
         display: flex;
         align-items: center;
     }
@@ -295,7 +309,7 @@
     }
 
     .album-card {
-        background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+        background: linear-gradient(135deg, var(--us-surface-alt), var(--us-surface-2));
         border-radius: 12px;
         padding: 1.5rem;
         transition: all 0.3s ease;
@@ -312,7 +326,7 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background: linear-gradient(135deg, rgba(29, 185, 84, 0.1), rgba(30, 215, 96, 0.1));
+        background: linear-gradient(135deg, rgba(200, 16, 46, 0.1), rgba(163, 13, 37, 0.1));
         opacity: 0;
         transition: opacity 0.3s ease;
         z-index: 1;
@@ -325,7 +339,7 @@
     .album-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        border-color: rgba(29, 185, 84, 0.5);
+        border-color: rgba(200, 16, 46, 0.5);
     }
 
     .album-cover {
@@ -340,11 +354,11 @@
     .cover-placeholder {
         width: 100%;
         height: 100%;
-        background: linear-gradient(135deg, #282828, #404040);
+        background: linear-gradient(135deg, var(--us-surface-2), var(--us-border));
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #b3b3b3;
+        color: var(--us-ink-soft);
         font-size: 3rem;
         border-radius: 8px;
         transition: all 0.3s ease;
@@ -370,7 +384,7 @@
     }
 
     .play-album-btn {
-        background: #1db954;
+        background: #c8102e;
         border: none;
         border-radius: 50%;
         width: 60px;
@@ -378,16 +392,16 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #000;
+        color: #ffffff;
         font-size: 1.5rem;
         cursor: pointer;
         transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(29, 185, 84, 0.3);
+        box-shadow: 0 4px 15px rgba(200, 16, 46, 0.3);
     }
 
     .play-album-btn:hover {
         transform: scale(1.1);
-        box-shadow: 0 6px 20px rgba(29, 185, 84, 0.4);
+        box-shadow: 0 6px 20px rgba(200, 16, 46, 0.4);
     }
 
     .album-info {
@@ -400,14 +414,14 @@
         font-size: 1.4rem;
         font-weight: 700;
         margin-bottom: 0.5rem;
-        color: #fff;
+        color: var(--us-ink);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
     }
 
     .album-artist {
-        color: #b3b3b3;
+        color: var(--us-ink-soft);
         font-size: 1rem;
         margin-bottom: 1rem;
         font-weight: 500;
@@ -421,7 +435,7 @@
 
     .album-date,
     .album-songs {
-        color: #b3b3b3;
+        color: var(--us-ink-soft);
         font-size: 0.9rem;
         display: flex;
         align-items: center;
@@ -439,7 +453,7 @@
 
     .empty-icon {
         font-size: 5rem;
-        color: #404040;
+        color: var(--us-border);
         margin-bottom: 2rem;
     }
 
@@ -447,19 +461,19 @@
         font-size: 1.8rem;
         font-weight: 600;
         margin-bottom: 1rem;
-        color: #fff;
+        color: var(--us-ink);
     }
 
     .empty-albums p {
-        color: #b3b3b3;
+        color: var(--us-ink-soft);
         font-size: 1.1rem;
         margin-bottom: 2rem;
         max-width: 400px;
     }
 
     .btn-primary {
-        background: linear-gradient(135deg, #1db954, #1ed760);
-        color: #000 !important;
+        background: linear-gradient(135deg, #c8102e, #a30d25);
+        color: #ffffff !important;
         border: none;
         padding: 12px 24px;
         border-radius: 25px;
@@ -468,13 +482,13 @@
         display: inline-flex;
         align-items: center;
         transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(29, 185, 84, 0.3);
+        box-shadow: 0 4px 15px rgba(200, 16, 46, 0.3);
     }
 
     .btn-primary:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(29, 185, 84, 0.4);
-        color: #000 !important;
+        box-shadow: 0 6px 20px rgba(200, 16, 46, 0.4);
+        color: #ffffff !important;
     }
 
     /* FontAwesome */
@@ -510,6 +524,47 @@
     .album-card:nth-child(4) { animation-delay: 0.4s; }
     .album-card:nth-child(5) { animation-delay: 0.5s; }
     .album-card:nth-child(6) { animation-delay: 0.6s; }
+
+    /* Conteo de seguidores y botón seguir */
+    .followers-count {
+        font-weight: 600;
+        color: var(--us-ink);
+    }
+
+    .follow-btn {
+        margin-top: 1.25rem;
+        display: inline-flex;
+        align-items: center;
+        background: #c8102e;
+        color: #ffffff;
+        border: none;
+        border-radius: 25px;
+        padding: 10px 28px;
+        font-size: 0.95rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.25s ease;
+    }
+
+    .follow-btn:hover {
+        transform: scale(1.05);
+    }
+
+    .follow-btn.following {
+        background: transparent;
+        color: var(--us-ink);
+        border: 1px solid #cdd1d6;
+    }
+
+    .follow-btn.following:hover {
+        border-color: #c8102e;
+        color: #c8102e;
+    }
+
+    .follow-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
 </style>
 
 <!-- FontAwesome -->
@@ -547,6 +602,48 @@ document.addEventListener('DOMContentLoaded', function() {
 // Función para navegar a los detalles del álbum
 function goToAlbumDetails(albumId) {
     window.location.href = '@Url.Action("AlbumDetails", "Clients")/' + albumId;
+}
+
+// Seguir / dejar de seguir al artista
+async function toggleFollow(btn) {
+    const artistId = btn.getAttribute('data-artist-id');
+    btn.disabled = true;
+
+    try {
+        const formData = new FormData();
+        formData.append('artistId', artistId);
+
+        const response = await fetch('@Url.Action("ToggleFollow", "Clients")', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await response.json();
+
+        if (data.success) {
+            const text = btn.querySelector('.follow-btn-text');
+            const icon = btn.querySelector('i');
+            const counter = document.getElementById('followersCount');
+
+            if (data.isFollowing) {
+                btn.classList.add('following');
+                text.textContent = 'Siguiendo';
+                icon.className = 'fas fa-user-check me-2';
+            } else {
+                btn.classList.remove('following');
+                text.textContent = 'Seguir';
+                icon.className = 'fas fa-user-plus me-2';
+            }
+            btn.setAttribute('data-following', data.isFollowing);
+            if (counter) counter.textContent = data.followersCount;
+        } else {
+            alert(data.message || 'No se pudo procesar el seguimiento.');
+        }
+    } catch (err) {
+        console.error('Error al seguir al artista:', err);
+        alert('Ocurrió un error al procesar el seguimiento.');
+    } finally {
+        btn.disabled = false;
+    }
 }
 
 // Función para el botón de reproducir álbum (evento click del botón play)

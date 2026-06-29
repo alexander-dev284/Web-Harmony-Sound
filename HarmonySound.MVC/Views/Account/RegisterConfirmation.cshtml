@@ -4,17 +4,17 @@
 }
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
     <meta charset="utf-8" />
-    <title>Confirm your email - HarmonySound</title>
+    <title>Confirma tu correo - UniSound</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" />
     <style>
         body {
-            background: linear-gradient(135deg, #000000, #1a1a1a) !important;
+            background: linear-gradient(135deg, var(--us-surface), var(--us-surface-alt)) !important;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -30,57 +30,57 @@
         }
 
         .auth-card {
-            background: linear-gradient(135deg, #1e1e1e, #2d2d2d);
-            border: 1px solid #404040;
+            background: linear-gradient(135deg, var(--us-surface-alt), var(--us-surface-alt));
+            border: 1px solid var(--us-border);
             border-radius: 16px;
             padding: 3rem 2rem;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
-            color: #ffffff !important;
+            color: var(--us-ink) !important;
             text-align: center;
         }
 
         .auth-card h2 {
-            color: #1db954 !important;
+            color: #c8102e !important;
             font-size: 2rem;
             font-weight: 700;
             margin-bottom: 1.5rem;
-            background: linear-gradient(135deg, #1db954, #1ed760);
+            background: linear-gradient(135deg, #c8102e, #a30d25);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
 
         .auth-card p {
-            color: #e0e0e0 !important;
+            color: var(--us-ink-soft) !important;
             font-size: 1.1rem;
             line-height: 1.6;
             margin-bottom: 2rem;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #1db954, #1ed760) !important;
+            background: linear-gradient(135deg, #c8102e, #a30d25) !important;
             border: none !important;
-            color: #000000 !important;
+            color: #ffffff !important;
             font-weight: 600;
             padding: 12px 24px;
             border-radius: 25px;
             font-size: 1rem;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(29, 185, 84, 0.3);
+            box-shadow: 0 4px 15px rgba(200, 16, 46, 0.3);
         }
 
         .btn-primary:hover {
-            background: linear-gradient(135deg, #1ed760, #22c55e) !important;
+            background: linear-gradient(135deg, #a30d25, #22c55e) !important;
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(29, 185, 84, 0.4);
-            color: #000000 !important;
+            box-shadow: 0 6px 20px rgba(200, 16, 46, 0.4);
+            color: #ffffff !important;
         }
 
         .btn-primary:focus,
         .btn-primary:active {
-            background: linear-gradient(135deg, #1db954, #1ed760) !important;
-            color: #000000 !important;
-            box-shadow: 0 0 0 0.2rem rgba(29, 185, 84, 0.5) !important;
+            background: linear-gradient(135deg, #c8102e, #a30d25) !important;
+            color: #ffffff !important;
+            box-shadow: 0 0 0 0.2rem rgba(200, 16, 46, 0.5) !important;
         }
 
         .auth-card {
@@ -100,12 +100,14 @@
         }
 
     </style>
+    <link rel="stylesheet" href="~/css/design-system.css" />
+    <link rel="stylesheet" href="~/css/dark-theme.css" />
 </head>
 
 <body>
     <div class="auth-container">
         <div class="auth-card text-center">
-            <h2>Check your email</h2>
+            <h2>Revisa tu correo</h2>
             <p>
                 Enviamos un enlace para verificar tu correo.<br />
                 Por favor verifica tu correo para activar tu cuenta.

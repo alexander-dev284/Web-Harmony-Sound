@@ -2,7 +2,7 @@
     <div class="sidebar-header">
         <div class="logo">
             <i class="fas fa-shield-alt"></i>
-            <h2>HarmonySound</h2>
+            <h2>UniSound</h2>
             <span>Admin Panel</span>
         </div>
     </div>
@@ -39,8 +39,8 @@
 <style>
     .admin-sidebar {
         width: 250px;
-        background: linear-gradient(180deg, #1a1a1a, #2a2a2a);
-        border-right: 1px solid #333;
+        background: linear-gradient(180deg, var(--us-surface-alt), var(--us-surface-2));
+        border-right: 1px solid var(--us-border);
         display: flex;
         flex-direction: column;
         min-height: 100vh;
@@ -48,25 +48,25 @@
 
     .sidebar-header {
         padding: 2rem 1rem;
-        border-bottom: 1px solid #333;
+        border-bottom: 1px solid var(--us-border);
         text-align: center;
     }
 
     .logo i {
         font-size: 2rem;
-        color: #ef4444;
+        color: #c8102e;
         margin-bottom: 0.5rem;
         display: block;
     }
 
     .logo h2 {
         margin: 0;
-        color: #fff;
+        color: var(--us-ink);
         font-size: 1.2rem;
     }
 
     .logo span {
-        color: #888;
+        color: var(--us-ink-faint);
         font-size: 0.9rem;
     }
 
@@ -79,16 +79,16 @@
         display: flex;
         align-items: center;
         padding: 1rem 1.5rem;
-        color: #ccc;
+        color: var(--us-ink-soft);
         text-decoration: none;
         transition: all 0.3s ease;
         border-left: 3px solid transparent;
     }
 
     .menu-item:hover, .menu-item.active {
-        background: rgba(239, 68, 68, 0.1);
-        color: #ef4444;
-        border-left-color: #ef4444;
+        background: rgba(200, 16, 46, 0.1);
+        color: #c8102e;
+        border-left-color: #c8102e;
     }
 
     .menu-item i {
@@ -98,14 +98,14 @@
 
     .sidebar-footer {
         padding: 1rem;
-        border-top: 1px solid #333;
+        border-top: 1px solid var(--us-border);
     }
 
     .logout-btn {
         width: 100%;
         background: transparent;
-        border: 1px solid #333;
-        color: #ccc;
+        border: 1px solid var(--us-border);
+        color: var(--us-ink-soft);
         padding: 0.75rem;
         border-radius: 6px;
         cursor: pointer;
@@ -116,9 +116,9 @@
     }
 
     .logout-btn:hover {
-        background: #dc3545;
-        border-color: #dc3545;
-        color: #fff;
+        background: #c8102e;
+        border-color: #c8102e;
+        color: #ffffff;
     }
 
     .logout-btn i {

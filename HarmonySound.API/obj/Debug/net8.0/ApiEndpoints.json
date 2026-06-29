@@ -685,6 +685,32 @@
   },
   {
     "ContainingType": "HarmonySound.API.Controllers.ContentsController",
+    "Method": "GetPopularContents",
+    "RelativePath": "api/Contents/popular",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "count",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.IEnumerable\u00601[[System.Object, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HarmonySound.API.Controllers.ContentsController",
     "Method": "Search",
     "RelativePath": "api/Contents/search",
     "HttpMethod": "GET",
@@ -765,6 +791,112 @@
         "StatusCode": 200
       }
     ]
+  },
+  {
+    "ContainingType": "HarmonySound.API.Controllers.FollowsController",
+    "Method": "ToggleFollow",
+    "RelativePath": "api/Follows",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "followerId",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "artistId",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "HarmonySound.API.Controllers.FollowsController",
+    "Method": "GetFollowers",
+    "RelativePath": "api/Follows/followers/{artistId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "artistId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "HarmonySound.API.Controllers.FollowsController",
+    "Method": "GetFollowersCount",
+    "RelativePath": "api/Follows/followers/count/{artistId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "artistId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "HarmonySound.API.Controllers.FollowsController",
+    "Method": "GetFollowing",
+    "RelativePath": "api/Follows/following/{followerId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "followerId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "HarmonySound.API.Controllers.FollowsController",
+    "Method": "IsFollowing",
+    "RelativePath": "api/Follows/is-following",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "followerId",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "artistId",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "HarmonySound.API.Controllers.FollowsController",
+    "Method": "GetTopArtists",
+    "RelativePath": "api/Follows/top-artists",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "count",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
   },
   {
     "ContainingType": "HarmonySound.API.Controllers.LikesController",

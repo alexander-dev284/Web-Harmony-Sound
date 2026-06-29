@@ -48,12 +48,12 @@ html, body {
 }
 
 .login-card input:focus {
-    outline: 2px solid #1db954;
+    outline: 2px solid #e50914;
     background: #191414;
 }
 
 .login-card button {
-    background: #1db954;
+    background: #e50914;
     color: #191414;
     font-weight: bold;
     border: none;
@@ -69,7 +69,7 @@ html, body {
 }
 
 .login-card a {
-    color: #1db954;
+    color: #e50914;
     text-decoration: underline;
 }
 

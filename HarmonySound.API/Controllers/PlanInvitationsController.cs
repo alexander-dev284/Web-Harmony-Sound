@@ -309,7 +309,7 @@ namespace HarmonySound.API.Controllers
                 </ul>
                 
                 <p>
-                    <a href='{acceptUrl}' style='background-color: #1db954; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>
+                    <a href='{acceptUrl}' style='background-color: #e50914; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>
                         Aceptar Invitación
                     </a>
                 </p>

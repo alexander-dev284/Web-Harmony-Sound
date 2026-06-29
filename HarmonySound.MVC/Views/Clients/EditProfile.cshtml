@@ -113,9 +113,9 @@
     }
 
     body {
-        background: #000 !important;
-        color: #fff !important;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+        background: var(--us-surface) !important;
+        color: var(--us-ink) !important;
+        font-family: var(--us-font) !important;
         margin: 0;
         padding: 0;
     }
@@ -138,9 +138,9 @@
     }
 
     .btn-home {
-        background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
-        color: #fff !important;
-        border: 1px solid #333;
+        background: linear-gradient(135deg, var(--us-surface-alt), var(--us-surface-2));
+        color: var(--us-ink) !important;
+        border: 1px solid var(--us-border);
         padding: 8px 16px;
         border-radius: 20px;
         font-weight: 600;
@@ -155,16 +155,16 @@
     .btn-home:hover {
         transform: translateY(-2px);
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-        color: #000 !important;
-        border-color: #1db954;
-        background: linear-gradient(135deg, #1db954, #1ed760);
+        color: #ffffff !important;
+        border-color: #c8102e;
+        background: linear-gradient(135deg, #c8102e, #a30d25);
     }
 
     .edit-profile-content {
-        background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+        background: linear-gradient(135deg, var(--us-surface-alt), var(--us-surface-2));
         border-radius: 12px;
         padding: 2rem;
-        border: 1px solid #333;
+        border: 1px solid var(--us-border);
         box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
         margin-top: 3rem;
     }
@@ -173,9 +173,9 @@
         font-size: 1.8rem;
         font-weight: 700;
         margin-bottom: 2rem;
-        color: #fff !important;
+        color: var(--us-ink) !important;
         text-align: center;
-        background: linear-gradient(135deg, #1db954, #1ed760);
+        background: linear-gradient(135deg, #c8102e, #a30d25);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
@@ -195,16 +195,16 @@
 
     .form-label {
         font-weight: 600;
-        color: #fff;
+        color: var(--us-ink);
         font-size: 1rem;
         display: flex;
         align-items: center;
     }
 
     .form-control {
-        background: #121212 !important;
-        border: 2px solid #333 !important;
-        color: #fff !important;
+        background: var(--us-surface) !important;
+        border: 2px solid var(--us-border) !important;
+        color: var(--us-ink) !important;
         padding: 12px 16px;
         border-radius: 8px;
         font-size: 1rem;
@@ -212,22 +212,22 @@
     }
 
     .form-control:focus {
-        border-color: #1db954 !important;
-        box-shadow: 0 0 0 0.2rem rgba(29, 185, 84, 0.25) !important;
-        background: #1a1a1a !important;
+        border-color: #c8102e !important;
+        box-shadow: 0 0 0 0.2rem rgba(200, 16, 46, 0.25) !important;
+        background: var(--us-surface-alt) !important;
     }
 
     .form-control::placeholder {
-        color: #b3b3b3 !important;
+        color: var(--us-ink-soft) !important;
     }
 
     .form-control[readonly] {
-        background: #0a0a0a !important;
+        background: var(--us-surface) !important;
         opacity: 0.7;
     }
 
     .form-text {
-        color: #b3b3b3 !important;
+        color: var(--us-ink-soft) !important;
         font-size: 0.875rem;
     }
 
@@ -241,23 +241,23 @@
         height: 120px;
         border-radius: 50%;
         object-fit: cover;
-        border: 3px solid #1db954;
-        box-shadow: 0 4px 15px rgba(29, 185, 84, 0.3);
+        border: 3px solid #c8102e;
+        box-shadow: 0 4px 15px rgba(200, 16, 46, 0.3);
     }
 
     .file-upload-area {
         position: relative;
-        border: 2px dashed #333;
+        border: 2px dashed var(--us-border);
         border-radius: 8px;
         padding: 2rem;
         text-align: center;
         transition: all 0.3s ease;
-        background: #121212;
+        background: var(--us-surface);
     }
 
     .file-upload-area:hover {
-        border-color: #1db954;
-        background: #1a1a1a;
+        border-color: #c8102e;
+        background: var(--us-surface-alt);
     }
 
     .file-input {
@@ -279,18 +279,18 @@
 
     .file-upload-placeholder i {
         font-size: 3rem;
-        color: #1db954;
+        color: #c8102e;
         margin-bottom: 1rem;
     }
 
     .file-upload-placeholder p {
-        color: #fff;
+        color: var(--us-ink);
         font-size: 1.1rem;
         margin-bottom: 0.5rem;
     }
 
     .file-upload-placeholder small {
-        color: #b3b3b3;
+        color: var(--us-ink-soft);
         display: block;
         margin-bottom: 0.25rem;
     }
@@ -305,14 +305,14 @@
     }
 
     .alert-success {
-        background: rgba(29, 185, 84, 0.1);
-        color: #1db954;
-        border: 1px solid rgba(29, 185, 84, 0.3);
+        background: rgba(200, 16, 46, 0.1);
+        color: #c8102e;
+        border: 1px solid rgba(200, 16, 46, 0.3);
     }
 
     .alert-danger {
         background: rgba(220, 53, 69, 0.1);
-        color: #dc3545;
+        color: #c8102e;
         border: 1px solid rgba(220, 53, 69, 0.3);
     }
 
@@ -340,27 +340,27 @@
     }
 
     .btn-save {
-        background: linear-gradient(135deg, #1db954, #1ed760);
-        color: #000;
-        box-shadow: 0 4px 15px rgba(29, 185, 84, 0.3);
+        background: linear-gradient(135deg, #c8102e, #a30d25);
+        color: #ffffff;
+        box-shadow: 0 4px 15px rgba(200, 16, 46, 0.3);
     }
 
     .btn-save:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(29, 185, 84, 0.4);
-        color: #000;
+        box-shadow: 0 6px 20px rgba(200, 16, 46, 0.4);
+        color: #ffffff;
     }
 
     .btn-cancel {
         background: transparent;
-        border: 2px solid #666;
-        color: #b3b3b3;
+        border: 2px solid var(--us-ink-faint);
+        color: var(--us-ink-soft);
     }
 
     .btn-cancel:hover {
-        background: #1a1a1a;
-        color: #fff;
-        border-color: #999;
+        background: var(--us-surface-alt);
+        color: var(--us-ink);
+        border-color: var(--us-ink-faint);
         transform: translateY(-2px);
     }
 
@@ -378,7 +378,7 @@
 
     /* Override Bootstrap validation */
     .field-validation-error {
-        color: #dc3545 !important;
+        color: #c8102e !important;
         font-size: 0.875rem;
         margin-top: 0.5rem;
     }
@@ -401,12 +401,12 @@
                     
                     placeholder.innerHTML = `
                         <i class="fas fa-file-image"></i>
-                        <p style="color: #1db954; font-weight: 600;">${fileName}</p>
-                        <small style="color: #1db954;">Tamaño: ${fileSize}</small>
-                        <small style="color: #b3b3b3;">Haz clic para cambiar la imagen</small>
+                        <p style="color: #c8102e; font-weight: 600;">${fileName}</p>
+                        <small style="color: #c8102e;">Tamaño: ${fileSize}</small>
+                        <small style="color: var(--us-ink-soft);">Haz clic para cambiar la imagen</small>
                     `;
-                    fileUploadArea.style.borderColor = '#1db954';
-                    fileUploadArea.style.background = '#1a1a1a';
+                    fileUploadArea.style.borderColor = '#c8102e';
+                    fileUploadArea.style.background = 'var(--us-surface-alt)';
                 } else {
                     placeholder.innerHTML = `
                         <i class="fas fa-cloud-upload-alt"></i>
@@ -414,23 +414,23 @@
                         <small>Formatos: JPG, PNG, GIF</small>
                         <small>Tamaño máximo: 5MB</small>
                     `;
-                    fileUploadArea.style.borderColor = '#333';
-                    fileUploadArea.style.background = '#121212';
+                    fileUploadArea.style.borderColor = 'var(--us-border)';
+                    fileUploadArea.style.background = 'var(--us-surface)';
                 }
             });
 
             // Efectos de drag and drop
             fileUploadArea.addEventListener('dragover', function(e) {
                 e.preventDefault();
-                this.style.borderColor = '#1db954';
-                this.style.background = '#1a1a1a';
+                this.style.borderColor = '#c8102e';
+                this.style.background = 'var(--us-surface-alt)';
             });
 
             fileUploadArea.addEventListener('dragleave', function(e) {
                 e.preventDefault();
                 if (!fileInput.files.length) {
-                    this.style.borderColor = '#333';
-                    this.style.background = '#121212';
+                    this.style.borderColor = 'var(--us-border)';
+                    this.style.background = 'var(--us-surface)';
                 }
             });
 

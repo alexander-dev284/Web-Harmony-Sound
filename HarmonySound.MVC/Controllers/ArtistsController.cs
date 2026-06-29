@@ -60,10 +60,12 @@ namespace HarmonySound.MVC.Controllers
                     Console.WriteLine($"Error al obtener álbumes: {albumsResponse.StatusCode} - {errorContent}");
                 }
 
-                //  Obtener total de likes usando JsonElement
+                //  Obtener likes por canción (y total) usando JsonElement
                 var totalLikes = 0;
+                var perSongLikes = new List<(string Title, int Likes)>();
                 foreach (var song in artistSongs)
                 {
+                    var songLikes = 0;
                     try
                     {
                         var likesResponse = await _httpClient.GetAsync($"https://localhost:7120/api/Contents/{song.Id}/likes");
@@ -72,19 +74,47 @@ namespace HarmonySound.MVC.Controllers
                             var likesJson = await likesResponse.Content.ReadAsStringAsync();
                             var likesDocument = JsonDocument.Parse(likesJson);
                             var likesElement = likesDocument.RootElement;
-                            
+
                             if (likesElement.TryGetProperty("likes", out var likesCount))
                             {
-                                totalLikes += likesCount.GetInt32();
+                                songLikes = likesCount.GetInt32();
+                                totalLikes += songLikes;
                             }
                         }
                     }
                     catch
                     {
                         // Si hay error obteniendo likes de una canción, continuar con las demás
-                        continue;
+                    }
+                    perSongLikes.Add((song.Title ?? "Sin título", songLikes));
+                }
+
+                // Obtener total de reproducciones desde Statistics
+                var totalReproductions = 0;
+                try
+                {
+                    var statsResponse = await _httpClient.GetAsync("https://localhost:7120/api/Statistics");
+                    if (statsResponse.IsSuccessStatusCode)
+                    {
+                        var statsJson = await statsResponse.Content.ReadAsStringAsync();
+                        var allStats = JsonSerializer.Deserialize<List<Statistic>>(statsJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new List<Statistic>();
+                        var artistSongIds = artistSongs.Select(s => s.Id).ToHashSet();
+                        totalReproductions = allStats
+                            .Where(s => artistSongIds.Contains(s.ContentId))
+                            .Sum(s => s.Reproductions);
                     }
                 }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error obteniendo reproducciones: {ex.Message}");
+                }
+
+                // Top 5 canciones por likes (para tabla y gráfico)
+                var topSongs = perSongLikes
+                    .OrderByDescending(s => s.Likes)
+                    .Take(5)
+                    .Select(s => new { title = s.Title, likes = s.Likes })
+                    .ToList();
 
                 // Obtener la última canción subida
                 var lastUpload = artistSongs
@@ -97,6 +127,7 @@ namespace HarmonySound.MVC.Controllers
                 Console.WriteLine($"   - Canciones: {totalSongs}");
                 Console.WriteLine($"   - Álbumes: {totalAlbums}");
                 Console.WriteLine($"   - Likes: {totalLikes}");
+                Console.WriteLine($"   - Reproducciones: {totalReproductions}");
                 Console.WriteLine($"   - Última subida: {lastUploadTitle}");
 
                 // Retornar las estadísticas como JSON
@@ -105,10 +136,15 @@ namespace HarmonySound.MVC.Controllers
                     totalSongs = totalSongs,
                     totalAlbums = totalAlbums,
                     totalLikes = totalLikes,
-                    lastUpload = lastUploadTitle
+                    totalReproductions = totalReproductions,
+                    lastUpload = lastUploadTitle,
+                    topSongs = topSongs
                 };
 
-                return Json(stats);
+                // Usar opciones planas para evitar el wrapping de ReferenceHandler.Preserve
+                // (configurado globalmente en Program.cs), que convertiría topSongs en {$id,$values:[...]}
+                // y rompería el .map() del dashboard en el navegador.
+                return new JsonResult(stats, new System.Text.Json.JsonSerializerOptions());
             }
             catch (Exception ex)
             {
@@ -121,10 +157,12 @@ namespace HarmonySound.MVC.Controllers
                     totalSongs = 0,
                     totalAlbums = 0,
                     totalLikes = 0,
-                    lastUpload = "Error al cargar"
+                    totalReproductions = 0,
+                    lastUpload = "Error al cargar",
+                    topSongs = new List<object>()
                 };
 
-                return Json(errorStats);
+                return new JsonResult(errorStats, new System.Text.Json.JsonSerializerOptions());
             }
         }
 
@@ -141,6 +179,34 @@ namespace HarmonySound.MVC.Controllers
 
                 var json = await response.Content.ReadAsStringAsync();
                 var dto = System.Text.Json.JsonSerializer.Deserialize<ProfileEditViewModel>(json, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                // Número de seguidores del artista
+                ViewBag.FollowersCount = 0;
+                ViewBag.RecentFollowers = new List<FollowerViewModel>();
+                try
+                {
+                    var followersResponse = await client.GetAsync($"https://localhost:7120/api/Follows/followers/count/{userId}");
+                    if (followersResponse.IsSuccessStatusCode)
+                    {
+                        var followersJson = await followersResponse.Content.ReadAsStringAsync();
+                        using var doc = System.Text.Json.JsonDocument.Parse(followersJson);
+                        ViewBag.FollowersCount = doc.RootElement.GetProperty("followersCount").GetInt32();
+                    }
+
+                    // Últimos en seguir (los 5 más recientes)
+                    var recentResponse = await client.GetAsync($"https://localhost:7120/api/Follows/followers/{userId}");
+                    if (recentResponse.IsSuccessStatusCode)
+                    {
+                        var recentJson = await recentResponse.Content.ReadAsStringAsync();
+                        var followers = System.Text.Json.JsonSerializer.Deserialize<List<FollowerViewModel>>(recentJson,
+                            new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new List<FollowerViewModel>();
+                        ViewBag.RecentFollowers = followers.Take(5).ToList();
+                    }
+                }
+                catch (Exception followEx)
+                {
+                    Console.WriteLine($"No se pudo cargar el conteo de seguidores: {followEx.Message}");
+                }
 
                 ViewBag.Success = TempData["Success"];
                 return View(dto);

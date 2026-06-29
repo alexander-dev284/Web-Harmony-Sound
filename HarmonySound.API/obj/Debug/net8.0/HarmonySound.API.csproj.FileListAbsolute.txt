@@ -1696,10 +1696,10 @@ C:\Universidad\Tercer Semestre\Herramientas de Programación\Web-Harmony-Sound\H
 C:\Universidad\Tercer Semestre\Herramientas de Programación\Web-Harmony-Sound\HarmonySound.API\obj\Debug\net8.0\staticwebassets.build.json.cache
 C:\Universidad\Tercer Semestre\Herramientas de Programación\Web-Harmony-Sound\HarmonySound.API\obj\Debug\net8.0\staticwebassets.development.json
 C:\Universidad\Tercer Semestre\Herramientas de Programación\Web-Harmony-Sound\HarmonySound.API\obj\Debug\net8.0\staticwebassets.build.endpoints.json
-C:\Universidad\Tercer Semestre\Herramientas de Programación\Web-Harmony-Sound\HarmonySound.API\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
 C:\Universidad\Tercer Semestre\Herramientas de Programación\Web-Harmony-Sound\HarmonySound.API\obj\Debug\net8.0\HarmonyS.54327FFC.Up2Date
 C:\Universidad\Tercer Semestre\Herramientas de Programación\Web-Harmony-Sound\HarmonySound.API\obj\Debug\net8.0\HarmonySound.API.dll
 C:\Universidad\Tercer Semestre\Herramientas de Programación\Web-Harmony-Sound\HarmonySound.API\obj\Debug\net8.0\refint\HarmonySound.API.dll
 C:\Universidad\Tercer Semestre\Herramientas de Programación\Web-Harmony-Sound\HarmonySound.API\obj\Debug\net8.0\HarmonySound.API.pdb
 C:\Universidad\Tercer Semestre\Herramientas de Programación\Web-Harmony-Sound\HarmonySound.API\obj\Debug\net8.0\HarmonySound.API.genruntimeconfig.cache
 C:\Universidad\Tercer Semestre\Herramientas de Programación\Web-Harmony-Sound\HarmonySound.API\obj\Debug\net8.0\ref\HarmonySound.API.dll
+C:\Universidad\Tercer Semestre\Herramientas de Programación\Web-Harmony-Sound\HarmonySound.API\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt

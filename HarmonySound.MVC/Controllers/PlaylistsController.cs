@@ -112,6 +112,43 @@ namespace HarmonySound.MVC.Controllers
             return RedirectToAction("Index");
         }
 
+        // Agregar varias canciones a la vez a una playlist
+        [HttpPost]
+        public async Task<IActionResult> AddMultipleToPlaylist(int playlistId, List<int> contentIds)
+        {
+            if (contentIds == null || !contentIds.Any())
+            {
+                TempData["Error"] = "No seleccionaste ninguna canción.";
+                return RedirectToAction("Details", new { id = playlistId });
+            }
+
+            int added = 0, failed = 0;
+            foreach (var contentId in contentIds.Distinct())
+            {
+                try
+                {
+                    var content = new StringContent(contentId.ToString(), Encoding.UTF8, "application/json");
+                    var response = await _httpClient.PostAsync($"https://localhost:7120/api/Playlists/{playlistId}/add", content);
+                    if (response.IsSuccessStatusCode)
+                        added++;
+                    else
+                        failed++;
+                }
+                catch (Exception ex)
+                {
+                    failed++;
+                    System.Diagnostics.Debug.WriteLine($"Error al agregar la canción {contentId}: {ex.Message}");
+                }
+            }
+
+            if (added > 0)
+                TempData["Success"] = $"Se agregaron {added} canción(es) a la playlist." + (failed > 0 ? $" {failed} no se pudieron agregar." : "");
+            else
+                TempData["Error"] = "No se pudo agregar ninguna canción a la playlist.";
+
+            return RedirectToAction("Details", new { id = playlistId });
+        }
+
         // GET: Playlists/Create
         public IActionResult Create()
         {
@@ -210,7 +247,31 @@ namespace HarmonySound.MVC.Controllers
                             }).ToList()
                             : new List<PlaylistSongDto>()
                     };
-                    
+
+                    // Canciones disponibles para añadir (todas las que no están ya en la playlist)
+                    var availableSongs = new List<ContentWithArtistDto>();
+                    try
+                    {
+                        var contentsResponse = await _httpClient.GetAsync("https://localhost:7120/api/Contents/with-artists");
+                        if (contentsResponse.IsSuccessStatusCode)
+                        {
+                            var contentsJson = await contentsResponse.Content.ReadAsStringAsync();
+                            var allContents = JsonSerializer.Deserialize<List<ContentWithArtistDto>>(contentsJson, options)
+                                ?? new List<ContentWithArtistDto>();
+
+                            var existingIds = playlistDto.Songs.Select(s => s.ContentId).ToHashSet();
+                            availableSongs = allContents
+                                .Where(c => !existingIds.Contains(c.Id))
+                                .OrderBy(c => c.Title)
+                                .ToList();
+                        }
+                    }
+                    catch (Exception contentsEx)
+                    {
+                        Console.WriteLine($"No se pudieron cargar las canciones disponibles: {contentsEx.Message}");
+                    }
+                    ViewBag.AvailableSongs = availableSongs;
+
                     return View(playlistDto);
                 }
                 else

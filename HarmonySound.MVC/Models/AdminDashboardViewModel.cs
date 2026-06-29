@@ -9,8 +9,38 @@ namespace HarmonySound.MVC.Models
         public int TotalAlbums { get; set; }
         public int PendingReports { get; set; }
         public int ActiveSubscriptions { get; set; }
+        public int TotalLikes { get; set; }
         public decimal TotalRevenue { get; set; }
         public List<RecentActivityViewModel> RecentActivities { get; set; } = new();
+
+        // Métricas enriquecidas
+        public List<TopContentViewModel> TopContents { get; set; } = new();
+        public List<AdminUserViewModel> RecentUsers { get; set; } = new();
+        // Ranking de artistas más seguidos
+        public List<TopArtistViewModel> TopArtists { get; set; } = new();
+
+        // Datos para gráficos
+        // Distribución de usuarios por rol (Admin / Artist / Client)
+        public Dictionary<string, int> UsersByRole { get; set; } = new();
+        // Distribución de contenido por tipo (canción, podcast, etc.)
+        public Dictionary<string, int> ContentByType { get; set; } = new();
+    }
+
+    public class TopContentViewModel
+    {
+        public int Id { get; set; }
+        public string Title { get; set; } = "";
+        public string Type { get; set; } = "";
+        public string ArtistName { get; set; } = "";
+        public int Likes { get; set; }
+    }
+
+    public class TopArtistViewModel
+    {
+        public int ArtistId { get; set; }
+        public string Name { get; set; } = "";
+        public string? ProfileImageUrl { get; set; }
+        public int FollowersCount { get; set; }
     }
 
     public class RecentActivityViewModel

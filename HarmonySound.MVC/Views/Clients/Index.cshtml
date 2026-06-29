@@ -29,6 +29,15 @@
         <p class="library-subtitle">Descubre y reproduce tu música favorita</p>
     </div>
 
+    <!-- Búsqueda en tiempo real (canciones y artistas) -->
+    <div class="search-container">
+        <div class="search-input-group">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" id="librarySearch" class="search-input"
+                   placeholder="Buscar canciones o artistas..." oninput="filterLibrary()" autocomplete="off" />
+        </div>
+    </div>
+
     <div class="songs-container">
         <div class="songs-header">
             <h2>Canciones</h2>
@@ -37,7 +46,7 @@
         <div class="songs-list">
             @foreach (var content in Model)
             {
-                <div class="song-item" data-content-id="@content.Id">
+                <div class="song-item" data-content-id="@content.Id" data-search="@(((content.Title ?? "") + " " + (content.ArtistName ?? "")).ToLower())">
                     <div class="song-main-info">
                         <div class="song-cover">
                             <div class="cover-placeholder">
@@ -85,6 +94,12 @@
                 </div>
             }
         </div>
+
+        <div id="noLibraryResults" class="no-results" style="display:none;">
+            <div class="no-results-icon"><i class="fas fa-search"></i></div>
+            <h3>No se encontraron resultados</h3>
+            <p>Prueba con otro título o nombre de artista</p>
+        </div>
     </div>
 </div>
 
@@ -109,48 +124,127 @@
 
 <style>
     .container { max-width: none !important; padding: 0 !important; }
-    body { background: #000 !important; color: #fff !important; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important; margin: 0; padding: 0; padding-bottom: 90px; }
+    body { background: var(--us-surface) !important; color: var(--us-ink) !important; font-family: var(--us-font) !important; margin: 0; padding: 0; padding-bottom: 90px; }
 
     .navigation-bar { position: absolute; top: 0; left: 0; z-index: 10; }
-    .btn-home { background: linear-gradient(135deg, #1a1a1a, #2a2a2a); color: #fff !important; border: 1px solid #333; padding: 8px 16px; border-radius: 20px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; transition: all .3s; box-shadow: 0 2px 10px rgba(0,0,0,.3); font-size: .9rem; }
-    .btn-home:hover { transform: translateY(-2px); color: #000 !important; border-color: #1db954; background: linear-gradient(135deg, #1db954, #1ed760); }
+    .btn-home { background: linear-gradient(135deg, var(--us-surface-alt), var(--us-surface-2)); color: var(--us-ink) !important; border: 1px solid var(--us-border); padding: 8px 16px; border-radius: 20px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; transition: all .3s; box-shadow: 0 2px 10px rgba(0,0,0,.3); font-size: .9rem; }
+    .btn-home:hover { transform: translateY(-2px); color: #ffffff !important; border-color: #c8102e; background: linear-gradient(135deg, #c8102e, #a30d25); }
 
     .logout-section { position: absolute; top: 0; right: 0; z-index: 10; }
     .logout-form { margin: 0; padding: 0; }
-    .btn-logout { background: linear-gradient(135deg, #dc2626, #ef4444); color: #fff !important; border: 1px solid #dc2626; padding: 8px 16px; border-radius: 20px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; transition: all .3s; font-size: .9rem; }
-    .btn-logout:hover { transform: translateY(-2px); background: linear-gradient(135deg, #b91c1c, #dc2626); }
+    .btn-logout { background: linear-gradient(135deg, #c8102e, #c8102e); color: #ffffff !important; border: 1px solid #c8102e; padding: 8px 16px; border-radius: 20px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; transition: all .3s; font-size: .9rem; }
+    .btn-logout:hover { transform: translateY(-2px); background: linear-gradient(135deg, #a30d25, #c8102e); }
 
     .music-library-container { max-width: 1200px; margin: 0 auto; padding: 2rem; position: relative; }
     .library-header { margin-bottom: 2rem; padding-top: 3rem; }
-    .library-title { font-size: 2rem; font-weight: 700; margin-bottom: .5rem; color: #fff !important; }
-    .library-subtitle { color: #b3b3b3 !important; font-size: 1rem; }
-    .songs-container { background: #121212 !important; border-radius: 8px; padding: 1.5rem; }
-    .songs-header h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; color: #fff !important; }
+    .library-title { font-size: 2rem; font-weight: 700; margin-bottom: .5rem; color: var(--us-ink) !important; }
+    .library-subtitle { color: var(--us-ink-soft) !important; font-size: 1rem; }
+    .songs-container { background: var(--us-surface) !important; border-radius: 8px; padding: 1.5rem; }
+    .songs-header h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; color: var(--us-ink) !important; }
     .songs-list { display: flex; flex-direction: column; gap: 4px; }
+
+    /* Barra de búsqueda (estilo del Home) */
+    .search-container { margin-bottom: 1.5rem; }
+    .search-input-group {
+        position: relative; display: flex; align-items: center; max-width: 600px;
+        background: var(--us-surface-alt); border-radius: 25px; border: 2px solid var(--us-border);
+        transition: border-color .3s ease; overflow: hidden;
+    }
+    .search-input-group:focus-within { border-color: #c8102e; }
+    .search-icon { position: absolute; left: 18px; color: var(--us-ink-soft); font-size: 16px; z-index: 2; }
+    .search-input {
+        flex: 1; background: transparent; border: none; color: var(--us-ink);
+        padding: 14px 18px 14px 48px; font-size: 16px; outline: none;
+    }
+    .search-input::placeholder { color: var(--us-ink-soft); }
+
+    /* Sin resultados */
+    .no-results { text-align: center; padding: 3rem 1rem; color: var(--us-ink-soft); }
+    .no-results-icon { font-size: 3rem; color: var(--us-ink-faint); margin-bottom: 1rem; }
+    .no-results h3 { color: var(--us-ink); margin-bottom: .25rem; }
 
     .song-item { display: grid; grid-template-columns: 1fr 120px 80px; grid-template-areas: "info actions duration"; align-items: center; padding: 8px 16px; border-radius: 4px; min-height: 56px; border: 1px solid transparent; }
     .song-main-info { grid-area: info; display: flex; align-items: center; gap: 12px; min-width: 0; }
     .song-cover { width: 40px; height: 40px; flex-shrink: 0; }
-    .cover-placeholder { width: 100%; height: 100%; background: #282828; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #b3b3b3; }
+    .cover-placeholder { width: 100%; height: 100%; background: var(--us-surface-2); border-radius: 4px; display: flex; align-items: center; justify-content: center; color: var(--us-ink-soft); }
     .song-details { min-width: 0; flex-grow: 1; }
-    .song-title { font-size: 16px; font-weight: 400; color: #fff !important; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .song-meta { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #b3b3b3; }
-    .content-type { background: #1db954 !important; color: #000 !important; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; }
-    .artist-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #b3b3b3 !important; }
+    .song-title { font-size: 16px; font-weight: 400; color: var(--us-ink) !important; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .song-meta { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--us-ink-soft); }
+    .content-type { background: var(--us-surface-2) !important; color: var(--us-ink-soft) !important; padding: 2px 9px; border-radius: 999px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid var(--us-border); flex-shrink: 0; }
+    .artist-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--us-ink-soft) !important; font-weight: 600; }
 
     .song-actions { grid-area: actions; display: flex; gap: 4px; justify-content: flex-end; }
-    .song-actions .btn { background: none !important; border: none !important; color: #b3b3b3 !important; padding: 6px !important; border-radius: 50% !important; cursor: pointer !important; transition: all .2s; width: 28px !important; height: 28px !important; display: flex !important; align-items: center !important; justify-content: center !important; font-size: 12px !important; }
-    .song-actions .btn:hover { background: #333 !important; color: #fff !important; }
-    .btn-like:hover, .btn-playlist:hover, .btn-play:hover { color: #1db954 !important; }
+    .song-actions .btn { background: none !important; border: none !important; color: var(--us-ink-soft) !important; padding: 6px !important; border-radius: 50% !important; cursor: pointer !important; transition: all .2s; width: 28px !important; height: 28px !important; display: flex !important; align-items: center !important; justify-content: center !important; font-size: 12px !important; }
+    .song-actions .btn:hover { background: var(--us-border) !important; color: var(--us-ink) !important; }
+    .btn-like:hover, .btn-playlist:hover, .btn-play:hover { color: #c8102e !important; }
 
-    .song-duration { grid-area: duration; font-size: 14px; color: #b3b3b3 !important; text-align: right; }
+    .song-duration { grid-area: duration; font-size: 14px; color: var(--us-ink-soft) !important; text-align: right; }
 
-    .subscription-status-banner { background: rgba(255,152,0,.95); color: #000; padding: 12px 16px; border-radius: 8px; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 12px; }
+    .subscription-status-banner { background: rgba(255,152,0,.95); color: #ffffff; padding: 12px 16px; border-radius: 8px; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 12px; }
     .banner-content { display: flex; align-items: center; gap: 8px; flex-grow: 1; }
-    .banner-action { background: #fff; color: #000; padding: 8px 16px; border-radius: 20px; font-weight: 600; text-decoration: none; }
-    .banner-action:hover { background: #1db954; }
+    .banner-action { background: var(--us-surface); color: #ffffff; padding: 8px 16px; border-radius: 20px; font-weight: 600; text-decoration: none; }
+    .banner-action:hover { background: #c8102e; }
 
     header, footer { display: none !important; }
+
+    /* CTA del banner: rojo con texto blanco (antes texto blanco sobre fondo claro) */
+    .banner-action { background: var(--us-accent) !important; color: #ffffff !important; }
+    .banner-action:hover { background: var(--us-accent-hover) !important; }
+
+    /* ===== Mejora UX/UI: filas de canciones (consistente con el Home) ===== */
+    .songs-container {
+        background: var(--us-surface) !important;
+        border: 1px solid var(--us-border);
+        border-radius: var(--us-radius-lg);
+        box-shadow: var(--us-shadow-sm);
+        padding: 0.6rem !important;
+    }
+    .songs-list { gap: 2px; }
+    .song-item {
+        gap: 14px !important;
+        padding: 10px 12px !important;
+        border-radius: var(--us-radius) !important;
+        min-height: 64px;
+        transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+    .song-item:hover { background: var(--us-surface-alt) !important; border-color: var(--us-border) !important; }
+    .song-item.playing { background: var(--us-accent-soft) !important; border-color: var(--us-accent-border) !important; }
+    .song-cover { width: 48px !important; height: 48px !important; }
+    .song-cover .cover-placeholder {
+        background: var(--us-surface-2) !important;
+        color: var(--us-accent) !important;
+        border: 1px solid var(--us-border);
+        border-radius: 10px !important;
+        font-size: 1.05rem;
+    }
+    .song-title { font-size: 0.98rem !important; font-weight: 600 !important; margin-bottom: 3px !important; }
+    /* Línea "Tipo · Artista" limpia y profesional */
+    .song-meta { gap: 6px; align-items: baseline; }
+    .content-type {
+        background: transparent !important; border: none !important; padding: 0 !important;
+        color: var(--us-ink-faint) !important; font-size: 0.82rem !important; font-weight: 500 !important;
+        text-transform: none !important; letter-spacing: 0 !important;
+    }
+    .song-meta .artist-name {
+        color: var(--us-ink-soft) !important; font-weight: 600; font-size: 0.85rem;
+    }
+    .song-meta .artist-name::before {
+        content: "•"; color: var(--us-ink-faint); margin-right: 6px; font-weight: 700;
+    }
+    .song-duration { color: var(--us-ink-faint) !important; font-size: 0.85rem; }
+    .song-actions { gap: 6px !important; }
+    .song-actions .btn {
+        width: 38px !important; height: 38px !important;
+        background: var(--us-surface-2) !important;
+        color: var(--us-ink-soft) !important;
+        border: 1px solid var(--us-border) !important;
+        display: inline-flex !important; align-items: center !important; justify-content: center !important;
+        transition: all 0.2s ease !important;
+    }
+    .song-actions .btn:hover {
+        background: var(--us-accent) !important; color: #ffffff !important;
+        border-color: var(--us-accent) !important; transform: scale(1.06);
+    }
 </style>
 
 <script>
@@ -166,6 +260,23 @@ window.harmonyConfig = {
 
 function redirectToPlaylistsWithContent(contentId) {
     window.location.href = '@Url.Action("Index", "Playlists")?contentId=' + contentId;
+}
+
+// Búsqueda en tiempo real por título y artista
+function filterLibrary() {
+    var input = document.getElementById('librarySearch');
+    if (!input) return;
+    var q = input.value.trim().toLowerCase();
+    var items = document.querySelectorAll('.songs-list .song-item');
+    var visible = 0;
+    items.forEach(function (item) {
+        var haystack = item.getAttribute('data-search') || '';
+        var match = haystack.indexOf(q) !== -1;
+        item.style.display = match ? '' : 'none';
+        if (match) visible++;
+    });
+    var noResults = document.getElementById('noLibraryResults');
+    if (noResults) noResults.style.display = (visible === 0) ? '' : 'none';
 }
 </script>
 <script src="~/js/harmony-player.js"></script>

@@ -583,7 +583,7 @@
         // ── Toast ──────────────────────────────────────────────────────────
 
         showToast(msg, type = 'info') {
-            const colors = { success: '#1db954', error: '#ef4444', info: '#3b82f6' };
+            const colors = { success: '#e50914', error: '#e50914', info: '#3b82f6' };
             const t = document.createElement('div');
             t.className = 'harmony-toast';
             t.style.cssText = `background:${colors[type] || colors.info}`;

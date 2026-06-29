@@ -71,7 +71,9 @@ namespace HarmonySound.API.Controllers
                 u.Email,
                 u.Name,
                 u.State,
-                u.RegisterDate
+                u.RegisterDate,
+                u.Biography,
+                u.ProfileImageUrl
             }).ToList();
 
             return Ok(result);

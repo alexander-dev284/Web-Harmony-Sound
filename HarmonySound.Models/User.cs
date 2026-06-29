@@ -19,5 +19,10 @@ namespace HarmonySound.Models
         public virtual ICollection<Content> Content { get; set; } = new List<Content>();
         public virtual ICollection<SubscriptionHistory> SubscriptionHistory { get; set; } = new List<SubscriptionHistory>();
         public virtual ICollection<UserLike> UserLikes { get; set; } = new List<UserLike>();
+
+        // Artistas que este usuario sigue.
+        public virtual ICollection<UserFollow> Following { get; set; } = new List<UserFollow>();
+        // Seguidores de este usuario (cuando es artista).
+        public virtual ICollection<UserFollow> Followers { get; set; } = new List<UserFollow>();
     }
 }

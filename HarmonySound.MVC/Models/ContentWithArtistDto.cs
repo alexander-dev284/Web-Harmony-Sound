@@ -12,8 +12,9 @@ namespace HarmonySound.MVC.Models
         public DateTimeOffset UploadDate { get; set; }
         public int ArtistId { get; set; }
         public string ArtistName { get; set; } = "Artista desconocido";
-        
-        public string FormattedDuration => Duration.TotalSeconds > 0 
+        public int Likes { get; set; }
+
+        public string FormattedDuration => Duration.TotalSeconds > 0
             ? Duration.ToString(@"mm\:ss") 
             : "--:--";
     }

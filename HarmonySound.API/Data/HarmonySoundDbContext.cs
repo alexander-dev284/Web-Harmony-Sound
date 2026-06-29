@@ -24,6 +24,7 @@ namespace HarmonySound.API.Data
         public DbSet<SubscriptionHistory> SubscriptionsHistories { get; set; } = default!;
         public DbSet<UserPlan> UsersPlans { get; set; } = default!;
         public DbSet<UserLike> UserLikes { get; set; } = default!;
+        public DbSet<UserFollow> UserFollows { get; set; } = default!;
         public DbSet<PlanInvitation> PlanInvitations { get; set; } = default!;
         public DbSet<HarmonySound.Models.Playlist> Playlist { get; set; } = default!;
         public DbSet<HarmonySound.Models.PlaylistContent> PlaylistContents { get; set; } = default!;
@@ -90,6 +91,24 @@ namespace HarmonySound.API.Data
                     .OnDelete(DeleteBehavior.Cascade);
                     
                 entity.HasIndex(pi => pi.InvitationToken)
+                    .IsUnique();
+            });
+
+            // Configuración para UserFollow (seguimiento usuario -> artista)
+            builder.Entity<UserFollow>(follow =>
+            {
+                follow.HasOne(f => f.Follower)
+                    .WithMany(u => u.Following)
+                    .HasForeignKey(f => f.FollowerId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                follow.HasOne(f => f.Artist)
+                    .WithMany(u => u.Followers)
+                    .HasForeignKey(f => f.ArtistId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                // Evita seguir dos veces al mismo artista.
+                follow.HasIndex(f => new { f.FollowerId, f.ArtistId })
                     .IsUnique();
             });
         }

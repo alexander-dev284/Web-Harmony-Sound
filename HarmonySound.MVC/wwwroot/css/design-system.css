@@ -1,0 +1,419 @@
+/* ============================================================
+   UniSound — Sistema de diseño corporativo
+   Minimalista, limpio y profesional.
+   Negro/carbón para profundidad · Blanco puro para legibilidad
+   Rojo institucional #C8102E solo para acentos / CTA / estados activos
+   ============================================================ */
+
+:root {
+    /* ---- Paleta ---- */
+    --us-white: #ffffff;
+    --us-bg: #ffffff;            /* fondo base claro */
+    --us-surface: #ffffff;       /* tarjetas / paneles */
+    --us-surface-alt: #f5f6f7;   /* superficie gris muy clara */
+    --us-surface-2: #eef0f2;     /* superficie gris secundaria */
+
+    --us-ink: #0a0a0a;           /* texto principal sobre claro (casi negro) */
+    --us-ink-soft: #5b6065;      /* texto secundario sobre claro */
+    --us-ink-faint: #8a9099;     /* texto terciario / placeholders */
+
+    --us-black: #0a0a0a;         /* negro sólido */
+    --us-charcoal: #1c1c1e;      /* gris oscuro carbón */
+    --us-charcoal-2: #2a2b2e;    /* carbón elevado */
+
+    --us-accent: #c8102e;        /* rojo institucional */
+    --us-accent-hover: #a30d25;  /* rojo hover/activo */
+    --us-accent-soft: rgba(200, 16, 46, 0.10);
+    --us-accent-border: rgba(200, 16, 46, 0.28);
+
+    --us-on-dark: #f4f5f6;       /* texto claro sobre zonas oscuras */
+    --us-on-dark-soft: #b9bdc2;
+
+    --us-border: #e5e7eb;        /* borde sutil sobre claro */
+    --us-border-dark: #34363a;   /* borde sobre oscuro */
+
+    /* ---- Tipografía ---- */
+    --us-font: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+
+    /* ---- Radios ---- */
+    --us-radius-sm: 8px;
+    --us-radius: 12px;
+    --us-radius-lg: 16px;
+    --us-radius-pill: 999px;
+
+    /* ---- Sombras (directas, muy sutiles) ---- */
+    --us-shadow-xs: 0 1px 2px rgba(10, 10, 10, 0.06);
+    --us-shadow-sm: 0 2px 6px rgba(10, 10, 10, 0.07);
+    --us-shadow-md: 0 6px 18px rgba(10, 10, 10, 0.08);
+    --us-shadow-lg: 0 14px 40px rgba(10, 10, 10, 0.12);
+
+    /* ---- Transición ---- */
+    --us-transition: 0.2s ease;
+}
+
+/* ---- Tipografía moderna (Inter) ---- */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+/* ============================================================
+   Base
+   ============================================================ */
+.us-app,
+body.us-app {
+    background: var(--us-bg);
+    color: var(--us-ink);
+    font-family: var(--us-font);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+.us-app h1, .us-app h2, .us-app h3, .us-app h4, .us-app h5 {
+    color: var(--us-ink);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+.us-muted { color: var(--us-ink-soft); }
+.us-accent-text { color: var(--us-accent); }
+
+/* ============================================================
+   Botones
+   ============================================================ */
+.us-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-family: var(--us-font);
+    font-weight: 600;
+    font-size: 0.95rem;
+    line-height: 1;
+    padding: 0.75rem 1.4rem;
+    border-radius: var(--us-radius-pill);
+    border: 1px solid transparent;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all var(--us-transition);
+    white-space: nowrap;
+}
+
+/* CTA principal — rojo institucional */
+.us-btn-primary {
+    background: var(--us-accent);
+    color: #fff;
+    box-shadow: var(--us-shadow-sm);
+}
+.us-btn-primary:hover {
+    background: var(--us-accent-hover);
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: var(--us-shadow-md);
+}
+
+/* Secundario — contorno neutro sobre claro */
+.us-btn-secondary {
+    background: var(--us-surface);
+    color: var(--us-ink);
+    border-color: var(--us-border);
+}
+.us-btn-secondary:hover {
+    border-color: var(--us-ink);
+    background: var(--us-surface-alt);
+    color: var(--us-ink);
+}
+
+/* Sólido oscuro — para zonas claras que necesitan énfasis neutro */
+.us-btn-dark {
+    background: var(--us-charcoal);
+    color: var(--us-on-dark);
+}
+.us-btn-dark:hover {
+    background: var(--us-black);
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+/* Fantasma / texto */
+.us-btn-ghost {
+    background: transparent;
+    color: var(--us-ink-soft);
+    border-color: transparent;
+}
+.us-btn-ghost:hover {
+    background: var(--us-surface-alt);
+    color: var(--us-ink);
+}
+
+/* Peligro */
+.us-btn-danger {
+    background: var(--us-accent);
+    color: #fff;
+}
+.us-btn-danger:hover { background: var(--us-accent-hover); color: #fff; }
+
+.us-btn-block { width: 100%; }
+.us-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+
+/* ============================================================
+   Tarjetas / superficies
+   ============================================================ */
+.us-card {
+    background: var(--us-surface);
+    border: 1px solid var(--us-border);
+    border-radius: var(--us-radius-lg);
+    box-shadow: var(--us-shadow-sm);
+    padding: 1.5rem;
+}
+.us-card-hover { transition: all var(--us-transition); }
+.us-card-hover:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--us-shadow-md);
+    border-color: #d8dade;
+}
+
+/* Superficie oscura (profundidad/elegancia) */
+.us-surface-dark {
+    background: var(--us-charcoal);
+    color: var(--us-on-dark);
+    border-radius: var(--us-radius-lg);
+}
+.us-surface-dark h1, .us-surface-dark h2, .us-surface-dark h3, .us-surface-dark h4 { color: #fff; }
+
+/* ============================================================
+   Formularios
+   ============================================================ */
+.us-label {
+    display: block;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--us-ink);
+    margin-bottom: 0.45rem;
+}
+.us-input,
+.us-select,
+.us-textarea {
+    width: 100%;
+    box-sizing: border-box;
+    background: var(--us-surface);
+    border: 1px solid var(--us-border);
+    border-radius: var(--us-radius);
+    color: var(--us-ink);
+    font-family: var(--us-font);
+    font-size: 1rem;
+    padding: 0.8rem 1rem;
+    transition: all var(--us-transition);
+}
+.us-input::placeholder { color: var(--us-ink-faint); }
+.us-input:focus,
+.us-select:focus,
+.us-textarea:focus {
+    outline: none;
+    border-color: var(--us-accent);
+    box-shadow: 0 0 0 3px var(--us-accent-soft);
+}
+
+/* Grupo con icono a la izquierda */
+.us-input-group { position: relative; }
+.us-input-group .us-input { padding-left: 2.85rem; }
+.us-input-group .us-input-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--us-ink-faint);
+    pointer-events: none;
+}
+
+/* ============================================================
+   Tablas
+   ============================================================ */
+.us-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--us-surface);
+}
+.us-table thead th {
+    text-align: left;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--us-ink-soft);
+    padding: 0.9rem 1rem;
+    border-bottom: 1px solid var(--us-border);
+}
+.us-table tbody td {
+    padding: 0.9rem 1rem;
+    border-bottom: 1px solid var(--us-border);
+    color: var(--us-ink);
+}
+.us-table tbody tr:hover { background: var(--us-surface-alt); }
+
+/* ============================================================
+   Badges / chips
+   ============================================================ */
+.us-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.7rem;
+    border-radius: var(--us-radius-pill);
+    font-size: 0.78rem;
+    font-weight: 600;
+    background: var(--us-surface-2);
+    color: var(--us-ink);
+}
+.us-badge-accent {
+    background: var(--us-accent-soft);
+    color: var(--us-accent);
+    border: 1px solid var(--us-accent-border);
+}
+
+/* ============================================================
+   Estados activos (nav, pestañas)
+   ============================================================ */
+.us-active-bar {
+    position: relative;
+}
+.us-active-bar.is-active::after {
+    content: '';
+    position: absolute;
+    left: 0; bottom: -1px;
+    width: 100%; height: 3px;
+    background: var(--us-accent);
+    border-radius: var(--us-radius-pill);
+}
+
+/* ============================================================
+   Alertas
+   ============================================================ */
+.us-alert {
+    border-radius: var(--us-radius);
+    padding: 0.9rem 1.1rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    border: 1px solid transparent;
+}
+.us-alert-success { background: #ecf7ef; color: #1b7d3e; border-color: #c5e8d1; }
+.us-alert-error   { background: var(--us-accent-soft); color: var(--us-accent-hover); border-color: var(--us-accent-border); }
+.us-alert-info    { background: var(--us-surface-alt); color: var(--us-ink); border-color: var(--us-border); }
+
+/* ============================================================
+   Modales
+   ============================================================ */
+.us-modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(10, 10, 10, 0.45);
+    backdrop-filter: blur(3px);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 10000;
+}
+.us-modal {
+    background: var(--us-surface);
+    border-radius: var(--us-radius-lg);
+    box-shadow: var(--us-shadow-lg);
+    width: 92%;
+    max-width: 480px;
+    overflow: hidden;
+}
+.us-modal-header { padding: 1.5rem; border-bottom: 1px solid var(--us-border); }
+.us-modal-body { padding: 1.5rem; color: var(--us-ink-soft); }
+.us-modal-actions { padding: 1.25rem 1.5rem; display: flex; gap: 0.75rem; justify-content: flex-end; background: var(--us-surface-alt); }
+
+/* ============================================================
+   Utilidades
+   ============================================================ */
+.us-container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+.us-stack { display: flex; flex-direction: column; }
+.us-row { display: flex; align-items: center; }
+.us-gap-sm { gap: 0.5rem; } .us-gap { gap: 1rem; } .us-gap-lg { gap: 1.5rem; }
+
+/* Utilidades de margen icono↔texto (para páginas sin Bootstrap, p.ej. admin/auth) */
+.me-1 { margin-right: 0.25rem !important; }
+.me-2 { margin-right: 0.5rem !important; }
+.me-3 { margin-right: 1rem !important; }
+.ms-1 { margin-left: 0.25rem !important; }
+.ms-2 { margin-left: 0.5rem !important; }
+.ms-3 { margin-left: 1rem !important; }
+
+/* ============================================================
+   Armonización de Bootstrap (vistas scaffold con _Layout)
+   Aplica solo dentro de .us-app para no afectar páginas propias.
+   ============================================================ */
+.us-app .container { padding-top: 2rem; padding-bottom: 2rem; }
+
+.us-app h1, .us-app h2, .us-app h3, .us-app h4 { color: var(--us-ink); }
+
+/* Botones Bootstrap -> estética corporativa */
+.us-app .btn-primary {
+    background-color: var(--us-accent);
+    border-color: var(--us-accent);
+    border-radius: var(--us-radius-pill);
+    font-weight: 600;
+}
+.us-app .btn-primary:hover,
+.us-app .btn-primary:focus {
+    background-color: var(--us-accent-hover);
+    border-color: var(--us-accent-hover);
+    box-shadow: var(--us-shadow-sm);
+}
+.us-app .btn-danger { background-color: var(--us-accent); border-color: var(--us-accent); border-radius: var(--us-radius-pill); }
+.us-app .btn-danger:hover { background-color: var(--us-accent-hover); border-color: var(--us-accent-hover); }
+.us-app .btn-secondary {
+    background-color: var(--us-surface);
+    border-color: var(--us-border);
+    color: var(--us-ink);
+    border-radius: var(--us-radius-pill);
+    font-weight: 600;
+}
+.us-app .btn-secondary:hover { background-color: var(--us-surface-alt); color: var(--us-ink); border-color: var(--us-ink); }
+
+/* Enlaces de acción de scaffold */
+.us-app a { color: var(--us-accent); }
+.us-app a:hover { color: var(--us-accent-hover); }
+
+/* Tablas Bootstrap */
+.us-app .table {
+    background: var(--us-surface);
+    border-radius: var(--us-radius);
+    overflow: hidden;
+    box-shadow: var(--us-shadow-xs);
+}
+.us-app .table thead th {
+    background: var(--us-surface-alt);
+    color: var(--us-ink-soft);
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.04em;
+    border-bottom: 1px solid var(--us-border);
+}
+.us-app .table td, .us-app .table th { border-color: var(--us-border); vertical-align: middle; }
+.us-app .table tbody tr:hover { background: var(--us-surface-alt); }
+
+/* Inputs Bootstrap */
+.us-app .form-control, .us-app .form-select, .us-app textarea {
+    border-radius: var(--us-radius);
+    border-color: var(--us-border);
+    background-color: var(--us-surface);
+    color: var(--us-ink);
+}
+.us-app .form-control::placeholder { color: var(--us-ink-faint); }
+.us-app .form-control:focus, .us-app .form-select:focus, .us-app textarea:focus {
+    border-color: var(--us-accent);
+    box-shadow: 0 0 0 3px var(--us-accent-soft);
+    background-color: var(--us-surface);
+    color: var(--us-ink);
+}
+
+/* Tarjetas / superficies Bootstrap */
+.us-app .card,
+.us-app .modal-content,
+.us-app .dropdown-menu,
+.us-app .list-group-item {
+    background-color: var(--us-surface);
+    color: var(--us-ink);
+    border-color: var(--us-border);
+    border-radius: var(--us-radius-lg);
+    box-shadow: var(--us-shadow-sm);
+}

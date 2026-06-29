@@ -473,6 +473,7 @@ namespace HarmonySound.API.Controllers
                         Id = c.Id,
                         Title = c.Title,
                         Type = c.Type,
+                        ArtistId = c.ArtistId,
                         ArtistName = c.Artist != null ? c.Artist.Name : "Artista desconocido",
                         Duration = c.Duration,
                         UploadDate = c.UploadDate,
@@ -482,6 +483,51 @@ namespace HarmonySound.API.Controllers
                     .ToListAsync();
 
                 return Ok(contentsWithArtists);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = "Error interno del servidor", Error = ex.Message });
+            }
+        }
+
+        // GET: api/Contents/popular?count=12
+        // Devuelve las canciones más populares ordenadas por número de "me gusta".
+        [HttpGet("popular")]
+        public async Task<ActionResult<IEnumerable<object>>> GetPopularContents([FromQuery] int count = 12)
+        {
+            try
+            {
+                // Conteo de likes por contenido
+                var likeCounts = await _context.UserLikes
+                    .GroupBy(ul => ul.ContentId)
+                    .Select(g => new { ContentId = g.Key, Likes = g.Count() })
+                    .ToListAsync();
+
+                var likesDict = likeCounts.ToDictionary(x => x.ContentId, x => x.Likes);
+
+                var contents = await _context.Contents
+                    .Include(c => c.Artist)
+                    .ToListAsync();
+
+                var result = contents
+                    .Select(c => new
+                    {
+                        Id = c.Id,
+                        Title = c.Title,
+                        Type = c.Type,
+                        ArtistId = c.ArtistId,
+                        ArtistName = c.Artist != null ? c.Artist.Name : "Artista desconocido",
+                        Duration = c.Duration,
+                        UploadDate = c.UploadDate,
+                        UrlMedia = c.UrlMedia,
+                        Likes = likesDict.ContainsKey(c.Id) ? likesDict[c.Id] : 0
+                    })
+                    .OrderByDescending(c => c.Likes)
+                    .ThenByDescending(c => c.UploadDate)
+                    .Take(count > 0 ? count : 12)
+                    .ToList();
+
+                return Ok(result);
             }
             catch (Exception ex)
             {

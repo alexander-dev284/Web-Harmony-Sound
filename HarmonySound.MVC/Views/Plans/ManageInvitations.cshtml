@@ -211,8 +211,8 @@
         max-width: 1000px;
         margin: 0 auto;
         padding: 2rem;
-        background: #000;
-        color: #fff;
+        background: var(--us-surface);
+        color: var(--us-ink);
         min-height: 100vh;
         position: relative;
     }
@@ -233,13 +233,13 @@
     }
 
     .btn-back {
-        background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
-        color: #fff !important;
+        background: linear-gradient(135deg, var(--us-surface-alt), var(--us-surface-2));
+        color: var(--us-ink) !important;
         padding: 10px 20px;
         border-radius: 25px;
         font-weight: 600;
         text-decoration: none;
-        border: 1px solid #333;
+        border: 1px solid var(--us-border);
         display: inline-flex;
         align-items: center;
         transition: all 0.3s ease;
@@ -250,9 +250,9 @@
     .btn-back:hover {
         transform: translateY(-2px);
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-        color: #000 !important;
-        border-color: #1db954;
-        background: linear-gradient(135deg, #1db954, #1ed760);
+        color: #ffffff !important;
+        border-color: #c8102e;
+        background: linear-gradient(135deg, #c8102e, #a30d25);
     }
 
    
@@ -266,8 +266,8 @@
         font-size: 2.5rem;
         font-weight: 700;
         margin-bottom: 1rem;
-        color: #fff !important;
-        background: linear-gradient(135deg, #1db954, #1ed760);
+        color: var(--us-ink) !important;
+        background: linear-gradient(135deg, #c8102e, #a30d25);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
@@ -276,7 +276,7 @@
 
     
     .invitations-subtitle {
-        color: #b3b3b3 !important;
+        color: var(--us-ink-soft) !important;
         font-size: 1.1rem;
         margin-bottom: 0;
         line-height: 1.4; 
@@ -284,7 +284,7 @@
 
  
     .plan-name {
-        color: #1db954;
+        color: #c8102e;
         font-weight: 600;
     }
 
@@ -295,8 +295,8 @@
 
     .send-invitation-card,
     .invitations-list-card {
-        background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
-        border: 1px solid #333;
+        background: linear-gradient(135deg, var(--us-surface-alt), var(--us-surface-2));
+        border: 1px solid var(--us-border);
         border-radius: 12px;
         margin-bottom: 2rem;
         overflow: hidden;
@@ -304,14 +304,14 @@
     }
 
     .card-header {
-        background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
+        background: linear-gradient(135deg, var(--us-surface-2), var(--us-surface-alt));
         padding: 1.5rem;
-        border-bottom: 1px solid #333;
+        border-bottom: 1px solid var(--us-border);
     }
 
     .card-header h3 {
         margin: 0;
-        color: #fff;
+        color: var(--us-ink);
         font-size: 1.3rem;
         font-weight: 600;
         display: flex;
@@ -329,7 +329,7 @@
     .form-group label {
         display: block;
         margin-bottom: 0.5rem;
-        color: #fff;
+        color: var(--us-ink);
         font-weight: 600;
     }
 
@@ -337,27 +337,27 @@
         width: 100%;
         padding: 12px 16px; 
         background: rgba(255, 255, 255, 0.1);
-        border: 1px solid #444;
+        border: 1px solid var(--us-border);
         border-radius: 8px;
-        color: #fff;
+        color: var(--us-ink);
         font-size: 1rem;
         transition: all 0.3s ease;
     }
 
     .form-control:focus {
         background: rgba(255, 255, 255, 0.15);
-        border-color: #1db954;
-        box-shadow: 0 0 0 0.2rem rgba(29, 185, 84, 0.25);
+        border-color: #c8102e;
+        box-shadow: 0 0 0 0.2rem rgba(200, 16, 46, 0.25);
         outline: none;
     }
 
     .form-control::placeholder {
-        color: #888;
+        color: var(--us-ink-faint);
     }
 
     .btn-send-invitation {
-        background: linear-gradient(135deg, #1db954, #1ed760);
-        color: #000;
+        background: linear-gradient(135deg, #c8102e, #a30d25);
+        color: #ffffff;
         padding: 12px 24px; 
         border: none;
         border-radius: 25px; 
@@ -367,25 +367,25 @@
         display: inline-flex;
         align-items: center;
         font-size: 1rem;
-        box-shadow: 0 4px 15px rgba(29, 185, 84, 0.3);
+        box-shadow: 0 4px 15px rgba(200, 16, 46, 0.3);
     }
 
     .btn-send-invitation:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(29, 185, 84, 0.4);
+        box-shadow: 0 6px 20px rgba(200, 16, 46, 0.4);
     }
 
     .btn-send-invitation:disabled {
-        background: #666;
-        color: #999;
+        background: var(--us-ink-faint);
+        color: var(--us-ink-faint);
         cursor: not-allowed;
         transform: none;
         box-shadow: none;
     }
 
     .btn-manage-invitations {
-        background: linear-gradient(135deg, #1db954, #1ed760);
-        color: #000;
+        background: linear-gradient(135deg, #c8102e, #a30d25);
+        color: #ffffff;
         padding: 0.75rem 1.5rem;
         border-radius: 8px;
         text-decoration: none;
@@ -393,8 +393,8 @@
     }
 
     .invitation-section {
-        background: #1a1a1a;
-        border: 1px solid #333;
+        background: var(--us-surface-alt);
+        border: 1px solid var(--us-border);
         border-radius: 12px;
         padding: 2rem;
         margin-bottom: 3rem;
@@ -407,34 +407,34 @@
         padding: 1.5rem;
         border-radius: 12px;
         margin-bottom: 2rem;
-        border: 1px solid #444;
+        border: 1px solid var(--us-border);
     }
 
     .account-limit-info h4 {
         margin: 0;
-        color: #fff;
+        color: var(--us-ink);
         font-size: 1.2rem;
         display: flex;
         align-items: center;
     }
 
     .invitations-table {
-        background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+        background: linear-gradient(135deg, var(--us-surface-alt), var(--us-surface-2));
         border-radius: 12px;
         overflow: hidden;
-        border: 1px solid #333;
+        border: 1px solid var(--us-border);
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     }
 
     .table-header {
-        background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
+        background: linear-gradient(135deg, var(--us-surface-2), var(--us-surface-alt));
         display: grid;
         grid-template-columns: 2fr 1fr 1fr 1fr 80px;
         gap: 1rem;
         padding: 1rem 1.5rem;
         font-weight: 600;
-        color: #fff;
-        border-bottom: 1px solid #444;
+        color: var(--us-ink);
+        border-bottom: 1px solid var(--us-border);
         font-size: 0.9rem;
         text-transform: uppercase;
         letter-spacing: 0.5px;
@@ -445,13 +445,13 @@
         grid-template-columns: 2fr 1fr 1fr 1fr 80px;
         gap: 1rem;
         padding: 1rem 1.5rem;
-        border-bottom: 1px solid #333;
+        border-bottom: 1px solid var(--us-border);
         transition: background 0.3s ease;
         align-items: center;
     }
 
     .table-row:hover {
-        background: rgba(29, 185, 84, 0.05);
+        background: rgba(200, 16, 46, 0.05);
     }
 
     .table-row:last-child {
@@ -459,12 +459,12 @@
     }
 
     .email-info strong {
-        color: #fff;
+        color: var(--us-ink);
         font-size: 1rem;
     }
 
     .text-muted {
-        color: #888 !important;
+        color: var(--us-ink-faint) !important;
         font-size: 0.9rem;
     }
 
@@ -480,32 +480,32 @@
 
     .status-pending {
         background: #ffc107;
-        color: #000;
+        color: #ffffff;
     }
 
     .status-accepted {
         background: #28a745;
-        color: #fff;
+        color: var(--us-ink);
     }
 
     .status-declined {
-        background: #dc3545;
-        color: #fff;
+        background: #c8102e;
+        color: #ffffff;
     }
 
     .status-expired {
         background: #6c757d;
-        color: #fff;
+        color: var(--us-ink);
     }
 
     .status-cancelled {
         background: #fd7e14;
-        color: #000;
+        color: #ffffff;
     }
 
     .btn-cancel-invitation {
-        background: #dc3545;
-        color: #fff;
+        background: #c8102e;
+        color: #ffffff;
         padding: 0.5rem;
         border: none;
         border-radius: 50%;
@@ -519,7 +519,7 @@
     }
 
     .btn-cancel-invitation:hover {
-        background: #c82333;
+        background: #a30d25;
         transform: scale(1.1);
     }
 
@@ -547,14 +547,14 @@
 
     /* Banner de suscripción cancelada */
     .subscription-status-banner {
-        background: linear-gradient(135deg, #dc3545, #c82333);
-        color: #fff;
+        background: linear-gradient(135deg, #c8102e, #a30d25);
+        color: #ffffff;
         padding: 1rem 1.5rem;
         border-radius: 12px;
         margin-bottom: 2rem;
         display: flex;
         align-items: center;
-        box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+        box-shadow: 0 4px 15px rgba(200, 16, 46, 0.3);
     }
 
     .banner-content {

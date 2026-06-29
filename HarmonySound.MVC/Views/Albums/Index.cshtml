@@ -147,9 +147,9 @@
     }
 
     body {
-        background: #000 !important;
-        color: #fff !important;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+        background: var(--us-surface) !important;
+        color: var(--us-ink) !important;
+        font-family: var(--us-font) !important;
         margin: 0;
         padding: 0;
     }
@@ -177,9 +177,9 @@
     }
 
     .btn-home {
-        background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
-        color: #fff !important;
-        border: 1px solid #333;
+        background: linear-gradient(135deg, var(--us-surface-alt), var(--us-surface-2));
+        color: var(--us-ink) !important;
+        border: 1px solid var(--us-border);
         padding: 8px 16px;
         border-radius: 20px;
         font-weight: 600;
@@ -194,24 +194,24 @@
     .btn-home:hover {
         transform: translateY(-2px);
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-        color: #000 !important;
-        border-color: #1db954;
-        background: linear-gradient(135deg, #1db954, #1ed760);
+        color: #ffffff !important;
+        border-color: #c8102e;
+        background: linear-gradient(135deg, #c8102e, #a30d25);
     }
 
     .albums-title {
         font-size: 2.5rem;
         font-weight: 700;
         margin-bottom: 0.5rem;
-        color: #fff !important;
-        background: linear-gradient(135deg, #1db954, #1ed760);
+        color: var(--us-ink) !important;
+        background: linear-gradient(135deg, #c8102e, #a30d25);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
     }
 
     .albums-subtitle {
-        color: #b3b3b3 !important;
+        color: var(--us-ink-soft) !important;
         font-size: 1.1rem;
         margin-bottom: 2rem;
     }
@@ -223,8 +223,8 @@
     }
 
     .btn-create {
-        background: linear-gradient(135deg, #1db954, #1ed760);
-        color: #000 !important;
+        background: linear-gradient(135deg, #c8102e, #a30d25);
+        color: #ffffff !important;
         border: none;
         padding: 12px 24px;
         border-radius: 25px;
@@ -233,13 +233,13 @@
         display: inline-flex;
         align-items: center;
         transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(29, 185, 84, 0.3);
+        box-shadow: 0 4px 15px rgba(200, 16, 46, 0.3);
     }
 
     .btn-create:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(29, 185, 84, 0.4);
-        color: #000 !important;
+        box-shadow: 0 6px 20px rgba(200, 16, 46, 0.4);
+        color: #ffffff !important;
     }
 
     .albums-grid {
@@ -249,7 +249,7 @@
     }
 
     .album-card {
-        background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+        background: linear-gradient(135deg, var(--us-surface-alt), var(--us-surface-2));
         border-radius: 12px;
         padding: 1.5rem;
         transition: all 0.3s ease;
@@ -265,7 +265,7 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background: linear-gradient(135deg, rgba(29, 185, 84, 0.1), rgba(30, 215, 96, 0.1));
+        background: linear-gradient(135deg, rgba(200, 16, 46, 0.1), rgba(163, 13, 37, 0.1));
         opacity: 0;
         transition: opacity 0.3s ease;
         z-index: 1;
@@ -278,7 +278,7 @@
     .album-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        border-color: rgba(29, 185, 84, 0.5);
+        border-color: rgba(200, 16, 46, 0.5);
     }
 
     .album-cover {
@@ -293,11 +293,11 @@
     .cover-placeholder {
         width: 100%;
         height: 100%;
-        background: linear-gradient(135deg, #282828, #404040);
+        background: linear-gradient(135deg, var(--us-surface-2), var(--us-border));
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #b3b3b3;
+        color: var(--us-ink-soft);
         font-size: 3rem;
         border-radius: 8px;
         transition: all 0.3s ease;
@@ -323,7 +323,7 @@
     }
 
     .play-album-btn {
-        background: #1db954;
+        background: #c8102e;
         border: none;
         border-radius: 50%;
         width: 60px;
@@ -331,16 +331,16 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #000;
+        color: #ffffff;
         font-size: 1.5rem;
         cursor: pointer;
         transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(29, 185, 84, 0.3);
+        box-shadow: 0 4px 15px rgba(200, 16, 46, 0.3);
     }
 
     .play-album-btn:hover {
         transform: scale(1.1);
-        box-shadow: 0 6px 20px rgba(29, 185, 84, 0.4);
+        box-shadow: 0 6px 20px rgba(200, 16, 46, 0.4);
     }
 
     .album-info {
@@ -353,14 +353,14 @@
         font-size: 1.4rem;
         font-weight: 700;
         margin-bottom: 0.5rem;
-        color: #fff;
+        color: var(--us-ink);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
     }
 
     .album-artist {
-        color: #b3b3b3;
+        color: var(--us-ink-soft);
         font-size: 1rem;
         margin-bottom: 1rem;
         font-weight: 500;
@@ -374,7 +374,7 @@
 
     .album-date,
     .album-songs {
-        color: #b3b3b3;
+        color: var(--us-ink-soft);
         font-size: 0.9rem;
         display: flex;
         align-items: center;
@@ -400,7 +400,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #b3b3b3;
+        color: var(--us-ink-soft);
         cursor: pointer;
         transition: all 0.3s ease;
         text-decoration: none;
@@ -409,12 +409,12 @@
 
     .btn-action:hover {
         transform: scale(1.1);
-        color: #fff;
+        color: var(--us-ink);
     }
 
     .btn-details:hover {
-        background: rgba(30, 215, 96, 0.2);
-        color: #1ed760;
+        background: rgba(163, 13, 37, 0.2);
+        color: #a30d25;
     }
 
     .btn-edit:hover {
@@ -423,8 +423,8 @@
     }
 
     .btn-delete:hover {
-        background: rgba(220, 53, 69, 0.2);
-        color: #dc3545;
+        background: rgba(200, 16, 46, 0.2);
+        color: #c8102e;
     }
 
     .delete-form {
@@ -443,7 +443,7 @@
 
     .empty-icon {
         font-size: 5rem;
-        color: #404040;
+        color: var(--us-border);
         margin-bottom: 2rem;
     }
 
@@ -451,11 +451,11 @@
         font-size: 1.8rem;
         font-weight: 600;
         margin-bottom: 1rem;
-        color: #fff;
+        color: var(--us-ink);
     }
 
     .empty-state p {
-        color: #b3b3b3;
+        color: var(--us-ink-soft);
         font-size: 1.1rem;
         margin-bottom: 2rem;
         max-width: 400px;
@@ -492,8 +492,8 @@
     }
 
     .modal-container {
-        background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
-        border: 1px solid #444;
+        background: linear-gradient(135deg, var(--us-surface-alt), var(--us-surface-2));
+        border: 1px solid var(--us-border);
         border-radius: 16px;
         padding: 0;
         max-width: 480px;
@@ -503,10 +503,10 @@
     }
 
     .modal-header {
-        background: linear-gradient(135deg, #dc3545, #c82333);
+        background: linear-gradient(135deg, #c8102e, #a30d25);
         padding: 1.5rem;
         text-align: center;
-        color: #fff;
+        color: #ffffff;
     }
 
     .modal-icon {
@@ -527,7 +527,7 @@
 
     .modal-message {
         font-size: 1.1rem;
-        color: #fff;
+        color: var(--us-ink);
         margin-bottom: 1.5rem;
     }
 
@@ -567,24 +567,24 @@
 
     .btn-cancel {
         background: transparent;
-        color: #b3b3b3;
-        border: 2px solid #666;
+        color: var(--us-ink-soft);
+        border: 2px solid var(--us-ink-faint);
     }
 
     .btn-cancel:hover {
-        background: #1a1a1a;
-        color: #fff;
-        border-color: #999;
+        background: var(--us-surface-alt);
+        color: var(--us-ink);
+        border-color: var(--us-ink-faint);
     }
 
     .btn-confirm {
-        background: linear-gradient(135deg, #dc3545, #c82333);
-        color: #fff;
-        box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+        background: linear-gradient(135deg, #c8102e, #a30d25);
+        color: #ffffff;
+        box-shadow: 0 4px 15px rgba(200, 16, 46, 0.3);
     }
 
     .btn-confirm:hover {
-        box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+        box-shadow: 0 6px 20px rgba(200, 16, 46, 0.4);
     }
 
     .cover-link {

@@ -10,11 +10,13 @@ namespace HarmonySound.MVC.Models
 
         [Required]
         [EmailAddress]
+        [RegularExpression(@"^[^@\s]+@utn\.edu\.ec$", ErrorMessage = "El correo debe pertenecer al dominio @utn.edu.ec.")]
         [Display(Name = "Correo electrónico")]
         public string Email { get; set; }
 
         [Required]
         [DataType(DataType.Password)]
+        [MinLength(8, ErrorMessage = "La contraseña debe tener al menos 8 caracteres.")]
         [Display(Name = "Contraseña")]
         public string Password { get; set; }
 
@@ -29,5 +31,8 @@ namespace HarmonySound.MVC.Models
         public string Role { get; set; }
 
         public IEnumerable<string> Roles { get; set; }
+
+        // Token de invitación a plan compartido (cuando el usuario llega desde un correo de invitación).
+        public string? InvitationToken { get; set; }
     }
 }

@@ -35,9 +35,9 @@
 
 <style>
     body { 
-        background: #000 !important; 
-        color: #fff !important; 
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important; 
+        background: var(--us-surface) !important; 
+        color: var(--us-ink) !important; 
+        font-family: var(--us-font) !important; 
         margin: 0; 
         padding: 0; 
         min-height: 100vh;
@@ -58,8 +58,8 @@
     }
 
     .access-denied-card {
-        background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
-        border: 1px solid #333;
+        background: linear-gradient(135deg, var(--us-surface-alt), var(--us-surface-2));
+        border: 1px solid var(--us-border);
         border-radius: 20px;
         overflow: hidden;
         box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
@@ -68,7 +68,7 @@
     }
 
     .denied-header {
-        background: linear-gradient(135deg, #dc3545, #c82333);
+        background: linear-gradient(135deg, #c8102e, #a30d25);
         text-align: center;
         padding: 3rem 2rem 2rem;
         position: relative;
@@ -76,7 +76,7 @@
 
     .denied-icon {
         font-size: 4rem;
-        color: #fff;
+        color: var(--us-ink);
         margin-bottom: 1rem;
         animation: bounceIn 0.8s ease-out 0.2s both;
     }
@@ -84,7 +84,7 @@
     .denied-title {
         font-size: 2.5rem;
         font-weight: 700;
-        color: #fff;
+        color: var(--us-ink);
         margin: 0;
         text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
     }
@@ -101,13 +101,13 @@
     .message-title {
         font-size: 1.5rem;
         font-weight: 600;
-        color: #dc3545;
+        color: #c8102e;
         margin-bottom: 1rem;
     }
 
     .message-description {
         font-size: 1.1rem;
-        color: #b3b3b3;
+        color: var(--us-ink-soft);
         line-height: 1.6;
         margin-bottom: 2rem;
         max-width: 400px;
@@ -139,27 +139,27 @@
     }
 
     .btn-primary {
-        background: linear-gradient(135deg, #1db954, #1ed760);
-        color: #000;
-        box-shadow: 0 4px 15px rgba(29, 185, 84, 0.3);
+        background: linear-gradient(135deg, #c8102e, #a30d25);
+        color: #ffffff;
+        box-shadow: 0 4px 15px rgba(200, 16, 46, 0.3);
     }
 
     .btn-primary:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(29, 185, 84, 0.4);
-        color: #000;
+        box-shadow: 0 6px 20px rgba(200, 16, 46, 0.4);
+        color: #ffffff;
     }
 
     .btn-secondary {
         background: transparent;
-        color: #b3b3b3;
-        border: 1px solid #404040;
+        color: var(--us-ink-soft);
+        border: 1px solid var(--us-border);
     }
 
     .btn-secondary:hover {
-        background: #1a1a1a;
-        color: #fff;
-        border-color: #dc3545;
+        background: var(--us-surface-alt);
+        color: var(--us-ink);
+        border-color: #c8102e;
         transform: translateY(-2px);
     }
 

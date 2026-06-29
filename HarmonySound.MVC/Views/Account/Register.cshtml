@@ -1,7 +1,7 @@
 ﻿@model HarmonySound.MVC.Models.RegisterViewModel
 
 @{
-    ViewBag.Title = "Register";
+    ViewBag.Title = "Registro";
     Layout = null;
 }
 
@@ -9,11 +9,13 @@
 <html lang="es">
 <head>
     <meta charset="utf-8" />
-    <title>Registro - HarmonySound</title>
+    <title>Registro - UniSound</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="~/css/design-system.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="~/css/dark-theme.css" />
 </head>
-<body>
+<body class="us-app">
     <div class="auth-container">
         <div class="auth-card">
             <div class="auth-logo">
@@ -23,77 +25,111 @@
             <h2>Registro</h2>
             <p class="auth-subtitle">Únete a la comunidad musical</p>
 
+            @{
+                var selectedRole = Model?.Role;
+                var hasRole = !string.IsNullOrEmpty(selectedRole);
+            }
+
             @using (Html.BeginForm("Register", "Account", FormMethod.Post))
             {
                 @Html.AntiForgeryToken()
 
+                <!-- Token de invitación a plan compartido (si aplica) -->
+                @Html.HiddenFor(m => m.InvitationToken)
+
+                <!-- Valor real del rol (Client = Usuario, Artist = Artista) -->
+                @Html.HiddenFor(m => m.Role, new { id = "Role" })
+
                 <!-- Mostrar errores de validación -->
                 @Html.ValidationSummary(true, "", new { @class = "validation-summary" })
 
-                <div class="form-group">
-                    @Html.LabelFor(m => m.Name, "Nombre completo", new { @class = "form-label" })
-                    <div class="input-group">
-                        <span class="input-icon">
+                <!-- Paso 1: elección del tipo de cuenta -->
+                <div id="roleSelection" class="role-selection" style="@(hasRole ? "display:none;" : "")">
+                    <p class="role-prompt">¿Cómo quieres registrarte?</p>
+                    <div class="role-cards">
+                        <button type="button" class="role-card" data-role="Client"
+                                data-name-label="Nombre de usuario"
+                                data-name-placeholder="Tu nombre de usuario"
+                                data-email-placeholder="usuario@utn.edu.ec">
                             <i class="fas fa-user"></i>
-                        </span>
-                        @Html.TextBoxFor(m => m.Name, new { @placeholder = "Tu nombre completo", @class = "form-control" })
-                    </div>
-                    @Html.ValidationMessageFor(m => m.Name, "", new { @class = "validation-error" })
-                </div>
-
-                <div class="form-group">
-                    @Html.LabelFor(m => m.Email, "Correo electrónico", new { @class = "form-label" })
-                    <div class="input-group">
-                        <span class="input-icon">
-                            <i class="fas fa-envelope"></i>
-                        </span>
-                        @Html.TextBoxFor(m => m.Email, new { @placeholder = "tu@email.com", @class = "form-control" })
-                    </div>
-                    @Html.ValidationMessageFor(m => m.Email, "", new { @class = "validation-error" })
-                </div>
-
-                <div class="form-group">
-                    @Html.LabelFor(m => m.Password, "Contraseña", new { @class = "form-label" })
-                    <div class="input-group">
-                        <span class="input-icon">
-                            <i class="fas fa-lock"></i>
-                        </span>
-                        @Html.PasswordFor(m => m.Password, new { @placeholder = "Mínimo 6 caracteres", @class = "form-control" })
-                    </div>
-                    @Html.ValidationMessageFor(m => m.Password, "", new { @class = "validation-error" })
-                </div>
-
-                <div class="form-group">
-                    @Html.LabelFor(m => m.ConfirmPassword, "Confirmar contraseña", new { @class = "form-label" })
-                    <div class="input-group">
-                        <span class="input-icon">
-                            <i class="fas fa-lock"></i>
-                        </span>
-                        @Html.PasswordFor(m => m.ConfirmPassword, new { @placeholder = "Repite tu contraseña", @class = "form-control" })
-                    </div>
-                    @Html.ValidationMessageFor(m => m.ConfirmPassword, "", new { @class = "validation-error" })
-                </div>
-
-                <div class="form-group">
-                    @Html.LabelFor(m => m.Role, "Tipo de cuenta", new { @class = "form-label" })
-                    <div class="input-group">
-                        <span class="input-icon">
-                            <i class="fas fa-users"></i>
-                        </span>
-                        @Html.DropDownListFor(
-                            m => m.Role,
-                            new SelectList(Model.Roles ?? new List<string>()),
-                            "Selecciona tu tipo de cuenta",
-                            new { @class = "form-control select-control" }
-                        )
+                            <span class="role-card-title">Usuario</span>
+                            <small>Escucha y disfruta la música</small>
+                        </button>
+                        <button type="button" class="role-card" data-role="Artist"
+                                data-name-label="Nombre de artista"
+                                data-name-placeholder="Tu nombre de artista"
+                                data-email-placeholder="artista@utn.edu.ec">
+                            <i class="fas fa-microphone"></i>
+                            <span class="role-card-title">Artista</span>
+                            <small>Comparte y publica tu música</small>
+                        </button>
                     </div>
                     @Html.ValidationMessageFor(m => m.Role, "", new { @class = "validation-error" })
                 </div>
 
-                <button type="submit" class="btn-primary">
-                    <i class="fas fa-user-plus me-2"></i>
-                    Crear Cuenta
-                </button>
+                <!-- Paso 2: campos del formulario (según la elección) -->
+                <div id="registerFields" style="@(hasRole ? "" : "display:none;")">
+                    <div class="selected-role-bar">
+                        <span id="selectedRoleText">
+                            @(selectedRole == "Artist" ? "Registro como Artista" : "Registro como Usuario")
+                        </span>
+                        <button type="button" id="changeRoleBtn" class="change-role-btn">
+                            <i class="fas fa-exchange-alt me-1"></i> Cambiar
+                        </button>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="Name" id="NameLabel">
+                            @(selectedRole == "Artist" ? "Nombre de artista" : "Nombre de usuario")
+                        </label>
+                        <div class="input-group">
+                            <span class="input-icon">
+                                <i class="fas fa-user"></i>
+                            </span>
+                            @Html.TextBoxFor(m => m.Name, new { @placeholder = (selectedRole == "Artist" ? "Tu nombre de artista" : "Tu nombre de usuario"), @class = "form-control", id = "Name" })
+                        </div>
+                        @Html.ValidationMessageFor(m => m.Name, "", new { @class = "validation-error" })
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(m => m.Email, "Correo electrónico", new { @class = "form-label" })
+                        <div class="input-group">
+                            <span class="input-icon">
+                                <i class="fas fa-envelope"></i>
+                            </span>
+                            @Html.TextBoxFor(m => m.Email, new { @placeholder = (selectedRole == "Artist" ? "artista@utn.edu.ec" : "usuario@utn.edu.ec"), @class = "form-control", id = "Email" })
+                        </div>
+                        <small id="emailHint" class="email-hint">El correo debe terminar en <strong>@@utn.edu.ec</strong></small>
+                        @Html.ValidationMessageFor(m => m.Email, "", new { @class = "validation-error" })
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(m => m.Password, "Contraseña", new { @class = "form-label" })
+                        <div class="input-group">
+                            <span class="input-icon">
+                                <i class="fas fa-lock"></i>
+                            </span>
+                            @Html.PasswordFor(m => m.Password, new { @placeholder = "Mínimo 8 caracteres", @class = "form-control" })
+                        </div>
+                        @Html.ValidationMessageFor(m => m.Password, "", new { @class = "validation-error" })
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(m => m.ConfirmPassword, "Confirmar contraseña", new { @class = "form-label" })
+                        <div class="input-group">
+                            <span class="input-icon">
+                                <i class="fas fa-lock"></i>
+                            </span>
+                            @Html.PasswordFor(m => m.ConfirmPassword, new { @placeholder = "Repite tu contraseña", @class = "form-control" })
+                        </div>
+                        @Html.ValidationMessageFor(m => m.ConfirmPassword, "", new { @class = "validation-error" })
+                    </div>
+
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-user-plus me-2"></i>
+                        Crear Cuenta
+                    </button>
+                </div>
 
                 <!-- Enlaces de navegación -->
                 <div class="auth-links">
@@ -116,240 +152,178 @@
 
     <style>
         body {
-            background: linear-gradient(135deg, #000000, #1a1a1a) !important;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 0;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            color: #fff;
-            padding: 2rem 0;
+            background:
+                radial-gradient(1200px 500px at 50% -10%, var(--us-surface-alt) 0%, transparent 60%),
+                var(--us-bg);
+            padding: 2rem 1rem;
         }
 
         .auth-container {
             width: 100%;
-            max-width: 500px;
-            padding: 1rem;
+            max-width: 520px;
         }
 
         .auth-card {
-            background: linear-gradient(135deg, #1e1e1e, #2d2d2d);
-            border: 1px solid #404040;
-            border-radius: 20px;
-            padding: 3rem 2rem;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            background: var(--us-surface);
+            border: 1px solid var(--us-border);
+            border-radius: var(--us-radius-lg);
+            padding: 2.75rem 2.25rem;
+            box-shadow: var(--us-shadow-lg);
             text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .auth-card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(29, 185, 84, 0.05), transparent);
-            animation: shimmer 3s infinite;
         }
 
         .auth-logo {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, #1db954, #1ed760);
-            border-radius: 50%;
+            width: 56px;
+            height: 56px;
+            background: var(--us-accent);
+            border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 1.5rem;
-            font-size: 2rem;
-            color: #000;
-            position: relative;
-            z-index: 2;
+            margin: 0 auto 1.25rem;
+            font-size: 1.5rem;
+            color: #ffffff;
+            box-shadow: var(--us-shadow-sm);
         }
 
         .auth-card h2 {
-            color: #fff;
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            position: relative;
-            z-index: 2;
+            color: var(--us-ink);
+            font-size: 1.75rem;
+            font-weight: 800;
+            margin-bottom: 0.35rem;
+            letter-spacing: -0.02em;
         }
 
         .auth-subtitle {
-            color: #b3b3b3;
-            font-size: 1rem;
+            color: var(--us-ink-soft);
+            font-size: 0.98rem;
             margin-bottom: 2rem;
-            position: relative;
-            z-index: 2;
         }
 
         .form-group {
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.25rem;
             text-align: left;
-            position: relative;
-            z-index: 2;
         }
 
         .form-label {
             display: block;
-            color: #fff;
+            color: var(--us-ink);
             font-weight: 600;
-            margin-bottom: 0.5rem;
-            font-size: 0.95rem;
+            margin-bottom: 0.45rem;
+            font-size: 0.9rem;
         }
 
-        .input-group {
-            position: relative;
-            color: #000;
-        }
+        .input-group { position: relative; }
 
         .input-icon {
             position: absolute;
-            left: 16px;
+            left: 1rem;
             top: 50%;
             transform: translateY(-50%);
-            color: #1db954;
+            color: var(--us-ink-faint);
             z-index: 3;
         }
 
         .form-control {
             width: 100%;
-            padding: 14px 16px 14px 48px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
-            color: #fff;
+            padding: 0.8rem 1rem 0.8rem 2.85rem;
+            background: var(--us-surface);
+            border: 1px solid var(--us-border);
+            border-radius: var(--us-radius);
+            color: var(--us-ink);
             font-size: 1rem;
-            transition: all 0.3s ease;
+            transition: all var(--us-transition);
             box-sizing: border-box;
-        }
-
-        .select-control {
-            background-image: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path fill='%23000000' d='M6 8L0 2 1.4 0.6 6 5.2 10.6 0.6 12 2z'/></svg>");
-            background-repeat: no-repeat;
-            background-position: right 16px center;
-            background-size: 12px;
-            appearance: none;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            color: #000 !important;
-        }
-
-        .select-control option {
-            color: #000 !important;
-            background: #fff !important;
+            font-family: var(--us-font);
         }
 
         .form-control:focus {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: #1db954;
-            box-shadow: 0 0 0 0.2rem rgba(29, 185, 84, 0.25);
+            border-color: var(--us-accent);
+            box-shadow: 0 0 0 3px var(--us-accent-soft);
             outline: none;
         }
 
-        .form-control::placeholder {
-            color: #888;
-        }
+        .form-control::placeholder { color: var(--us-ink-faint); }
 
         .btn-primary {
             width: 100%;
-            background: linear-gradient(135deg, #1db954, #1ed760);
+            background: var(--us-accent);
             border: none;
-            color: #000;
+            color: #ffffff;
             font-weight: 600;
-            padding: 14px 24px;
-            border-radius: 25px;
+            padding: 0.85rem 1.5rem;
+            border-radius: var(--us-radius-pill);
             font-size: 1rem;
             cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(29, 185, 84, 0.3);
-            margin: 1rem 0;
-            position: relative;
-            z-index: 2;
+            transition: all var(--us-transition);
+            box-shadow: var(--us-shadow-sm);
+            margin: 0.75rem 0 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .btn-primary:hover {
-            background: linear-gradient(135deg, #1ed760, #22c55e);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(29, 185, 84, 0.4);
+            background: var(--us-accent-hover);
+            transform: translateY(-1px);
+            box-shadow: var(--us-shadow-md);
         }
 
-        .auth-links {
-            margin-top: 1.5rem;
-            position: relative;
-            z-index: 2;
-        }
+        .auth-links { margin-top: 1.75rem; }
 
         .login-link {
-            color: #b3b3b3;
+            color: var(--us-ink-soft);
             font-size: 0.95rem;
-            margin-bottom: 1rem;
+            margin-bottom: 0.75rem;
         }
 
         .login-link a {
-            color: #1db954;
+            color: var(--us-accent);
             text-decoration: none;
             font-weight: 600;
-            transition: color 0.3s ease;
+            transition: color var(--us-transition);
         }
 
-        .login-link a:hover {
-            color: #1ed760;
-        }
+        .login-link a:hover { color: var(--us-accent-hover); text-decoration: underline; }
 
-        .forgot-password-link {
-            margin: 0;
-        }
+        .forgot-password-link { margin: 0; }
 
         .forgot-password-link a {
-            color: #ff9500;
+            color: var(--us-ink-soft);
             text-decoration: none;
             font-weight: 600;
             font-size: 0.9rem;
             display: inline-flex;
             align-items: center;
-            transition: all 0.3s ease;
-            padding: 8px 16px;
-            border-radius: 8px;
-            background: rgba(255, 149, 0, 0.1);
-            border: 1px solid rgba(255, 149, 0, 0.2);
+            transition: all var(--us-transition);
+            padding: 0.5rem 0.9rem;
+            border-radius: var(--us-radius-sm);
         }
 
         .forgot-password-link a:hover {
-            color: #ffb366;
-            background: rgba(255, 149, 0, 0.2);
-            border-color: rgba(255, 149, 0, 0.3);
-            transform: translateY(-1px);
+            color: var(--us-accent);
+            background: var(--us-accent-soft);
         }
 
         .validation-summary, .validation-error {
-            color: #ff6b6b;
-            font-size: 0.875rem;
-            margin-top: 0.5rem;
+            color: var(--us-accent);
+            font-size: 0.85rem;
+            margin-top: 0.4rem;
             display: block;
         }
 
         .validation-summary {
-            background: rgba(255, 107, 107, 0.1);
-            border: 1px solid rgba(255, 107, 107, 0.3);
-            padding: 1rem;
-            border-radius: 8px;
+            background: var(--us-accent-soft);
+            border: 1px solid var(--us-accent-border);
+            color: var(--us-accent-hover);
+            padding: 0.9rem 1rem;
+            border-radius: var(--us-radius);
             margin-bottom: 1rem;
-            position: relative;
-            z-index: 2;
-        }
-
-        @@keyframes shimmer {
-            0% {
-                transform: translateX(-100%) translateY(-100%) rotate(45deg);
-            }
-            100% {
-                transform: translateX(100%) translateY(100%) rotate(45deg);
-            }
         }
 
         .fas {
@@ -359,7 +333,180 @@
 
         .me-1 { margin-right: 0.25rem !important; }
         .me-2 { margin-right: 0.5rem !important; }
+
+        /* Selección de tipo de cuenta */
+        .role-selection { margin-bottom: 1rem; }
+
+        .role-prompt {
+            color: var(--us-ink);
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .role-cards { display: flex; gap: 1rem; }
+
+        .role-card {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.4rem;
+            background: var(--us-surface-alt);
+            border: 1px solid var(--us-border);
+            border-radius: var(--us-radius-lg);
+            padding: 1.5rem 1rem;
+            color: var(--us-ink);
+            cursor: pointer;
+            transition: all var(--us-transition);
+            text-align: center;
+        }
+
+        .role-card i {
+            font-size: 1.9rem;
+            color: var(--us-accent);
+            transition: transform var(--us-transition);
+        }
+
+        .role-card-title { font-weight: 700; font-size: 1.05rem; color: var(--us-ink); }
+
+        .role-card small { color: var(--us-ink-soft); font-size: 0.8rem; }
+
+        .role-card:hover {
+            border-color: var(--us-accent);
+            background: var(--us-accent-soft);
+            transform: translateY(-3px);
+            box-shadow: var(--us-shadow-sm);
+        }
+
+        .role-card:hover i { transform: scale(1.1); }
+
+        .role-card.active {
+            border-color: var(--us-accent);
+            background: var(--us-accent-soft);
+            box-shadow: 0 0 0 2px var(--us-accent-border) inset;
+        }
+
+        /* Barra del rol seleccionado */
+        .selected-role-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--us-accent-soft);
+            border: 1px solid var(--us-accent-border);
+            border-radius: var(--us-radius);
+            padding: 0.75rem 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .selected-role-bar span { color: var(--us-accent-hover); font-weight: 600; font-size: 0.95rem; }
+
+        .change-role-btn {
+            background: var(--us-surface);
+            border: 1px solid var(--us-border);
+            color: var(--us-ink);
+            border-radius: var(--us-radius-sm);
+            padding: 0.35rem 0.75rem;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all var(--us-transition);
+        }
+
+        .change-role-btn:hover { border-color: var(--us-accent); color: var(--us-accent); }
+
+        /* Pista en vivo del correo */
+        .email-hint {
+            display: block;
+            margin-top: 0.4rem;
+            font-size: 0.82rem;
+            color: var(--us-ink-soft);
+            transition: color var(--us-transition);
+        }
+
+        .email-hint.valid { color: #1b7d3e; }
+        .email-hint.invalid { color: var(--us-accent); }
+
+        .form-control.input-valid { border-color: #1b7d3e !important; }
+        .form-control.input-invalid { border-color: var(--us-accent) !important; }
     </style>
+
+    <!-- Scripts de validación del lado del cliente -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+
+    <script>
+        (function () {
+            var roleSelection = document.getElementById('roleSelection');
+            var registerFields = document.getElementById('registerFields');
+            var roleInput = document.getElementById('Role');
+            var nameLabel = document.getElementById('NameLabel');
+            var nameInput = document.getElementById('Name');
+            var emailInput = document.getElementById('Email');
+            var selectedRoleText = document.getElementById('selectedRoleText');
+            var changeRoleBtn = document.getElementById('changeRoleBtn');
+            var cards = document.querySelectorAll('.role-card');
+
+            function selectRole(card) {
+                var role = card.getAttribute('data-role');
+                roleInput.value = role;
+
+                nameLabel.textContent = card.getAttribute('data-name-label');
+                nameInput.setAttribute('placeholder', card.getAttribute('data-name-placeholder'));
+                emailInput.setAttribute('placeholder', card.getAttribute('data-email-placeholder'));
+                selectedRoleText.textContent = (role === 'Artist') ? 'Registro como Artista' : 'Registro como Usuario';
+
+                cards.forEach(function (c) { c.classList.remove('active'); });
+                card.classList.add('active');
+
+                roleSelection.style.display = 'none';
+                registerFields.style.display = '';
+            }
+
+            cards.forEach(function (card) {
+                card.addEventListener('click', function () { selectRole(card); });
+            });
+
+            if (changeRoleBtn) {
+                changeRoleBtn.addEventListener('click', function () {
+                    registerFields.style.display = 'none';
+                    roleSelection.style.display = '';
+                });
+            }
+
+            // Validación en vivo del dominio del correo
+            var emailHint = document.getElementById('emailHint');
+            var domainRegex = /^[^@@\s]+@@utn\.edu\.ec$/;
+
+            function checkEmailDomain() {
+                var value = emailInput.value.trim();
+
+                if (value === '') {
+                    emailHint.className = 'email-hint';
+                    emailHint.innerHTML = 'El correo debe terminar en <strong>@@utn.edu.ec</strong>';
+                    emailInput.classList.remove('input-valid', 'input-invalid');
+                    return;
+                }
+
+                if (domainRegex.test(value)) {
+                    emailHint.className = 'email-hint valid';
+                    emailHint.innerHTML = '<i class="fas fa-check-circle me-1"></i>Correo válido';
+                    emailInput.classList.add('input-valid');
+                    emailInput.classList.remove('input-invalid');
+                } else {
+                    emailHint.className = 'email-hint invalid';
+                    emailHint.innerHTML = '<i class="fas fa-exclamation-circle me-1"></i>Falta el dominio <strong>@@utn.edu.ec</strong>';
+                    emailInput.classList.add('input-invalid');
+                    emailInput.classList.remove('input-valid');
+                }
+            }
+
+            if (emailInput) {
+                emailInput.addEventListener('input', checkEmailDomain);
+                emailInput.addEventListener('blur', checkEmailDomain);
+            }
+        })();
+    </script>
 </body>
 </html>
 

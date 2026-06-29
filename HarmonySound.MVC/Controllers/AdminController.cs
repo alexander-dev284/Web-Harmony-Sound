@@ -271,6 +271,8 @@ namespace HarmonySound.MVC.Controllers
                 RecentActivities = new List<RecentActivityViewModel>()
             };
 
+            var jsonOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+
             try
             {
                 // Usuarios con roles
@@ -278,28 +280,53 @@ namespace HarmonySound.MVC.Controllers
                 if (usersResponse.IsSuccessStatusCode)
                 {
                     var usersJson = await usersResponse.Content.ReadAsStringAsync();
-                    var users = JsonSerializer.Deserialize<List<AdminUserViewModel>>(usersJson,
-                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    
-                    stats.TotalUsers = users?.Count ?? 0;
-                    stats.TotalArtists = users?.Count(u => u.Role == "artist") ?? 0;
-                    stats.TotalClients = users?.Count(u => u.Role == "client") ?? 0;  
-                    
+                    var users = JsonSerializer.Deserialize<List<AdminUserViewModel>>(usersJson, jsonOptions)
+                        ?? new List<AdminUserViewModel>();
+
+                    stats.TotalUsers = users.Count;
+                    stats.TotalArtists = users.Count(u => string.Equals(u.Role, "artist", StringComparison.OrdinalIgnoreCase));
+                    stats.TotalClients = users.Count(u => string.Equals(u.Role, "client", StringComparison.OrdinalIgnoreCase));
+
+                    // Distribución por rol para gráfico
+                    stats.UsersByRole = new Dictionary<string, int>
+                    {
+                        ["Administradores"] = users.Count(u => string.Equals(u.Role, "admin", StringComparison.OrdinalIgnoreCase)),
+                        ["Artistas"] = stats.TotalArtists,
+                        ["Clientes"] = stats.TotalClients
+                    };
+
+                    // Usuarios recientes (últimos registrados)
+                    stats.RecentUsers = users
+                        .OrderByDescending(u => u.RegisterDate)
+                        .Take(5)
+                        .ToList();
+
                     Console.WriteLine($"Total usuarios: {stats.TotalUsers}");
-                    Console.WriteLine($"Total artistas: {stats.TotalArtists}");
-                    Console.WriteLine($"Total clientes: {stats.TotalClients}");
                 }
 
-                // Contenido con artistas
-                var contentsResponse = await _httpClient.GetAsync("https://localhost:7120/api/Contents/with-artists");
+                // Contenido con conteo de likes (usamos el endpoint de populares con un tope alto)
+                var contentsResponse = await _httpClient.GetAsync("https://localhost:7120/api/Contents/popular?count=10000");
                 if (contentsResponse.IsSuccessStatusCode)
                 {
                     var contentsJson = await contentsResponse.Content.ReadAsStringAsync();
-                    var contents = JsonSerializer.Deserialize<List<AdminContentViewModel>>(contentsJson,
-                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    stats.TotalSongs = contents?.Count ?? 0;
-                    
-                    Console.WriteLine($"Total canciones: {stats.TotalSongs}");
+                    var contents = JsonSerializer.Deserialize<List<TopContentViewModel>>(contentsJson, jsonOptions)
+                        ?? new List<TopContentViewModel>();
+
+                    stats.TotalSongs = contents.Count;
+                    stats.TotalLikes = contents.Sum(c => c.Likes);
+
+                    // Top 5 canciones más populares
+                    stats.TopContents = contents
+                        .OrderByDescending(c => c.Likes)
+                        .Take(5)
+                        .ToList();
+
+                    // Distribución por tipo para gráfico
+                    stats.ContentByType = contents
+                        .GroupBy(c => string.IsNullOrWhiteSpace(c.Type) ? "Otro" : c.Type)
+                        .ToDictionary(g => g.Key, g => g.Count());
+
+                    Console.WriteLine($"Total canciones: {stats.TotalSongs}, likes: {stats.TotalLikes}");
                 }
 
                 // Álbumes
@@ -311,6 +338,17 @@ namespace HarmonySound.MVC.Controllers
                     stats.TotalAlbums = albums?.Count ?? 0;
                     
                     Console.WriteLine($"Total álbumes: {stats.TotalAlbums}");
+                }
+
+                // Ranking de artistas más seguidos
+                var topArtistsResponse = await _httpClient.GetAsync("https://localhost:7120/api/Follows/top-artists?count=5");
+                if (topArtistsResponse.IsSuccessStatusCode)
+                {
+                    var topArtistsJson = await topArtistsResponse.Content.ReadAsStringAsync();
+                    stats.TopArtists = JsonSerializer.Deserialize<List<TopArtistViewModel>>(topArtistsJson, jsonOptions)
+                        ?? new List<TopArtistViewModel>();
+
+                    Console.WriteLine($"Top artistas más seguidos: {stats.TopArtists.Count}");
                 }
 
                 // Suscripciones activas

@@ -10,8 +10,10 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - HarmonySound Admin</title>
+    <title>@ViewData["Title"] - UniSound Admin</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="~/css/design-system.css" />
+    <link rel="stylesheet" href="~/css/dark-theme.css" />
 </head>
 <body class="admin-body">
     <div class="admin-dashboard">
@@ -19,7 +21,7 @@
             <div class="sidebar-header">
                 <div class="logo">
                     <i class="fas fa-shield-alt"></i>
-                    <h2>HarmonySound</h2>
+                    <h2>UniSound</h2>
                     <span>Admin Panel</span>
                 </div>
             </div>
@@ -103,7 +105,7 @@
 
                 <div class="stat-card">
                     <div class="stat-icon">
-                        <i class="fas fa-album"></i>
+                        <i class="fas fa-compact-disc"></i>
                     </div>
                     <div class="stat-info">
                         <h3>@Model.TotalAlbums</h3>
@@ -119,6 +121,146 @@
                         <h3>@Model.ActiveSubscriptions</h3>
                         <p>Suscripciones Activas</p>
                     </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>@Model.TotalLikes</h3>
+                        <p>Me Gusta Totales</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gráficos -->
+            <div class="charts-grid">
+                <div class="panel">
+                    <h3><i class="fas fa-users me-2"></i>Usuarios por Rol</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="usersByRoleChart"></canvas>
+                    </div>
+                </div>
+                <div class="panel">
+                    <h3><i class="fas fa-music me-2"></i>Contenido por Tipo</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="contentByTypeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tablas de detalle -->
+            <div class="tables-grid">
+                <div class="panel">
+                    <h3><i class="fas fa-fire me-2"></i>Canciones más populares</h3>
+                    @if (Model.TopContents?.Any() == true)
+                    {
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Título</th>
+                                    <th>Artista</th>
+                                    <th class="text-end">Me gusta</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{ var pos = 0; }
+                                @foreach (var c in Model.TopContents)
+                                {
+                                    pos++;
+                                    <tr>
+                                        <td class="rank-cell">@pos</td>
+                                        <td>@c.Title</td>
+                                        <td class="muted">@c.ArtistName</td>
+                                        <td class="text-end"><i class="fas fa-heart like-ico"></i> @c.Likes</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <p class="empty-text">Aún no hay datos de popularidad.</p>
+                    }
+                </div>
+
+                <div class="panel">
+                    <h3><i class="fas fa-user-plus me-2"></i>Usuarios recientes</h3>
+                    @if (Model.RecentUsers?.Any() == true)
+                    {
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Rol</th>
+                                    <th>Registro</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var u in Model.RecentUsers)
+                                {
+                                    <tr>
+                                        <td>@u.Name</td>
+                                        <td><span class="role-badge">@u.Role</span></td>
+                                        <td class="muted">@u.RegisterDate.ToString("dd/MM/yyyy")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <p class="empty-text">No hay usuarios recientes.</p>
+                    }
+                </div>
+            </div>
+
+            <!-- Ranking de artistas más seguidos -->
+            <div class="tables-grid">
+                <div class="panel">
+                    <h3><i class="fas fa-star me-2"></i>Artistas más seguidos</h3>
+                    @if (Model.TopArtists?.Any() == true)
+                    {
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Artista</th>
+                                    <th class="text-end">Seguidores</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{ var rank = 0; }
+                                @foreach (var a in Model.TopArtists)
+                                {
+                                    rank++;
+                                    <tr>
+                                        <td class="rank-cell">@rank</td>
+                                        <td>
+                                            <div class="artist-cell">
+                                                @if (!string.IsNullOrEmpty(a.ProfileImageUrl))
+                                                {
+                                                    <img src="@a.ProfileImageUrl" alt="@a.Name" class="artist-avatar" />
+                                                }
+                                                else
+                                                {
+                                                    <span class="artist-avatar artist-avatar-placeholder"><i class="fas fa-user-music"></i></span>
+                                                }
+                                                <span>@a.Name</span>
+                                            </div>
+                                        </td>
+                                        <td class="text-end"><i class="fas fa-users like-ico"></i> @a.FollowersCount</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <p class="empty-text">Aún no hay seguidores registrados.</p>
+                    }
                 </div>
             </div>
 
@@ -147,8 +289,8 @@
             margin: 0;
             padding: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #000;
-            color: #fff;
+            background: var(--us-surface);
+            color: var(--us-ink);
         }
 
         .admin-dashboard {
@@ -158,32 +300,32 @@
 
         .admin-sidebar {
             width: 250px;
-            background: linear-gradient(180deg, #1a1a1a, #2a2a2a);
-            border-right: 1px solid #333;
+            background: linear-gradient(180deg, var(--us-surface-alt), var(--us-surface-2));
+            border-right: 1px solid var(--us-border);
             display: flex;
             flex-direction: column;
         }
 
         .sidebar-header {
             padding: 2rem 1rem;
-            border-bottom: 1px solid #333;
+            border-bottom: 1px solid var(--us-border);
             text-align: center;
         }
 
         .logo i {
             font-size: 2rem;
-            color: #ef4444;
+            color: #c8102e;
             margin-bottom: 0.5rem;
         }
 
         .logo h2 {
             margin: 0;
-            color: #fff;
+            color: var(--us-ink);
             font-size: 1.2rem;
         }
 
         .logo span {
-            color: #888;
+            color: var(--us-ink-faint);
             font-size: 0.9rem;
         }
 
@@ -196,16 +338,16 @@
             display: flex;
             align-items: center;
             padding: 1rem 1.5rem;
-            color: #ccc;
+            color: var(--us-ink-soft);
             text-decoration: none;
             transition: all 0.3s ease;
             border-left: 3px solid transparent;
         }
 
         .menu-item:hover, .menu-item.active {
-            background: rgba(239, 68, 68, 0.1);
-            color: #ef4444;
-            border-left-color: #ef4444;
+            background: rgba(200, 16, 46, 0.1);
+            color: #c8102e;
+            border-left-color: #c8102e;
         }
 
         .menu-item i {
@@ -215,14 +357,14 @@
 
         .sidebar-footer {
             padding: 1rem;
-            border-top: 1px solid #333;
+            border-top: 1px solid var(--us-border);
         }
 
         .logout-btn {
             width: 100%;
             background: transparent;
-            border: 1px solid #333;
-            color: #ccc;
+            border: 1px solid var(--us-border);
+            color: var(--us-ink-soft);
             padding: 0.75rem;
             border-radius: 6px;
             cursor: pointer;
@@ -233,9 +375,9 @@
         }
 
         .logout-btn:hover {
-            background: #dc3545;
-            border-color: #dc3545;
-            color: #fff;
+            background: #c8102e;
+            border-color: #c8102e;
+            color: #ffffff;
         }
 
         .logout-btn i {
@@ -255,12 +397,12 @@
         .admin-header h1 {
             margin: 0 0 0.5rem 0;
             font-size: 2.5rem;
-            color: #ef4444;
+            color: #c8102e;
         }
 
         .admin-header p {
             margin: 0;
-            color: #888;
+            color: var(--us-ink-faint);
             font-size: 1.1rem;
         }
 
@@ -272,17 +414,17 @@
         }
 
         .stat-card {
-            background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+            background: linear-gradient(135deg, var(--us-surface-alt), var(--us-surface-2));
             padding: 2rem;
             border-radius: 12px;
-            border: 1px solid #333;
+            border: 1px solid var(--us-border);
             display: flex;
             align-items: center;
         }
 
         .stat-icon {
-            background: #ef4444;
-            color: #fff;
+            background: #c8102e;
+            color: #ffffff;
             width: 60px;
             height: 60px;
             border-radius: 50%;
@@ -296,12 +438,12 @@
         .stat-info h3 {
             margin: 0;
             font-size: 2rem;
-            color: #fff;
+            color: var(--us-ink);
         }
 
         .stat-info p {
             margin: 0;
-            color: #888;
+            color: var(--us-ink-faint);
         }
 
         .quick-actions {
@@ -310,7 +452,7 @@
 
         .quick-actions h3 {
             margin-bottom: 1.5rem;
-            color: #fff;
+            color: var(--us-ink);
         }
 
         .actions-grid {
@@ -320,12 +462,12 @@
         }
 
         .action-card {
-            background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+            background: linear-gradient(135deg, var(--us-surface-alt), var(--us-surface-2));
             padding: 1.5rem;
             border-radius: 8px;
-            border: 1px solid #333;
+            border: 1px solid var(--us-border);
             text-decoration: none;
-            color: #ccc;
+            color: var(--us-ink-soft);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -334,9 +476,9 @@
         }
 
         .action-card:hover {
-            background: rgba(239, 68, 68, 0.1);
-            border-color: #ef4444;
-            color: #ef4444;
+            background: rgba(200, 16, 46, 0.1);
+            border-color: #c8102e;
+            color: #c8102e;
             transform: translateY(-2px);
         }
 
@@ -344,6 +486,184 @@
             font-size: 2rem;
             margin-bottom: 0.5rem;
         }
+
+        /* Gráficos y tablas */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .tables-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .panel {
+            background: linear-gradient(135deg, var(--us-surface-alt), var(--us-surface-2));
+            border: 1px solid var(--us-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .panel h3 {
+            margin: 0 0 1.25rem 0;
+            color: var(--us-ink);
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .panel h3 i { color: #c8102e; }
+
+        .chart-wrapper {
+            position: relative;
+            height: 260px;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .data-table th {
+            text-align: left;
+            color: var(--us-ink-faint);
+            font-weight: 600;
+            padding: 0.6rem 0.5rem;
+            border-bottom: 1px solid var(--us-border);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+        }
+
+        .data-table td {
+            padding: 0.7rem 0.5rem;
+            border-bottom: 1px solid var(--us-border);
+            color: var(--us-ink);
+        }
+
+        .data-table tr:last-child td { border-bottom: none; }
+        .data-table .muted { color: var(--us-ink-faint); }
+        .data-table .text-end { text-align: right; }
+        .data-table .rank-cell { color: #c8102e; font-weight: 700; }
+        .like-ico { color: #c8102e; margin-right: 2px; }
+
+        .role-badge {
+            background: rgba(200, 16, 46, 0.12);
+            color: #c8102e;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+
+        .empty-text { color: var(--us-ink-faint); font-style: italic; }
+
+        .artist-cell {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .artist-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .artist-avatar-placeholder {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--us-surface-2);
+            color: #c8102e;
+            font-size: 0.8rem;
+        }
+    
+
+    
+        /* === Override corporativo: barra lateral oscura (profundidad) === */
+        .admin-body { background: var(--us-surface-alt) !important; color: var(--us-ink); }
+        .admin-sidebar { background: #1c1c1e !important; border-right: 1px solid #2a2b2e !important; }
+        .sidebar-header { border-bottom: 1px solid #2a2b2e !important; }
+        .logo i { color: #c8102e !important; }
+        .logo h2 { color: #ffffff !important; }
+        .logo span { color: #b9bdc2 !important; }
+        .menu-item { color: #b9bdc2 !important; }
+        .menu-item i { color: var(--us-ink-faint) !important; }
+        .menu-item:hover, .menu-item.active { background: rgba(200,16,46,0.16) !important; color: #ffffff !important; box-shadow: inset 3px 0 0 #c8102e; }
+        .menu-item:hover i, .menu-item.active i { color: #c8102e !important; }
+        .sidebar-footer { border-top: 1px solid #2a2b2e !important; }
+        .logout-btn { color: #b9bdc2 !important; background: transparent !important; border: 1px solid #34363a !important; }
+        .logout-btn:hover { background: rgba(200,16,46,0.16) !important; color: #ffffff !important; border-color: #c8102e !important; }
     </style>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>
+        const usersByRole = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.UsersByRole));
+        const contentByType = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ContentByType));
+
+        // Paleta dentro del tema rojo / blanco / gris / negro, con tonos distintos por segmento
+        // Oscuro por defecto, salvo que el sistema pida claro explícito
+        const isLightTheme = window.matchMedia('(prefers-color-scheme: light)').matches;
+        const chartTextColor = isLightTheme ? '#374151' : '#cbd5e1';
+        const chartBorderColor = isLightTheme ? '#ffffff' : '#1a1a1a';
+
+        // Paleta de colores sólidos (Chart.js no resuelve variables CSS en el canvas)
+        const palette = ['#c8102e', '#6b7280', '#f59e0b', '#a30d25', '#9ca3af', '#374151', '#d1d5db'];
+
+        Chart.defaults.color = chartTextColor;
+        Chart.defaults.font.family = "'Segoe UI', Tahoma, sans-serif";
+
+        function buildDoughnut(canvasId, dataObj) {
+            const labels = Object.keys(dataObj);
+            const values = Object.values(dataObj);
+            const el = document.getElementById(canvasId);
+            if (!el) return;
+
+            if (!labels.length || values.every(v => v === 0)) {
+                const ctx = el.getContext('2d');
+                ctx.font = '14px Segoe UI';
+                ctx.fillStyle = chartTextColor;
+                ctx.textAlign = 'center';
+                ctx.fillText('Sin datos disponibles', el.width / 2, el.height / 2);
+                return;
+            }
+
+            new Chart(el, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: palette,
+                        borderColor: chartBorderColor,
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { padding: 16, usePointStyle: true } }
+                    },
+                    cutout: '60%'
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            buildDoughnut('usersByRoleChart', usersByRole);
+            buildDoughnut('contentByTypeChart', contentByType);
+        });
+    </script>
 </body>
 </html>

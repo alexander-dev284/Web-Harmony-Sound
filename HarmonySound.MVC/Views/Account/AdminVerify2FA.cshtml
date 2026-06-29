@@ -1,7 +1,7 @@
 @model HarmonySound.MVC.Models.Admin2FAViewModel
 
 @{
-    ViewData["Title"] = "Verificaci髇 2FA";
+    ViewData["Title"] = "Verificaci贸n 2FA";
     Layout = null;
 }
 
@@ -10,12 +10,12 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - HarmonySound</title>
+    <title>@ViewData["Title"] - UniSound</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         body {
-            background: linear-gradient(135deg, #0f172a, #1e293b, #334155);
-            color: #fff;
+            background: linear-gradient(135deg, var(--us-bg), var(--us-surface));
+            color: var(--us-ink);
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             margin: 0;
             padding: 0;
@@ -26,8 +26,8 @@
         }
 
         .verify-container {
-            background: rgba(15, 23, 42, 0.9);
-            border: 2px solid #ef4444;
+            background: var(--us-surface);
+            border: 2px solid #c8102e;
             border-radius: 16px;
             padding: 3rem;
             width: 100%;
@@ -44,48 +44,56 @@
         .verify-icon {
             width: 80px;
             height: 80px;
-            background: #ef4444;
+            background: #c8102e;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 0 auto 1rem;
             font-size: 2rem;
+            color: #ffffff;
         }
 
         .verify-form .form-group {
             margin-bottom: 1.5rem;
+            text-align: center;
         }
 
         .form-label {
             display: block;
-            margin-bottom: 0.5rem;
-            color: #e2e8f0;
+            margin-bottom: 0.75rem;
+            color: var(--us-ink-soft);
             font-weight: 500;
         }
 
         .form-control {
-            width: 100%;
-            padding: 1rem;
-            border: 2px solid #334155;
+            display: block;
+            width: 220px;
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 0.85rem 1rem;
+            border: 2px solid var(--us-ink-soft);
             border-radius: 8px;
-            background: #1e293b;
-            color: #fff;
-            font-size: 1.1rem;
+            background: var(--us-surface-alt);
+            color: var(--us-ink);
+            font-size: 1.6rem;
+            font-weight: 700;
             text-align: center;
-            letter-spacing: 0.2em;
+            letter-spacing: 0.4em;
+            text-indent: 0.4em;
+            box-sizing: border-box;
         }
 
         .form-control:focus {
             outline: none;
-            border-color: #ef4444;
-            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+            border-color: #c8102e;
+            box-shadow: 0 0 0 3px rgba(200, 16, 46, 0.1);
         }
 
         .btn-verify {
             width: 100%;
             padding: 1rem;
-            background: #ef4444;
+            background: #c8102e;
             color: white;
             border: none;
             border-radius: 8px;
@@ -96,13 +104,13 @@
         }
 
         .btn-verify:hover {
-            background: #dc2626;
+            background: #c8102e;
             transform: translateY(-2px);
         }
 
         .validation-summary,
         .validation-error {
-            color: #fca5a5;
+            color: #e3a3ab;
             font-size: 0.9rem;
             margin-top: 0.5rem;
         }
@@ -118,6 +126,8 @@
             color: #93c5fd;
         }
     </style>
+    <link rel="stylesheet" href="~/css/design-system.css" />
+    <link rel="stylesheet" href="~/css/dark-theme.css" />
 </head>
 <body>
     <div class="verify-container">
@@ -125,8 +135,8 @@
             <div class="verify-icon">
                 <i class="fas fa-shield-alt"></i>
             </div>
-            <h1>Verificaci髇 2FA</h1>
-            <p>Introduce el c骴igo enviado a tu email</p>
+            <h1>Verificaci贸n 2FA</h1>
+            <p>Introduce el c贸digo enviado a tu email</p>
         </div>
 
         <form asp-action="AdminVerify2FA" method="post" class="verify-form">
@@ -135,7 +145,7 @@
             <div class="form-group">
                 <label asp-for="Code" class="form-label">
                     <i class="fas fa-key me-2"></i>
-                    C骴igo de 6 d韌itos
+                    C贸digo de 6 d铆gitos
                 </label>
                 <input asp-for="Code" class="form-control" placeholder="000000" maxlength="6" />
                 <span asp-validation-for="Code" class="validation-error"></span>

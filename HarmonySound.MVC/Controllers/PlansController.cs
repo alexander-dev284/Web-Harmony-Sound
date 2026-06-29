@@ -386,8 +386,7 @@ namespace HarmonySound.MVC.Controllers
                 else
                 {
                     var errorContent = await response.Content.ReadAsStringAsync();
-                    var errorObj = JsonSerializer.Deserialize<JsonElement>(errorContent);
-                    TempData["Error"] = errorObj.TryGetProperty("message", out var msg) ? msg.GetString() : "Error al enviar invitación";
+                    TempData["Error"] = ExtractError(errorContent, "Error al enviar invitación");
                 }
             }
             catch (Exception ex)
@@ -417,18 +416,28 @@ namespace HarmonySound.MVC.Controllers
                 {
                     var responseJson = await response.Content.ReadAsStringAsync();
                     var result = JsonSerializer.Deserialize<JsonElement>(responseJson);
-                    
+
+                    // Si el invitado todavía no tiene cuenta, primero debe registrarse.
+                    if (result.TryGetProperty("requiresRegistration", out var reqReg) &&
+                        reqReg.ValueKind == JsonValueKind.True)
+                    {
+                        TempData["Info"] = "Para aceptar la invitación primero necesitas crear tu cuenta en HarmonySound.";
+                        var redirectUrl = result.TryGetProperty("redirectUrl", out var ru) ? ru.GetString() : null;
+                        return Redirect(string.IsNullOrEmpty(redirectUrl)
+                            ? Url.Action("Register", "Account")
+                            : redirectUrl);
+                    }
+
                     TempData["Success"] = "¡Invitación aceptada exitosamente! Ya tienes acceso premium.";
-                    ViewBag.PlanName = result.GetProperty("planName").GetString();
-                    ViewBag.InviterName = result.GetProperty("inviterName").GetString();
-                    
+                    ViewBag.PlanName = result.TryGetProperty("planName", out var pn) ? pn.GetString() : "";
+                    ViewBag.InviterName = result.TryGetProperty("inviterName", out var inv) ? inv.GetString() : "";
+
                     return View("InvitationAccepted");
                 }
                 else
                 {
                     var errorContent = await response.Content.ReadAsStringAsync();
-                    var errorObj = JsonSerializer.Deserialize<JsonElement>(errorContent);
-                    TempData["Error"] = errorObj.TryGetProperty("message", out var msg) ? msg.GetString() : "Error al aceptar invitación";
+                    TempData["Error"] = ExtractError(errorContent, "Error al aceptar invitación");
                 }
             }
             catch (Exception ex)
@@ -455,8 +464,7 @@ namespace HarmonySound.MVC.Controllers
                 else
                 {
                     var errorContent = await response.Content.ReadAsStringAsync();
-                    var errorObj = JsonSerializer.Deserialize<JsonElement>(errorContent);
-                    TempData["Error"] = errorObj.TryGetProperty("message", out var msg) ? msg.GetString() : "Error al cancelar invitación";
+                    TempData["Error"] = ExtractError(errorContent, "Error al cancelar invitación");
                 }
             }
             catch (Exception ex)
@@ -466,6 +474,41 @@ namespace HarmonySound.MVC.Controllers
             }
 
             return RedirectToAction("ManageInvitations");
+        }
+
+        // Extrae un mensaje de error legible de la respuesta de la API.
+        // La API a veces responde con una cadena JSON plana ("texto"), a veces con un objeto
+        // ({ message | error | details }) y a veces con texto sin formato. TryGetProperty
+        // lanza excepción si el JSON no es un objeto, así que aquí lo manejamos de forma segura.
+        private static string ExtractError(string content, string fallback)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+                return fallback;
+
+            try
+            {
+                using var doc = JsonDocument.Parse(content);
+                var root = doc.RootElement;
+
+                if (root.ValueKind == JsonValueKind.String)
+                    return root.GetString() ?? fallback;
+
+                if (root.ValueKind == JsonValueKind.Object)
+                {
+                    foreach (var prop in new[] { "message", "error", "details" })
+                    {
+                        if (root.TryGetProperty(prop, out var val) && val.ValueKind == JsonValueKind.String)
+                            return val.GetString() ?? fallback;
+                    }
+                }
+            }
+            catch (JsonException)
+            {
+                // No es JSON válido: devolver el texto plano tal cual.
+                return content.Trim();
+            }
+
+            return fallback;
         }
 
         public ActionResult Details(int id)
