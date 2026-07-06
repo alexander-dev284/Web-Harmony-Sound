@@ -21,10 +21,13 @@ namespace HarmonySound.MVC.Controllers
             _httpClient.Timeout = TimeSpan.FromMinutes(10);
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int page = 1)
         {
             try
             {
+                // Forzar que la página sea mínimo 1
+                if (page < 1) page = 1;
+
                 int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
                 ViewBag.UserId = userId;
 
@@ -34,8 +37,9 @@ namespace HarmonySound.MVC.Controllers
                 {
                     var userPlanJson = await userPlanResponse.Content.ReadAsStringAsync();
                     var userPlan = JsonSerializer.Deserialize<UserPlan>(userPlanJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    
-                    ViewBag.SubscriptionStatus = new {
+
+                    ViewBag.SubscriptionStatus = new
+                    {
                         IsCancelled = userPlan?.IsCancelled ?? false,
                         IsActive = userPlan?.Active ?? false,
                         EndDate = userPlan?.EndDate
@@ -43,14 +47,34 @@ namespace HarmonySound.MVC.Controllers
                 }
 
                 var response = await _httpClient.GetAsync("https://localhost:7120/api/Contents/with-artists");
-                
+
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();
-                    var contents = JsonSerializer.Deserialize<List<ContentWithArtistDto>>(json, 
-                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    
-                    return View(contents);
+                    var allContents = JsonSerializer.Deserialize<List<ContentWithArtistDto>>(json,
+                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new List<ContentWithArtistDto>();
+
+                    // Lógica de Paginación (5 elementos por página)
+                    int pageSize = 5;
+                    int totalItems = allContents.Count;
+                    int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+
+                    // Evitar que pidan una página mayor a la existente si hay datos
+                    if (page > totalPages && totalPages > 0) page = totalPages;
+
+                    // Segmentar la lista usando LINQ
+                    var pagedContents = allContents
+                        .Skip((page - 1) * pageSize)
+                        .Take(pageSize)
+                        .ToList();
+
+                    // Guardar metadatos en el ViewBag para armar los botones en la Vista (.cshtml)
+                    ViewBag.CurrentPage = page;
+                    ViewBag.TotalPages = totalPages;
+                    ViewBag.HasPreviousPage = page > 1;
+                    ViewBag.HasNextPage = page < totalPages;
+
+                    return View(pagedContents);
                 }
                 else
                 {
@@ -158,11 +182,19 @@ namespace HarmonySound.MVC.Controllers
             return RedirectToAction("Home");
         }
 
-        public async Task<IActionResult> Home(string query)
+        public async Task<IActionResult> Home(string query, int pagePopular = 1, int pageRecent = 1)
         {
+            // Validar límites inferiores para que no se envíen páginas negativas
+            if (pagePopular < 1) pagePopular = 1;
+            if (pageRecent < 1) pageRecent = 1;
+
+            // Guardar las páginas actuales en el ViewBag para mantener el estado en los enlaces
+            ViewBag.PagePopular = pagePopular;
+            ViewBag.PageRecent = pageRecent;
+
             int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
-            ViewBag.UserId = userId; 
-            
+            ViewBag.UserId = userId;
+
             var model = new SearchResultsViewModel { Query = query };
 
             // Verificar estado de suscripción
@@ -171,8 +203,9 @@ namespace HarmonySound.MVC.Controllers
             {
                 var userPlanJson = await userPlanResponse.Content.ReadAsStringAsync();
                 var userPlan = JsonSerializer.Deserialize<UserPlan>(userPlanJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                
-                ViewBag.SubscriptionStatus = new {
+
+                ViewBag.SubscriptionStatus = new
+                {
                     IsCancelled = userPlan?.IsCancelled ?? false,
                     IsActive = userPlan?.Active ?? false,
                     EndDate = userPlan?.EndDate
@@ -185,13 +218,14 @@ namespace HarmonySound.MVC.Controllers
                 return View("Error");
 
             var json = await response.Content.ReadAsStringAsync();
-            model.Profile = JsonSerializer.Deserialize<ProfileEditViewModel>(json, 
+            model.Profile = JsonSerializer.Deserialize<ProfileEditViewModel>(json,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             // Sin búsqueda: cargar el contenido de descubrimiento (populares, novedades, álbumes y artistas)
             if (string.IsNullOrWhiteSpace(query))
             {
-                await LoadDiscoveryContentAsync(model);
+                // CAMBIO AQUÍ: Enviamos 'pagePopular', 'pageRecent' y 'ViewBag' para procesar ambas paginaciones
+                await LoadDiscoveryContentAsync(model, pagePopular, pageRecent, ViewBag);
                 await LoadFollowedArtistsAsync(model, userId);
             }
             // Si hay búsqueda, consulta artistas y contenidos
@@ -202,7 +236,7 @@ namespace HarmonySound.MVC.Controllers
                 if (artistsResponse.IsSuccessStatusCode)
                 {
                     var artistsJson = await artistsResponse.Content.ReadAsStringAsync();
-                    model.Artists = JsonSerializer.Deserialize<List<User>>(artistsJson, 
+                    model.Artists = JsonSerializer.Deserialize<List<User>>(artistsJson,
                         new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new();
                 }
 
@@ -211,20 +245,20 @@ namespace HarmonySound.MVC.Controllers
                 if (contentsResponse.IsSuccessStatusCode)
                 {
                     var contentsJson = await contentsResponse.Content.ReadAsStringAsync();
-                    var contents = JsonSerializer.Deserialize<List<Content>>(contentsJson, 
+                    var contents = JsonSerializer.Deserialize<List<Content>>(contentsJson,
                         new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new();
-                    
+
                     // Obtener información de los artistas para cada contenido
                     var userIds = contents.Select(c => c.ArtistId).Distinct().ToList();
                     var artists = new Dictionary<int, string>();
-                    
+
                     foreach (var artistId in userIds)
                     {
                         var artistResponse = await _httpClient.GetAsync($"https://localhost:7120/api/Users/profile/{artistId}");
                         if (artistResponse.IsSuccessStatusCode)
                         {
                             var artistJson = await artistResponse.Content.ReadAsStringAsync();
-                            var artist = JsonSerializer.Deserialize<User>(artistJson, 
+                            var artist = JsonSerializer.Deserialize<User>(artistJson,
                                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                             artists[artistId] = artist?.Name ?? "Artista desconocido";
                         }
@@ -255,18 +289,31 @@ namespace HarmonySound.MVC.Controllers
 
         // Carga las secciones de descubrimiento de la pantalla de inicio:
         // canciones populares, novedades, álbumes y artistas destacados.
-        private async Task LoadDiscoveryContentAsync(SearchResultsViewModel model)
+        private async Task LoadDiscoveryContentAsync(SearchResultsViewModel model, int pagePopular, int pageRecent, dynamic viewBag)
         {
             var jsonOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            int pageSize = 5; // Cantidad de elementos por página para ambas secciones
 
-            // Canciones más populares del momento (ordenadas por "me gusta")
+            // 1. CANCIONES MÁS POPULARES
             try
             {
-                var popularResponse = await _httpClient.GetAsync("https://localhost:7120/api/Contents/popular?count=12");
+                var popularResponse = await _httpClient.GetAsync("https://localhost:7120/api/Contents/popular?count=20");
                 if (popularResponse.IsSuccessStatusCode)
                 {
                     var popularJson = await popularResponse.Content.ReadAsStringAsync();
-                    model.PopularContents = JsonSerializer.Deserialize<List<ContentWithArtistDto>>(popularJson, jsonOptions) ?? new();
+                    var allPopular = JsonSerializer.Deserialize<List<ContentWithArtistDto>>(popularJson, jsonOptions) ?? new();
+
+                    int totalItems = allPopular.Count;
+                    int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+
+                    if (pagePopular < 1) pagePopular = 1;
+                    if (pagePopular > totalPages && totalPages > 0) pagePopular = totalPages;
+
+                    model.PopularContents = allPopular.Skip((pagePopular - 1) * pageSize).Take(pageSize).ToList();
+
+                    // Guardar en ViewBag con prefijo "Popular"
+                    viewBag.CurrentPagePopular = pagePopular;
+                    viewBag.TotalPagesPopular = totalPages;
                 }
             }
             catch (Exception ex)
@@ -274,15 +321,31 @@ namespace HarmonySound.MVC.Controllers
                 Console.WriteLine($"Error cargando canciones populares: {ex.Message}");
             }
 
-            // Novedades: contenido más reciente (with-artists ya viene ordenado por fecha desc)
+            // 2. NOVEDADES (SECCIÓN SOLICITADA)
             try
             {
                 var recentResponse = await _httpClient.GetAsync("https://localhost:7120/api/Contents/with-artists");
                 if (recentResponse.IsSuccessStatusCode)
                 {
                     var recentJson = await recentResponse.Content.ReadAsStringAsync();
-                    var recent = JsonSerializer.Deserialize<List<ContentWithArtistDto>>(recentJson, jsonOptions) ?? new();
-                    model.RecentContents = recent.Take(12).ToList();
+                    var allRecent = JsonSerializer.Deserialize<List<ContentWithArtistDto>>(recentJson, jsonOptions) ?? new();
+
+                    // Lógica de paginación independiente para Novedades
+                    int totalItemsRecent = allRecent.Count;
+                    int totalPagesRecent = (int)Math.Ceiling((double)totalItemsRecent / pageSize);
+
+                    if (pageRecent < 1) pageRecent = 1;
+                    if (pageRecent > totalPagesRecent && totalPagesRecent > 0) pageRecent = totalPagesRecent;
+
+                    // Segmentamos la lista según la página de novedades
+                    model.RecentContents = allRecent
+                        .Skip((pageRecent - 1) * pageSize)
+                        .Take(pageSize)
+                        .ToList();
+
+                    // Guardar en ViewBag con prefijo "Recent"
+                    viewBag.CurrentPageRecent = pageRecent;
+                    viewBag.TotalPagesRecent = totalPagesRecent;
                 }
             }
             catch (Exception ex)
@@ -290,7 +353,7 @@ namespace HarmonySound.MVC.Controllers
                 Console.WriteLine($"Error cargando novedades: {ex.Message}");
             }
 
-            // Álbumes destacados
+            // Álbumes destacados (se quedan igual)
             try
             {
                 var albumsResponse = await _httpClient.GetAsync("https://localhost:7120/api/Albums");
@@ -298,10 +361,7 @@ namespace HarmonySound.MVC.Controllers
                 {
                     var albumsJson = await albumsResponse.Content.ReadAsStringAsync();
                     var albums = JsonSerializer.Deserialize<List<AlbumDto>>(albumsJson, jsonOptions) ?? new();
-                    model.FeaturedAlbums = albums
-                        .OrderByDescending(a => a.CreationDate)
-                        .Take(8)
-                        .ToList();
+                    model.FeaturedAlbums = albums.OrderByDescending(a => a.CreationDate).Take(8).ToList();
                 }
             }
             catch (Exception ex)
@@ -309,7 +369,7 @@ namespace HarmonySound.MVC.Controllers
                 Console.WriteLine($"Error cargando álbumes destacados: {ex.Message}");
             }
 
-            // Artistas para explorar
+            // Artistas para explorar (se quedan igual)
             try
             {
                 var artistsResponse = await _httpClient.GetAsync("https://localhost:7120/api/Users/Artists");

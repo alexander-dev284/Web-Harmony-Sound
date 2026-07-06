@@ -1,14 +1,14 @@
 {
   "version": 2,
-  "dgSpecHash": "VGpxOjKnJ38=",
+  "dgSpecHash": "jg4rZnjk1FYxvdO9QfMtLvmSDeq5awX46qu9YZO+jWCDxw0Sypm2TSywFlHpzPzFpkqMwiz4+zEhfrlxLoVjNw==",
   "success": true,
-  "projectFilePath": "C:\\Universidad\\Tercer Semestre\\Herramientas de Programación\\Web-Harmony-Sound\\HarmonySound.API.Consumer\\HarmonySound.API.Consumer.csproj",
+  "projectFilePath": "C:\\Users\\diego\\Source\\Repos\\Web-Harmony-Sound\\HarmonySound.API.Consumer\\HarmonySound.API.Consumer.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\Victus\\.nuget\\packages\\microsoft.aspnetcore.jsonpatch\\8.0.15\\microsoft.aspnetcore.jsonpatch.8.0.15.nupkg.sha512",
-    "C:\\Users\\Victus\\.nuget\\packages\\microsoft.aspnetcore.mvc.newtonsoftjson\\8.0.15\\microsoft.aspnetcore.mvc.newtonsoftjson.8.0.15.nupkg.sha512",
-    "C:\\Users\\Victus\\.nuget\\packages\\microsoft.csharp\\4.7.0\\microsoft.csharp.4.7.0.nupkg.sha512",
-    "C:\\Users\\Victus\\.nuget\\packages\\newtonsoft.json\\13.0.3\\newtonsoft.json.13.0.3.nupkg.sha512",
-    "C:\\Users\\Victus\\.nuget\\packages\\newtonsoft.json.bson\\1.0.2\\newtonsoft.json.bson.1.0.2.nupkg.sha512"
+    "C:\\Users\\diego\\.nuget\\packages\\microsoft.aspnetcore.jsonpatch\\8.0.15\\microsoft.aspnetcore.jsonpatch.8.0.15.nupkg.sha512",
+    "C:\\Users\\diego\\.nuget\\packages\\microsoft.aspnetcore.mvc.newtonsoftjson\\8.0.15\\microsoft.aspnetcore.mvc.newtonsoftjson.8.0.15.nupkg.sha512",
+    "C:\\Users\\diego\\.nuget\\packages\\microsoft.csharp\\4.7.0\\microsoft.csharp.4.7.0.nupkg.sha512",
+    "C:\\Users\\diego\\.nuget\\packages\\newtonsoft.json\\13.0.3\\newtonsoft.json.13.0.3.nupkg.sha512",
+    "C:\\Users\\diego\\.nuget\\packages\\newtonsoft.json.bson\\1.0.2\\newtonsoft.json.bson.1.0.2.nupkg.sha512"
   ],
   "logs": []
 }

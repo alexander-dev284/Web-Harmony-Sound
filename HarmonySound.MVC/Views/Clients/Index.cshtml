@@ -29,7 +29,6 @@
         <p class="library-subtitle">Descubre y reproduce tu música favorita</p>
     </div>
 
-    <!-- Búsqueda en tiempo real (canciones y artistas) -->
     <div class="search-container">
         <div class="search-input-group">
             <i class="fas fa-search search-icon"></i>
@@ -38,69 +37,169 @@
         </div>
     </div>
 
-    <div class="songs-container">
-        <div class="songs-header">
-            <h2>Canciones</h2>
+    @if (Model?.Any() == true)
+    {
+        @* Agrupación automática por el campo Type *@
+        var categories = Model.GroupBy(c => c.Type).ToList();
+
+        <div class="categories-section mb-4">
+            <div class="cards-grid category-cards-tabs mb-4" role="tablist">
+                @foreach (var category in categories)
+                {
+                    var typeName = category.Key ?? "Otros";
+                    var totalItems = category.Count();
+                    var tabId = "cat-" + typeName.Replace(" ", "-").ToLower(); 
+                    
+                    <button class="media-card category-tab-btn" 
+        id="@(tabId)-tab" 
+        data-bs-toggle="tab" 
+        data-bs-target="#@tabId" 
+        type="button" 
+        role="tab" 
+        aria-controls="@tabId" 
+        aria-selected="false"
+        onclick="handleCategoryTabClick(this)">  <!-- CAMBIADO AQUÍ -->
+                        <div class="media-cover">
+                            <div class="media-cover-placeholder">
+                                @if (typeName.ToLower().Contains("podcast"))
+                                {
+                                    <i class="fas fa-microphone-alt"></i>
+                                }
+                                else if (typeName.ToLower().Contains("cancion") || typeName.ToLower().Contains("música") || typeName.ToLower().Contains("music"))
+                                {
+                                    <i class="fas fa-music"></i>
+                                }
+                                else
+                                {
+                                    <i class="fas fa-compact-disc"></i>
+                                }
+                            </div>
+                            <div class="media-play"><i class="fas fa-folder-open"></i></div>
+                        </div>
+                        <div class="media-card-info text-start">
+                            <div class="media-card-title text-capitalize">@typeName</div>
+                            <div class="media-card-subtitle">@totalItems @(totalItems == 1 ? "elemento" : "elementos")</div>
+                        </div>
+                    </button>
+                }
+            </div>
+
+            <div class="tab-content">
+                @foreach (var category in categories)
+                {
+                    var typeName = category.Key ?? "Otros";
+                    var tabId = "cat-" + typeName.Replace(" ", "-").ToLower();
+
+                    <div class="tab-pane fade" id="@tabId" role="tabpanel" aria-labelledby="@(tabId)-tab">
+                        <div class="songs-container">
+                            <div class="songs-header d-flex align-items-center justify-content-between mb-3">
+                                <h2 class="text-capitalize mb-0">
+                                    <i class="fas fa-list me-2"></i>@typeName
+                                </h2>
+                                <button class="btn btn-sm btn-outline-light btn-close-category" onclick="closeCategoryTab()" style="border-radius: 20px; font-size: 0.8rem;">
+                                    <i class="fas fa-times me-1"></i> Cerrar sección
+                                </button>
+                            </div>
+
+                            <div class="songs-list">
+                                @foreach (var content in category)
+                                {
+                                    <div class="song-item" data-content-id="@content.Id" data-search="@(((content.Title ?? "") + " " + (content.ArtistName ?? "")).ToLower())">
+                                        <div class="song-main-info">
+                                            <div class="song-cover">
+                                                <div class="cover-placeholder">
+                                                    @if (typeName.ToLower().Contains("podcast"))
+                                                    {
+                                                        <i class="fas fa-microphone"></i>
+                                                    }
+                                                    else
+                                                    {
+                                                        <i class="fas fa-music"></i>
+                                                    }
+                                                </div>
+                                            </div>
+
+                                            <div class="song-details">
+                                                <div class="song-title">@content.Title</div>
+                                                <div class="song-meta">
+                                                    <span class="content-type">@content.Type</span>
+                                                    <span class="artist-name">@content.ArtistName</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="song-actions">
+                                            <button class="btn btn-like like-btn"
+                                                    data-content-id="@content.Id"
+                                                    data-user-id="@ViewBag.UserId"
+                                                    title="Me gusta">
+                                                <i class="far fa-heart"></i>
+                                            </button>
+
+                                            <button class="btn btn-playlist"
+                                                    onclick="redirectToPlaylistsWithContent(@content.Id)"
+                                                    title="Agregar a Playlist">
+                                                <i class="fas fa-plus"></i>
+                                            </button>
+
+                                            <button class="btn btn-play play-in-player-btn"
+                                                    data-content-id="@content.Id"
+                                                    data-title="@content.Title"
+                                                    data-artist="@content.ArtistName"
+                                                    data-url="@content.UrlMedia"
+                                                    title="Reproducir">
+                                                <i class="fas fa-play"></i>
+                                            </button>
+                                        </div>
+
+                                        <div class="song-duration">
+                                            <i class="fas fa-clock me-1"></i>
+                                            <span>@content.FormattedDuration</span>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
         </div>
+    }
 
-        <div class="songs-list">
-            @foreach (var content in Model)
+    <div id="noLibraryResults" class="no-results" style="display:none; margin-top: 20px;">
+        <div class="no-results-icon"><i class="fas fa-search"></i></div>
+        <h3>No se encontraron resultados</h3>
+        <p>Prueba con otro título o nombre de artista</p>
+    </div>
+
+    @if (ViewBag.TotalPages > 1)
+    {
+        <div class="pagination-container">
+            @if (ViewBag.HasPreviousPage)
             {
-                <div class="song-item" data-content-id="@content.Id" data-search="@(((content.Title ?? "") + " " + (content.ArtistName ?? "")).ToLower())">
-                    <div class="song-main-info">
-                        <div class="song-cover">
-                            <div class="cover-placeholder">
-                                <i class="fas fa-music"></i>
-                            </div>
-                        </div>
+                <a class="btn-pagination" href="@Url.Action("Index", "Clients", new { page = ViewBag.CurrentPage - 1 })">
+                    <i class="fas fa-chevron-left me-1"></i> Anterior
+                </a>
+            }
+            else
+            {
+                <button class="btn-pagination" disabled><i class="fas fa-chevron-left me-1"></i> Anterior</button>
+            }
 
-                        <div class="song-details">
-                            <div class="song-title">@content.Title</div>
-                            <div class="song-meta">
-                                <span class="content-type">@content.Type</span>
-                                <span class="artist-name">@content.ArtistName</span>
-                            </div>
-                        </div>
-                    </div>
+            <span class="pagination-info">Página <strong>@ViewBag.CurrentPage</strong> de @ViewBag.TotalPages</span>
 
-                    <div class="song-actions">
-                        <button class="btn btn-like like-btn"
-                                data-content-id="@content.Id"
-                                data-user-id="@ViewBag.UserId"
-                                title="Me gusta">
-                            <i class="far fa-heart"></i>
-                        </button>
-
-                        <button class="btn btn-playlist"
-                                onclick="redirectToPlaylistsWithContent(@content.Id)"
-                                title="Agregar a Playlist">
-                            <i class="fas fa-plus"></i>
-                        </button>
-
-                        <button class="btn btn-play play-in-player-btn"
-                                data-content-id="@content.Id"
-                                data-title="@content.Title"
-                                data-artist="@content.ArtistName"
-                                data-url="@content.UrlMedia"
-                                title="Reproducir">
-                            <i class="fas fa-play"></i>
-                        </button>
-                    </div>
-
-                    <div class="song-duration">
-                        <i class="fas fa-clock me-1"></i>
-                        <span>@content.FormattedDuration</span>
-                    </div>
-                </div>
+            @if (ViewBag.HasNextPage)
+            {
+                <a class="btn-pagination" href="@Url.Action("Index", "Clients", new { page = ViewBag.CurrentPage + 1 })">
+                    Siguiente <i class="fas fa-chevron-right ms-1"></i>
+                </a>
+            }
+            else
+            {
+                <button class="btn-pagination" disabled>Siguiente <i class="fas fa-chevron-right ms-1"></i></button>
             }
         </div>
-
-        <div id="noLibraryResults" class="no-results" style="display:none;">
-            <div class="no-results-icon"><i class="fas fa-search"></i></div>
-            <h3>No se encontraron resultados</h3>
-            <p>Prueba con otro título o nombre de artista</p>
-        </div>
-    </div>
+    }
 </div>
 
 @await Html.PartialAsync("_PlayerBar")
@@ -143,7 +242,7 @@
     .songs-header h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; color: var(--us-ink) !important; }
     .songs-list { display: flex; flex-direction: column; gap: 4px; }
 
-    /* Barra de búsqueda (estilo del Home) */
+    /* Barra de búsqueda */
     .search-container { margin-bottom: 1.5rem; }
     .search-input-group {
         position: relative; display: flex; align-items: center; max-width: 600px;
@@ -186,12 +285,9 @@
     .banner-action:hover { background: #c8102e; }
 
     header, footer { display: none !important; }
-
-    /* CTA del banner: rojo con texto blanco (antes texto blanco sobre fondo claro) */
     .banner-action { background: var(--us-accent) !important; color: #ffffff !important; }
     .banner-action:hover { background: var(--us-accent-hover) !important; }
 
-    /* ===== Mejora UX/UI: filas de canciones (consistente con el Home) ===== */
     .songs-container {
         background: var(--us-surface) !important;
         border: 1px solid var(--us-border);
@@ -218,7 +314,7 @@
         font-size: 1.05rem;
     }
     .song-title { font-size: 0.98rem !important; font-weight: 600 !important; margin-bottom: 3px !important; }
-    /* Línea "Tipo · Artista" limpia y profesional */
+    
     .song-meta { gap: 6px; align-items: baseline; }
     .content-type {
         background: transparent !important; border: none !important; padding: 0 !important;
@@ -245,6 +341,114 @@
         background: var(--us-accent) !important; color: #ffffff !important;
         border-color: var(--us-accent) !important; transform: scale(1.06);
     }
+
+    .pagination-container {
+        display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 1.5rem; padding: 10px;
+    }
+    .btn-pagination {
+        background: var(--us-surface-2); color: var(--us-ink-soft); border: 1px solid var(--us-border);
+        padding: 6px 14px; border-radius: 20px; font-weight: 600; font-size: 0.88rem; text-decoration: none;
+        display: inline-flex; align-items: center; transition: all 0.2s ease;
+    }
+    .btn-pagination:not([disabled]):hover {
+        background: #c8102e; color: #ffffff !important; border-color: #c8102e; transform: translateY(-1px);
+    }
+    .btn-pagination[disabled] {
+        opacity: 0.5; cursor: not-allowed;
+    }
+    .pagination-info {
+        font-size: 0.9rem; color: var(--us-ink-soft);
+    }
+
+    /* ==========================================================================
+       NUEVOS ESTILOS AGREGADOS REQUERIDOS PARA LAS TARJETAS DINÁMICAS (TABS)
+       ========================================================================== */
+    .cards-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 24px;
+    }
+    .category-tab-btn {
+        background: var(--us-surface-alt, #181818);
+        border: 1px solid var(--us-border, #282828);
+        padding: 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        width: 100%;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+    .category-tab-btn:hover {
+        background: var(--us-surface-2, #282828);
+        transform: translateY(-4px);
+    }
+    .category-tab-btn:focus {
+        outline: none;
+    }
+    .media-cover {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 1;
+        margin-bottom: 16px;
+        border-radius: 6px;
+        overflow: hidden;
+    }
+    .media-cover-placeholder {
+        width: 100%;
+        height: 100%;
+        background: var(--us-surface-2, #282828);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        color: var(--us-ink-soft, #b3b3b3);
+    }
+    .media-play {
+        position: absolute;
+        right: 8px;
+        bottom: 8px;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #c8102e;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        opacity: 0;
+        transform: translateY(8px);
+        transition: all 0.3s ease;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+    }
+    .category-tab-btn:hover .media-play {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    .media-card-title {
+        color: var(--us-ink, #ffffff);
+        font-weight: 700;
+        font-size: 1rem;
+        margin-bottom: 4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .media-card-subtitle {
+        color: var(--us-ink-soft, #b3b3b3);
+        font-size: 0.85rem;
+    }
+    /* Estilo para la tarjeta seleccionada */
+    .category-tab-btn.active {
+        background: var(--us-surface-2, #282828);
+        border-color: #c8102e !important;
+        box-shadow: 0 0 15px rgba(200, 16, 46, 0.2);
+    }
+    .category-tab-btn.active .media-play {
+        opacity: 1;
+        transform: translateY(0);
+        background: #ffffff;
+        color: #c8102e;
+    }
 </style>
 
 <script>
@@ -262,7 +466,33 @@ function redirectToPlaylistsWithContent(contentId) {
     window.location.href = '@Url.Action("Index", "Playlists")?contentId=' + contentId;
 }
 
-// Búsqueda en tiempo real por título y artista
+// NUEVA FUNCIÓN: Control manual para asegurar que se desplieguen las canciones
+function handleCategoryTabClick(button) {
+    resetSearchBar();
+    
+    // Obtener el ID del contenedor de canciones correspondiente
+    const targetSelector = button.getAttribute('data-bs-target');
+    const targetPane = document.querySelector(targetSelector);
+    
+    if (!targetPane) return;
+
+    // 1. Desactivar todos los botones de categorías
+    document.querySelectorAll('.category-tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+        btn.setAttribute('aria-selected', 'false');
+    });
+
+    // 2. Ocultar todas las listas de canciones abiertas
+    document.querySelectorAll('.tab-content .tab-pane').forEach(pane => {
+        pane.classList.remove('show', 'active');
+    });
+
+    // 3. Activar visualmente la tarjeta clickeada y mostrar sus canciones
+    button.classList.add('active');
+    button.setAttribute('aria-selected', 'true');
+    targetPane.classList.add('show', 'active');
+}
+
 function filterLibrary() {
     var input = document.getElementById('librarySearch');
     if (!input) return;
@@ -277,6 +507,24 @@ function filterLibrary() {
     });
     var noResults = document.getElementById('noLibraryResults');
     if (noResults) noResults.style.display = (visible === 0) ? '' : 'none';
+}
+
+function closeCategoryTab() {
+    document.querySelectorAll('.category-tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+        btn.setAttribute('aria-selected', 'false');
+    });
+    document.querySelectorAll('.tab-content .tab-pane').forEach(pane => {
+        pane.classList.remove('show', 'active');
+    });
+}
+
+function resetSearchBar() {
+    const searchInput = document.getElementById('librarySearch');
+    if(searchInput) {
+        searchInput.value = '';
+        filterLibrary();
+    }
 }
 </script>
 <script src="~/js/harmony-player.js"></script>
