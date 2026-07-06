@@ -17,6 +17,8 @@ namespace HarmonySound.MVC.Models
         [Required]
         [DataType(DataType.Password)]
         [MinLength(8, ErrorMessage = "La contraseña debe tener al menos 8 caracteres.")]
+        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$",
+            ErrorMessage = "La contraseña debe combinar mayúscula, minúscula, número y carácter especial.")]
         [Display(Name = "Contraseña")]
         public string Password { get; set; }
 

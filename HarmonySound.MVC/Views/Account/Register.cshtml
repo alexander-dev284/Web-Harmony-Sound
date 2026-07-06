@@ -109,8 +109,23 @@
                             <span class="input-icon">
                                 <i class="fas fa-lock"></i>
                             </span>
-                            @Html.PasswordFor(m => m.Password, new { @placeholder = "Mínimo 8 caracteres", @class = "form-control" })
+                            @Html.PasswordFor(m => m.Password, new { @placeholder = "Mínimo 8 caracteres", @class = "form-control", id = "Password" })
                         </div>
+                        <!-- Indicador de seguridad de contraseña -->
+                        <div class="password-strength" id="passwordStrength" style="display: none;">
+                            <div class="strength-bar">
+                                <div class="strength-fill" id="strengthFill"></div>
+                            </div>
+                            <span class="strength-text" id="strengthText">Débil</span>
+                        </div>
+                        <!-- Requisitos mínimos de la contraseña -->
+                        <ul class="password-requirements" id="passwordRequirements">
+                            <li data-req="length"><i class="fas fa-circle"></i> Al menos 8 caracteres</li>
+                            <li data-req="upper"><i class="fas fa-circle"></i> Una letra mayúscula (A-Z)</li>
+                            <li data-req="lower"><i class="fas fa-circle"></i> Una letra minúscula (a-z)</li>
+                            <li data-req="number"><i class="fas fa-circle"></i> Un número (0-9)</li>
+                            <li data-req="special"><i class="fas fa-circle"></i> Un carácter especial (!@@#$%&*)</li>
+                        </ul>
                         @Html.ValidationMessageFor(m => m.Password, "", new { @class = "validation-error" })
                     </div>
 
@@ -429,6 +444,68 @@
 
         .form-control.input-valid { border-color: #1b7d3e !important; }
         .form-control.input-invalid { border-color: var(--us-accent) !important; }
+
+        /* Indicador de fuerza de contraseña */
+        .password-strength {
+            margin: 0.6rem 0 0;
+            text-align: left;
+        }
+
+        .strength-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--us-surface-alt);
+            border: 1px solid var(--us-border);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 0.4rem;
+        }
+
+        .strength-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: all var(--us-transition);
+            width: 0%;
+        }
+
+        .strength-text {
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
+
+        /* Requisitos mínimos de la contraseña */
+        .password-requirements {
+            list-style: none;
+            padding: 0;
+            margin: 0.7rem 0 0;
+            text-align: left;
+        }
+
+        .password-requirements li {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+            color: var(--us-ink-soft);
+            margin-bottom: 0.3rem;
+            transition: color var(--us-transition);
+        }
+
+        .password-requirements li i {
+            font-size: 0.7rem;
+            width: 0.9rem;
+            text-align: center;
+            color: var(--us-ink-faint);
+            transition: color var(--us-transition);
+        }
+
+        .password-requirements li.met {
+            color: #1b7d3e;
+        }
+
+        .password-requirements li.met i {
+            color: #1b7d3e;
+        }
     </style>
 
     <!-- Scripts de validación del lado del cliente -->
@@ -504,6 +581,86 @@
             if (emailInput) {
                 emailInput.addEventListener('input', checkEmailDomain);
                 emailInput.addEventListener('blur', checkEmailDomain);
+            }
+
+            // Indicador de fuerza de contraseña
+            var passwordInput = document.getElementById('Password');
+            var strengthIndicator = document.getElementById('passwordStrength');
+            var strengthFill = document.getElementById('strengthFill');
+            var strengthText = document.getElementById('strengthText');
+
+            function evaluatePasswordStrength(password) {
+                var score = 0;
+
+                if (password.length >= 6) score += 1;
+                if (password.length >= 8) score += 1;
+                if (/[a-z]/.test(password)) score += 1;
+                if (/[A-Z]/.test(password)) score += 1;
+                if (/[0-9]/.test(password)) score += 1;
+                if (/[^A-Za-z0-9]/.test(password)) score += 1;
+
+                var strength = 'Muy débil';
+                var color = 'var(--us-accent)';
+                var width = '20%';
+
+                if (score >= 2) { strength = 'Débil'; color = 'var(--us-accent)'; width = '40%'; }
+                if (score >= 3) { strength = 'Regular'; color = '#e8a13a'; width = '60%'; }
+                if (score >= 4) { strength = 'Buena'; color = '#e8a13a'; width = '80%'; }
+                if (score >= 5) { strength = 'Muy fuerte'; color = '#1b7d3e'; width = '100%'; }
+
+                return { strength: strength, color: color, width: width };
+            }
+
+            // Requisitos mínimos que debe cumplir la contraseña
+            var requirementsList = document.getElementById('passwordRequirements');
+
+            var requirementChecks = {
+                length: function (p) { return p.length >= 8; },
+                upper: function (p) { return /[A-Z]/.test(p); },
+                lower: function (p) { return /[a-z]/.test(p); },
+                number: function (p) { return /[0-9]/.test(p); },
+                special: function (p) { return /[^A-Za-z0-9]/.test(p); }
+            };
+
+            function updateRequirements(password) {
+                if (!requirementsList) return;
+
+                var items = requirementsList.querySelectorAll('li');
+                items.forEach(function (item) {
+                    var req = item.getAttribute('data-req');
+                    var icon = item.querySelector('i');
+                    var met = requirementChecks[req](password);
+
+                    if (met) {
+                        item.classList.add('met');
+                        icon.classList.remove('fa-circle');
+                        icon.classList.add('fa-check-circle');
+                    } else {
+                        item.classList.remove('met');
+                        icon.classList.remove('fa-check-circle');
+                        icon.classList.add('fa-circle');
+                    }
+                });
+            }
+
+            if (passwordInput) {
+                passwordInput.addEventListener('input', function () {
+                    var password = this.value;
+
+                    if (password.length > 0) {
+                        strengthIndicator.style.display = 'block';
+                        var evaluation = evaluatePasswordStrength(password);
+
+                        strengthFill.style.width = evaluation.width;
+                        strengthFill.style.backgroundColor = evaluation.color;
+                        strengthText.textContent = evaluation.strength;
+                        strengthText.style.color = evaluation.color;
+                    } else {
+                        strengthIndicator.style.display = 'none';
+                    }
+
+                    updateRequirements(password);
+                });
             }
         })();
     </script>
