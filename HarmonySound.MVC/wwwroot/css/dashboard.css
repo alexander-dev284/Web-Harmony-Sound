@@ -110,7 +110,7 @@
 }
 
 .music-card {
-    background-color: #1e1e1e;
+    background-color: #3D3D3D;
     border-radius: 12px;
     padding: 1rem;
     box-shadow: 0 4px 12px rgba(0,0,0,0.2);
@@ -177,11 +177,11 @@
     }
 
 .card-title.playlist-title {
-    color: #000 !important;
+    color: #3D3D3D !important;
 }
 
 .card-body.plan-card {
-    color: #000 !important;
+    color: #3D3D3D !important;
 }
 
 
