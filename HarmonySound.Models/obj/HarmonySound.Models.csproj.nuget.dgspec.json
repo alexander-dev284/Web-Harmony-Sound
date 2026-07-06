@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Universidad\\Tercer Semestre\\Herramientas de Programación\\Web-Harmony-Sound\\HarmonySound.Models\\HarmonySound.Models.csproj": {}
+    "C:\\Users\\ASUS\\OneDrive\\Desktop\\UTN\\Music\\Web-Harmony-Sound\\HarmonySound.Models\\HarmonySound.Models.csproj": {}
   },
   "projects": {
-    "C:\\Universidad\\Tercer Semestre\\Herramientas de Programación\\Web-Harmony-Sound\\HarmonySound.Models\\HarmonySound.Models.csproj": {
+    "C:\\Users\\ASUS\\OneDrive\\Desktop\\UTN\\Music\\Web-Harmony-Sound\\HarmonySound.Models\\HarmonySound.Models.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Universidad\\Tercer Semestre\\Herramientas de Programación\\Web-Harmony-Sound\\HarmonySound.Models\\HarmonySound.Models.csproj",
+        "projectUniqueName": "C:\\Users\\ASUS\\OneDrive\\Desktop\\UTN\\Music\\Web-Harmony-Sound\\HarmonySound.Models\\HarmonySound.Models.csproj",
         "projectName": "HarmonySound.Models",
-        "projectPath": "C:\\Universidad\\Tercer Semestre\\Herramientas de Programación\\Web-Harmony-Sound\\HarmonySound.Models\\HarmonySound.Models.csproj",
-        "packagesPath": "C:\\Users\\Victus\\.nuget\\packages\\",
-        "outputPath": "C:\\Universidad\\Tercer Semestre\\Herramientas de Programación\\Web-Harmony-Sound\\HarmonySound.Models\\obj\\",
+        "projectPath": "C:\\Users\\ASUS\\OneDrive\\Desktop\\UTN\\Music\\Web-Harmony-Sound\\HarmonySound.Models\\HarmonySound.Models.csproj",
+        "packagesPath": "C:\\Users\\ASUS\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\ASUS\\OneDrive\\Desktop\\UTN\\Music\\Web-Harmony-Sound\\HarmonySound.Models\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\Victus\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\ASUS\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -72,7 +72,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.313/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.315/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
