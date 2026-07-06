@@ -87,7 +87,7 @@ html, body {
 }
 
 .auth-card {
-    background: #1e1e1e;
+    background: #ff6666;
     color: #fff;
     border-radius: 20px;
     box-shadow: 0 6px 30px rgba(0, 0, 0, 0.4);
@@ -168,10 +168,10 @@ html, body {
 }
 
 :root {
-    --spotify-green: #178a43; 
+    --spotify-green: #178a43;
     --spotify-green-hover: #14733a;
     --background-dark: #121212;
-    --input-bg: #232323;
+    --input-bg: #3D3D3D;
     --input-focus-bg: #1a1a1a;
 }
 
@@ -185,10 +185,11 @@ html, body {
     font-size: 1rem;
     appearance: none;
 
-.auth-card select option {
- background-color: #232323; 
-    color: #fff; 
- }
+.auth-card select option
+{
+    background-color: #3D3D3D;
+    color: #fff;
+}
 
 .navbar {
     display: none;

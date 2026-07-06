@@ -9,23 +9,20 @@
 
     :root {
         /* Superficies */
-        --us-bg:          #050505;   /* Fondo de página */
-        --us-surface:     #121212;   /* Tarjetas / paneles */
-        --us-surface-alt: #1a1a1a;   /* Superficie alterna */
-        --us-surface-2:   #1e1e1e;   /* Superficie elevada */
-
+        --us-bg: #050505; /* Fondo de página */
+        --us-surface: #3D3D3D; /* Tarjetas / paneles */
+        --us-surface-alt: #1a1a1a; /* Superficie alterna */
+        --us-surface-2: #1e1e1e; /* Superficie elevada */
         /* Texto */
-        --us-ink:        #ffffff;    /* Texto principal */
-        --us-ink-soft:   #a0a0a0;    /* Texto secundario */
-        --us-ink-faint:  #8a9099;    /* Texto terciario / placeholders */
-
+        --us-ink: #ffffff; /* Texto principal */
+        --us-ink-soft: #a0a0a0; /* Texto secundario */
+        --us-ink-faint: #8a9099; /* Texto terciario / placeholders */
         /* Bordes y sombras */
-        --us-border:  rgba(255, 255, 255, 0.12);
+        --us-border: rgba(255, 255, 255, 0.12);
         --us-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.5);
         --us-shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.5);
         --us-shadow-md: 0 6px 18px rgba(0, 0, 0, 0.55);
         --us-shadow-lg: 0 14px 40px rgba(0, 0, 0, 0.65);
-
         /* El acento rojo (--us-accent / --us-accent-hover) se mantiene */
         color-scheme: dark;
     }
