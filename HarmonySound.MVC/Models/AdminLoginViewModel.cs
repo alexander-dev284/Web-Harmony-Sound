@@ -5,13 +5,13 @@ namespace HarmonySound.MVC.Models
     public class AdminLoginViewModel
     {
         [Required(ErrorMessage = "El email es requerido")]
-        [EmailAddress(ErrorMessage = "Formato de email inv·lido")]
+        [EmailAddress(ErrorMessage = "Formato de email inv√°lido")]
         [Display(Name = "Email")]
         public string Email { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "La contraseÒa es requerida")]
+        [Required(ErrorMessage = "La contrase√±a es requerida")]
         [DataType(DataType.Password)]
-        [Display(Name = "ContraseÒa")]
+        [Display(Name = "Contrase√±a")]
         public string Password { get; set; } = string.Empty;
     }
 }

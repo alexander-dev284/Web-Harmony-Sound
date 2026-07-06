@@ -48,10 +48,10 @@ namespace HarmonySound.API.Services
         public async Task SendCodeByEmailAsync(string email, string code)
         {
             var emailBody = $@"
-            Código de Verificación - HarmonySound
+            Código de Verificación - UniSound
             Tu código de verificación es: {code}
             Este código expira en 5 minutos.";
-            await _emailSender.SendEmailAsync(email, "Código de Verificación - HarmonySound", emailBody);
+            await _emailSender.SendEmailAsync(email, "Código de Verificación - UniSound", emailBody);
         }
 
         private string GenerateNumericCode(int length)

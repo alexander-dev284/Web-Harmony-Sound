@@ -1,4 +1,4 @@
-// HarmonySound - Reproductor compartido
+// UniSound - Reproductor compartido
 // Usar window.harmonyConfig para configurar URLs y opciones en cada vista
 
 (function () {

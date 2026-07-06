@@ -202,7 +202,7 @@ namespace HarmonySound.API.Controllers
                 {
                     // Si el usuario no existe, solo marcar como aceptada pero requerir registro
                     return Ok(new { 
-                        message = "Para completar la aceptación, necesitas registrarte en HarmonySound",
+                        message = "Para completar la aceptación, necesitas registrarte en UniSound",
                         requiresRegistration = true,
                         planName = invitation.Plan.PlanName,
                         inviterName = invitation.Inviter.Name,
@@ -295,9 +295,9 @@ namespace HarmonySound.API.Controllers
             var declineUrl = $"{_configuration["AppUrl"]}/api/PlanInvitations/decline/{invitation.InvitationToken}";
 
             var emailBody = $@"
-                <h2>Invitación a HarmonySound</h2>
+                <h2>Invitación a UniSound</h2>
                 <p>¡Hola!</p>
-                <p><strong>{inviter.Name}</strong> te ha invitado a unirte a su plan <strong>{userPlan.Plan.PlanName}</strong> en HarmonySound.</p>
+                <p><strong>{inviter.Name}</strong> te ha invitado a unirte a su plan <strong>{userPlan.Plan.PlanName}</strong> en UniSound.</p>
                 
                 {(!string.IsNullOrEmpty(invitation.InvitationMessage) ? $"<p><em>Mensaje personal: {invitation.InvitationMessage}</em></p>" : "")}
                 
@@ -321,7 +321,7 @@ namespace HarmonySound.API.Controllers
 
             await _emailSender.SendEmailAsync(
                 invitation.InviteeEmail, 
-                $"Invitación a HarmonySound de {inviter.Name}", 
+                $"Invitación a UniSound de {inviter.Name}",
                 emailBody
             );
         }

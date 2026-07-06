@@ -5,7 +5,7 @@ namespace HarmonySound.API.DTOs
     public class ForgotPasswordModel
     {
         [Required(ErrorMessage = "El email es obligatorio")]
-        [EmailAddress(ErrorMessage = "Formato de email inv·lido")]
+        [EmailAddress(ErrorMessage = "Formato de email inv√°lido")]
         public string Email { get; set; } = "";
     }
 }

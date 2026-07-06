@@ -1,7 +1,7 @@
 @model IEnumerable<HarmonySound.Models.Content>
 
 @{
-    ViewData["Title"] = "Mis Canciones";
+    ViewData["Title"] = "Mi Contenido";
 }
 
 <div class="music-library-container">
@@ -26,7 +26,7 @@
         
         <h1 class="library-title">
             <i class="fas fa-music me-3"></i>
-            Mis Canciones
+            Mi Contenido
         </h1>
         <p class="library-subtitle">Gestiona y reproduce tu contenido musical</p>
         
@@ -40,15 +40,32 @@
 
     <div class="songs-container">
         <div class="songs-header">
-            <h2>Canciones</h2>
+            <h2>Mi Contenido</h2>
+            @if (Model != null && Model.Any())
+            {
+                <div class="content-toolbar">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="contentSearch" placeholder="Buscar por título..." autocomplete="off" />
+                    </div>
+                    <div class="type-filters" id="typeFilters">
+                        <button type="button" class="type-chip active" data-filter="all">Todos</button>
+                        @foreach (var t in Model.Select(c => c.Type).Where(t => !string.IsNullOrWhiteSpace(t)).Distinct())
+                        {
+                            <button type="button" class="type-chip" data-filter="@t">@t</button>
+                        }
+                    </div>
+                </div>
+                <p class="no-results" id="noResults" style="display:none;">No se encontró contenido con ese criterio.</p>
+            }
         </div>
-        
+
         @if (Model != null && Model.Any())
         {
             <div class="songs-list">
                 @foreach (var content in Model)
                 {
-                    <div class="song-item" data-content-id="@content.Id">
+                    <div class="song-item" data-content-id="@content.Id" data-type="@content.Type" data-title="@content.Title">
                         <div class="song-main-info">
                             <div class="song-cover">
                                 <div class="cover-placeholder">
@@ -113,8 +130,8 @@
                 <div class="empty-icon">
                     <i class="fas fa-music"></i>
                 </div>
-                <h3>No tienes canciones aún</h3>
-                <p>Sube tu primera canción para comenzar</p>
+                <h3>No tienes contenido aún</h3>
+                <p>Sube tu primer contenido para comenzar</p>
                 <a asp-action="Upload" class="btn-create">
                     <i class="fas fa-plus me-2"></i>
                     Subir Mi Primera Canción
@@ -264,6 +281,39 @@
 
     .songs-container { background: var(--us-surface) !important; border-radius: 8px; padding: 1.5rem; }
     .songs-header h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; color: var(--us-ink) !important; }
+
+    /* Barra de búsqueda y filtros de contenido */
+    .content-toolbar {
+        display: flex; flex-wrap: wrap; gap: 1rem;
+        align-items: center; justify-content: space-between; margin-bottom: 1rem;
+    }
+    .search-box { position: relative; flex: 1 1 240px; max-width: 360px; }
+    .search-box i {
+        position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+        color: var(--us-ink-soft); font-size: 0.9rem; pointer-events: none;
+    }
+    .search-box input {
+        width: 100%; box-sizing: border-box; padding: 10px 14px 10px 38px;
+        background: var(--us-surface-2); border: 1px solid var(--us-border);
+        border-radius: 999px; color: var(--us-ink); font-size: 0.9rem;
+        outline: none; transition: border-color 0.2s ease;
+    }
+    .search-box input:focus { border-color: #c8102e; }
+    .search-box input::placeholder { color: var(--us-ink-faint); }
+
+    .type-filters { display: flex; flex-wrap: wrap; gap: 8px; }
+    .type-chip {
+        background: var(--us-surface-2); border: 1px solid var(--us-border);
+        color: var(--us-ink-soft); padding: 7px 16px; border-radius: 999px;
+        font-size: 0.82rem; font-weight: 600; cursor: pointer;
+        transition: all 0.2s ease; white-space: nowrap;
+    }
+    .type-chip:hover { border-color: #c8102e; color: var(--us-ink) !important; }
+    .type-chip.active {
+        background: linear-gradient(135deg, #c8102e, #a30d25);
+        border-color: #c8102e; color: #ffffff !important;
+    }
+    .no-results { color: var(--us-ink-soft); text-align: center; padding: 2rem 0; }
     .songs-list { display: flex; flex-direction: column; gap: 4px; }
 
     /* Items de Canciones - GRID MODIFICADO SIN BOTÓN DE LIKE */
@@ -707,5 +757,41 @@ document.addEventListener('keydown', function(e) {
         hideDeleteModal();
     }
 });
+
+// Búsqueda y filtrado de contenido por tipo
+(function () {
+    const search = document.getElementById('contentSearch');
+    const chips = document.querySelectorAll('.type-chip');
+    const items = document.querySelectorAll('.song-item');
+    const noResults = document.getElementById('noResults');
+    let activeType = 'all';
+
+    function norm(s) { return (s || '').toLowerCase().trim(); }
+
+    function applyFilters() {
+        const q = norm(search ? search.value : '');
+        let visible = 0;
+        items.forEach(function (item) {
+            const type = item.getAttribute('data-type') || '';
+            const title = norm(item.getAttribute('data-title'));
+            const matchType = activeType === 'all' || type === activeType;
+            const matchText = !q || title.includes(q);
+            const show = matchType && matchText;
+            item.style.display = show ? '' : 'none';
+            if (show) visible++;
+        });
+        if (noResults) noResults.style.display = visible === 0 ? 'block' : 'none';
+    }
+
+    if (search) search.addEventListener('input', applyFilters);
+    chips.forEach(function (chip) {
+        chip.addEventListener('click', function () {
+            chips.forEach(function (c) { c.classList.remove('active'); });
+            chip.classList.add('active');
+            activeType = chip.getAttribute('data-filter');
+            applyFilters();
+        });
+    });
+})();
 </script>
 <script src="~/js/harmony-player.js"></script>

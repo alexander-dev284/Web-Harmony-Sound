@@ -421,7 +421,7 @@ namespace HarmonySound.MVC.Controllers
                     if (result.TryGetProperty("requiresRegistration", out var reqReg) &&
                         reqReg.ValueKind == JsonValueKind.True)
                     {
-                        TempData["Info"] = "Para aceptar la invitación primero necesitas crear tu cuenta en HarmonySound.";
+                        TempData["Info"] = "Para aceptar la invitación primero necesitas crear tu cuenta en UniSound.";
                         var redirectUrl = result.TryGetProperty("redirectUrl", out var ru) ? ru.GetString() : null;
                         return Redirect(string.IsNullOrEmpty(redirectUrl)
                             ? Url.Action("Register", "Account")

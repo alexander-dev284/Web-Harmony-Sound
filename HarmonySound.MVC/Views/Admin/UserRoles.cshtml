@@ -1,7 +1,7 @@
 @model List<HarmonySound.API.DTOs.UserRoleDto>
 
 @{
-    ViewData["Title"] = "Gesti髇 de Roles";
+    ViewData["Title"] = "Gesti贸n de Roles";
     Layout = null;
 }
 
@@ -49,7 +49,7 @@
                 <form asp-action="Logout" asp-controller="Account" method="post">
                     <button type="submit" class="logout-btn">
                         <i class="fas fa-sign-out-alt"></i>
-                        <span>Cerrar Sesi髇</span>
+                        <span>Cerrar Sesi贸n</span>
                     </button>
                 </form>
             </div>
@@ -59,9 +59,9 @@
             <div class="admin-header">
                 <h1>
                     <i class="fas fa-user-shield me-3"></i>
-                    Gesti髇 de Roles
+                    Gesti贸n de Roles
                 </h1>
-                <p>Administrar asignaci髇 de roles a usuarios del sistema</p>
+                <p>Administrar asignaci贸n de roles a usuarios del sistema</p>
             </div>
 
             <!-- Mensajes de feedback -->
@@ -81,7 +81,7 @@
                 </div>
             }
 
-            <!-- Filtros y b鷖queda -->
+            <!-- Filtros y b煤squeda -->
             <div class="filters-section">
                 <div class="filters-row">
                     <input type="text" id="search-users" placeholder="Buscar por usuario o email..." class="search-input">
@@ -94,7 +94,7 @@
                 </div>
             </div>
 
-            <!-- Estad韘ticas r醦idas -->
+            <!-- Estad铆sticas r谩pidas -->
             <div class="stats-cards">
                 <div class="stat-card">
                     <div class="stat-icon admin-icon">
@@ -131,7 +131,7 @@
                     <thead>
                         <tr>
                             <th>Usuario</th>
-                            <th>Correo electr贸nico</th>
+                            <th>Correo electr脙鲁nico</th>
                             <th>Rol Actual</th>
                             <th>ID Usuario</th>
                         </tr>
@@ -191,7 +191,7 @@
                     <div class="form-group">
                         <label for="userId">ID del Usuario:</label>
                         <input type="number" id="userId" name="userId" class="form-control" required>
-                        <small class="form-text">Ingresa el ID num閞ico del usuario</small>
+                        <small class="form-text">Ingresa el ID num茅rico del usuario</small>
                     </div>
                     <div class="form-group">
                         <label for="roleName">Rol:</label>
@@ -446,7 +446,7 @@
             box-shadow: 0 0 0 2px rgba(200, 16, 46, 0.2);
         }
 
-        /* Estilos espec韋icos para las opciones del select */
+        /* Estilos espec铆ficos para las opciones del select */
         .filter-select option {
             background: var(--us-surface-alt);
             color: var(--us-ink);
@@ -831,17 +831,17 @@
     </style>
 
     <script>
-        // Funci髇 para mostrar el modal de asignar rol
+        // Funci贸n para mostrar el modal de asignar rol
         function showAssignRoleModal() {
             document.getElementById('assignRoleModal').style.display = 'block';
         }
 
-        // Funci髇 para ocultar el modal de asignar rol
+        // Funci贸n para ocultar el modal de asignar rol
         function hideAssignRoleModal() {
             document.getElementById('assignRoleModal').style.display = 'none';
         }
 
-        // Funci髇 para mostrar el modal de editar rol
+        // Funci贸n para mostrar el modal de editar rol
         function editUserRole(userId, currentRole, userName) {
             document.getElementById('editUserId').value = userId;
             document.getElementById('editUserName').value = userName;
@@ -849,12 +849,12 @@
             document.getElementById('editRoleModal').style.display = 'block';
         }
 
-        // Funci髇 para ocultar el modal de editar rol
+        // Funci贸n para ocultar el modal de editar rol
         function hideEditRoleModal() {
             document.getElementById('editRoleModal').style.display = 'none';
         }
 
-        // Funci髇 para obtener el icono del rol
+        // Funci贸n para obtener el icono del rol
         function getRoleIcon(roleName) {
             switch(roleName) {
                 case 'Admin': return 'fa-crown';

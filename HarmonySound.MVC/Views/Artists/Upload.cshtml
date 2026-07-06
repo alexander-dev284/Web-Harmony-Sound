@@ -5,7 +5,7 @@
 }
 
 <div class="upload-container">
-    <!--  Bot髇 de navegaci髇 al Home del Artista -->
+    <!--  Bot贸n de navegaci贸n al Home del Artista -->
     <div class="navigation-bar">
         <a href="@Url.Action("Home", "Artists")" class="btn-home">
             <i class="fas fa-home me-2"></i>
@@ -18,7 +18,7 @@
             <i class="fas fa-upload me-3"></i>
             Subir Nuevo Contenido
         </h2>
-        <p class="upload-subtitle">Comparte tu m鷖ica con el mundo</p>
+        <p class="upload-subtitle">Comparte tu m煤sica con el mundo</p>
 
         @if (TempData["Error"] != null)
         {
@@ -44,9 +44,9 @@
                 <div class="form-group">
                     <label for="Title" class="form-label">
                         <i class="fas fa-music me-2"></i>
-                        T韙ulo
+                        T铆tulo
                     </label>
-                    <input type="text" name="Title" class="form-control" placeholder="Nombre de tu canci髇" required />
+                    <input type="text" name="Title" class="form-control" placeholder="Nombre de tu canci贸n" required />
                 </div>
 
                 <div class="form-group">
@@ -56,7 +56,7 @@
                     </label>
                     <select name="Type" class="form-control" required>
                         <option value="">Selecciona el tipo</option>
-                        <option value="Canci髇">Canci髇</option>
+                        <option value="Canci贸n">Canci贸n</option>
                         <option value="Podcast">Podcast</option>
                         <option value="Instrumental">Instrumental</option>
                         <option value="Cover">Cover</option>
@@ -76,12 +76,26 @@
                         <i class="fas fa-cloud-upload-alt"></i>
                         <p>Haz clic para seleccionar un archivo de audio</p>
                         <small>Formatos: MP3, WAV, OGG, FLAC, AAC, M4A</small>
-                        <small>Tama駉 m醲imo: 50 MB</small>
+                        <small>Tama帽o m谩ximo: 50 MB</small>
                     </div>
                 </div>
             </div>
 
             <input type="hidden" name="ArtistId" value="@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value" />
+
+            <!-- Aceptaci贸n de t茅rminos de derechos de autor -->
+            <div class="form-group terms-group">
+                <label class="terms-check">
+                    <input type="checkbox" name="AcceptTerms" id="AcceptTerms" required />
+                    <span class="terms-text">
+                        <i class="fas fa-shield-alt me-1"></i>
+                        Declaro que soy el titular de los derechos de autor de esta obra (o cuento con autorizaci贸n)
+                        y acepto los
+                        <a href="#" id="openTerms" class="terms-link">T茅rminos de Derechos de Autor y Condiciones</a>
+                        de UniSound.
+                    </span>
+                </label>
+            </div>
 
             <div class="form-actions">
                 <button type="submit" class="btn btn-upload">
@@ -94,6 +108,31 @@
                 </a>
             </div>
         }
+
+        <!-- Modal de T茅rminos de Derechos de Autor -->
+        <div id="termsModal" class="terms-modal" aria-hidden="true">
+            <div class="terms-modal-overlay" data-close-terms></div>
+            <div class="terms-modal-box" role="dialog" aria-modal="true" aria-labelledby="termsModalTitle">
+                <div class="terms-modal-header">
+                    <h3 id="termsModalTitle"><i class="fas fa-scroll me-2"></i>T茅rminos de Derechos de Autor</h3>
+                    <button type="button" class="terms-modal-close" data-close-terms aria-label="Cerrar">&times;</button>
+                </div>
+                <div class="terms-modal-body">
+                    <p>Al subir contenido a <strong>UniSound</strong>, declaras y garantizas que:</p>
+                    <ol>
+                        <li>Eres el autor y/o titular leg铆timo de los derechos de autor de la obra, o cuentas con autorizaci贸n expresa de sus titulares.</li>
+                        <li>El contenido no infringe derechos de propiedad intelectual, marcas registradas ni derechos de terceros.</li>
+                        <li>Otorgas a UniSound una licencia no exclusiva para almacenar, reproducir y poner tu contenido a disposici贸n de los usuarios dentro de la plataforma.</li>
+                        <li>Eres el 煤nico responsable de cualquier reclamaci贸n relacionada con la titularidad o el uso de la obra.</li>
+                        <li>UniSound podr谩 retirar cualquier contenido que infrinja estos t茅rminos o la legislaci贸n aplicable.</li>
+                    </ol>
+                    <p>Al marcar la casilla y subir tu canci贸n, aceptas estos t茅rminos y las condiciones generales de la aplicaci贸n.</p>
+                </div>
+                <div class="terms-modal-footer">
+                    <button type="button" class="btn btn-upload" data-close-terms>Entendido</button>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -120,7 +159,7 @@
         position: relative;
     }
 
-    /*  Estilos para barra de navegaci髇 */
+    /*  Estilos para barra de navegaci贸n */
     .navigation-bar {
         position: absolute;
         top: 0;
@@ -365,6 +404,132 @@
         font-family: "Font Awesome 5 Free" !important;
         font-weight: 900 !important;
     }
+
+    /* Aceptaci贸n de t茅rminos */
+    .terms-group {
+        background: var(--us-surface);
+        border: 1px solid var(--us-border);
+        border-radius: 8px;
+        padding: 1rem 1.25rem;
+    }
+
+    .terms-check {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        cursor: pointer;
+        margin: 0;
+    }
+
+    .terms-check input[type="checkbox"] {
+        margin-top: 0.2rem;
+        width: 18px;
+        height: 18px;
+        accent-color: #c8102e;
+        flex-shrink: 0;
+        cursor: pointer;
+    }
+
+    .terms-text {
+        color: var(--us-ink-soft);
+        font-size: 0.92rem;
+        line-height: 1.5;
+    }
+
+    .terms-text i { color: #c8102e; }
+
+    .terms-link {
+        color: #c8102e;
+        font-weight: 600;
+        text-decoration: underline;
+        cursor: pointer;
+    }
+
+    .terms-link:hover { color: #a30d25; }
+
+    /* Modal de t茅rminos */
+    .terms-modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    .terms-modal.open { display: flex; }
+
+    .terms-modal-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.6);
+    }
+
+    .terms-modal-box {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        max-width: 560px;
+        max-height: 85vh;
+        overflow-y: auto;
+        background: var(--us-surface-alt);
+        border: 1px solid var(--us-border);
+        border-radius: 12px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+
+    .terms-modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--us-border);
+    }
+
+    .terms-modal-header h3 {
+        margin: 0;
+        color: var(--us-ink);
+        font-size: 1.25rem;
+    }
+
+    .terms-modal-header h3 i { color: #c8102e; }
+
+    .terms-modal-close {
+        background: none;
+        border: none;
+        color: var(--us-ink-soft);
+        font-size: 1.6rem;
+        line-height: 1;
+        cursor: pointer;
+        padding: 0 0.25rem;
+    }
+
+    .terms-modal-close:hover { color: #c8102e; }
+
+    .terms-modal-body {
+        padding: 1.25rem 1.5rem;
+        color: var(--us-ink-soft);
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+
+    .terms-modal-body ol {
+        padding-left: 1.25rem;
+        margin: 0.75rem 0;
+    }
+
+    .terms-modal-body li { margin-bottom: 0.6rem; }
+
+    .terms-modal-body strong { color: var(--us-ink); }
+
+    .terms-modal-footer {
+        padding: 1rem 1.5rem 1.5rem;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .terms-modal-footer .btn { min-width: 140px; }
 </style>
 
 <!-- FontAwesome -->
@@ -385,7 +550,7 @@
                     placeholder.innerHTML = `
                         <i class="fas fa-file-audio"></i>
                         <p style="color: #c8102e; font-weight: 600;">${fileName}</p>
-                        <small style="color: #c8102e;">Tama駉: ${fileSize}</small>
+                        <small style="color: #c8102e;">Tama帽o: ${fileSize}</small>
                         <small style="color: var(--us-ink-soft);">Haz clic para cambiar el archivo</small>
                     `;
                     fileUploadArea.style.borderColor = '#c8102e';
@@ -395,7 +560,7 @@
                         <i class="fas fa-cloud-upload-alt"></i>
                         <p>Haz clic para seleccionar un archivo de audio</p>
                         <small>Formatos: MP3, WAV, OGG, FLAC, AAC, M4A</small>
-                        <small>Tama駉 m醲imo: 50 MB</small>
+                        <small>Tama帽o m谩ximo: 50 MB</small>
                     `;
                     fileUploadArea.style.borderColor = 'var(--us-border)';
                     fileUploadArea.style.background = 'var(--us-surface)';
@@ -427,7 +592,7 @@
             });
         }
 
-        // Validaci髇 del formulario
+        // Validaci贸n del formulario
         const form = document.querySelector('.upload-form');
         if (form) {
             form.addEventListener('submit', function(e) {
@@ -443,7 +608,7 @@
 
                 if (!titleInput.value.trim()) {
                     e.preventDefault();
-                    alert('Por favor ingresa un t韙ulo para tu contenido');
+                    alert('Por favor ingresa un t铆tulo para tu contenido');
                     titleInput.focus();
                     return;
                 }
@@ -455,10 +620,36 @@
                     return;
                 }
 
+                const acceptTerms = form.querySelector('#AcceptTerms');
+                if (acceptTerms && !acceptTerms.checked) {
+                    e.preventDefault();
+                    alert('Debes aceptar los T茅rminos de Derechos de Autor para subir tu canci贸n');
+                    acceptTerms.focus();
+                    return;
+                }
+
                 // Mostrar indicador de carga
                 const submitBtn = form.querySelector('.btn-upload');
                 submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Subiendo...';
                 submitBtn.disabled = true;
+            });
+        }
+
+        // Modal de t茅rminos de derechos de autor
+        const openTerms = document.getElementById('openTerms');
+        const termsModal = document.getElementById('termsModal');
+        if (openTerms && termsModal) {
+            openTerms.addEventListener('click', function(e) {
+                e.preventDefault();
+                termsModal.classList.add('open');
+            });
+            termsModal.querySelectorAll('[data-close-terms]').forEach(function(el) {
+                el.addEventListener('click', function() {
+                    termsModal.classList.remove('open');
+                });
+            });
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') termsModal.classList.remove('open');
             });
         }
     });

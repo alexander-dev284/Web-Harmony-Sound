@@ -39,7 +39,7 @@ body {
     z-index: 1;
 }
 
-/* BotÛn de logout elegante */
+/* Bot√≥n de logout elegante */
 .logout-section {
     position: absolute;
     top: 2rem;
@@ -194,7 +194,7 @@ body {
     align-items: center;
 }
 
-/* Acciones r·pidas */
+/* Acciones r√°pidas */
 .quick-actions-section {
     margin-bottom: 4rem;
 }
@@ -283,7 +283,7 @@ body {
     color: #1db954;
 }
 
-/* GestiÛn de contenido */
+/* Gesti√≥n de contenido */
 .content-management-section {
     margin-bottom: 4rem;
 }
@@ -383,7 +383,7 @@ body {
     transform: scale(1.1);
 }
 
-/* EstadÌsticas */
+/* Estad√≠sticas */
 .stats-section {
     margin-bottom: 4rem;
 }

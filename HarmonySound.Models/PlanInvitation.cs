@@ -8,7 +8,7 @@ namespace HarmonySound.Models
         public int Id { get; set; }
         
         [Required]
-        public int InviterId { get; set; } // Usuario que envía la invitación
+        public int InviterId { get; set; } // Usuario que envÃ­a la invitaciÃ³n
         public User Inviter { get; set; }
         
         [Required]
@@ -23,7 +23,7 @@ namespace HarmonySound.Models
         public Plan Plan { get; set; }
         
         [Required]
-        public string InvitationToken { get; set; } // Token único para la invitación
+        public string InvitationToken { get; set; } // Token Ãºnico para la invitaciÃ³n
         
         public DateTimeOffset InvitedDate { get; set; }
         public DateTimeOffset? AcceptedDate { get; set; }

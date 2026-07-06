@@ -56,7 +56,7 @@ namespace HarmonySound.API
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "HarmonySound API", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "UniSound API", Version = "v1" });
                 
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
