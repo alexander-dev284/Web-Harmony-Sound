@@ -29,6 +29,14 @@
             this.adNotification = null;
             this.adCountdownInterval = null;
 
+            // Anuncios: se reproduce uno cada N canciones (usuarios no premium)
+            this.adEvery = (window.harmonyConfig && window.harmonyConfig.adEvery) || 5;
+            this.songsPlayedCount = 0;
+
+            // Persistencia del reproductor entre vistas
+            this.STORAGE_KEY = 'harmonyPlayerState';
+            this._lastSave = 0;
+
             // Selectores - detecta automáticamente el tipo de fila en la vista
             this.ROW_SEL = '.track-row, .song-item';
             this.PLAY_SEL = '.play-track-btn, .play-in-player-btn';
@@ -54,6 +62,97 @@
             } catch (e) {
                 console.warn('HarmonyPlayer init error:', e);
             }
+
+            // Reanudar el estado guardado al cambiar de vista
+            this._restoreState();
+        }
+
+        // ── Persistencia entre vistas (localStorage) ───────────────────────
+
+        _saveState() {
+            try {
+                if (!this.currentTrack || !this.currentTrack.url) return;
+                const state = {
+                    currentTrack: this.currentTrack,
+                    playlist: this.playlist,
+                    currentTrackIndex: this.currentTrackIndex,
+                    currentTime: (this.isPlayingAd || !this.audio) ? 0 : (this.audio.currentTime || 0),
+                    isPlaying: this.isPlaying,
+                    volume: this.volume,
+                    isLooping: this.isLooping,
+                    isShuffling: this.isShuffling,
+                    songsPlayedCount: this.songsPlayedCount,
+                    savedAt: Date.now()
+                };
+                localStorage.setItem(this.STORAGE_KEY, JSON.stringify(state));
+            } catch (e) { /* almacenamiento no disponible */ }
+        }
+
+        _restoreState() {
+            let state = null;
+            try { state = JSON.parse(localStorage.getItem(this.STORAGE_KEY)); } catch { return; }
+            if (!state || !state.currentTrack || !state.currentTrack.url) return;
+            // Ignorar estados con más de 6 horas
+            if (state.savedAt && (Date.now() - state.savedAt) > 6 * 60 * 60 * 1000) return;
+
+            // Restaurar la cola guardada (para siguiente/anterior entre vistas)
+            if (Array.isArray(state.playlist) && state.playlist.length) {
+                this.playlist = state.playlist;
+                this.originalPlaylist = state.playlist.map(t => ({ ...t }));
+            }
+            this.currentTrack = state.currentTrack;
+            this.currentTrackIndex = state.currentTrackIndex || 0;
+            this.isLooping = !!state.isLooping;
+            this.isShuffling = !!state.isShuffling;
+            this.songsPlayedCount = state.songsPlayedCount || 0;
+            if (typeof state.volume === 'number') this.setVolume(state.volume);
+
+            // Restaurar la interfaz del reproductor
+            if (this.trackTitleEl)  this.trackTitleEl.textContent  = this.currentTrack.title;
+            if (this.trackArtistEl) this.trackArtistEl.textContent = this.currentTrack.artist;
+            this.playerEl?.classList.remove('d-none');
+            document.getElementById('repeat-btn')?.classList.toggle('active', this.isLooping);
+            document.getElementById('shuffle-btn')?.classList.toggle('active', this.isShuffling);
+            this._updateListUI(this.currentTrack.id);
+            this._updatePlayerHeart();
+
+            // Cargar el audio y reanudar desde la posición guardada
+            const resumeTime = state.currentTime || 0;
+            const wasPlaying = !!state.isPlaying;
+
+            const onLoaded = async () => {
+                this.audio.removeEventListener('loadedmetadata', onLoaded);
+                try {
+                    if (resumeTime > 0 && resumeTime < (this.audio.duration || Infinity)) {
+                        this.audio.currentTime = resumeTime;
+                    }
+                } catch (e) {}
+                this._updateProgress();
+                if (this.currentTimeEl) this.currentTimeEl.textContent = this._fmt(this.audio.currentTime);
+
+                if (wasPlaying) {
+                    try {
+                        await this.audio.play();
+                        this.isPlaying = true;
+                        this._refreshPlayBtn();
+                    } catch (e) {
+                        // Autoplay bloqueado: reanudar en el primer clic del usuario
+                        this.isPlaying = false;
+                        this._refreshPlayBtn();
+                        const resumeOnGesture = () => {
+                            document.removeEventListener('click', resumeOnGesture);
+                            this.audio.play()
+                                .then(() => { this.isPlaying = true; this._refreshPlayBtn(); })
+                                .catch(() => {});
+                        };
+                        document.addEventListener('click', resumeOnGesture, { once: true });
+                    }
+                }
+            };
+            this.audio.addEventListener('loadedmetadata', onLoaded);
+            this.audio.src = this.currentTrack.url;
+            this.audio.load();
+            this._refreshPlayBtn();
         }
 
         _createAudioEl() {
@@ -179,6 +278,10 @@
 
             this._setupProgressBar();
             this._setupVolumeControl();
+
+            // Guardar el estado al salir de la vista para reanudar en la siguiente
+            window.addEventListener('pagehide', () => this._saveState());
+            window.addEventListener('beforeunload', () => this._saveState());
         }
 
         // ── Reproducción ───────────────────────────────────────────────────
@@ -203,7 +306,13 @@
                 if (this.isPremiumUser) {
                     await this._playDirect(track);
                 } else {
-                    await this._playWithAd(track);
+                    // Un anuncio cada N canciones; el resto se reproducen directo
+                    this.songsPlayedCount++;
+                    if (this.songsPlayedCount % this.adEvery === 0) {
+                        await this._playWithAd(track);
+                    } else {
+                        await this._playDirect(track);
+                    }
                 }
             } catch (err) {
                 console.error('Error reproduciendo:', err);
@@ -286,6 +395,7 @@
                     this.isPlaying = false;
                 }
                 this._refreshPlayBtn();
+                this._saveState();
             } catch (e) {
                 this.isPlaying = false;
                 this._refreshPlayBtn();
@@ -520,6 +630,9 @@
             if (this.isProgressDragging || !this.audio?.duration) return;
             this._updateProgress();
             if (this.currentTimeEl) this.currentTimeEl.textContent = this._fmt(this.audio.currentTime);
+            // Guardar posición periódicamente para reanudar entre vistas
+            const now = Date.now();
+            if (now - this._lastSave > 2000) { this._lastSave = now; this._saveState(); }
         }
 
         _updateProgress() {
