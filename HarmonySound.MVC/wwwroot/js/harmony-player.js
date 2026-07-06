@@ -347,7 +347,7 @@
             if (liked) {
                 btn.classList.add('liked');
                 if (icon) icon.className = 'fas fa-heart';
-                btn.title = 'Quitar de favoritos';
+                btn.title = 'Quitar de Mis me gustas';
             } else {
                 btn.classList.remove('liked');
                 if (icon) icon.className = 'far fa-heart';
@@ -383,9 +383,9 @@
                     else          this.likedContentIds.delete(contentId);
                     this._setLikeBtnState(btn, wasLiked);
                     this._updatePlayerHeart();
-                    this.showToast('No se pudo actualizar el favorito', 'error');
+                    this.showToast('No se pudo actualizar tu me gusta', 'error');
                 } else {
-                    const msg = data.action === 'added' ? '¡Agregado a favoritos!' : 'Removido de favoritos';
+                    const msg = data.action === 'added' ? '¡Agregado a Mis me gustas!' : 'Removido de Mis me gustas';
                     this.showToast(msg, data.action === 'added' ? 'success' : 'info');
                 }
             } catch {
@@ -394,7 +394,7 @@
                 else          this.likedContentIds.delete(contentId);
                 this._setLikeBtnState(btn, wasLiked);
                 this._updatePlayerHeart();
-                this.showToast('Error de conexión al actualizar favorito', 'error');
+                this.showToast('Error de conexión al actualizar tu me gusta', 'error');
             } finally {
                 btn.disabled = false;
             }

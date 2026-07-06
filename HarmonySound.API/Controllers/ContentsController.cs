@@ -414,13 +414,13 @@ namespace HarmonySound.API.Controllers
         {
             // Buscar o crear playlist de favoritos
             var favoritesPlaylist = await _context.Playlist
-                .FirstOrDefaultAsync(p => p.UserId == userId && p.Name == "Favoritos");
+                .FirstOrDefaultAsync(p => p.UserId == userId && p.Name == "Mis me gustas");
 
             if (favoritesPlaylist == null)
             {
                 favoritesPlaylist = new Playlist
                 {
-                    Name = "Favoritos",
+                    Name = "Mis me gustas",
                     UserId = userId
                 };
                 _context.Playlist.Add(favoritesPlaylist);
@@ -446,7 +446,7 @@ namespace HarmonySound.API.Controllers
         private async Task RemoveFromFavoritesPlaylist(int userId, int contentId)
         {
             var favoritesPlaylist = await _context.Playlist
-                .FirstOrDefaultAsync(p => p.UserId == userId && p.Name == "Favoritos");
+                .FirstOrDefaultAsync(p => p.UserId == userId && p.Name == "Mis me gustas");
 
             if (favoritesPlaylist != null)
             {

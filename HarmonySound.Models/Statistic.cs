@@ -12,6 +12,7 @@ namespace HarmonySound.Models
 
         public int Reproductions { get; set; }
 
+        [Display(Name = "Me gusta")]
         public int Likes { get; set; }
 
         public int Comments { get; set; }

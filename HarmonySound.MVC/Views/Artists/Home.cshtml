@@ -202,7 +202,7 @@
                         <i class="fas fa-heart"></i>
                     </div>
                     <div class="stat-info">
-                        <h4>Likes Totales</h4>
+                        <h4>Me gusta totales</h4>
                         <span class="stat-number" id="total-likes">--</span>
                     </div>
                 </div>
@@ -238,13 +238,13 @@
 
             <div class="performance-grid">
                 <div class="performance-panel">
-                    <h3><i class="fas fa-trophy me-2"></i>Top canciones por likes</h3>
+                    <h3><i class="fas fa-trophy me-2"></i>Top canciones por me gusta</h3>
                     <div id="top-songs-list" class="top-songs-list">
                         <p class="loading-text">Cargando...</p>
                     </div>
                 </div>
                 <div class="performance-panel">
-                    <h3><i class="fas fa-chart-bar me-2"></i>Likes por canción</h3>
+                    <h3><i class="fas fa-chart-bar me-2"></i>Me gusta por canción</h3>
                     <div class="chart-wrapper">
                         <canvas id="topSongsChart"></canvas>
                     </div>
@@ -1088,7 +1088,7 @@
             if (!container) return;
 
             if (!topSongs || topSongs.length === 0) {
-                container.innerHTML = '<p class="empty-text">Aún no tienes canciones con likes.</p>';
+                container.innerHTML = '<p class="empty-text">Aún no tienes canciones con me gusta.</p>';
                 return;
             }
 

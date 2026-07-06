@@ -30,10 +30,10 @@ namespace HarmonySound.API.Controllers
                     .Select(ul => ul.ContentId)
                     .ToListAsync();
 
-                // También obtener canciones de playlist "Favoritos"
+                // También obtener canciones de playlist "Mis me gustas"
                 var favoritesPlaylist = await _context.Playlist
                     .Include(p => p.PlaylistContents)
-                    .FirstOrDefaultAsync(p => p.UserId == userId && p.Name == "Favoritos");
+                    .FirstOrDefaultAsync(p => p.UserId == userId && p.Name == "Mis me gustas");
 
                 var favoritesLikes = new List<int>();
                 if (favoritesPlaylist != null)
@@ -71,7 +71,7 @@ namespace HarmonySound.API.Controllers
                 // También verificar si está en playlist Favoritos
                 var favoritesPlaylist = await _context.Playlist
                     .Include(p => p.PlaylistContents)
-                    .FirstOrDefaultAsync(p => p.UserId == userId && p.Name == "Favoritos");
+                    .FirstOrDefaultAsync(p => p.UserId == userId && p.Name == "Mis me gustas");
 
                 var isInFavorites = favoritesPlaylist?.PlaylistContents
                     ?.Any(pc => pc.ContentId == contentId) ?? false;
@@ -152,13 +152,13 @@ namespace HarmonySound.API.Controllers
             {
                 // Buscar o crear playlist de favoritos
                 var favoritesPlaylist = await _context.Playlist
-                    .FirstOrDefaultAsync(p => p.UserId == userId && p.Name == "Favoritos");
+                    .FirstOrDefaultAsync(p => p.UserId == userId && p.Name == "Mis me gustas");
 
                 if (favoritesPlaylist == null)
                 {
                     favoritesPlaylist = new Playlist
                     {
-                        Name = "Favoritos",
+                        Name = "Mis me gustas",
                         UserId = userId,
                         ImageUrl = null // Se puede agregar una imagen predeterminada si se desea
                     };
@@ -194,7 +194,7 @@ namespace HarmonySound.API.Controllers
             {
                 // Buscar playlist de favoritos
                 var favoritesPlaylist = await _context.Playlist
-                    .FirstOrDefaultAsync(p => p.UserId == userId && p.Name == "Favoritos");
+                    .FirstOrDefaultAsync(p => p.UserId == userId && p.Name == "Mis me gustas");
 
                 if (favoritesPlaylist != null)
                 {
