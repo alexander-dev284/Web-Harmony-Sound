@@ -54,7 +54,7 @@ namespace HarmonySound.MVC.Controllers
                         return View(model);
                     }
 
-                    var response = await client.PostAsync("https://localhost:7120/api/Contents/upload", form);
+                    var response = await client.PostAsync($"{ApiConfig.BaseUrl}/api/Contents/upload", form);
 
                     if (!response.IsSuccessStatusCode)
                     {

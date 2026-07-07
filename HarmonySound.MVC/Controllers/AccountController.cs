@@ -45,7 +45,7 @@ namespace HarmonySound.MVC.Controllers
                 using (var client = new HttpClient())
                 {
                     var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-                    var response = await client.PostAsync("https://localhost:7120/api/Auth/Login", content);
+                    var response = await client.PostAsync($"{ApiConfig.BaseUrl}/api/Auth/Login", content);
 
                     if (!response.IsSuccessStatusCode)
                     {
@@ -81,7 +81,7 @@ namespace HarmonySound.MVC.Controllers
                     if (userIdClaim != null && int.TryParse(userIdClaim.Value, out int userId))
                     {
                         // Estado del usuario en la API
-                        var userStatusResponse = await client.GetAsync($"https://localhost:7120/api/Users/{userId}");
+                        var userStatusResponse = await client.GetAsync($"{ApiConfig.BaseUrl}/api/Users/{userId}");
                         if (userStatusResponse.IsSuccessStatusCode)
                         {
                             var userStatusJson = await userStatusResponse.Content.ReadAsStringAsync();
@@ -211,7 +211,7 @@ namespace HarmonySound.MVC.Controllers
                     var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
                     Console.WriteLine("Llamando a API admin-login...");
 
-                    var response = await client.PostAsync("https://localhost:7120/api/Auth/admin-login", content);
+                    var response = await client.PostAsync($"{ApiConfig.BaseUrl}/api/Auth/admin-login", content);
                     Console.WriteLine($"Respuesta API: {response.StatusCode}");
 
                     if (!response.IsSuccessStatusCode)
@@ -256,7 +256,7 @@ namespace HarmonySound.MVC.Controllers
                     var twoFactorContent = new StringContent(twoFactorJson, System.Text.Encoding.UTF8, "application/json");
 
                     Console.WriteLine("Llamando a generate-2fa-code...");
-                    var twoFactorResponse = await client.PostAsync("https://localhost:7120/api/Auth/generate-2fa-code", twoFactorContent);
+                    var twoFactorResponse = await client.PostAsync($"{ApiConfig.BaseUrl}/api/Auth/generate-2fa-code", twoFactorContent);
                     Console.WriteLine($"Respuesta 2FA: {twoFactorResponse.StatusCode}");
 
                     if (!twoFactorResponse.IsSuccessStatusCode)
@@ -375,7 +375,7 @@ namespace HarmonySound.MVC.Controllers
                 using (var client = new HttpClient())
                 {
                     Console.WriteLine("Llamando a verify-2fa-code...");
-                    var response = await client.PostAsync("https://localhost:7120/api/Auth/verify-2fa-code", content);
+                    var response = await client.PostAsync($"{ApiConfig.BaseUrl}/api/Auth/verify-2fa-code", content);
                     Console.WriteLine($"Respuesta verificación: {response.StatusCode}");
 
                     if (!response.IsSuccessStatusCode)
@@ -510,7 +510,7 @@ namespace HarmonySound.MVC.Controllers
                 using (var client = new HttpClient())
                 {
                     var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-                    var response = await client.PostAsync("https://localhost:7120/api/Auth/Register", content);
+                    var response = await client.PostAsync($"{ApiConfig.BaseUrl}/api/Auth/Register", content);
 
                     var errorContent = await response.Content.ReadAsStringAsync();
 
@@ -524,7 +524,7 @@ namespace HarmonySound.MVC.Controllers
                             {
                                 var acceptPayload = JsonConvert.SerializeObject(new { Token = model.InvitationToken });
                                 var acceptContent = new StringContent(acceptPayload, System.Text.Encoding.UTF8, "application/json");
-                                var acceptResponse = await client.PostAsync("https://localhost:7120/api/PlanInvitations/accept", acceptContent);
+                                var acceptResponse = await client.PostAsync($"{ApiConfig.BaseUrl}/api/PlanInvitations/accept", acceptContent);
 
                                 TempData[acceptResponse.IsSuccessStatusCode ? "Success" : "Info"] =
                                     acceptResponse.IsSuccessStatusCode
@@ -563,7 +563,7 @@ namespace HarmonySound.MVC.Controllers
             {
                 using (var client = new HttpClient())
                 {
-                    var response = await client.GetAsync("https://localhost:7120/api/Roles");
+                    var response = await client.GetAsync($"{ApiConfig.BaseUrl}/api/Roles");
                     if (response.IsSuccessStatusCode)
                     {
                         var content = await response.Content.ReadAsStringAsync();
@@ -732,7 +732,7 @@ namespace HarmonySound.MVC.Controllers
                 using (var client = new HttpClient())
                 {
                     var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-                    var response = await client.PostAsync("https://localhost:7120/api/Auth/forgot-password", content);
+                    var response = await client.PostAsync($"{ApiConfig.BaseUrl}/api/Auth/forgot-password", content);
 
                     if (response.IsSuccessStatusCode)
                     {
@@ -795,7 +795,7 @@ namespace HarmonySound.MVC.Controllers
                 using (var client = new HttpClient())
                 {
                     // Usar el endpoint de usuarios para buscar por email
-                    var response = await client.GetAsync($"https://localhost:7120/api/Users");
+                    var response = await client.GetAsync($"{ApiConfig.BaseUrl}/api/Users");
                     if (response.IsSuccessStatusCode)
                     {
                         var usersJson = await response.Content.ReadAsStringAsync();
@@ -845,7 +845,7 @@ namespace HarmonySound.MVC.Controllers
                 using (var client = new HttpClient())
                 {
                     var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-                    var response = await client.PostAsync("https://localhost:7120/api/Auth/reset-password", content);
+                    var response = await client.PostAsync($"{ApiConfig.BaseUrl}/api/Auth/reset-password", content);
 
                     if (response.IsSuccessStatusCode)
                     {

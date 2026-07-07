@@ -43,7 +43,7 @@ namespace HarmonySound.MVC.Controllers
             try
             {
                 // endpoint con roles
-                var response = await _httpClient.GetAsync("https://localhost:7120/api/Users/with-roles");
+                var response = await _httpClient.GetAsync($"{ApiConfig.BaseUrl}/api/Users/with-roles");
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();
@@ -66,7 +66,7 @@ namespace HarmonySound.MVC.Controllers
         {
             try
             {
-                var response = await _httpClient.GetAsync("https://localhost:7120/api/Contents/with-artists");
+                var response = await _httpClient.GetAsync($"{ApiConfig.BaseUrl}/api/Contents/with-artists");
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();
@@ -88,7 +88,7 @@ namespace HarmonySound.MVC.Controllers
         {
             try
             {
-                var response = await _httpClient.GetAsync("https://localhost:7120/api/UserRoles");
+                var response = await _httpClient.GetAsync($"{ApiConfig.BaseUrl}/api/UserRoles");
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();
@@ -96,7 +96,7 @@ namespace HarmonySound.MVC.Controllers
                         new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                     
                     // Obtener todos los roles disponibles
-                    var rolesResponse = await _httpClient.GetAsync("https://localhost:7120/api/Roles");
+                    var rolesResponse = await _httpClient.GetAsync($"{ApiConfig.BaseUrl}/api/Roles");
                     var allRoles = new List<string>();
                     if (rolesResponse.IsSuccessStatusCode)
                     {
@@ -127,7 +127,7 @@ namespace HarmonySound.MVC.Controllers
                 var json = JsonSerializer.Serialize(assignRequest);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
                 
-                var response = await _httpClient.PostAsync("https://localhost:7120/api/UserRoles/assign", content);
+                var response = await _httpClient.PostAsync($"{ApiConfig.BaseUrl}/api/UserRoles/assign", content);
                 
                 if (response.IsSuccessStatusCode)
                 {
@@ -156,7 +156,7 @@ namespace HarmonySound.MVC.Controllers
                 var json = JsonSerializer.Serialize(removeRequest);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
                 
-                var response = await _httpClient.PostAsync("https://localhost:7120/api/UserRoles/remove", content);
+                var response = await _httpClient.PostAsync($"{ApiConfig.BaseUrl}/api/UserRoles/remove", content);
                 
                 if (response.IsSuccessStatusCode)
                 {
@@ -198,7 +198,7 @@ namespace HarmonySound.MVC.Controllers
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
                 
                 // Usar endpoint específico en lugar de genérico
-                var endpoint = $"https://localhost:7120/api/Users/{userId}/toggle-status";
+                var endpoint = $"{ApiConfig.BaseUrl}/api/Users/{userId}/toggle-status";
                 
                 _logger.LogInformation($"Llamando a API: {endpoint}");
                 
@@ -246,7 +246,7 @@ namespace HarmonySound.MVC.Controllers
         {
             try
             {
-                var response = await _httpClient.DeleteAsync($"https://localhost:7120/api/Contents/{contentId}");
+                var response = await _httpClient.DeleteAsync($"{ApiConfig.BaseUrl}/api/Contents/{contentId}");
                 if (response.IsSuccessStatusCode)
                 {
                     TempData["Success"] = "Contenido eliminado correctamente";
@@ -276,7 +276,7 @@ namespace HarmonySound.MVC.Controllers
             try
             {
                 // Usuarios con roles
-                var usersResponse = await _httpClient.GetAsync("https://localhost:7120/api/Users/with-roles");
+                var usersResponse = await _httpClient.GetAsync($"{ApiConfig.BaseUrl}/api/Users/with-roles");
                 if (usersResponse.IsSuccessStatusCode)
                 {
                     var usersJson = await usersResponse.Content.ReadAsStringAsync();
@@ -305,7 +305,7 @@ namespace HarmonySound.MVC.Controllers
                 }
 
                 // Contenido con conteo de likes (usamos el endpoint de populares con un tope alto)
-                var contentsResponse = await _httpClient.GetAsync("https://localhost:7120/api/Contents/popular?count=10000");
+                var contentsResponse = await _httpClient.GetAsync($"{ApiConfig.BaseUrl}/api/Contents/popular?count=10000");
                 if (contentsResponse.IsSuccessStatusCode)
                 {
                     var contentsJson = await contentsResponse.Content.ReadAsStringAsync();
@@ -330,7 +330,7 @@ namespace HarmonySound.MVC.Controllers
                 }
 
                 // Álbumes
-                var albumsResponse = await _httpClient.GetAsync("https://localhost:7120/api/Albums");
+                var albumsResponse = await _httpClient.GetAsync($"{ApiConfig.BaseUrl}/api/Albums");
                 if (albumsResponse.IsSuccessStatusCode)
                 {
                     var albumsJson = await albumsResponse.Content.ReadAsStringAsync();
@@ -341,7 +341,7 @@ namespace HarmonySound.MVC.Controllers
                 }
 
                 // Ranking de artistas más seguidos
-                var topArtistsResponse = await _httpClient.GetAsync("https://localhost:7120/api/Follows/top-artists?count=5");
+                var topArtistsResponse = await _httpClient.GetAsync($"{ApiConfig.BaseUrl}/api/Follows/top-artists?count=5");
                 if (topArtistsResponse.IsSuccessStatusCode)
                 {
                     var topArtistsJson = await topArtistsResponse.Content.ReadAsStringAsync();
@@ -352,7 +352,7 @@ namespace HarmonySound.MVC.Controllers
                 }
 
                 // Suscripciones activas
-                var subscriptionsResponse = await _httpClient.GetAsync("https://localhost:7120/api/UserPlans");
+                var subscriptionsResponse = await _httpClient.GetAsync($"{ApiConfig.BaseUrl}/api/UserPlans");
                 if (subscriptionsResponse.IsSuccessStatusCode)
                 {
                     var subscriptionsJson = await subscriptionsResponse.Content.ReadAsStringAsync();

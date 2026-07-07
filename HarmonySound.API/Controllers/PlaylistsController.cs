@@ -1,6 +1,5 @@
-﻿using Azure.Storage.Blobs;
-using Azure.Storage.Blobs.Models;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using HarmonySound.API.Services;
 using Microsoft.EntityFrameworkCore;
 using HarmonySound.Models;
 using HarmonySound.API.DTOs;
@@ -14,11 +13,13 @@ namespace HarmonySound.API.Controllers
         private readonly HarmonySoundDbContext _context;
         // Agrega el campo privado para IConfiguration
         private readonly IConfiguration _configuration;
+        private readonly IStorageService _storage;
 
-        public PlaylistsController(HarmonySoundDbContext context, IConfiguration configuration)
+        public PlaylistsController(HarmonySoundDbContext context, IConfiguration configuration, IStorageService storage)
         {
             _context = context;
             _configuration = configuration;
+            _storage = storage;
         }
 
         // GET: api/Playlists
@@ -404,18 +405,6 @@ namespace HarmonySound.API.Controllers
                 if (!allowedExtensions.Contains(extension))
                     throw new Exception("Solo se permiten imágenes: .jpg, .jpeg, .png, .gif, .webp");
 
-                // USAR CONTENEDOR COMPARTIDO PARA IMÁGENES DE CONTENIDO
-                var blobConnectionString = _configuration["AzureBlobStorage:ConnectionString"];
-                var blobContainerName = _configuration["AzureBlobStorage:ContentImagesContainer"];
-
-                var blobServiceClient = new BlobServiceClient(blobConnectionString);
-                var containerClient = blobServiceClient.GetBlobContainerClient(blobContainerName);
-                await containerClient.CreateIfNotExistsAsync(PublicAccessType.Blob);
-
-                // MANTENER CARPETAS PARA ORGANIZACIÓN: playlists/ y albums/
-                var uniqueFileName = $"{containerFolder}/{Guid.NewGuid()}{extension}";
-                var blobClient = containerClient.GetBlobClient(uniqueFileName);
-
                 // Configurar tipo MIME correcto
                 string contentType = imageFile.ContentType;
                 if (extension == ".jpg" || extension == ".jpeg") contentType = "image/jpeg";
@@ -423,12 +412,12 @@ namespace HarmonySound.API.Controllers
                 else if (extension == ".gif") contentType = "image/gif";
                 else if (extension == ".webp") contentType = "image/webp";
 
+                // Subir al almacenamiento, manteniendo la organización por carpetas (albums/, playlists/)
+                var uniqueFileName = $"{Guid.NewGuid()}{extension}";
                 using (var stream = imageFile.OpenReadStream())
                 {
-                    await blobClient.UploadAsync(stream, new BlobHttpHeaders { ContentType = contentType });
+                    return await _storage.UploadAsync(stream, uniqueFileName, contentType, $"content-images/{containerFolder}");
                 }
-
-                return blobClient.Uri.ToString();
             }
             catch (Exception ex)
             {
@@ -441,20 +430,7 @@ namespace HarmonySound.API.Controllers
         {
             try
             {
-                // Extraer nombre del archivo de la URL
-                var fileName = Path.GetFileName(imageUrl);
-
-                // USAR CONTENEDOR COMPARTIDO PARA IMÁGENES DE CONTENIDO
-                var blobConnectionString = _configuration["AzureBlobStorage:ConnectionString"];
-                var blobContainerName = _configuration["AzureBlobStorage:ContentImagesContainer"];
-
-                var blobServiceClient = new BlobServiceClient(blobConnectionString);
-                var containerClient = blobServiceClient.GetBlobContainerClient(blobContainerName);
-
-                var blobClient = containerClient.GetBlobClient($"playlists/{fileName}");
-
-                // Eliminar blob
-                await blobClient.DeleteIfExistsAsync();
+                await _storage.DeleteByUrlAsync(imageUrl);
             }
             catch (Exception ex)
             {

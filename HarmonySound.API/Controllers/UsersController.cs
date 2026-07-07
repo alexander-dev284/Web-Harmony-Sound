@@ -3,9 +3,8 @@ using Microsoft.AspNetCore.Identity;
 using HarmonySound.Models;
 using HarmonySound.API.Data;
 using HarmonySound.API.DTOs;
-using Azure.Storage.Blobs;
-using Azure.Storage.Blobs.Models;
 using Microsoft.EntityFrameworkCore;
+using HarmonySound.API.Services;
 
 namespace HarmonySound.API.Controllers
 {
@@ -15,13 +14,15 @@ namespace HarmonySound.API.Controllers
     {
         private readonly UserManager<User> _userManager;
         private readonly IConfiguration _configuration;
-        private readonly HarmonySoundDbContext _context; 
+        private readonly HarmonySoundDbContext _context;
+        private readonly IStorageService _storage;
 
-        public UsersController(UserManager<User> userManager, IConfiguration configuration, HarmonySoundDbContext context)
+        public UsersController(UserManager<User> userManager, IConfiguration configuration, HarmonySoundDbContext context, IStorageService storage)
         {
             _userManager = userManager;
             _configuration = configuration;
-            _context = context; 
+            _context = context;
+            _storage = storage;
         }
 
         // GET: api/Users
@@ -167,47 +168,25 @@ namespace HarmonySound.API.Controllers
                 if (!allowedExtensions.Contains(extension))
                     return BadRequest("Only image files are allowed.");
 
-                var connectionString = _configuration["AzureBlobStorage:ConnectionString"];
-                if (string.IsNullOrEmpty(connectionString))
-                    return StatusCode(500, "Azure Blob Storage connection string is missing.");
-
-                var containerName = "profile-images";
                 var fileName = $"{Guid.NewGuid()}{extension}";
-
-                var blobServiceClient = new BlobServiceClient(connectionString);
-                var containerClient = blobServiceClient.GetBlobContainerClient(containerName);
-                await containerClient.CreateIfNotExistsAsync(PublicAccessType.Blob);
 
                 // Obtener el usuario y la URL anterior
                 var user = await _userManager.FindByIdAsync(model.UserId.ToString());
                 if (user == null)
                     return NotFound();
 
-                var previousImageUrl = user.ProfileImageUrl;
-
-                // Eliminar la imagen anterior si existe y es de Azure 
-                if (!string.IsNullOrEmpty(previousImageUrl) && previousImageUrl.Contains(containerName))
+                // Eliminar la imagen anterior si existe
+                if (!string.IsNullOrEmpty(user.ProfileImageUrl))
                 {
-                    try
-                    {
-                        var previousBlobName = Path.GetFileName(new Uri(previousImageUrl).LocalPath);
-                        var previousBlobClient = containerClient.GetBlobClient(previousBlobName);
-                        await previousBlobClient.DeleteIfExistsAsync();
-                    }
-                    catch
-                    {
-                        // Si falla la eliminación, no interrumpe el flujo
-                    }
+                    await _storage.DeleteByUrlAsync(user.ProfileImageUrl);
                 }
 
                 // Subir la nueva imagen
-                var blobClient = containerClient.GetBlobClient(fileName);
                 using (var stream = model.File.OpenReadStream())
                 {
-                    await blobClient.UploadAsync(stream, new BlobHttpHeaders { ContentType = model.File.ContentType });
+                    user.ProfileImageUrl = await _storage.UploadAsync(stream, fileName, model.File.ContentType, "profile-images");
                 }
 
-                user.ProfileImageUrl = blobClient.Uri.ToString();
                 await _userManager.UpdateAsync(user);
 
                 return Ok(new { ProfileImageUrl = user.ProfileImageUrl });

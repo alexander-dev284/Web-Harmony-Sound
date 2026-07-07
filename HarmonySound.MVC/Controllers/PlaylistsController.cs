@@ -27,7 +27,7 @@ namespace HarmonySound.MVC.Controllers
                 Content selectedContent = null;
                 if (contentId.HasValue)
                 {
-                    var contentResponse = await _httpClient.GetAsync($"https://localhost:7120/api/Contents/{contentId.Value}");
+                    var contentResponse = await _httpClient.GetAsync($"{ApiConfig.BaseUrl}/api/Contents/{contentId.Value}");
                     if (contentResponse.IsSuccessStatusCode)
                     {
                         var contentJson = await contentResponse.Content.ReadAsStringAsync();
@@ -36,7 +36,7 @@ namespace HarmonySound.MVC.Controllers
                 }
                 
                 // Obtener playlists del usuario
-                var playlistsResponse = await _httpClient.GetAsync($"https://localhost:7120/api/Playlists/user/{userId}");
+                var playlistsResponse = await _httpClient.GetAsync($"{ApiConfig.BaseUrl}/api/Playlists/user/{userId}");
                 
                 if (playlistsResponse.IsSuccessStatusCode)
                 {
@@ -92,7 +92,7 @@ namespace HarmonySound.MVC.Controllers
             try
             {
                 var content = new StringContent(contentId.ToString(), Encoding.UTF8, "application/json");
-                var response = await _httpClient.PostAsync($"https://localhost:7120/api/Playlists/{playlistId}/add", content);
+                var response = await _httpClient.PostAsync($"{ApiConfig.BaseUrl}/api/Playlists/{playlistId}/add", content);
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -128,7 +128,7 @@ namespace HarmonySound.MVC.Controllers
                 try
                 {
                     var content = new StringContent(contentId.ToString(), Encoding.UTF8, "application/json");
-                    var response = await _httpClient.PostAsync($"https://localhost:7120/api/Playlists/{playlistId}/add", content);
+                    var response = await _httpClient.PostAsync($"{ApiConfig.BaseUrl}/api/Playlists/{playlistId}/add", content);
                     if (response.IsSuccessStatusCode)
                         added++;
                     else
@@ -177,7 +177,7 @@ namespace HarmonySound.MVC.Controllers
                     content.Add(fileContent, "ImageFile", imageFile.FileName);
                 }
 
-                var response = await _httpClient.PostAsync("https://localhost:7120/api/Playlists", content);
+                var response = await _httpClient.PostAsync($"{ApiConfig.BaseUrl}/api/Playlists", content);
                 
                 if (response.IsSuccessStatusCode)
                 {
@@ -208,7 +208,7 @@ namespace HarmonySound.MVC.Controllers
                 ViewBag.UserId = userId;
                 
                 // Obtener playlist específica
-                var response = await _httpClient.GetAsync($"https://localhost:7120/api/Playlists/user/{userId}");
+                var response = await _httpClient.GetAsync($"{ApiConfig.BaseUrl}/api/Playlists/user/{userId}");
                 
                 if (response.IsSuccessStatusCode)
                 {
@@ -252,7 +252,7 @@ namespace HarmonySound.MVC.Controllers
                     var availableSongs = new List<ContentWithArtistDto>();
                     try
                     {
-                        var contentsResponse = await _httpClient.GetAsync("https://localhost:7120/api/Contents/with-artists");
+                        var contentsResponse = await _httpClient.GetAsync($"{ApiConfig.BaseUrl}/api/Contents/with-artists");
                         if (contentsResponse.IsSuccessStatusCode)
                         {
                             var contentsJson = await contentsResponse.Content.ReadAsStringAsync();
@@ -294,7 +294,7 @@ namespace HarmonySound.MVC.Controllers
                 int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
                 
                 // Obtener playlist específica
-                var response = await _httpClient.GetAsync($"https://localhost:7120/api/Playlists/user/{userId}");
+                var response = await _httpClient.GetAsync($"{ApiConfig.BaseUrl}/api/Playlists/user/{userId}");
                 
                 if (response.IsSuccessStatusCode)
                 {
@@ -384,7 +384,7 @@ namespace HarmonySound.MVC.Controllers
                     content.Add(fileContent, "ImageFile", imageFile.FileName);
                 }
 
-                var response = await _httpClient.PutAsync($"https://localhost:7120/api/Playlists/{id}", content);
+                var response = await _httpClient.PutAsync($"{ApiConfig.BaseUrl}/api/Playlists/{id}", content);
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -413,7 +413,7 @@ namespace HarmonySound.MVC.Controllers
         {
             try
             {
-                var response = await _httpClient.DeleteAsync($"https://localhost:7120/api/Playlists/{id}");
+                var response = await _httpClient.DeleteAsync($"{ApiConfig.BaseUrl}/api/Playlists/{id}");
                 
                 if (response.IsSuccessStatusCode)
                 {
@@ -440,7 +440,7 @@ namespace HarmonySound.MVC.Controllers
             try
             {
                 // Crear endpoint para remover canción de playlist en la API
-                var response = await _httpClient.DeleteAsync($"https://localhost:7120/api/Playlists/{playlistId}/remove/{contentId}");
+                var response = await _httpClient.DeleteAsync($"{ApiConfig.BaseUrl}/api/Playlists/{playlistId}/remove/{contentId}");
                 
                 if (response.IsSuccessStatusCode)
                 {

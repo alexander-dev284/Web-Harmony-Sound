@@ -31,14 +31,14 @@ namespace HarmonySound.MVC.Controllers
                 Console.WriteLine($"Obteniendo estadísticas para artista ID: {artistId}");
 
                 // Obtener total de canciones del artista
-                var songsResponse = await _httpClient.GetAsync("https://localhost:7120/api/Contents");
+                var songsResponse = await _httpClient.GetAsync($"{ApiConfig.BaseUrl}/api/Contents");
                 var songsJson = await songsResponse.Content.ReadAsStringAsync();
                 var allSongs = JsonSerializer.Deserialize<List<Content>>(songsJson, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                 var artistSongs = allSongs?.Where(c => c.ArtistId == artistId).ToList() ?? new List<Content>();
                 var totalSongs = artistSongs.Count;
 
                 // Usar el endpoint específico para álbumes del artista que ahora devuelve DTOs
-                var albumsResponse = await _httpClient.GetAsync($"https://localhost:7120/api/Albums/ByArtist/{artistId}");
+                var albumsResponse = await _httpClient.GetAsync($"{ApiConfig.BaseUrl}/api/Albums/ByArtist/{artistId}");
                 var totalAlbums = 0;
                 
                 Console.WriteLine($"Respuesta de álbumes: {albumsResponse.StatusCode}");
@@ -68,7 +68,7 @@ namespace HarmonySound.MVC.Controllers
                     var songLikes = 0;
                     try
                     {
-                        var likesResponse = await _httpClient.GetAsync($"https://localhost:7120/api/Contents/{song.Id}/likes");
+                        var likesResponse = await _httpClient.GetAsync($"{ApiConfig.BaseUrl}/api/Contents/{song.Id}/likes");
                         if (likesResponse.IsSuccessStatusCode)
                         {
                             var likesJson = await likesResponse.Content.ReadAsStringAsync();
@@ -93,7 +93,7 @@ namespace HarmonySound.MVC.Controllers
                 var totalReproductions = 0;
                 try
                 {
-                    var statsResponse = await _httpClient.GetAsync("https://localhost:7120/api/Statistics");
+                    var statsResponse = await _httpClient.GetAsync($"{ApiConfig.BaseUrl}/api/Statistics");
                     if (statsResponse.IsSuccessStatusCode)
                     {
                         var statsJson = await statsResponse.Content.ReadAsStringAsync();
@@ -173,7 +173,7 @@ namespace HarmonySound.MVC.Controllers
 
             using (var client = new HttpClient())
             {
-                var response = await client.GetAsync($"https://localhost:7120/api/Users/profile/{userId}");
+                var response = await client.GetAsync($"{ApiConfig.BaseUrl}/api/Users/profile/{userId}");
                 if (!response.IsSuccessStatusCode)
                     return View("Error");
 
@@ -185,7 +185,7 @@ namespace HarmonySound.MVC.Controllers
                 ViewBag.RecentFollowers = new List<FollowerViewModel>();
                 try
                 {
-                    var followersResponse = await client.GetAsync($"https://localhost:7120/api/Follows/followers/count/{userId}");
+                    var followersResponse = await client.GetAsync($"{ApiConfig.BaseUrl}/api/Follows/followers/count/{userId}");
                     if (followersResponse.IsSuccessStatusCode)
                     {
                         var followersJson = await followersResponse.Content.ReadAsStringAsync();
@@ -194,7 +194,7 @@ namespace HarmonySound.MVC.Controllers
                     }
 
                     // Últimos en seguir (los 5 más recientes)
-                    var recentResponse = await client.GetAsync($"https://localhost:7120/api/Follows/followers/{userId}");
+                    var recentResponse = await client.GetAsync($"{ApiConfig.BaseUrl}/api/Follows/followers/{userId}");
                     if (recentResponse.IsSuccessStatusCode)
                     {
                         var recentJson = await recentResponse.Content.ReadAsStringAsync();
@@ -220,7 +220,7 @@ namespace HarmonySound.MVC.Controllers
 
             using (var client = new HttpClient())
             {
-                var response = await client.GetAsync($"https://localhost:7120/api/Users/profile/{userId}");
+                var response = await client.GetAsync($"{ApiConfig.BaseUrl}/api/Users/profile/{userId}");
                 if (!response.IsSuccessStatusCode)
                     return View("Error");
 
@@ -251,7 +251,7 @@ namespace HarmonySound.MVC.Controllers
                     form.Add(new StringContent(model.Id.ToString()), "UserId");
                     form.Add(new StreamContent(model.ProfileImageFile.OpenReadStream()), "file", model.ProfileImageFile.FileName);
 
-                    var response = await client.PostAsync("https://localhost:7120/api/Users/upload-profile-image", form);
+                    var response = await client.PostAsync($"{ApiConfig.BaseUrl}/api/Users/upload-profile-image", form);
                     if (response.IsSuccessStatusCode)
                     {
                         var json = await response.Content.ReadAsStringAsync();
@@ -280,7 +280,7 @@ namespace HarmonySound.MVC.Controllers
                 // Si no se sube imagen, recupera la actual
                 using (var client = new HttpClient())
                 {
-                    var response = await client.GetAsync($"https://localhost:7120/api/Users/profile/{model.Id}");
+                    var response = await client.GetAsync($"{ApiConfig.BaseUrl}/api/Users/profile/{model.Id}");
                     if (response.IsSuccessStatusCode)
                     {
                         var json = await response.Content.ReadAsStringAsync();
@@ -304,7 +304,7 @@ namespace HarmonySound.MVC.Controllers
             {
                 var json = System.Text.Json.JsonSerializer.Serialize(userUpdate);
                 var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-                var response = await client.PutAsync($"https://localhost:7120/api/Users/profile/{model.Id}", content);
+                var response = await client.PutAsync($"{ApiConfig.BaseUrl}/api/Users/profile/{model.Id}", content);
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -358,7 +358,7 @@ namespace HarmonySound.MVC.Controllers
 
                 content.Add(new StreamContent(file.OpenReadStream()), "File", file.FileName);
 
-                var response = await _httpClient.PostAsync("https://localhost:7120/api/Contents/upload", content);
+                var response = await _httpClient.PostAsync($"{ApiConfig.BaseUrl}/api/Contents/upload", content);
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -389,7 +389,7 @@ namespace HarmonySound.MVC.Controllers
                 return View("Error401");
             }
 
-            Crud<Content>.EndPoint = "https://localhost:7120/api/Contents";
+            Crud<Content>.EndPoint = $"{ApiConfig.BaseUrl}/api/Contents";
             var allContents = Crud<Content>.GetAll();
             var myContents = allContents.Where(c => c.ArtistId == artistId).ToList();
             return View(myContents);
@@ -400,7 +400,7 @@ namespace HarmonySound.MVC.Controllers
         {
             try
             {
-                var response = await _httpClient.GetAsync($"https://localhost:7120/api/Contents/{id}");
+                var response = await _httpClient.GetAsync($"{ApiConfig.BaseUrl}/api/Contents/{id}");
                 if (!response.IsSuccessStatusCode)
                 {
                     TempData["Error"] = "No se pudo encontrar la canción.";
@@ -419,7 +419,7 @@ namespace HarmonySound.MVC.Controllers
                 }
 
                 // Obtener nombre del artista
-                var artistResponse = await _httpClient.GetAsync($"https://localhost:7120/api/Users/profile/{artistId}");
+                var artistResponse = await _httpClient.GetAsync($"{ApiConfig.BaseUrl}/api/Users/profile/{artistId}");
                 if (artistResponse.IsSuccessStatusCode)
                 {
                     var artistJson = await artistResponse.Content.ReadAsStringAsync();
@@ -445,7 +445,7 @@ namespace HarmonySound.MVC.Controllers
         {
             try
             {
-                var response = await _httpClient.GetAsync($"https://localhost:7120/api/Contents/{id}");
+                var response = await _httpClient.GetAsync($"{ApiConfig.BaseUrl}/api/Contents/{id}");
                 if (!response.IsSuccessStatusCode)
                 {
                     TempData["Error"] = "No se pudo encontrar la canción.";
@@ -464,7 +464,7 @@ namespace HarmonySound.MVC.Controllers
                 }
 
                 // Obtener nombre del artista
-                var artistResponse = await _httpClient.GetAsync($"https://localhost:7120/api/Users/profile/{artistId}");
+                var artistResponse = await _httpClient.GetAsync($"{ApiConfig.BaseUrl}/api/Users/profile/{artistId}");
                 if (artistResponse.IsSuccessStatusCode)
                 {
                     var artistJson = await artistResponse.Content.ReadAsStringAsync();
@@ -493,7 +493,7 @@ namespace HarmonySound.MVC.Controllers
             try
             {
                 // Verificar que el contenido existe y pertenece al artista actual
-                var getResponse = await _httpClient.GetAsync($"https://localhost:7120/api/Contents/{id}");
+                var getResponse = await _httpClient.GetAsync($"{ApiConfig.BaseUrl}/api/Contents/{id}");
                 if (!getResponse.IsSuccessStatusCode)
                 {
                     TempData["Error"] = "No se pudo encontrar la canción.";
@@ -514,7 +514,7 @@ namespace HarmonySound.MVC.Controllers
                 if (string.IsNullOrWhiteSpace(title))
                 {
                     // Obtener nombre del artista para la vista
-                    var artistResponse = await _httpClient.GetAsync($"https://localhost:7120/api/Users/profile/{artistId}");
+                    var artistResponse = await _httpClient.GetAsync($"{ApiConfig.BaseUrl}/api/Users/profile/{artistId}");
                     if (artistResponse.IsSuccessStatusCode)
                     {
                         var artistJson = await artistResponse.Content.ReadAsStringAsync();
@@ -534,7 +534,7 @@ namespace HarmonySound.MVC.Controllers
                 if (title.Length > 20)
                 {
                     // Obtener nombre del artista para la vista
-                    var artistResponse = await _httpClient.GetAsync($"https://localhost:7120/api/Users/profile/{artistId}");
+                    var artistResponse = await _httpClient.GetAsync($"{ApiConfig.BaseUrl}/api/Users/profile/{artistId}");
                     if (artistResponse.IsSuccessStatusCode)
                     {
                         var artistJson = await artistResponse.Content.ReadAsStringAsync();
@@ -564,7 +564,7 @@ namespace HarmonySound.MVC.Controllers
 
                 var updateJson = JsonSerializer.Serialize(updateModel);
                 var content = new StringContent(updateJson, Encoding.UTF8, "application/json");
-                var response = await _httpClient.PutAsync($"https://localhost:7120/api/Contents/{id}", content);
+                var response = await _httpClient.PutAsync($"{ApiConfig.BaseUrl}/api/Contents/{id}", content);
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -577,7 +577,7 @@ namespace HarmonySound.MVC.Controllers
                     TempData["Error"] = $"Error al actualizar la canción: {error}";
                     
                     // Obtener nombre del artista para la vista de error
-                    var artistResponse = await _httpClient.GetAsync($"https://localhost:7120/api/Users/profile/{artistId}");
+                    var artistResponse = await _httpClient.GetAsync($"{ApiConfig.BaseUrl}/api/Users/profile/{artistId}");
                     if (artistResponse.IsSuccessStatusCode)
                     {
                         var artistJson = await artistResponse.Content.ReadAsStringAsync();
@@ -607,7 +607,7 @@ namespace HarmonySound.MVC.Controllers
             try
             {
                 // Verificar que el contenido pertenece al artista actual
-                var getResponse = await _httpClient.GetAsync($"https://localhost:7120/api/Contents/{id}");
+                var getResponse = await _httpClient.GetAsync($"{ApiConfig.BaseUrl}/api/Contents/{id}");
                 if (!getResponse.IsSuccessStatusCode)
                 {
                     TempData["Error"] = "No se pudo encontrar la canción.";
@@ -625,7 +625,7 @@ namespace HarmonySound.MVC.Controllers
                 }
 
                 // Eliminar de la base de datos Y de Azure Storage
-                var deleteResponse = await _httpClient.DeleteAsync($"https://localhost:7120/api/Contents/{id}");
+                var deleteResponse = await _httpClient.DeleteAsync($"{ApiConfig.BaseUrl}/api/Contents/{id}");
 
                 if (deleteResponse.IsSuccessStatusCode)
                 {

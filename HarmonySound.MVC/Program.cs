@@ -10,17 +10,20 @@ namespace HarmonySound.MVC
     {
         public static void Main(string[] args)
         {
+            // URL base de la API (localhost por defecto; en producción se define la variable de entorno ApiUrl)
+            ApiConfig.BaseUrl = (Environment.GetEnvironmentVariable("ApiUrl") ?? "https://localhost:7120").TrimEnd('/');
+
             // Configuración de los endpoints de la API
-            Crud<Album>.EndPoint = "https://localhost:7120/api/Albums";
-            Crud<ContentAlbum>.EndPoint = "https://localhost:7120/api/ContentAlbums";
-            Crud<Content>.EndPoint = "https://localhost:7120/api/Contents";
-            Crud<Plan>.EndPoint = "https://localhost:7120/api/Plans";
-            Crud<Role>.EndPoint = "https://localhost:7120/api/Roles";
-            Crud<Statistic>.EndPoint = "https://localhost:7120/api/Statistics";
-            Crud<SubscriptionHistory>.EndPoint = "https://localhost:7120/api/SubscriptionsHistories";
-            Crud<UserRole>.EndPoint = "https://localhost:7120/api/UserRoles";
-            Crud<User>.EndPoint = "https://localhost:7120/api/Users";
-            Crud<UserPlan>.EndPoint = "https://localhost:7120/api/UsersPlans";
+            Crud<Album>.EndPoint = $"{ApiConfig.BaseUrl}/api/Albums";
+            Crud<ContentAlbum>.EndPoint = $"{ApiConfig.BaseUrl}/api/ContentAlbums";
+            Crud<Content>.EndPoint = $"{ApiConfig.BaseUrl}/api/Contents";
+            Crud<Plan>.EndPoint = $"{ApiConfig.BaseUrl}/api/Plans";
+            Crud<Role>.EndPoint = $"{ApiConfig.BaseUrl}/api/Roles";
+            Crud<Statistic>.EndPoint = $"{ApiConfig.BaseUrl}/api/Statistics";
+            Crud<SubscriptionHistory>.EndPoint = $"{ApiConfig.BaseUrl}/api/SubscriptionsHistories";
+            Crud<UserRole>.EndPoint = $"{ApiConfig.BaseUrl}/api/UserRoles";
+            Crud<User>.EndPoint = $"{ApiConfig.BaseUrl}/api/Users";
+            Crud<UserPlan>.EndPoint = $"{ApiConfig.BaseUrl}/api/UsersPlans";
 
             // Configuración de Serilog para registrar en la consola y en un archivo
             Log.Logger = new LoggerConfiguration()

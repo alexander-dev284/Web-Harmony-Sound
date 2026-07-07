@@ -25,7 +25,7 @@ namespace HarmonySound.MVC.Controllers
                 int artistId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
                 
                 // Usar el endpoint específico para álbumes del artista
-                var response = await _httpClient.GetAsync($"https://localhost:7120/api/Albums/ByArtist/{artistId}");
+                var response = await _httpClient.GetAsync($"{ApiConfig.BaseUrl}/api/Albums/ByArtist/{artistId}");
                 
                 if (response.IsSuccessStatusCode)
                 {
@@ -50,7 +50,7 @@ namespace HarmonySound.MVC.Controllers
         // GET: Albums/Details/5
         public async Task<IActionResult> Details(int id)
         {
-            var response = await _httpClient.GetAsync($"https://localhost:7120/api/Albums/{id}");
+            var response = await _httpClient.GetAsync($"{ApiConfig.BaseUrl}/api/Albums/{id}");
             if (!response.IsSuccessStatusCode)
                 return NotFound();
 
@@ -103,7 +103,7 @@ namespace HarmonySound.MVC.Controllers
                 content.Add(fileContent, "ImageFile", imageFile.FileName);
             }
 
-            var response = await _httpClient.PostAsync("https://localhost:7120/api/Albums", content);
+            var response = await _httpClient.PostAsync($"{ApiConfig.BaseUrl}/api/Albums", content);
 
             if (response.IsSuccessStatusCode)
                 return RedirectToAction(nameof(Index));
@@ -115,7 +115,7 @@ namespace HarmonySound.MVC.Controllers
         // GET: Albums/Edit/5
         public async Task<IActionResult> Edit(int id)
         {
-            var response = await _httpClient.GetAsync($"https://localhost:7120/api/Albums/{id}");
+            var response = await _httpClient.GetAsync($"{ApiConfig.BaseUrl}/api/Albums/{id}");
             if (!response.IsSuccessStatusCode)
                 return NotFound();
 
@@ -141,7 +141,7 @@ namespace HarmonySound.MVC.Controllers
                 content.Add(new StringContent(model.Title), "Title");
                 content.Add(new StringContent(int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value).ToString()), "ArtistId");
 
-                var response = await _httpClient.PutAsync($"https://localhost:7120/api/Albums/{id}", content);
+                var response = await _httpClient.PutAsync($"{ApiConfig.BaseUrl}/api/Albums/{id}", content);
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -156,7 +156,7 @@ namespace HarmonySound.MVC.Controllers
                 // Actualizar las canciones del álbum usando la API
                 var songsJson = System.Text.Json.JsonSerializer.Serialize(selectedSongIds ?? new List<int>());
                 var songsContent = new StringContent(songsJson, System.Text.Encoding.UTF8, "application/json");
-                var songsResponse = await _httpClient.PostAsync($"https://localhost:7120/api/Albums/{id}/UpdateSongs", songsContent);
+                var songsResponse = await _httpClient.PostAsync($"{ApiConfig.BaseUrl}/api/Albums/{id}/UpdateSongs", songsContent);
 
                 if (!songsResponse.IsSuccessStatusCode)
                 {
@@ -177,7 +177,7 @@ namespace HarmonySound.MVC.Controllers
                 var allSongs = await GetAllSongsForArtist(artistId);
                 ViewBag.AllSongs = allSongs;
 
-                var response = await _httpClient.GetAsync($"https://localhost:7120/api/Albums/{id}");
+                var response = await _httpClient.GetAsync($"{ApiConfig.BaseUrl}/api/Albums/{id}");
                 AlbumDto album = null;
                 if (response.IsSuccessStatusCode)
                 {
@@ -193,7 +193,7 @@ namespace HarmonySound.MVC.Controllers
         // Helper para obtener todas las canciones del artista usando HttpClient
         private async Task<List<ContentDto>> GetAllSongsForArtist(int artistId)
         {
-            var response = await _httpClient.GetAsync("https://localhost:7120/api/Contents");
+            var response = await _httpClient.GetAsync($"{ApiConfig.BaseUrl}/api/Contents");
             if (!response.IsSuccessStatusCode)
                 return new List<ContentDto>();
 
@@ -223,7 +223,7 @@ namespace HarmonySound.MVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> RemoveSong(int albumId, int contentId)
         {
-            var response = await _httpClient.DeleteAsync($"https://localhost:7120/api/Albums/{albumId}/RemoveSong/{contentId}");
+            var response = await _httpClient.DeleteAsync($"{ApiConfig.BaseUrl}/api/Albums/{albumId}/RemoveSong/{contentId}");
             return RedirectToAction("Edit", new { id = albumId });
         }
 
@@ -233,7 +233,7 @@ namespace HarmonySound.MVC.Controllers
         public async Task<IActionResult> AddSong(int albumId, int songId)
         {
             var content = new StringContent(songId.ToString(), System.Text.Encoding.UTF8, "application/json");
-            var response = await _httpClient.PostAsync($"https://localhost:7120/api/Albums/{albumId}/AddSong", content);
+            var response = await _httpClient.PostAsync($"{ApiConfig.BaseUrl}/api/Albums/{albumId}/AddSong", content);
             return RedirectToAction("Edit", new { id = albumId });
         }
 
@@ -246,7 +246,7 @@ namespace HarmonySound.MVC.Controllers
             {
                 Console.WriteLine($"Intentando eliminar álbum ID: {id}");
                 
-                var response = await _httpClient.DeleteAsync($"https://localhost:7120/api/Albums/{id}");
+                var response = await _httpClient.DeleteAsync($"{ApiConfig.BaseUrl}/api/Albums/{id}");
                 
                 if (response.IsSuccessStatusCode)
                 {
@@ -276,7 +276,7 @@ namespace HarmonySound.MVC.Controllers
             try
             {
                 // Usar el endpoint DELETE específico del API
-                var response = await _httpClient.DeleteAsync($"https://localhost:7120/api/Albums/{albumId}/RemoveSong/{trackId}");
+                var response = await _httpClient.DeleteAsync($"{ApiConfig.BaseUrl}/api/Albums/{albumId}/RemoveSong/{trackId}");
                 
                 if (response.IsSuccessStatusCode)
                 {

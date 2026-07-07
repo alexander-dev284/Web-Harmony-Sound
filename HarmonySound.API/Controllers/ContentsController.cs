@@ -2,9 +2,8 @@
 using HarmonySound.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Azure.Storage.Blobs;
-using Azure.Storage.Blobs.Models;
 using HarmonySound.API.Data;
+using HarmonySound.API.Services;
 using NAudio.Wave;
 using NAudio.MediaFoundation;
 
@@ -17,19 +16,20 @@ namespace HarmonySound.API.Controllers
         private readonly HarmonySoundDbContext _context;
         private readonly IWebHostEnvironment _env;
         private readonly ILogger<ContentsController> _logger;
-        private readonly string _blobConnectionString;
-        private readonly string _blobContainerName;
+        private readonly IStorageService _storage;
 
-        public ContentsController(HarmonySoundDbContext context, IWebHostEnvironment env, ILogger<ContentsController> logger, IConfiguration configuration)
+        public ContentsController(HarmonySoundDbContext context, IWebHostEnvironment env, ILogger<ContentsController> logger, IStorageService storage)
         {
             _context = context;
             _env = env;
             _logger = logger;
-            _blobConnectionString = configuration["AzureBlobStorage:ConnectionString"];
-            _blobContainerName = configuration["AzureBlobStorage:MediaContainer"];
-            
-            // Inicializar MediaFoundation para soporte de archivos de audio avanzados
-            MediaFoundationApi.Startup();
+            _storage = storage;
+
+            // MediaFoundation solo está disponible en Windows; en Linux (Render) se omite.
+            if (OperatingSystem.IsWindows())
+            {
+                try { MediaFoundationApi.Startup(); } catch { /* no disponible en este entorno */ }
+            }
         }
 
         // GET: api/Contents
@@ -192,20 +192,13 @@ namespace HarmonySound.API.Controllers
                 if (extension == ".wav")
                     contentType = "audio/wav";
 
-                // Subir a Azure Blob Storage
-                var blobServiceClient = new BlobServiceClient(_blobConnectionString);
-                var containerClient = blobServiceClient.GetBlobContainerClient(_blobContainerName);
-                await containerClient.CreateIfNotExistsAsync(PublicAccessType.Blob);
-
+                // Subir al almacenamiento (S3 / Backblaze B2)
                 var uniqueFileName = $"{Guid.NewGuid()}{extension}";
-                var blobClient = containerClient.GetBlobClient(uniqueFileName);
-
+                string fileUrl;
                 using (var stream = model.File.OpenReadStream())
                 {
-                    await blobClient.UploadAsync(stream, new BlobHttpHeaders { ContentType = contentType });
+                    fileUrl = await _storage.UploadAsync(stream, uniqueFileName, contentType, "media");
                 }
-
-                var fileUrl = blobClient.Uri.ToString();
 
                 var content = new Content
                 {
@@ -248,15 +241,8 @@ namespace HarmonySound.API.Controllers
             {
                 try
                 {
-                    var blobServiceClient = new BlobServiceClient(_blobConnectionString);
-                    var containerClient = blobServiceClient.GetBlobContainerClient(_blobContainerName);
-                    
-                    // Extraer nombre del blob de la URL
-                    var fileName = Path.GetFileName(new Uri(content.UrlMedia).LocalPath);
-                    var blobClient = containerClient.GetBlobClient(fileName);
-                    
-                    await blobClient.DeleteIfExistsAsync();
-                    _logger.LogInformation($"Archivo eliminado de Azure: {fileName}");
+                    await _storage.DeleteByUrlAsync(content.UrlMedia);
+                    _logger.LogInformation("Archivo eliminado del almacenamiento");
                 }
                 catch (Exception ex)
                 {

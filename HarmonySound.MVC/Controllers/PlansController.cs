@@ -25,14 +25,14 @@ namespace HarmonySound.MVC.Controllers
         {
             try
             {
-                var response = await _httpClient.GetAsync("https://localhost:7120/api/Plans");
+                var response = await _httpClient.GetAsync($"{ApiConfig.BaseUrl}/api/Plans");
                 var json = await response.Content.ReadAsStringAsync();
                 var plans = JsonSerializer.Deserialize<List<Plan>>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
                 var premiumPlans = plans.Where(p => p.Price > 0).ToList();
 
                 int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
-                var userPlanResponse = await _httpClient.GetAsync($"https://localhost:7120/api/UserPlans/user/{userId}");
+                var userPlanResponse = await _httpClient.GetAsync($"{ApiConfig.BaseUrl}/api/UserPlans/user/{userId}");
 
                 UserPlan? userPlan = null;
                 if (userPlanResponse.IsSuccessStatusCode)
@@ -67,7 +67,7 @@ namespace HarmonySound.MVC.Controllers
                 _logger.LogInformation($"Iniciando suscripción para plan {planId}");
                 
                 // Obtener información del plan
-                var planResponse = await _httpClient.GetAsync($"https://localhost:7120/api/Plans/{planId}");
+                var planResponse = await _httpClient.GetAsync($"{ApiConfig.BaseUrl}/api/Plans/{planId}");
                 if (!planResponse.IsSuccessStatusCode)
                 {
                     _logger.LogError($"Plan {planId} no encontrado");
@@ -96,7 +96,7 @@ namespace HarmonySound.MVC.Controllers
 
                 _logger.LogInformation($"Enviando solicitud de pago a PayPal...");
                 
-                var paymentResponse = await _httpClient.PostAsync("https://localhost:7120/api/PayPal/create-payment", paymentContent);
+                var paymentResponse = await _httpClient.PostAsync($"{ApiConfig.BaseUrl}/api/PayPal/create-payment", paymentContent);
                 var paymentResponseContent = await paymentResponse.Content.ReadAsStringAsync();
 
                 _logger.LogInformation($"Respuesta PayPal: {paymentResponse.StatusCode}");
@@ -163,7 +163,7 @@ namespace HarmonySound.MVC.Controllers
                     "application/json"
                 );
 
-                var executeResponse = await _httpClient.PostAsync("https://localhost:7120/api/PayPal/execute-payment", executeContent);
+                var executeResponse = await _httpClient.PostAsync($"{ApiConfig.BaseUrl}/api/PayPal/execute-payment", executeContent);
 
                 if (executeResponse.IsSuccessStatusCode)
                 {
@@ -192,7 +192,7 @@ namespace HarmonySound.MVC.Controllers
                             "application/json"
                         );
 
-                        var subscriptionResponse = await _httpClient.PostAsync("https://localhost:7120/api/UserPlans/process-subscription", subscriptionContent);
+                        var subscriptionResponse = await _httpClient.PostAsync($"{ApiConfig.BaseUrl}/api/UserPlans/process-subscription", subscriptionContent);
 
                         if (subscriptionResponse.IsSuccessStatusCode)
                         {
@@ -254,7 +254,7 @@ namespace HarmonySound.MVC.Controllers
 
                 var payload = new { UserId = userId };
                 var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
-                var response = await _httpClient.PostAsync("https://localhost:7120/api/UserPlans/cancel", content);
+                var response = await _httpClient.PostAsync($"{ApiConfig.BaseUrl}/api/UserPlans/cancel", content);
 
                 if (response.IsSuccessStatusCode)
                     TempData["Success"] = "Suscripción cancelada exitosamente";
@@ -278,7 +278,7 @@ namespace HarmonySound.MVC.Controllers
                 int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
                 
                 // Obtener plan actual del usuario
-                var userPlanResponse = await _httpClient.GetAsync($"https://localhost:7120/api/UserPlans/user/{userId}");
+                var userPlanResponse = await _httpClient.GetAsync($"{ApiConfig.BaseUrl}/api/UserPlans/user/{userId}");
                 
                 if (!userPlanResponse.IsSuccessStatusCode)
                 {
@@ -291,7 +291,7 @@ namespace HarmonySound.MVC.Controllers
 
                 // Solo el propietario del plan puede gestionar invitaciones
                 // Verificar si el usuario actual pagó por el plan o solo fue invitado
-                var isOwnerResponse = await _httpClient.GetAsync($"https://localhost:7120/api/UserPlans/is-plan-owner/{userId}");
+                var isOwnerResponse = await _httpClient.GetAsync($"{ApiConfig.BaseUrl}/api/UserPlans/is-plan-owner/{userId}");
                 bool isPlanOwner = false;
                 
                 if (isOwnerResponse.IsSuccessStatusCode)
@@ -310,7 +310,7 @@ namespace HarmonySound.MVC.Controllers
                 // Obtener invitaciones con deserialización correcta
                 List<InvitationDto> invitations = new List<InvitationDto>();
                 
-                var invitationsResponse = await _httpClient.GetAsync($"https://localhost:7120/api/PlanInvitations/sent/{userId}");
+                var invitationsResponse = await _httpClient.GetAsync($"{ApiConfig.BaseUrl}/api/PlanInvitations/sent/{userId}");
                 
                 if (invitationsResponse.IsSuccessStatusCode)
                 {
@@ -346,7 +346,7 @@ namespace HarmonySound.MVC.Controllers
                 int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
 
                 // Solo el propietario del plan puede enviar invitaciones
-                var isOwnerResponse = await _httpClient.GetAsync($"https://localhost:7120/api/UserPlans/is-plan-owner/{userId}");
+                var isOwnerResponse = await _httpClient.GetAsync($"{ApiConfig.BaseUrl}/api/UserPlans/is-plan-owner/{userId}");
                 
                 if (!isOwnerResponse.IsSuccessStatusCode)
                 {
@@ -377,7 +377,7 @@ namespace HarmonySound.MVC.Controllers
                     "application/json"
                 );
 
-                var response = await _httpClient.PostAsync("https://localhost:7120/api/PlanInvitations/send", content);
+                var response = await _httpClient.PostAsync($"{ApiConfig.BaseUrl}/api/PlanInvitations/send", content);
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -410,7 +410,7 @@ namespace HarmonySound.MVC.Controllers
                     "application/json"
                 );
 
-                var response = await _httpClient.PostAsync("https://localhost:7120/api/PlanInvitations/accept", content);
+                var response = await _httpClient.PostAsync($"{ApiConfig.BaseUrl}/api/PlanInvitations/accept", content);
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -455,7 +455,7 @@ namespace HarmonySound.MVC.Controllers
         {
             try
             {
-                var response = await _httpClient.PostAsync($"https://localhost:7120/api/PlanInvitations/cancel/{invitationId}", null);
+                var response = await _httpClient.PostAsync($"{ApiConfig.BaseUrl}/api/PlanInvitations/cancel/{invitationId}", null);
 
                 if (response.IsSuccessStatusCode)
                 {

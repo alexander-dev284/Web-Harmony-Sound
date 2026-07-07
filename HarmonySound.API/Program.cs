@@ -88,6 +88,7 @@ namespace HarmonySound.API
             builder.Services.AddTransient<IJwtService, JwtService>();
             builder.Services.AddTransient<I2FAService, TwoFactorAuthService>();
             builder.Services.AddScoped<IPayPalService, PayPalService>();
+            builder.Services.AddSingleton<IStorageService, S3StorageService>();
             builder.Services.AddMemoryCache();
 
             var app = builder.Build();

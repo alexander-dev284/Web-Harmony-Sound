@@ -10,7 +10,7 @@ namespace HarmonySound.MVC.Controllers
         public ActionResult Index()
         {
             // Actualizar para usar el endpoint unificado
-            Crud<UserPlan>.EndPoint = "https://localhost:7120/api/UserPlans";
+            Crud<UserPlan>.EndPoint = $"{ApiConfig.BaseUrl}/api/UserPlans";
             var data = Crud<UserPlan>.GetAll();
             return View(data);
         }
@@ -18,7 +18,7 @@ namespace HarmonySound.MVC.Controllers
         // GET: UsersPlansController/Details/5
         public ActionResult Details(int id)
         {
-            Crud<UserPlan>.EndPoint = "https://localhost:7120/api/UserPlans";
+            Crud<UserPlan>.EndPoint = $"{ApiConfig.BaseUrl}/api/UserPlans";
             var data = Crud<UserPlan>.GetById(id);
             return View(data);
         }
@@ -36,7 +36,7 @@ namespace HarmonySound.MVC.Controllers
         {
             try
             {
-                Crud<UserPlan>.EndPoint = "https://localhost:7120/api/UserPlans";
+                Crud<UserPlan>.EndPoint = $"{ApiConfig.BaseUrl}/api/UserPlans";
                 Crud<UserPlan>.Create(data);
                 return RedirectToAction(nameof(Index));
             }
@@ -49,7 +49,7 @@ namespace HarmonySound.MVC.Controllers
         // GET: UsersPlansController/Edit/5
         public ActionResult Edit(int id)
         {
-            Crud<UserPlan>.EndPoint = "https://localhost:7120/api/UserPlans";
+            Crud<UserPlan>.EndPoint = $"{ApiConfig.BaseUrl}/api/UserPlans";
             var data = Crud<UserPlan>.GetById(id);
             return View(data);
         }
@@ -61,7 +61,7 @@ namespace HarmonySound.MVC.Controllers
         {
             try
             {
-                Crud<UserPlan>.EndPoint = "https://localhost:7120/api/UserPlans";
+                Crud<UserPlan>.EndPoint = $"{ApiConfig.BaseUrl}/api/UserPlans";
                 Crud<UserPlan>.Update(id, data);
                 return RedirectToAction(nameof(Index));
             }
@@ -74,7 +74,7 @@ namespace HarmonySound.MVC.Controllers
         // GET: UsersPlansController/Delete/5
         public ActionResult Delete(int id)
         {
-            Crud<UserPlan>.EndPoint = "https://localhost:7120/api/UserPlans";
+            Crud<UserPlan>.EndPoint = $"{ApiConfig.BaseUrl}/api/UserPlans";
             var data = Crud<UserPlan>.GetById(id);
             return View(data);
         }
@@ -86,7 +86,7 @@ namespace HarmonySound.MVC.Controllers
         {
             try
             {
-                Crud<UserPlan>.EndPoint = "https://localhost:7120/api/UserPlans";
+                Crud<UserPlan>.EndPoint = $"{ApiConfig.BaseUrl}/api/UserPlans";
                 Crud<UserPlan>.Delete(id);
                 return RedirectToAction(nameof(Index));
             }
