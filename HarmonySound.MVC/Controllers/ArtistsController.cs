@@ -599,7 +599,7 @@ namespace HarmonySound.MVC.Controllers
             }
         }
 
-        // Eliminar canción (incluye eliminación de Azure)
+        // Eliminar canción (incluye eliminación del archivo en el almacenamiento)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
@@ -624,12 +624,12 @@ namespace HarmonySound.MVC.Controllers
                     return RedirectToAction("Index");
                 }
 
-                // Eliminar de la base de datos Y de Azure Storage
+                // Eliminar de la base de datos Y del archivo en el almacenamiento
                 var deleteResponse = await _httpClient.DeleteAsync($"{ApiConfig.BaseUrl}/api/Contents/{id}");
 
                 if (deleteResponse.IsSuccessStatusCode)
                 {
-                    TempData["Success"] = "Canción eliminada correctamente (incluido el archivo de Azure).";
+                    TempData["Success"] = "Canción eliminada correctamente (incluido el archivo).";
                 }
                 else
                 {
