@@ -43,4 +43,33 @@
     html .volume-handle {
         background: #ffffff !important;
     }
+
+    /* ------------------------------------------------------------
+       Alertas y mensajes de validación legibles en modo oscuro.
+       Las vistas de auth los definen con fondo rojo tenue + texto
+       rojo oscuro, que sobre superficie oscura queda ilegible.
+       Aquí se aclara el texto y se refuerza el fondo/borde.
+       ------------------------------------------------------------ */
+
+    /* Caja de resumen de errores (registro, login, 2FA, etc.) */
+    html .validation-summary,
+    html .us-alert-error {
+        background: rgba(200, 16, 46, 0.18) !important;
+        border: 1px solid rgba(200, 16, 46, 0.55) !important;
+        color: #ffb3ba !important;
+    }
+
+    /* Errores individuales de cada campo (texto, sin caja) */
+    html .validation-error {
+        color: #ff9aa2 !important;
+    }
+
+    /* Barra del rol seleccionado ("Registro como Usuario / Artista") */
+    html .selected-role-bar {
+        background: rgba(200, 16, 46, 0.15) !important;
+        border-color: rgba(200, 16, 46, 0.45) !important;
+    }
+    html .selected-role-bar span {
+        color: #ffb3ba !important;
+    }
 }
