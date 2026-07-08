@@ -49,9 +49,9 @@ Crea **dos Web Services** desde el repo de GitHub, tipo **Docker**:
   | `Storage__SecretKey` | *(applicationKey de B2)* |
   | `Storage__Bucket` | `unisound-media` |
   | `Storage__PublicBaseUrl` | `https://s3.us-east-005.backblazeb2.com/unisound-media` |
-  | `SmtpSettings__Username` | *(correo Gmail)* |
-  | `SmtpSettings__Password` | *(contraseña de app de Gmail)* |
-  | `SmtpSettings__FromEmail` | *(correo Gmail)* |
+  | `SmtpSettings__FromEmail` | *(correo remitente, ej. tu Gmail verificado en Brevo)* |
+  | `SmtpSettings__FromName` | `UniSound` |
+  | `Brevo__ApiKey` | *(API key de Brevo — el correo se envía por su API HTTP, no por SMTP)* |
   | `PayPal__ClientId` | *(client id)* |
   | `PayPal__ClientSecret` | *(client secret)* |
   | `PayPal__ReturnUrl` | `https://<tu-mvc>.onrender.com/Plans/PaymentSuccess` |

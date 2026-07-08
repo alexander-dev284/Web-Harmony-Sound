@@ -84,6 +84,7 @@ namespace HarmonySound.API
             });
 
             // Servicios personalizados
+            builder.Services.AddHttpClient(); // Para el envío de correo por la API HTTP de Brevo
             builder.Services.AddTransient<IEmailSender, EmailService>();
             builder.Services.AddTransient<IJwtService, JwtService>();
             builder.Services.AddTransient<I2FAService, TwoFactorAuthService>();
