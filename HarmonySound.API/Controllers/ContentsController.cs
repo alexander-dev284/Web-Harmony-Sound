@@ -4,8 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using HarmonySound.API.Data;
 using HarmonySound.API.Services;
-using NAudio.Wave;
-using NAudio.MediaFoundation;
 
 namespace HarmonySound.API.Controllers
 {
@@ -24,12 +22,6 @@ namespace HarmonySound.API.Controllers
             _env = env;
             _logger = logger;
             _storage = storage;
-
-            // MediaFoundation solo está disponible en Windows; en Linux (Render) se omite.
-            if (OperatingSystem.IsWindows())
-            {
-                try { MediaFoundationApi.Startup(); } catch { /* no disponible en este entorno */ }
-            }
         }
 
         // GET: api/Contents
@@ -80,83 +72,34 @@ namespace HarmonySound.API.Controllers
         // Método para obtener la duración del audio
         private async Task<TimeSpan> GetAudioDurationAsync(IFormFile file)
         {
+            // Se usa TagLibSharp (100% multiplataforma) en lugar de NAudio, porque NAudio
+            // depende de códecs de Windows (ACM/MediaFoundation) que no existen en el
+            // contenedor Linux donde corre la API en Render.
+            // TagLib detecta el formato por la extensión, así que se conserva en el archivo temporal.
+            var extension = Path.GetExtension(file.FileName);
+            var tempFile = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}{extension}");
+
             try
             {
-                var extension = Path.GetExtension(file.FileName).ToLower();
-                
-                switch (extension)
+                using (var fileStream = new FileStream(tempFile, FileMode.Create))
                 {
-                    case ".mp3":
-                        using (var stream = new MemoryStream())
-                        {
-                            await file.CopyToAsync(stream);
-                            stream.Position = 0;
-                            using (var mp3Reader = new Mp3FileReader(stream))
-                            {
-                                return mp3Reader.TotalTime;
-                            }
-                        }
-                    
-                    case ".wav":
-                        using (var stream = new MemoryStream())
-                        {
-                            await file.CopyToAsync(stream);
-                            stream.Position = 0;
-                            using (var waveReader = new WaveFileReader(stream))
-                            {
-                                return waveReader.TotalTime;
-                            }
-                        }
-                    
-                    case ".aac":
-                    case ".m4a":
-                        try
-                        {
-                            // MediaFoundation requiere archivo físico
-                            var tempFile = Path.GetTempFileName();
-                            try
-                            {
-                                // Guardar archivo temporal
-                                using (var fileStream = new FileStream(tempFile, FileMode.Create))
-                                {
-                                    await file.CopyToAsync(fileStream);
-                                }
-                                
-                                // Leer duración desde archivo temporal
-                                using (var mediaReader = new MediaFoundationReader(tempFile))
-                                {
-                                    return mediaReader.TotalTime;
-                                }
-                            }
-                            finally
-                            {
-                                // Limpiar archivo temporal
-                                if (System.IO.File.Exists(tempFile))
-                                {
-                                    System.IO.File.Delete(tempFile);
-                                }
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogWarning($"Error procesando archivo AAC/M4A {file.FileName}: {ex.Message}");
-                            return TimeSpan.Zero;
-                        }
-                    
-                    case ".ogg":
-                    case ".flac":
-                        _logger.LogInformation($"Formato {extension} no soportado para cálculo de duración");
-                        return TimeSpan.Zero;
-                    
-                    default:
-                        _logger.LogWarning($"Extensión no reconocida: {extension}");
-                        return TimeSpan.Zero;
+                    await file.CopyToAsync(fileStream);
                 }
+
+                var tagFile = TagLib.File.Create(tempFile);
+                return tagFile.Properties?.Duration ?? TimeSpan.Zero;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error obteniendo duración del archivo {file.FileName}");
                 return TimeSpan.Zero;
+            }
+            finally
+            {
+                if (System.IO.File.Exists(tempFile))
+                {
+                    System.IO.File.Delete(tempFile);
+                }
             }
         }
 
