@@ -8,7 +8,7 @@ using HarmonySound.API.DTOs;
 
 namespace HarmonySound.MVC.Controllers
 {
-    [Authorize(Roles = "client")]
+    [Authorize(Roles = "Client")]
     public class ClientsController : Controller
     {
         // Campo para la URL base de la API

@@ -10,7 +10,7 @@ using HarmonySound.API.DTOs;
 
 namespace HarmonySound.MVC.Controllers
 {
-    [Authorize(Roles = "artist")]
+    [Authorize(Roles = "Artist")]
     public class ArtistsController : Controller
     {
         private readonly HttpClient _httpClient;

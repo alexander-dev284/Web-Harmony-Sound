@@ -20,7 +20,7 @@ namespace HarmonySound.MVC.Controllers
             _logger = logger;
         }
 
-        [Authorize(Roles = "client")]
+        [Authorize(Roles = "Client")]
         public async Task<IActionResult> Index()
         {
             try
@@ -58,7 +58,7 @@ namespace HarmonySound.MVC.Controllers
             }
         }
 
-        [Authorize(Roles = "client")]
+        [Authorize(Roles = "Client")]
         [HttpPost]
         public async Task<IActionResult> Subscribe(int planId)
         {
@@ -134,7 +134,7 @@ namespace HarmonySound.MVC.Controllers
             }
         }
 
-        [Authorize(Roles = "client")]
+        [Authorize(Roles = "Client")]
         public async Task<IActionResult> PaymentSuccess(string paymentId, string PayerID)
         {
             try
@@ -232,7 +232,7 @@ namespace HarmonySound.MVC.Controllers
             return RedirectToAction("Index");
         }
 
-        [Authorize(Roles = "client")]
+        [Authorize(Roles = "Client")]
         public IActionResult PaymentCancel()
         {
             // Limpiar sesión
@@ -244,7 +244,7 @@ namespace HarmonySound.MVC.Controllers
             return RedirectToAction("Index");
         }
 
-        [Authorize(Roles = "client")]
+        [Authorize(Roles = "Client")]
         [HttpPost]
         public async Task<IActionResult> Cancel()
         {
@@ -270,7 +270,7 @@ namespace HarmonySound.MVC.Controllers
             return RedirectToAction("Index");
         }
 
-        [Authorize(Roles = "client")]
+        [Authorize(Roles = "Client")]
         public async Task<IActionResult> ManageInvitations()
         {
             try
@@ -337,7 +337,7 @@ namespace HarmonySound.MVC.Controllers
             }
         }
 
-        [Authorize(Roles = "client")]
+        [Authorize(Roles = "Client")]
         [HttpPost]
         public async Task<IActionResult> SendInvitation(string inviteeEmail, string message)
         {
@@ -449,7 +449,7 @@ namespace HarmonySound.MVC.Controllers
             return RedirectToAction("Index");
         }
 
-        [Authorize(Roles = "client")]
+        [Authorize(Roles = "Client")]
         [HttpPost]
         public async Task<IActionResult> CancelInvitation(int invitationId)
         {

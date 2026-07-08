@@ -8,14 +8,14 @@
     <div class="plans-header">
         <!--  Botón de navegación que detecta el rol del usuario -->
         <div class="navigation-bar">
-            @if (User.IsInRole("artist"))
+            @if (User.IsInRole("Artist"))
             {
                 <a href="@Url.Action("Home", "Artists")" class="btn-home">
                     <i class="fas fa-home me-2"></i>
                     Home Artista
                 </a>
             }
-            else if (User.IsInRole("client"))
+            else if (User.IsInRole("Client"))
             {
                 <a href="@Url.Action("Home", "Clients")" class="btn-home">
                     <i class="fas fa-home me-2"></i>

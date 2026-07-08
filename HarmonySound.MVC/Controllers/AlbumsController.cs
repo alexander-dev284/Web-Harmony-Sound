@@ -6,7 +6,7 @@ using System.Security.Claims;
 
 namespace HarmonySound.MVC.Controllers
 {
-    [Authorize(Roles = "artist")]
+    [Authorize(Roles = "Artist")]
     public class AlbumsController : Controller
     {
         private readonly HttpClient _httpClient;
