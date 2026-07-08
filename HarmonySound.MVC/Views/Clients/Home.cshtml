@@ -51,7 +51,7 @@
 
     <!-- Formulario de búsqueda -->
     <div class="search-container">
-        <form asp-action="Home" method="get" class="search-form">
+        <form asp-action="Home" asp-controller="Clients" method="get" class="search-form">
             <div class="search-input-group">
                 <i class="fas fa-search search-icon"></i>
                 <input type="text" name="query" value="@Model.Query" placeholder="Buscar artistas o canciones..." class="search-input" />
@@ -62,7 +62,7 @@
         </form>
     </div>
 
-    <!-- Resultados de búsqueda -->
+    <!-- ==================== RESULTADOS DE BÚSQUEDA ==================== -->
     @if (!string.IsNullOrWhiteSpace(Model.Query))
     {
         <!-- Artistas encontrados -->
@@ -87,7 +87,6 @@
                             <div class="artist-info">
                                 <h3 class="artist-name">@artist.Name</h3>
                                 <p class="artist-role">Artista</p>
-                                <!-- Nuevo botón para ver álbumes -->
                                 <a href="@Url.Action("ArtistAlbums", "Clients", new { artistId = artist.Id })" 
                                    class="btn-view-albums">
                                     <i class="fas fa-compact-disc me-1"></i>
@@ -132,7 +131,6 @@
                             </div>
                             
                             <div class="song-actions">
-                               
                                 <button class="btn btn-playlist" 
                                         onclick="redirectToPlaylistsWithContent(@content.Id)"
                                         title="Agregar a Playlist">
@@ -153,10 +151,36 @@
                                 <i class="fas fa-clock me-1"></i>
                                 <span>@content.FormattedDuration</span>
                             </div>
-                            
                         </div>
                     }
                 </div>
+
+                <!-- UBICACIÓN CORRECTA 1: Paginación para canciones de búsqueda -->
+                @if (ViewBag.TotalPages > 1)
+                {
+                    <div class="pagination-container">
+                        <ul class="pagination-list">
+                            <li class="pagination-item @(ViewBag.CurrentPage == 1 ? "disabled" : "")">
+                                <a href="@Url.Action("Home", "Clients", new { query = Model.Query, page = ViewBag.CurrentPage - 1 })" class="pagination-link">
+                                    <i class="fas fa-chevron-left"></i> Anterior
+                                </a>
+                            </li>
+
+                            @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                            {
+                                <li class="pagination-item @(ViewBag.CurrentPage == i ? "active" : "")">
+                                    <a href="@Url.Action("Home", "Clients", new { query = Model.Query, page = i })" class="pagination-link">@i</a>
+                                </li>
+                            }
+
+                            <li class="pagination-item @(ViewBag.CurrentPage == ViewBag.TotalPages ? "disabled" : "")">
+                                <a href="@Url.Action("Home", "Clients", new { query = Model.Query, page = ViewBag.CurrentPage + 1 })" class="pagination-link">
+                                    Siguiente <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                }
             </div>
         }
 
@@ -172,8 +196,8 @@
                 <p class="suggestion">Intenta buscar con palabras diferentes o revisa la ortografía</p>
             </div>
         }
-    }
-    else
+}
+else
     {
         <!-- ===== PANTALLA DE INICIO / DESCUBRIMIENTO ===== -->
 
@@ -191,7 +215,7 @@
 
                 <div class="songs-container">
                     <div class="songs-list">
-                        @{ var rank = 0; }
+                        @{ var rank = ((ViewBag.PagePopular - 1) * 5); } @* Ajusta el inicio del ranking según la página *@
                         @foreach (var content in Model.PopularContents)
                         {
                             rank++;
@@ -218,9 +242,7 @@
                                 </div>
 
                                 <div class="song-actions">
-                                    <button class="btn btn-playlist"
-                                            onclick="redirectToPlaylistsWithContent(@content.Id)"
-                                            title="Agregar a Playlist">
+                                    <button class="btn btn-playlist" onclick="redirectToPlaylistsWithContent(@content.Id)" title="Agregar a Playlist">
                                         <i class="fas fa-plus"></i>
                                     </button>
                                     <button class="btn btn-play play-in-player-btn"
@@ -239,9 +261,39 @@
                                 </div>
                             </div>
                         }
-                    </div>
-                </div>
-            </div>
+                    </div> <!-- Cierre correcto de .songs-list -->
+
+                    <!-- REPARADO AQUÍ: Paginación independiente para Populares fuera de .songs-list -->
+                    @if (ViewBag.TotalPagesPopular > 1)
+                    {
+                        <div class="pagination-container">
+                            <ul class="pagination-list">
+                                <!-- Botón Anterior -->
+                                <li class="pagination-item @(ViewBag.PagePopular == 1 ? "disabled" : "")">
+                                    <a href="@Url.Action("Home", new { pagePopular = ViewBag.PagePopular - 1, pageRecent = ViewBag.PageRecent })" class="pagination-link">
+                                        <i class="fas fa-chevron-left"></i> Anterior
+                                    </a>
+                                </li>
+
+                                <!-- Páginas Numeradas -->
+                                @for (int i = 1; i <= ViewBag.TotalPagesPopular; i++)
+                                {
+                                    <li class="pagination-item @(ViewBag.PagePopular == i ? "active" : "")">
+                                        <a href="@Url.Action("Home", new { pagePopular = i, pageRecent = ViewBag.PageRecent })" class="pagination-link">@i</a>
+                                    </li>
+                                }
+
+                                <!-- Botón Siguiente -->
+                                <li class="pagination-item @(ViewBag.PagePopular == ViewBag.TotalPagesPopular ? "disabled" : "")">
+                                    <a href="@Url.Action("Home", new { pagePopular = ViewBag.PagePopular + 1, pageRecent = ViewBag.PageRecent })" class="pagination-link">
+                                        Siguiente <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    }
+                </div> <!-- Cierre correcto de .songs-container -->
+            </div> <!-- Cierre correcto de .discovery-section -->
         }
 
         <!-- Álbumes destacados -->
@@ -314,9 +366,7 @@
                                 </div>
 
                                 <div class="song-actions">
-                                    <button class="btn btn-playlist"
-                                            onclick="redirectToPlaylistsWithContent(@content.Id)"
-                                            title="Agregar a Playlist">
+                                    <button class="btn btn-playlist" onclick="redirectToPlaylistsWithContent(@content.Id)" title="Agregar a Playlist">
                                         <i class="fas fa-plus"></i>
                                     </button>
                                     <button class="btn btn-play play-in-player-btn"
@@ -335,81 +385,41 @@
                                 </div>
                             </div>
                         }
-                    </div>
-                </div>
-            </div>
-        }
+                    </div> <!-- Cierre correcto de .songs-list -->
 
-        <!-- Artistas para explorar -->
-        @if (Model.FollowedArtists?.Any() == true)
-        {
-            <div class="discovery-section">
-                <div class="section-header">
-                    <h2 class="section-title">
-                        <i class="fas fa-heart me-2"></i>
-                        Artistas que sigo
-                    </h2>
-                    <p class="section-subtitle">Los artistas que sigues, siempre a mano</p>
-                </div>
-
-                <div class="cards-grid">
-                    @foreach (var artist in Model.FollowedArtists)
+                    <!-- REPARADO AQUÍ: Paginación para Novedades con la estructura de lista ul idéntica y variables correctas -->
+                    @if (ViewBag.TotalPagesRecent > 1)
                     {
-                        <a class="media-card artist-media-card" href="@Url.Action("ArtistAlbums", "Clients", new { artistId = artist.Id })">
-                            <div class="media-cover media-cover-round">
-                                @if (!string.IsNullOrEmpty(artist.ProfileImageUrl))
-                                {
-                                    <img src="@artist.ProfileImageUrl" alt="@artist.Name" />
-                                }
-                                else
-                                {
-                                    <div class="media-cover-placeholder"><i class="fas fa-user-music"></i></div>
-                                }
-                            </div>
-                            <div class="media-card-info">
-                                <div class="media-card-title">@artist.Name</div>
-                                <div class="media-card-subtitle">Siguiendo</div>
-                            </div>
-                        </a>
-                    }
-                </div>
-            </div>
-        }
+                        <div class="pagination-container">
+                            <ul class="pagination-list">
+                                <!-- Botón Anterior -->
+                                <li class="pagination-item @(ViewBag.PageRecent == 1 ? "disabled" : "")">
+                                    <a href="@Url.Action("Home", new { pagePopular = ViewBag.PagePopular, pageRecent = ViewBag.PageRecent - 1 })" class="pagination-link">
+                                        <i class="fas fa-chevron-left"></i> Anterior
+                                    </a>
+                                </li>
 
-        @if (Model.FeaturedArtists?.Any() == true)
-        {
-            <div class="discovery-section">
-                <div class="section-header">
-                    <h2 class="section-title">
-                        <i class="fas fa-user-music me-2"></i>
-                        Artistas para explorar
-                    </h2>
-                    <p class="section-subtitle">Descubre nuevos artistas y escucha sus álbumes</p>
-                </div>
+                                <!-- Páginas Numeradas -->
+                                @for (int i = 1; i <= ViewBag.TotalPagesRecent; i++)
+                                {
+                                    <li class="pagination-item @(ViewBag.PageRecent == i ? "active" : "")">
+                                        <a href="@Url.Action("Home", new { pagePopular = ViewBag.PagePopular, pageRecent = i })" class="pagination-link">@i</a>
+                                    </li>
+                                }
 
-                <div class="cards-grid">
-                    @foreach (var artist in Model.FeaturedArtists)
-                    {
-                        <a class="media-card artist-media-card" href="@Url.Action("ArtistAlbums", "Clients", new { artistId = artist.Id })">
-                            <div class="media-cover media-cover-round">
-                                @if (!string.IsNullOrEmpty(artist.ProfileImageUrl))
-                                {
-                                    <img src="@artist.ProfileImageUrl" alt="@artist.Name" />
-                                }
-                                else
-                                {
-                                    <div class="media-cover-placeholder"><i class="fas fa-user-music"></i></div>
-                                }
-                            </div>
-                            <div class="media-card-info">
-                                <div class="media-card-title">@artist.Name</div>
-                                <div class="media-card-subtitle">Artista</div>
-                            </div>
-                        </a>
+                                <!-- Botón Siguiente -->
+                                <li class="pagination-item @(ViewBag.PageRecent == ViewBag.TotalPagesRecent ? "disabled" : "")">
+                                    <a href="@Url.Action("Home", new { pagePopular = ViewBag.PagePopular, pageRecent = ViewBag.PageRecent + 1 })" class="pagination-link">
+                                        Siguiente <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
                     }
-                </div>
-            </div>
+                </div> <!-- Cierre de .songs-container -->
+            </div> <!-- Cierre de .discovery-section -->
         }
+    
 
         <!-- Si no hay nada que mostrar -->
         @if ((Model.PopularContents == null || !Model.PopularContents.Any())
@@ -1039,6 +1049,55 @@
     .song-actions .btn:hover {
         background: var(--us-accent) !important; color: #ffffff !important;
         border-color: var(--us-accent) !important; transform: scale(1.06);
+    }
+/* ===== ESTILOS DE PAGINACIÓN UNISOUND ===== */
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 1.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--us-border);
+    }
+    .pagination-list {
+        display: flex;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        gap: 6px;
+        align-items: center;
+    }
+    .pagination-item {
+        display: inline-block;
+    }
+    .pagination-link {
+        background: var(--us-surface-2);
+        color: var(--us-ink-soft) !important;
+        border: 1px solid var(--us-border);
+        padding: 8px 14px;
+        border-radius: var(--us-radius-pill, 20px);
+        font-size: 0.88rem;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.2s ease;
+    }
+    .pagination-link:hover {
+        background: var(--us-surface-alt);
+        border-color: var(--us-accent, #c8102e);
+        color: var(--us-accent, #c8102e) !important;
+        transform: translateY(-1px);
+    }
+    .pagination-item.active .pagination-link {
+        background: var(--us-accent, #c8102e);
+        border-color: var(--us-accent, #c8102e);
+        color: #ffffff !important;
+        box-shadow: 0 4px 12px rgba(200, 16, 46, 0.3);
+    }
+    .pagination-item.disabled {
+        pointer-events: none;
+        opacity: 0.4;
     }
 </style>
 
