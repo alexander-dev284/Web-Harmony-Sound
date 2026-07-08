@@ -477,6 +477,18 @@
             box-shadow: 0 0 0 2px rgba(200, 16, 46, 0.2);
         }
 
+        /* Opciones del desplegable: fondo y texto según el tema para que sean legibles */
+        .filter-select option {
+            background: var(--us-surface-alt);
+            color: var(--us-ink);
+            padding: 0.5rem;
+        }
+
+        .filter-select option:checked {
+            background: #c8102e;
+            color: #ffffff;
+        }
+
         .btn-clear-filters {
             background: var(--us-ink-faint);
             color: var(--us-ink);
