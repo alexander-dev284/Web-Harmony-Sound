@@ -22,18 +22,20 @@ namespace HarmonySound.API.Services
                 var smtpSettings = _configuration.GetSection("SmtpSettings");
 
                 // Validar configuración
-                if (string.IsNullOrEmpty(smtpSettings["Server"]) || 
-                    string.IsNullOrEmpty(smtpSettings["Username"]) || 
-                    string.IsNullOrEmpty(smtpSettings["Password"]))
+                if (string.IsNullOrEmpty(smtpSettings["Server"]) ||
+                    string.IsNullOrEmpty(smtpSettings["Username"]) ||
+                    string.IsNullOrEmpty(smtpSettings["Password"]) ||
+                    string.IsNullOrEmpty(smtpSettings["FromEmail"]))
                 {
-                    _logger.LogError("SMTP configuration is incomplete");
+                    _logger.LogError("SMTP configuration is incomplete (revisa Server, Username, Password y FromEmail)");
                     throw new InvalidOperationException("SMTP configuration is incomplete");
                 }
 
                 using var client = new SmtpClient(smtpSettings["Server"], int.Parse(smtpSettings["Port"]))
                 {
                     EnableSsl = bool.Parse(smtpSettings["EnableSsl"]),
-                    Credentials = new NetworkCredential(smtpSettings["Username"], smtpSettings["Password"])
+                    Credentials = new NetworkCredential(smtpSettings["Username"], smtpSettings["Password"]),
+                    Timeout = 20000 // 20 s máximo para no colgar la petición
                 };
 
                 var mailMessage = new MailMessage

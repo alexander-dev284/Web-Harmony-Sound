@@ -75,7 +75,21 @@ namespace HarmonySound.API.Controllers
             var apiUrl = _configuration["ApiUrl"] ?? "https://localhost:7120";
             var confirmationLink = $"{apiUrl}/api/Auth/confirm-email?userId={user.Id}&token={tokenEncoded}";
 
-            await _emailSender.SendEmailAsync(user.Email, "Confirma tu email", $"Confirma tu cuenta aquí: {confirmationLink}");
+            // Enviar el correo de confirmación en segundo plano: el registro NO debe bloquearse
+            // ni fallar si el SMTP tarda o no responde. Cualquier error queda registrado en EmailService.
+            var recipientEmail = user.Email;
+            var emailBody = $"Confirma tu cuenta aquí: {confirmationLink}";
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await _emailSender.SendEmailAsync(recipientEmail, "Confirma tu email", emailBody);
+                }
+                catch
+                {
+                    // El error ya se registra dentro de EmailService; no debe afectar al registro.
+                }
+            });
 
             return Ok(new { Message = "Usuario registrado correctamente. Por favor verifica tu email." });
         }
