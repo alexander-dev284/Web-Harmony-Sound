@@ -48,17 +48,17 @@
                 {
                     var typeName = category.Key ?? "Otros";
                     var totalItems = category.Count();
-                    var tabId = "cat-" + typeName.Replace(" ", "-").ToLower(); 
-                    
-                    <button class="media-card category-tab-btn" 
-        id="@(tabId)-tab" 
-        data-bs-toggle="tab" 
-        data-bs-target="#@tabId" 
-        type="button" 
-        role="tab" 
-        aria-controls="@tabId" 
+                    var tabId = "cat-" + typeName.Replace(" ", "-").ToLower();
+
+                    <button class="media-card category-tab-btn"
+        id="@(tabId)-tab"
+        data-bs-toggle="tab"
+        data-bs-target="#@tabId"
+        type="button"
+        role="tab"
+        aria-controls="@tabId"
         aria-selected="false"
-        onclick="handleCategoryTabClick(this)">  <!-- CAMBIADO AQUÍ -->
+        onclick="handleCategoryTabClick(this)">
                         <div class="media-cover">
                             <div class="media-cover-placeholder">
                                 @if (typeName.ToLower().Contains("podcast"))
@@ -101,7 +101,7 @@
                                 </button>
                             </div>
 
-                            <div class="songs-list">
+                            <div class="songs-list" id="list-@tabId">
                                 @foreach (var content in category)
                                 {
                                     <div class="song-item" data-content-id="@content.Id" data-search="@(((content.Title ?? "") + " " + (content.ArtistName ?? "")).ToLower())">
@@ -159,6 +159,17 @@
                                     </div>
                                 }
                             </div>
+
+                            @* Paginación propia de esta categoría, controlada 100% por JS (sin recargar la página) *@
+                            <div class="category-pagination" data-tab-id="@tabId" style="display:none;">
+                                <button class="btn-pagination cat-prev" data-target="#@tabId" type="button">
+                                    <i class="fas fa-chevron-left me-1"></i> Anterior
+                                </button>
+                                <span class="pagination-info cat-page-info">Página 1 de 1</span>
+                                <button class="btn-pagination cat-next" data-target="#@tabId" type="button">
+                                    Siguiente <i class="fas fa-chevron-right ms-1"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 }
@@ -172,34 +183,6 @@
         <p>Prueba con otro título o nombre de artista</p>
     </div>
 
-    @if (ViewBag.TotalPages > 1)
-    {
-        <div class="pagination-container">
-            @if (ViewBag.HasPreviousPage)
-            {
-                <a class="btn-pagination" href="@Url.Action("Index", "Clients", new { page = ViewBag.CurrentPage - 1 })">
-                    <i class="fas fa-chevron-left me-1"></i> Anterior
-                </a>
-            }
-            else
-            {
-                <button class="btn-pagination" disabled><i class="fas fa-chevron-left me-1"></i> Anterior</button>
-            }
-
-            <span class="pagination-info">Página <strong>@ViewBag.CurrentPage</strong> de @ViewBag.TotalPages</span>
-
-            @if (ViewBag.HasNextPage)
-            {
-                <a class="btn-pagination" href="@Url.Action("Index", "Clients", new { page = ViewBag.CurrentPage + 1 })">
-                    Siguiente <i class="fas fa-chevron-right ms-1"></i>
-                </a>
-            }
-            else
-            {
-                <button class="btn-pagination" disabled>Siguiente <i class="fas fa-chevron-right ms-1"></i></button>
-            }
-        </div>
-    }
 </div>
 
 @await Html.PartialAsync("_PlayerBar")
@@ -263,6 +246,10 @@
     .no-results h3 { color: var(--us-ink); margin-bottom: .25rem; }
 
     .song-item { display: grid; grid-template-columns: 1fr 120px 80px; grid-template-areas: "info actions duration"; align-items: center; padding: 8px 16px; border-radius: 4px; min-height: 56px; border: 1px solid transparent; }
+    .song-item.search-hidden,
+    .song-item.page-hidden {
+        display: none !important;
+    }
     .song-main-info { grid-area: info; display: flex; align-items: center; gap: 12px; min-width: 0; }
     .song-cover { width: 40px; height: 40px; flex-shrink: 0; }
     .cover-placeholder { width: 100%; height: 100%; background: var(--us-surface-2); border-radius: 4px; display: flex; align-items: center; justify-content: center; color: var(--us-ink-soft); }
@@ -314,7 +301,7 @@
         font-size: 1.05rem;
     }
     .song-title { font-size: 0.98rem !important; font-weight: 600 !important; margin-bottom: 3px !important; }
-    
+
     .song-meta { gap: 6px; align-items: baseline; }
     .content-type {
         background: transparent !important; border: none !important; padding: 0 !important;
@@ -349,6 +336,7 @@
         background: var(--us-surface-2); color: var(--us-ink-soft); border: 1px solid var(--us-border);
         padding: 6px 14px; border-radius: 20px; font-weight: 600; font-size: 0.88rem; text-decoration: none;
         display: inline-flex; align-items: center; transition: all 0.2s ease;
+        cursor: pointer;
     }
     .btn-pagination:not([disabled]):hover {
         background: #c8102e; color: #ffffff !important; border-color: #c8102e; transform: translateY(-1px);
@@ -358,6 +346,16 @@
     }
     .pagination-info {
         font-size: 0.9rem; color: var(--us-ink-soft);
+    }
+
+    /* Paginación propia de cada categoría (tarjeta) */
+    .category-pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 12px;
+        margin-top: 1rem;
+        padding: 10px;
     }
 
     /* ==========================================================================
@@ -466,14 +464,71 @@ function redirectToPlaylistsWithContent(contentId) {
     window.location.href = '@Url.Action("Index", "Playlists")?contentId=' + contentId;
 }
 
+// ==========================================================================
+// PAGINACIÓN POR CATEGORÍA (client-side, sin recargar la página)
+// ==========================================================================
+const CATEGORY_PAGE_SIZE = 5;
+const categoryState = {};
+
+function initCategoryPagination() {
+    document.querySelectorAll('.tab-pane').forEach(function (pane) {
+        categoryState[pane.id] = { page: 1 };
+        renderCategoryPage(pane.id, 1);
+    });
+}
+
+function renderCategoryPage(tabId, page) {
+    var pane = document.getElementById(tabId);
+    if (!pane) return;
+
+    // Solo se pagina sobre items visibles según el buscador
+    var items = Array.prototype.slice.call(pane.querySelectorAll('.song-item:not(.search-hidden)'));
+    var totalItems = items.length;
+    var totalPages = Math.max(1, Math.ceil(totalItems / CATEGORY_PAGE_SIZE));
+
+    if (page < 1) page = 1;
+    if (page > totalPages) page = totalPages;
+    categoryState[tabId] = categoryState[tabId] || {};
+    categoryState[tabId].page = page;
+
+    items.forEach(function (item, idx) {
+        var itemPage = Math.floor(idx / CATEGORY_PAGE_SIZE) + 1;
+        item.classList.toggle('page-hidden', itemPage !== page);
+    });
+
+    var info = pane.querySelector('.cat-page-info');
+    if (info) info.textContent = 'Página ' + page + ' de ' + totalPages;
+
+    var prevBtn = pane.querySelector('.cat-prev');
+    var nextBtn = pane.querySelector('.cat-next');
+    if (prevBtn) prevBtn.disabled = page <= 1;
+    if (nextBtn) nextBtn.disabled = page >= totalPages;
+
+    var paginationEl = pane.querySelector('.category-pagination');
+    if (paginationEl) paginationEl.style.display = totalPages > 1 ? 'flex' : 'none';
+}
+
+// Delegación de eventos para los botones Anterior/Siguiente de cada categoría
+document.addEventListener('click', function (e) {
+    var prev = e.target.closest('.cat-prev');
+    var next = e.target.closest('.cat-next');
+    if (prev) {
+        var tabId = prev.getAttribute('data-target').replace('#', '');
+        renderCategoryPage(tabId, (categoryState[tabId]?.page || 1) - 1);
+    } else if (next) {
+        var tabId2 = next.getAttribute('data-target').replace('#', '');
+        renderCategoryPage(tabId2, (categoryState[tabId2]?.page || 1) + 1);
+    }
+});
+
 // NUEVA FUNCIÓN: Control manual para asegurar que se desplieguen las canciones
 function handleCategoryTabClick(button) {
     resetSearchBar();
-    
+
     // Obtener el ID del contenedor de canciones correspondiente
     const targetSelector = button.getAttribute('data-bs-target');
     const targetPane = document.querySelector(targetSelector);
-    
+
     if (!targetPane) return;
 
     // 1. Desactivar todos los botones de categorías
@@ -491,20 +546,39 @@ function handleCategoryTabClick(button) {
     button.classList.add('active');
     button.setAttribute('aria-selected', 'true');
     targetPane.classList.add('show', 'active');
+
+    // 4. Reiniciar a la página 1 cada vez que se abre la categoría
+    renderCategoryPage(targetPane.id, 1);
 }
 
 function filterLibrary() {
     var input = document.getElementById('librarySearch');
     if (!input) return;
     var q = input.value.trim().toLowerCase();
+    var searching = q.length > 0;
     var items = document.querySelectorAll('.songs-list .song-item');
     var visible = 0;
+
     items.forEach(function (item) {
         var haystack = item.getAttribute('data-search') || '';
         var match = haystack.indexOf(q) !== -1;
-        item.style.display = match ? '' : 'none';
+        item.classList.toggle('search-hidden', !match);
         if (match) visible++;
     });
+
+    document.querySelectorAll('.tab-pane').forEach(function (pane) {
+        if (searching) {
+            // Mientras se busca, se ignora la paginación y se muestran todos los coincidentes
+            pane.querySelectorAll('.song-item').forEach(function (item) {
+                item.classList.remove('page-hidden');
+            });
+            var paginationEl = pane.querySelector('.category-pagination');
+            if (paginationEl) paginationEl.style.display = 'none';
+        } else {
+            renderCategoryPage(pane.id, 1);
+        }
+    });
+
     var noResults = document.getElementById('noLibraryResults');
     if (noResults) noResults.style.display = (visible === 0) ? '' : 'none';
 }
@@ -521,10 +595,12 @@ function closeCategoryTab() {
 
 function resetSearchBar() {
     const searchInput = document.getElementById('librarySearch');
-    if(searchInput) {
+    if (searchInput) {
         searchInput.value = '';
         filterLibrary();
     }
 }
+
+document.addEventListener('DOMContentLoaded', initCategoryPagination);
 </script>
 <script src="~/js/harmony-player.js"></script>

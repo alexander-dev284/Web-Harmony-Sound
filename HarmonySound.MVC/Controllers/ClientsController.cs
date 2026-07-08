@@ -21,13 +21,10 @@ namespace HarmonySound.MVC.Controllers
             _httpClient.Timeout = TimeSpan.FromMinutes(10);
         }
 
-        public async Task<IActionResult> Index(int page = 1)
+        public async Task<IActionResult> Index()
         {
             try
             {
-                // Forzar que la página sea mínimo 1
-                if (page < 1) page = 1;
-
                 int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
                 ViewBag.UserId = userId;
 
@@ -54,27 +51,9 @@ namespace HarmonySound.MVC.Controllers
                     var allContents = JsonSerializer.Deserialize<List<ContentWithArtistDto>>(json,
                         new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new List<ContentWithArtistDto>();
 
-                    // Lógica de Paginación (5 elementos por página)
-                    int pageSize = 5;
-                    int totalItems = allContents.Count;
-                    int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
-
-                    // Evitar que pidan una página mayor a la existente si hay datos
-                    if (page > totalPages && totalPages > 0) page = totalPages;
-
-                    // Segmentar la lista usando LINQ
-                    var pagedContents = allContents
-                        .Skip((page - 1) * pageSize)
-                        .Take(pageSize)
-                        .ToList();
-
-                    // Guardar metadatos en el ViewBag para armar los botones en la Vista (.cshtml)
-                    ViewBag.CurrentPage = page;
-                    ViewBag.TotalPages = totalPages;
-                    ViewBag.HasPreviousPage = page > 1;
-                    ViewBag.HasNextPage = page < totalPages;
-
-                    return View(pagedContents);
+                    // Ya NO se pagina aquí: se envía todo el contenido completo.
+                    // La paginación por categoría se hace en el cliente (JS).
+                    return View(allContents);
                 }
                 else
                 {
