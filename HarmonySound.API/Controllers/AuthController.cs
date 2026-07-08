@@ -78,7 +78,7 @@ namespace HarmonySound.API.Controllers
             // Enviar el correo de confirmación en segundo plano: el registro NO debe bloquearse
             // ni fallar si el SMTP tarda o no responde. Cualquier error queda registrado en EmailService.
             var recipientEmail = user.Email;
-            var emailBody = $"Confirma tu cuenta aquí: {confirmationLink}";
+            var emailBody = BuildConfirmationEmailHtml(confirmationLink);
             _ = Task.Run(async () =>
             {
                 try
@@ -234,7 +234,7 @@ namespace HarmonySound.API.Controllers
             var apiUrl = _configuration["ApiUrl"] ?? "https://localhost:7120";
             var confirmationLink = $"{apiUrl}/api/Auth/confirm-email?userId={user.Id}&token={tokenEncoded}";
 
-            await _emailSender.SendEmailAsync(user.Email, "Confirma tu email", $"Confirma tu cuenta aquí: {confirmationLink}");
+            await _emailSender.SendEmailAsync(user.Email, "Confirma tu email", BuildConfirmationEmailHtml(confirmationLink));
 
             return Ok(new { Message = "Correo de confirmación reenviado. Revisa tu bandeja de entrada." });
         }
@@ -344,6 +344,24 @@ namespace HarmonySound.API.Controllers
             {
                 return StatusCode(500, new { Error = ex.Message });
             }
+        }
+
+        // Genera el cuerpo HTML del correo de confirmación con un enlace clicable.
+        private static string BuildConfirmationEmailHtml(string confirmationLink)
+        {
+            return $@"
+<div style=""font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; color: #1a1a1a;"">
+  <h2 style=""color: #c8102e;"">Confirma tu cuenta en UniSound</h2>
+  <p>¡Gracias por registrarte! Para activar tu cuenta, haz clic en el botón:</p>
+  <p style=""text-align: center; margin: 28px 0;"">
+    <a href=""{confirmationLink}""
+       style=""display: inline-block; padding: 12px 28px; background: #c8102e; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: bold;"">
+      Confirmar mi cuenta
+    </a>
+  </p>
+  <p style=""font-size: 13px; color: #5b6065;"">Si el botón no funciona, copia y pega este enlace en tu navegador:</p>
+  <p style=""font-size: 13px; word-break: break-all;""><a href=""{confirmationLink}"">{confirmationLink}</a></p>
+</div>";
         }
 
         public class TwoFactorRequest
