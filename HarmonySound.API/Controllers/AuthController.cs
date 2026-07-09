@@ -98,14 +98,18 @@ namespace HarmonySound.API.Controllers
         [HttpGet("confirm-email")]
         public async Task<IActionResult> ConfirmEmail(int userId, string token)
         {
+            // Enlace al login de la aplicación (MVC) para que el usuario pueda entrar tras confirmar.
+            var appUrl = _configuration["AppUrl"] ?? "https://localhost:7052";
+            var loginUrl = $"{appUrl}/Account/Login";
+
             try
             {
                 if (string.IsNullOrWhiteSpace(token))
-                    return BadRequest("Token no proporcionado.");
+                    return ConfirmationResult("Token no proporcionado.", loginUrl, success: false);
 
                 var user = await _userManager.FindByIdAsync(userId.ToString());
                 if (user == null)
-                    return BadRequest("Usuario no encontrado.");
+                    return ConfirmationResult("Usuario no encontrado.", loginUrl, success: false);
 
                 string decodedToken;
                 try
@@ -114,20 +118,32 @@ namespace HarmonySound.API.Controllers
                 }
                 catch
                 {
-                    return BadRequest("Token malformado.");
+                    return ConfirmationResult("Token malformado.", loginUrl, success: false);
                 }
 
                 var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
 
                 if (result.Succeeded)
-                    return Ok("Email confirmado correctamente.");
+                    return ConfirmationResult("¡Tu cuenta ha sido confirmada correctamente!", loginUrl, success: true);
                 else
-                    return BadRequest("Token inválido o expirado.");
+                    return ConfirmationResult("El enlace de confirmación es inválido o ha expirado.", loginUrl, success: false);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error interno: {ex.Message}");
+                return ConfirmationResult($"Ocurrió un error al confirmar tu cuenta: {ex.Message}", loginUrl, success: false);
             }
+        }
+
+        // Devuelve una página HTML de resultado de la confirmación con un botón para ir al login.
+        private ContentResult ConfirmationResult(string message, string loginUrl, bool success)
+        {
+            var html = BuildConfirmationResultHtml(message, loginUrl, success);
+            return new ContentResult
+            {
+                Content = html,
+                ContentType = "text/html; charset=utf-8",
+                StatusCode = success ? StatusCodes.Status200OK : StatusCodes.Status400BadRequest
+            };
         }
 
         // Login de usuario con JWT
@@ -362,6 +378,35 @@ namespace HarmonySound.API.Controllers
   <p style=""font-size: 13px; color: #5b6065;"">Si el botón no funciona, copia y pega este enlace en tu navegador:</p>
   <p style=""font-size: 13px; word-break: break-all;""><a href=""{confirmationLink}"">{confirmationLink}</a></p>
 </div>";
+        }
+
+        // Genera la página HTML que ve el usuario tras hacer clic en el enlace de confirmación,
+        // con un botón que lo redirige directamente al login de la aplicación.
+        private static string BuildConfirmationResultHtml(string message, string loginUrl, bool success)
+        {
+            var accent = success ? "#0a8f4e" : "#c8102e";
+            var title = success ? "Cuenta confirmada" : "No se pudo confirmar";
+            var icon = success ? "&#10004;" : "&#10006;";
+
+            return $@"<!DOCTYPE html>
+<html lang=""es"">
+<head>
+  <meta charset=""utf-8"" />
+  <meta name=""viewport"" content=""width=device-width, initial-scale=1"" />
+  <title>{title} - UniSound</title>
+</head>
+<body style=""margin:0; font-family: Arial, sans-serif; background:#f4f5f7; color:#1a1a1a;"">
+  <div style=""max-width: 480px; margin: 64px auto; background:#ffffff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); padding: 40px 32px; text-align: center;"">
+    <div style=""width: 64px; height: 64px; line-height: 64px; margin: 0 auto 20px; border-radius: 50%; background:{accent}; color:#ffffff; font-size: 30px;"">{icon}</div>
+    <h1 style=""color:{accent}; font-size: 22px; margin: 0 0 12px;"">{title}</h1>
+    <p style=""font-size: 15px; color:#5b6065; margin: 0 0 28px;"">{message}</p>
+    <a href=""{loginUrl}""
+       style=""display: inline-block; padding: 12px 32px; background:#c8102e; color:#ffffff; text-decoration:none; border-radius: 8px; font-weight: bold;"">
+      Ir al inicio de sesión
+    </a>
+  </div>
+</body>
+</html>";
         }
 
         public class TwoFactorRequest
